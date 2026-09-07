@@ -285,4 +285,34 @@ public class CombatPathingTest {
                         || (mover.getX() == 1 && mover.getY() == 2),
                 "Should reach an adjacent tile to target (including diagonals in Chebyshev)");
     }
+
+    @Test
+    void fallsBackToReachableEnemy() {
+        var mover = new MockUnit("mover", 3, 0, "P1");
+        var nearest = new MockUnit("nearest", 0, 0, "P2");
+        var far = new MockUnit("far", 8, 0, "P2");
+        List<GameUnit> units = List.of(
+                mover,
+                nearest,
+                far,
+                new MockUnit("a", 0, 1, "P1"),
+                new MockUnit("b", 1, 0, "P1"),
+                new MockUnit("c", 1, 1, "P1"));
+        new BfsUnitMover(createTestClock()).moveTowards(mover, nearest, units, 0);
+        assertEquals(4, mover.getX());
+    }
+
+    @Test
+    void retriesAfterBlockedCellOpens() {
+        var mover = new MockUnit("mover", 0, 0, "P1");
+        var target = new MockUnit("target", 4, 0, "P2");
+        var blocker = new MockUnit("blocker", 1, 0, "P1");
+        List<GameUnit> units = List.of(mover, target, blocker, new MockUnit("wall", 0, 1, "P1"));
+        var movement = new BfsUnitMover(createTestClock());
+        movement.moveTowards(mover, target, units, 0);
+        assertEquals(0, mover.getX());
+        blocker.setCurrentHealth(0);
+        movement.moveTowards(mover, target, units, 100);
+        assertEquals(1, mover.getX());
+    }
 }

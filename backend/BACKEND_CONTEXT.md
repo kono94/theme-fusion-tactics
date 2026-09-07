@@ -243,6 +243,11 @@ knockback. `DamageResolver` applies mode affinity to basic attacks, direct damag
 derives the offensive element from the caster's traits and uses the best attacking trait against each target when a unit
 has two traits. Each mode resolves its own data-loaded affinity graph; One Piece remains neutral.
 
+Movement uses its own cooldown and falls back to the shortest reachable enemy approach when the nearest enemy is
+blocked. Stun and cast recovery still prevent movement. Enemy spells resolve living in-range targets before committing;
+an empty cast preserves mana and permits normal movement/attacks. Target-dependent damage modifiers are evaluated per
+hit. `AbilityCaster` returns whether the cast executed; only executed casts consume mana and start recovery.
+
 ## 10. REST and analytics
 
 Public endpoints:

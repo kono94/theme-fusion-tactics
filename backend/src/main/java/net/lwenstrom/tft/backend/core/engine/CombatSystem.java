@@ -212,14 +212,15 @@ public class CombatSystem {
                 continue;
             }
 
-            if (currentTime < unit.getNextAttackTime()) {
+            var attackReady = currentTime >= unit.getNextAttackTime();
+            if (attackReady) {
+                unit.setActiveAbility(null);
+            } else if (unit.getActiveAbility() != null) {
                 continue;
             }
 
-            unit.setActiveAbility(null);
-
-            if (unit.getMaxMana() > 0 && unit.getMana() >= unit.getMaxMana()) {
-                abilityCaster.castAbility(
+            if (attackReady && unit.getMaxMana() > 0 && unit.getMana() >= unit.getMaxMana()) {
+                var cast = abilityCaster.castAbility(
                         unit,
                         allUnits,
                         targetSelector,
@@ -278,15 +279,22 @@ public class CombatSystem {
                             }
                         },
                         currentTime);
-                unit.setMana(0);
-                unit.setNextAttackTime(currentTime + GameConstants.ABILITY_COOLDOWN_MS);
-                continue;
+                if (cast) {
+                    unit.setMana(0);
+                    unit.setNextAttackTime(currentTime + GameConstants.ABILITY_COOLDOWN_MS);
+                    unit.setNextMoveTime(
+                            Math.max(unit.getNextMoveTime(), currentTime + GameConstants.ABILITY_COOLDOWN_MS));
+                    continue;
+                }
             }
 
             var target = targetSelector.findTarget(unit, allUnits);
             if (target != null) {
                 var distance = CombatUtils.getDistance(unit, target);
                 if (distance <= unit.getRange()) {
+                    if (!attackReady) {
+                        continue;
+                    }
                     // Apply ATK buff multiplier to damage
                     int baseDamage = unit.getAttackDamage();
                     float multiplier = unit.getAtkBuff();

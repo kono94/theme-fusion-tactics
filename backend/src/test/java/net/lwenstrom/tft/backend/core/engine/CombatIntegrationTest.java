@@ -193,6 +193,7 @@ class CombatIntegrationTest {
                 .withAbility(ability);
         var target = MockUnit.create("target", p2.getId()).withPosition(4, 5).withHealth(100, 100);
         target.setNextAttackTime(Long.MAX_VALUE);
+        target.setNextMoveTime(Long.MAX_VALUE);
 
         addUnitToPlayer(p1, caster);
         addUnitToPlayer(p2, target);
@@ -216,6 +217,7 @@ class CombatIntegrationTest {
                 .withAbility(ability);
         var target = MockUnit.create("target", p2.getId()).withPosition(8, 2).withHealth(100, 100);
         target.setNextAttackTime(Long.MAX_VALUE);
+        target.setNextMoveTime(Long.MAX_VALUE);
 
         addUnitToPlayer(p1, caster);
         addUnitToPlayer(p2, target);
@@ -240,7 +242,9 @@ class CombatIntegrationTest {
         var target = MockUnit.create("target", p2.getId()).withPosition(4, 4).withHealth(100, 100);
         var blocker = MockUnit.create("blocker", p2.getId()).withPosition(4, 5).withHealth(100, 100);
         target.setNextAttackTime(Long.MAX_VALUE);
+        target.setNextMoveTime(Long.MAX_VALUE);
         blocker.setNextAttackTime(Long.MAX_VALUE);
+        blocker.setNextMoveTime(Long.MAX_VALUE);
 
         addUnitToPlayer(p1, caster);
         addUnitToPlayer(p2, target);
@@ -267,6 +271,7 @@ class CombatIntegrationTest {
                 .withAbility(ability);
         var target = MockUnit.create("target", p2.getId()).withPosition(4, 4).withHealth(100, 100);
         target.setNextAttackTime(Long.MAX_VALUE);
+        target.setNextMoveTime(Long.MAX_VALUE);
 
         addUnitToPlayer(p1, caster);
         addUnitToPlayer(p2, target);

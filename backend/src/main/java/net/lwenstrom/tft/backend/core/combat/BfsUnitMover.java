@@ -29,7 +29,13 @@ public class BfsUnitMover implements UnitMover {
             return;
         }
 
-        var nextStep = findNextStep(mover, target, allUnits);
+        var nextStep = findNextStep(mover, List.of(target), allUnits);
+        if (nextStep == null && CombatUtils.getDistance(mover, target) > mover.getRange()) {
+            var enemies = allUnits.stream()
+                    .filter(unit -> unit.getCurrentHealth() > 0 && CombatUtils.isEnemy(mover, unit))
+                    .toList();
+            nextStep = findNextStep(mover, enemies, allUnits);
+        }
 
         if (nextStep != null) {
             mover.setPosition(nextStep.x(), nextStep.y());
@@ -37,7 +43,7 @@ public class BfsUnitMover implements UnitMover {
         }
     }
 
-    private Point findNextStep(GameUnit start, GameUnit target, List<GameUnit> allUnits) {
+    private Point findNextStep(GameUnit start, List<GameUnit> targets, List<GameUnit> allUnits) {
         int rows = Grid.COMBAT_ROWS;
         int cols = Grid.COLS;
 
@@ -60,8 +66,11 @@ public class BfsUnitMover implements UnitMover {
         while (!queue.isEmpty()) {
             var current = queue.poll();
 
-            int dist = Math.max(Math.abs(current.x() - target.getX()), Math.abs(current.y() - target.getY()));
-            if (dist <= start.getRange()) {
+            var inRange = targets.stream()
+                    .anyMatch(target ->
+                            Math.max(Math.abs(current.x() - target.getX()), Math.abs(current.y() - target.getY()))
+                                    <= start.getRange());
+            if (inRange) {
                 if (current.equals(startPt) || !occupied[current.y()][current.x()]) {
                     foundDest = current;
                     break;

@@ -6,18 +6,18 @@ import net.lwenstrom.tft.backend.core.model.GameUnit;
 public interface AbilityCaster {
     default void setDamageResolver(DamageResolver damageResolver) {}
 
-    void castAbility(GameUnit source, List<GameUnit> allUnits, TargetSelector targetSelector);
+    boolean castAbility(GameUnit source, List<GameUnit> allUnits, TargetSelector targetSelector);
 
-    void castAbility(
+    boolean castAbility(
             GameUnit source, List<GameUnit> allUnits, TargetSelector targetSelector, CombatStatCallback callback);
 
-    default void castAbility(
+    default boolean castAbility(
             GameUnit source,
             List<GameUnit> allUnits,
             TargetSelector targetSelector,
             CombatStatCallback callback,
             long currentTime) {
-        castAbility(source, allUnits, targetSelector, callback);
+        return castAbility(source, allUnits, targetSelector, callback);
     }
 
     interface CombatStatCallback {

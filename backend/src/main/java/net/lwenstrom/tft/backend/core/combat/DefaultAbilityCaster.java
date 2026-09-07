@@ -31,18 +31,18 @@ public class DefaultAbilityCaster implements AbilityCaster {
     }
 
     @Override
-    public void castAbility(GameUnit source, List<GameUnit> allUnits, TargetSelector targetSelector) {
-        castAbility(source, allUnits, targetSelector, new CombatStatCallback() {}, System.currentTimeMillis());
+    public boolean castAbility(GameUnit source, List<GameUnit> allUnits, TargetSelector targetSelector) {
+        return castAbility(source, allUnits, targetSelector, new CombatStatCallback() {}, System.currentTimeMillis());
     }
 
     @Override
-    public void castAbility(
+    public boolean castAbility(
             GameUnit source, List<GameUnit> allUnits, TargetSelector targetSelector, CombatStatCallback callback) {
-        castAbility(source, allUnits, targetSelector, callback, System.currentTimeMillis());
+        return castAbility(source, allUnits, targetSelector, callback, System.currentTimeMillis());
     }
 
     @Override
-    public void castAbility(
+    public boolean castAbility(
             GameUnit source,
             List<GameUnit> allUnits,
             TargetSelector targetSelector,
@@ -50,7 +50,15 @@ public class DefaultAbilityCaster implements AbilityCaster {
             long currentTime) {
         AbilityDefinition ability = source.getAbility();
         if (ability == null) {
-            return;
+            return false;
+        }
+        var targets =
+                switch (ability.type()) {
+                    case DAMAGE, STUN, DEBUFF_DEF -> resolveEnemyTargets(source, allUnits, targetSelector, ability);
+                    default -> List.<GameUnit>of(source);
+                };
+        if (targets.isEmpty()) {
+            return false;
         }
 
         source.setActiveAbility(ability.name());
@@ -59,12 +67,12 @@ public class DefaultAbilityCaster implements AbilityCaster {
         var value = ability.getValueForLevel(source.getStarLevel());
 
         switch (abilityType) {
-            case DAMAGE -> castDamageAbility(source, allUnits, targetSelector, ability, value, callback, currentTime);
+            case DAMAGE -> castDamageAbility(source, allUnits, targets, ability, value, callback, currentTime);
             case STUN ->
                 castStunAbility(
                         source,
                         allUnits,
-                        targetSelector,
+                        targets,
                         ability,
                         ability.getStunDurationForLevel(source.getStarLevel()),
                         callback);
@@ -72,57 +80,37 @@ public class DefaultAbilityCaster implements AbilityCaster {
             case BUFF_ATK -> castBuffAtkAbility(source, allUnits, ability, value, callback, currentTime);
             case BUFF_SPD -> castBuffSpdAbility(source, allUnits, ability, value, callback);
             case BUFF_DEF -> castBuffDefAbility(source, allUnits, ability, value, callback);
-            case DEBUFF_DEF -> castDebuffDefAbility(source, allUnits, targetSelector, ability, value, callback);
+            case DEBUFF_DEF -> castDebuffDefAbility(source, targets, ability, value, callback);
             case SHIELD -> castShieldAbility(source, allUnits, ability, value, callback);
         }
+        return true;
     }
 
     private void castDamageAbility(
             GameUnit source,
             List<GameUnit> allUnits,
-            TargetSelector targetSelector,
+            List<GameUnit> targets,
             AbilityDefinition ability,
             int damage,
             CombatStatCallback callback,
             long currentTime) {
-        var target = targetSelector.findTarget(source, allUnits);
-        if (target == null) {
-            return;
-        }
-
-        // Check conditional modifiers before applying damage
-        if (!checkConditionalModifiers(source, target, ability)) {
-            return;
-        }
-
-        // Apply scaling modifiers
-        int scaledDamage = applyScalingModifiers(source, target, ability, damage);
-
-        // Apply Warlord ability damage multiplier
-        scaledDamage = (int) (scaledDamage * source.getAbilityDamageMultiplier());
-
-        // Apply execute modifier bonus damage
-        int finalDamage = applyExecuteModifier(source, target, ability, scaledDamage);
-
-        // Track total damage dealt for lifesteal
-        var totalDamageDealt = new int[] {0};
-
-        applyToTargets(source, allUnits, target, ability, u -> {
-            int effectiveDamage = damageResolver.apply(source, u, finalDamage);
-            u.takeAbilityDamage(effectiveDamage);
-            if (isFinalKill(u)) {
+        var totalDamageDealt = 0;
+        for (var target : targets) {
+            var scaledDamage = (int)
+                    (applyScalingModifiers(source, target, ability, damage) * source.getAbilityDamageMultiplier());
+            var finalDamage = applyExecuteModifier(source, target, ability, scaledDamage);
+            var effectiveDamage = damageResolver.apply(source, target, finalDamage);
+            target.takeAbilityDamage(effectiveDamage);
+            if (isFinalKill(target)) {
                 AugmentManager.applyTeamAttackDamageOnKill(source, allUnits);
             }
-            // Apply secondary effects from modifiers (stun, knockback)
-            applyStunAndKnockbackModifiers(source, u, ability, allUnits);
-            applyDotModifiers(source, u, ability, currentTime);
-            totalDamageDealt[0] += effectiveDamage;
-            callback.onDamage(source.getId(), source.getName(), u.getId(), effectiveDamage);
-            callback.onDirectHit(u);
-        });
-
-        // Apply lifesteal modifier
-        applyLifestealModifier(source, ability, totalDamageDealt[0], callback);
+            applyStunAndKnockbackModifiers(source, target, ability, allUnits);
+            applyDotModifiers(source, target, ability, currentTime);
+            totalDamageDealt += effectiveDamage;
+            callback.onDamage(source.getId(), source.getName(), target.getId(), effectiveDamage);
+            callback.onDirectHit(target);
+        }
+        applyLifestealModifier(source, ability, totalDamageDealt, callback);
     }
 
     private boolean isFinalKill(GameUnit target) {
@@ -132,18 +120,13 @@ public class DefaultAbilityCaster implements AbilityCaster {
     private void castStunAbility(
             GameUnit source,
             List<GameUnit> allUnits,
-            TargetSelector targetSelector,
+            List<GameUnit> targets,
             AbilityDefinition ability,
             float stunSeconds,
             CombatStatCallback callback) {
-        var target = targetSelector.findTarget(source, allUnits);
-        if (target == null) {
-            return;
-        }
-
-        applyToTargets(source, allUnits, target, ability, u -> {
-            u.setStunSecondsRemaining(u.getStunSecondsRemaining() + stunSeconds);
-            callback.onSkill(source.getId(), source.getName(), u.getId(), 0);
+        targets.forEach(target -> {
+            target.setStunSecondsRemaining(target.getStunSecondsRemaining() + stunSeconds);
+            callback.onSkill(source.getId(), source.getName(), target.getId(), 0);
         });
     }
 
@@ -306,54 +289,41 @@ public class DefaultAbilityCaster implements AbilityCaster {
 
     private void castDebuffDefAbility(
             GameUnit source,
-            List<GameUnit> allUnits,
-            TargetSelector targetSelector,
+            List<GameUnit> targets,
             AbilityDefinition ability,
             int defense,
             CombatStatCallback callback) {
-        var target = targetSelector.findTarget(source, allUnits);
-        if (target == null) {
-            return;
-        }
-        applyToTargets(source, allUnits, target, ability, unit -> {
+        targets.forEach(unit -> {
             unit.applyTemporaryDefenseShred(defense);
             callback.onSkill(source.getId(), source.getName(), unit.getId(), defense);
         });
     }
 
-    private void applyToTargets(
-            GameUnit source,
-            List<GameUnit> allUnits,
-            GameUnit target,
-            AbilityDefinition ability,
-            java.util.function.Consumer<GameUnit> effect) {
-        int starLevel = source.getStarLevel();
-        int range = ability.getRangeForLevel(starLevel);
-
-        switch (ability.pattern()) {
-            case SINGLE -> effect.accept(target);
-            case LINE -> {
-                var lineCells = getAimedLineCells(source, target, range);
-                applyLimitedTargets(
-                        source,
-                        ability,
-                        allUnits.stream()
-                                .filter(u -> lineCells.contains(new LineCell(u.getX(), u.getY())))
-                                .toList(),
-                        effect);
-            }
-            case SURROUND -> {
-                int r = range;
-                applyLimitedTargets(
-                        source,
-                        ability,
-                        allUnits.stream()
-                                .filter(u -> u != source)
-                                .filter(u -> CombatUtils.getDistance(source, u) <= r)
-                                .toList(),
-                        effect);
-            }
+    private List<GameUnit> resolveEnemyTargets(
+            GameUnit source, List<GameUnit> allUnits, TargetSelector selector, AbilityDefinition ability) {
+        var target = selector.findTarget(source, allUnits);
+        if (target == null) {
+            return List.of();
         }
+        var range = ability.getRangeForLevel(source.getStarLevel());
+        var lineCells = ability.pattern() == net.lwenstrom.tft.backend.core.model.AbilityPattern.LINE
+                ? getAimedLineCells(source, target, range)
+                : Set.<LineCell>of();
+        return allUnits.stream()
+                .filter(unit -> unit.getCurrentHealth() > 0 && CombatUtils.isEnemy(source, unit))
+                .filter(unit -> switch (ability.pattern()) {
+                    case SINGLE -> unit == target && CombatUtils.getDistance(source, unit) <= range;
+                    case LINE -> lineCells.contains(new LineCell(unit.getX(), unit.getY()));
+                    case SURROUND -> CombatUtils.getDistance(source, unit) <= range;
+                })
+                .filter(unit -> ability.type() != net.lwenstrom.tft.backend.core.model.AbilityType.DAMAGE
+                        || checkConditionalModifiers(source, unit, ability))
+                .sorted(Comparator.comparingDouble((GameUnit unit) -> CombatUtils.getDistance(source, unit))
+                        .thenComparingInt(GameUnit::getX)
+                        .thenComparingInt(GameUnit::getY)
+                        .thenComparing(GameUnit::getDefinitionId))
+                .limit(ability.getTargetLimitForLevel(source.getStarLevel()))
+                .toList();
     }
 
     private Set<LineCell> getAimedLineCells(GameUnit source, GameUnit target, int range) {
@@ -374,24 +344,6 @@ public class DefaultAbilityCaster implements AbilityCaster {
     }
 
     private record LineCell(int x, int y) {}
-
-    private void applyLimitedTargets(
-            GameUnit source,
-            AbilityDefinition ability,
-            List<GameUnit> candidates,
-            java.util.function.Consumer<GameUnit> effect) {
-        var targetLimit = ability.getTargetLimitForLevel(source.getStarLevel());
-        candidates.stream()
-                .filter(u -> u.getCurrentHealth() > 0)
-                .filter(u -> CombatUtils.isEnemy(source, u))
-                .sorted(Comparator.comparingDouble((GameUnit u) -> CombatUtils.getDistance(source, u))
-                        .thenComparingInt(GameUnit::getX)
-                        .thenComparingInt(GameUnit::getY)
-                        .thenComparing(GameUnit::getOwnerId, Comparator.nullsLast(String::compareTo))
-                        .thenComparing(GameUnit::getDefinitionId))
-                .limit(targetLimit)
-                .forEach(effect);
-    }
 
     private GameUnit findLowestHealthAlly(List<GameUnit> allUnits, GameUnit source) {
         return allUnits.stream()

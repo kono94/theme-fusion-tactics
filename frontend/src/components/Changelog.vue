@@ -6,6 +6,7 @@ defineOptions({
 defineEmits(['back'])
 
 const nextVersionCommits = [
+  { hash: 'pending', title: 'Fix blocked melee movement, empty casts, and per-target spell modifiers' },
   { hash: 'pending', title: 'Allow shop economy and bench management during combat' },
   { hash: 'pending', title: 'Add final-composition analytics with selectable build-cohort filters' },
   { hash: 'pending', title: 'Remove retired mode assets, animation paths, and unsupported wire modes' },

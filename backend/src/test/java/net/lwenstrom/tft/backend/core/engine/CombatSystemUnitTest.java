@@ -314,4 +314,48 @@ class CombatSystemUnitTest {
     private void addUnitToPlayer(Player player, GameUnit unit) {
         TestHelpers.addUnitToPlayer(player, unit);
     }
+
+    @Test
+    void emptyCastsRetainManaAndAllowMovementThenCastOnceInRange() {
+        for (var pattern : AbilityPattern.values()) {
+            var system = createTestCombatSystem();
+            var p1 = new Player("caster", GameMode.ONEPIECE, createMockDataLoader(), createSeededRandomProvider());
+            var p2 = new Player("enemy", GameMode.ONEPIECE, createMockDataLoader(), createSeededRandomProvider());
+            var ability = new AbilityDefinition(
+                    "short spell", "", AbilityType.DAMAGE, pattern, List.of(1), List.of(20), List.of());
+            var caster = MockUnit.create("caster", p1.getId())
+                    .withPosition(0, 0)
+                    .withMana(100, 100)
+                    .withAbility(ability);
+            var target = MockUnit.create("enemy", p2.getId()).withPosition(4, 0).withHealth(1000, 1000);
+            target.setStunSecondsRemaining(10);
+            TestHelpers.addUnitToPlayer(p1, caster);
+            TestHelpers.addUnitToPlayer(p2, target);
+            system.simulateTick(List.of(p1, p2), 0);
+            assertEquals(100, caster.getMana());
+            assertNull(caster.getActiveAbility());
+            assertEquals(1, caster.getX());
+            target.setPosition(2, 0);
+            system.simulateTick(List.of(p1, p2), 100);
+            assertEquals(0, caster.getMana());
+            assertEquals(980, target.getCurrentHealth());
+            system.simulateTick(List.of(p1, p2), 200);
+            assertEquals(980, target.getCurrentHealth());
+            assertEquals(1, caster.getX(), "Cast recovery prevents movement");
+        }
+    }
+
+    @Test
+    void basicAttackCooldownDoesNotPreventMovement() {
+        var p1 = new Player("a", GameMode.ONEPIECE, createMockDataLoader(), createSeededRandomProvider());
+        var p2 = new Player("b", GameMode.ONEPIECE, createMockDataLoader(), createSeededRandomProvider());
+        var mover = MockUnit.create("a", p1.getId()).withPosition(0, 0);
+        var target = MockUnit.create("b", p2.getId()).withPosition(4, 0);
+        mover.setNextAttackTime(1000);
+        target.setStunSecondsRemaining(10);
+        TestHelpers.addUnitToPlayer(p1, mover);
+        TestHelpers.addUnitToPlayer(p2, target);
+        combatSystem.simulateTick(List.of(p1, p2), 0);
+        assertEquals(1, mover.getX());
+    }
 }
