@@ -3960,7 +3960,7 @@
     "abilityPower": [0, 0, 0],
     "defense": [58, 58, 58],
     "attackSpeed": [0.8, 0.8, 0.8],
-    "range": [1, 1, 1],
+    "range": [3, 3, 3],
     "traits": [
       "Ice",
       "Flying"
@@ -3987,7 +3987,7 @@
     "abilityPower": [0, 0, 0],
     "defense": [44, 44, 44],
     "attackSpeed": [0.8, 0.8, 0.8],
-    "range": [1, 1, 1],
+    "range": [3, 3, 3],
     "traits": [
       "Electric",
       "Flying"
@@ -4019,7 +4019,7 @@
     "abilityPower": [0, 0, 0],
     "defense": [44, 44, 44],
     "attackSpeed": [0.8, 0.8, 0.8],
-    "range": [1, 1, 1],
+    "range": [3, 3, 3],
     "traits": [
       "Fire",
       "Flying"

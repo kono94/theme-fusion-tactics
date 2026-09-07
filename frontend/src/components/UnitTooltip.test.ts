@@ -1,5 +1,6 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
+import pokemonUnits from '../../../backend/src/main/resources/data/units_pokemon.json'
 import UnitTooltip from './UnitTooltip.vue'
 import type { UnitDefinition } from '../types'
 import { setTraitData } from '../data/traitData'
@@ -25,6 +26,17 @@ function unitDefinition(overrides: Partial<UnitDefinition> = {}): UnitDefinition
 }
 
 describe('UnitTooltip', () => {
+    it.each(['articuno', 'zapdos', 'moltres'])('shows %s as ranged using roster data', (id) => {
+        const definition = pokemonUnits.find((unit) => unit.id === id)!
+        for (const range of definition.range) {
+            const wrapper = mount(UnitTooltip, {
+                props: { unit: unitDefinition({ id, name: definition.name, range }) }
+            })
+            expect(wrapper.get('.range-badge').text()).toBe('RANGED')
+            expect(range).toBe(3)
+        }
+    })
+
     it('renders the current role and defense stat', () => {
         const wrapper = mount(UnitTooltip, {
             props: {

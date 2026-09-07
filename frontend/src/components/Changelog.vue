@@ -6,6 +6,7 @@ defineOptions({
 defineEmits(['back'])
 
 const nextVersionCommits = [
+  { hash: 'pending', title: 'Make legendary birds ranged' },
   { hash: 'pending', title: 'Replace free bot armies with persistent teams using normal gold, shops, upgrades, and XP' },
   { hash: 'pending', title: 'Fix blocked melee movement, empty casts, and per-target spell modifiers' },
   { hash: 'pending', title: 'Allow shop economy and bench management during combat' },
@@ -111,6 +112,42 @@ const version160Commits = [
               <span>{{ commit.title }}</span>
             </li>
           </ul>
+          <div class="balance-block">
+            <div class="balance-title">
+              <span class="tag buff">Buff</span>
+              <h4>Articuno</h4>
+            </div>
+            <p>
+              Attack range at all star levels:
+              <span class="old-value">1</span>
+              <span class="change-arrow">&nbsp;=>&nbsp;</span>
+              <strong class="value buff">3</strong>.
+            </p>
+          </div>
+          <div class="balance-block">
+            <div class="balance-title">
+              <span class="tag buff">Buff</span>
+              <h4>Zapdos</h4>
+            </div>
+            <p>
+              Attack range at all star levels:
+              <span class="old-value">1</span>
+              <span class="change-arrow">&nbsp;=>&nbsp;</span>
+              <strong class="value buff">3</strong>.
+            </p>
+          </div>
+          <div class="balance-block">
+            <div class="balance-title">
+              <span class="tag buff">Buff</span>
+              <h4>Moltres</h4>
+            </div>
+            <p>
+              Attack range at all star levels:
+              <span class="old-value">1</span>
+              <span class="change-arrow">&nbsp;=>&nbsp;</span>
+              <strong class="value buff">3</strong>.
+            </p>
+          </div>
         </article>
       </section>
 
