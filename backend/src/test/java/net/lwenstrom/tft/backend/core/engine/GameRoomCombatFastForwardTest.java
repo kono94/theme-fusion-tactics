@@ -156,7 +156,8 @@ class GameRoomCombatFastForwardTest {
 
     private void addBots(GameRoom room, int count) {
         for (var i = 0; i < count; i++) {
-            room.addBot().orElseThrow();
+            var bot = room.addBot().orElseThrow();
+            bot.addUnitToBoard(createCombatUnitDefinition("bot-unit-" + i, "Bot Unit"), 0, 2);
         }
     }
 

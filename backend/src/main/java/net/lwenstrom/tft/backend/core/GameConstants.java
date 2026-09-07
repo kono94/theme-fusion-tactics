@@ -38,11 +38,6 @@ public final class GameConstants {
     public static final long BASE_PLANNING_DURATION_MS = 15000L;
     public static final long PLANNING_DURATION_INCREMENT_MS = 250L;
 
-    // Bot
-    public static final int BOT_STARTING_LEVEL = 2;
-    public static final int BOT_MAX_LEVEL = 9;
-    public static final int BOT_MAX_UNITS_PER_ROW = 9;
-
     // Loot Orbs
     public static final int MIN_ORB_COUNT = 2;
     public static final int MAX_ORB_COUNT = 4;

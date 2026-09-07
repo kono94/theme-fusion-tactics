@@ -23,7 +23,7 @@ For detailed architectural information, refer to the context documents:
 ## ✨ Features
 
 ### Core Gameplay
-- **Up to 8 players** per game room (human + AI bots with adaptive shop odds)
+- **Up to 8 players** per game room (human + economy-based bots with persistent teams)
 - **Real-time state sync** via STOMP WebSockets (100ms tick rate)
 - **Theme-agnostic core engine** — hosts choose One Piece or Pokemon per room in the lobby
 - **Auto-battler mechanics**: Shop, XP, Gold (with interest), Trait Synergies, Unit Combinations

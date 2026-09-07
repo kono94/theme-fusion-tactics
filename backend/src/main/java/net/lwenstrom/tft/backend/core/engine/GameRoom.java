@@ -58,6 +58,7 @@ public class GameRoom {
     private final RandomProvider randomProvider;
     private final TraitManager traitManager;
     private final CombatSystem combatSystem;
+    private final BotController botController;
     private final GameplayAnalyticsRecorder analyticsRecorder;
     private boolean matchCompletedRecorded;
     private AugmentManager augmentManager;
@@ -110,6 +111,7 @@ public class GameRoom {
         this.gameModeRegistry = gameModeRegistry;
         this.clock = clock;
         this.randomProvider = randomProvider;
+        this.botController = new BotController(dataLoader, randomProvider);
         this.gameMode = gameMode;
         this.analyticsRecorder = analyticsRecorder;
 
@@ -331,7 +333,6 @@ public class GameRoom {
         bot.setBot(true);
         players.put(bot.getId(), bot);
         bot.refreshShop();
-        refreshBotRoster(bot);
         updateGameState(phaseEndTime - clock.currentTimeMillis());
         return Optional.of(bot);
     }
@@ -421,15 +422,7 @@ public class GameRoom {
                         player.refreshShop();
                         yield true;
                     }
-                    case EXP -> {
-                        if (player.getLevel() >= GameConstants.MAX_PLAYER_LEVEL
-                                || player.getGold() < GameConstants.XP_BUY_COST) {
-                            yield false;
-                        }
-                        player.gainGold(-GameConstants.XP_BUY_COST);
-                        player.gainXp(GameConstants.XP_BUY_AMOUNT);
-                        yield true;
-                    }
+                    case EXP -> player.buyXp();
                     case MOVE -> {
                         if (action.unitId() == null || action.targetX() == null || action.targetY() == null)
                             yield false;
@@ -635,9 +628,6 @@ public class GameRoom {
 
                 p.gainXp(GameConstants.XP_PER_PHASE);
                 p.refreshShop();
-                if (p.isBot()) {
-                    refreshBotRoster(p);
-                }
                 if (round % 2 == 0) {
                     spawnLootOrbsForPlayer(p);
                 }
@@ -650,6 +640,9 @@ public class GameRoom {
 
         if (phase == GamePhase.PLANNING) {
             generateAugmentChoicesForRound();
+            players.values().stream()
+                    .filter(Player::isBot)
+                    .forEach(player -> botController.plan(player, round, augmentManager));
         }
 
         if (phase == GamePhase.COMBAT) {
@@ -703,110 +696,6 @@ public class GameRoom {
         }
 
         updateGameState(currentPhaseDuration);
-    }
-
-    private void refreshBotRoster(Player bot) {
-        bot.removeAllUnits();
-
-        var botLevel = Math.min(GameConstants.BOT_STARTING_LEVEL + (round / 2), GameConstants.BOT_MAX_LEVEL);
-        bot.setLevel(botLevel);
-
-        var profile = getBotRosterProfile();
-        var naturalUnitCount = Math.min(Math.min(round + 1, botLevel), GameConstants.BOT_MAX_UNITS_PER_ROW);
-        var unitCount = Math.min(naturalUnitCount, profile.maxUnits());
-        var available = dataLoader.getAllUnits(gameMode);
-        for (var i = 0; i < unitCount; i++) {
-            var def = rollBotUnitDefinition(i, botLevel, available, profile);
-            var starLevel = rollBotStarLevel(i, def.cost(), profile, isGuaranteedThreeStarSlot(i, def.cost(), profile));
-
-            bot.addUnitToBoard(def, i, Grid.PLAYER_ROWS - 1, Math.min(starLevel, getMaxBotStarLevel(def.cost())));
-        }
-    }
-
-    private int getMaxBotStarLevel(int unitCost) {
-        if (round <= 5) {
-            return 2;
-        }
-
-        return switch (unitCost) {
-            case 1 -> 3;
-            case 2 -> round >= 8 ? 3 : 2;
-            case 3 -> round >= 12 ? 3 : 2;
-            case 4 -> round >= 16 ? 3 : 2;
-            default -> 2;
-        };
-    }
-
-    private BotRosterProfile getBotRosterProfile() {
-        return gameModeRegistry.getProvider(gameMode).getBotRosterProfile(round);
-    }
-
-    private UnitDefinition rollBotUnitDefinition(
-            int slotIndex, int botLevel, List<UnitDefinition> available, BotRosterProfile profile) {
-        if (slotIndex < profile.guaranteedCheapThreeStarUnits()) {
-            return rollBotUnitDefinitionByCost(available, 1, 2)
-                    .orElseGet(() -> ShopOdds.rollUnit(botLevel, available, randomProvider));
-        }
-        if (slotIndex < profile.guaranteedCheapThreeStarUnits() + profile.guaranteedMidCostThreeStarUnits()) {
-            return rollBotUnitDefinitionByCost(available, 3, 4)
-                    .orElseGet(() -> ShopOdds.rollUnit(botLevel, available, randomProvider));
-        }
-        return ShopOdds.rollUnit(botLevel, available, randomProvider);
-    }
-
-    private Optional<UnitDefinition> rollBotUnitDefinitionByCost(
-            List<UnitDefinition> available, int minCost, int maxCost) {
-        var candidates = available.stream()
-                .filter(def -> def.cost() >= minCost && def.cost() <= maxCost)
-                .toList();
-        if (candidates.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(candidates.get(randomProvider.nextInt(candidates.size())));
-    }
-
-    private boolean isGuaranteedThreeStarSlot(int slotIndex, int unitCost, BotRosterProfile profile) {
-        if (slotIndex < profile.guaranteedCheapThreeStarUnits()) {
-            return unitCost <= 2;
-        }
-        if (slotIndex < profile.guaranteedCheapThreeStarUnits() + profile.guaranteedMidCostThreeStarUnits()) {
-            return unitCost >= 3 && unitCost <= 4;
-        }
-        return false;
-    }
-
-    private int rollBotStarLevel(
-            int slotIndex, int unitCost, BotRosterProfile profile, boolean guaranteedThreeStarSlot) {
-        if (guaranteedThreeStarSlot) {
-            return 3;
-        }
-
-        var starRoll = randomProvider.nextInt(100);
-        var starLevel =
-                switch (unitCost) {
-                    case 1, 2 ->
-                        rollBotStarLevel(starRoll, profile.cheapTwoStarChance(), profile.cheapThreeStarChance());
-                    case 3, 4 ->
-                        rollBotStarLevel(starRoll, profile.midCostTwoStarChance(), profile.midCostThreeStarChance());
-                    default -> starRoll < profile.fiveCostTwoStarChance() ? 2 : 1;
-                };
-
-        var guaranteedTwoStarStart =
-                profile.guaranteedCheapThreeStarUnits() + profile.guaranteedMidCostThreeStarUnits();
-        if (slotIndex < guaranteedTwoStarStart + profile.guaranteedTwoStarUnits()) {
-            return Math.max(2, starLevel);
-        }
-        return starLevel;
-    }
-
-    private int rollBotStarLevel(int starRoll, int twoStarChance, int threeStarChance) {
-        if (starRoll < threeStarChance) {
-            return 3;
-        }
-        if (starRoll < threeStarChance + twoStarChance) {
-            return 2;
-        }
-        return 1;
     }
 
     private void updateGameState(long timeLeft) {
@@ -863,10 +752,6 @@ public class GameRoom {
         players.values().stream().filter(player -> player.getHealth() > 0).forEach(player -> {
             var choices = augmentManager.generateOffers(player, tier);
             player.setAugmentChoices(choices);
-            if (player.isBot() && !choices.isEmpty()) {
-                var selected = choices.get(randomProvider.nextInt(choices.size()));
-                augmentManager.selectAugment(player, selected.id(), round);
-            }
         });
     }
 

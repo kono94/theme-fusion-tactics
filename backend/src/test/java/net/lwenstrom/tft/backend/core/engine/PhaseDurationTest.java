@@ -71,6 +71,11 @@ public class PhaseDurationTest {
             }
 
             @Override
+            public List<net.lwenstrom.tft.backend.core.model.TraitMetadata> getTraitMetadata(GameMode mode) {
+                return List.of();
+            }
+
+            @Override
             public List<AugmentDefinition> getAugments(GameMode mode) {
                 return TestHelpers.createDefaultAugments();
             }

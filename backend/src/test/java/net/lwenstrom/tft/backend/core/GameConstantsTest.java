@@ -50,13 +50,6 @@ class GameConstantsTest {
     }
 
     @Test
-    void testBotConstants() {
-        assertEquals(2, GameConstants.BOT_STARTING_LEVEL);
-        assertEquals(9, GameConstants.BOT_MAX_LEVEL);
-        assertEquals(9, GameConstants.BOT_MAX_UNITS_PER_ROW);
-    }
-
-    @Test
     void testLootOrbConstants() {
         assertEquals(2, GameConstants.MIN_ORB_COUNT);
         assertEquals(4, GameConstants.MAX_ORB_COUNT);

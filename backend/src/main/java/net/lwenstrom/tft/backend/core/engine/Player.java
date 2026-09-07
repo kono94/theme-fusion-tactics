@@ -338,6 +338,13 @@ public class Player {
         bench.findFirstEmptySlot().ifPresent(slot -> bench.set(slot, unit));
     }
 
+    public boolean buyXp() {
+        if (level >= GameConstants.MAX_PLAYER_LEVEL || gold < GameConstants.XP_BUY_COST) return false;
+        gainGold(-GameConstants.XP_BUY_COST);
+        gainXp(GameConstants.XP_BUY_AMOUNT);
+        return true;
+    }
+
     public void gainXp(int amount) {
         if (level >= GameConstants.MAX_PLAYER_LEVEL) {
             xp = 0;
@@ -500,6 +507,7 @@ public class Player {
     }
 
     private void moveBoardToBoard(GameUnit unit, int x, int y) {
+        if (unit.getX() == x && unit.getY() == y) return;
         int oldX = unit.getX();
         int oldY = unit.getY();
 

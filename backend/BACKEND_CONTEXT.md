@@ -58,7 +58,7 @@ BackendApplication
 ```
 
 Core code does not import a franchise package. `GameModeProvider` supplies resource paths, trait registration, optional
-affinity data, and mode-specific bot roster tuning. One Piece and Pokemon are provider/data configurations.
+affinity data. Bot strategy is shared across modes. One Piece and Pokemon are provider/data configurations.
 
 ## 4. Ownership and concurrency
 
@@ -100,6 +100,16 @@ LOBBY → PLANNING ⇄ COMBAT → END_CELEBRATION → END
   bot-only pairings are simulated through the remaining combat window immediately.
 - `END_CELEBRATION` exposes final placement before `END`; ended rooms are removed by the same engine tick that observes
   them.
+
+Bots keep their units, gold, and XP across rounds. `BotController` runs once per living bot after planning income,
+paid shop refresh, loot, and augment offers, including round 1. It collects loot, chooses a random offered augment,
+and uses normal purchase, sale, XP, reroll, upgrade, and movement operations. Lobby bots have no generated army.
+`BotTeamEvaluator` ranks boards by stars, active trait tiers (distinct lines and evolved traits), role coverage, then cost.
+Bots favor immediate upgrades, empty slots, improved boards, and copies of deployed lines. They save up to
+`min(30, round * 5)` gold, except for filling empty slots or at 30 health and below. XP is bought only when it can
+reach the next level and a reserve can fill it. Rerolls are capped at two (four at low health), and economy actions at
+40 per pass. Tanks/melee deploy in front; ranged units behind. No opponent scouting or bot-only economy/stat grants.
+The existing human-only emergency drop remains unchanged. `Player.buyXp()` is shared by bot and human actions.
 
 ## 6. Modes and data loading
 
@@ -284,6 +294,10 @@ The summary response also returns all distinct build cohorts and anonymous playe
 independently of active mode/version/commit filters, so the dashboard can keep complete filter selections available.
 
 ## 11. Test strategy
+
+`BotProgressionSimulationTest` writes seeded 25-round progression reports for both modes under
+`target/simulation-reports/economy-bots-*.csv`, including gold, level, stars, action counts, and results against a fixed
+buy-first/level-above-20 baseline. These controlled comparisons are not estimates of human win rates.
 
 The normal suite covers room lifecycle and authorization, economy/upgrades, grid and movement, combat strategies,
 abilities/modifiers, traits, affinities, augments, loot/emergency drops, reconnect/abandonment, analytics persistence,

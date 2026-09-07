@@ -5,7 +5,6 @@ import static net.lwenstrom.tft.backend.test.TestHelpers.createTestClock;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -37,8 +36,6 @@ public class LobbyTest {
         MockitoAnnotations.openMocks(this);
         when(gameModeRegistry.getDefaultMode()).thenReturn(GameMode.ONEPIECE);
         when(gameModeRegistry.getProvider(GameMode.ONEPIECE)).thenReturn(gameModeProvider);
-        when(gameModeProvider.getBotRosterProfile(anyInt()))
-                .thenReturn(new BotRosterProfile(7, 0, 0, 0, 5, 1, 5, 0, 5));
 
         UnitDefinition dummyUnit = new UnitDefinition(
                 "unit-1",
