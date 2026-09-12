@@ -39,7 +39,8 @@ public record GameState(
             List<SelectedAugment> selectedAugments,
             boolean isGhost,
             boolean isBot,
-            BotPersonality botPersonality) {}
+            BotPersonality botPersonality,
+            MatchStats matchStats) {}
 
     public record CombatEvent(
             long timestamp,

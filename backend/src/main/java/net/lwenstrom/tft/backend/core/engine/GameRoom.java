@@ -31,6 +31,7 @@ import net.lwenstrom.tft.backend.core.model.GameState.PlayerState;
 import net.lwenstrom.tft.backend.core.model.GameUnit;
 import net.lwenstrom.tft.backend.core.model.LootOrb;
 import net.lwenstrom.tft.backend.core.model.LootType;
+import net.lwenstrom.tft.backend.core.model.MatchStats.RoundOutcome;
 import net.lwenstrom.tft.backend.core.model.PlanningPauseReason;
 import net.lwenstrom.tft.backend.core.random.RandomProvider;
 import net.lwenstrom.tft.backend.core.time.Clock;
@@ -979,12 +980,41 @@ public class GameRoom {
                 outcome.isDraw(),
                 participants));
 
+        recordMatchStats(outcome, result, participants);
+
         checkAndTriggerGameEnd();
 
         notifyCombatResult(outcome, result, participants);
     }
 
     private record CombatOutcome(Player winner, Player loser, boolean isDraw) {}
+
+    private void recordMatchStats(CombatOutcome outcome, CombatSystem.CombatResult result, List<Player> participants) {
+        var damageLog = result != null ? result.damageLog() : combatSystem.getDamageLog();
+        participants.stream()
+                .filter(player -> !player.isGhost())
+                .filter(player -> players.containsKey(player.getId()))
+                .forEach(player -> {
+                    var roundOutcome = outcome.isDraw()
+                            ? RoundOutcome.DRAW
+                            : player == outcome.winner() ? RoundOutcome.WIN : RoundOutcome.LOSS;
+                    var entries = damageLog.values().stream()
+                            .filter(entry -> player.getId().equals(entry.ownerId()))
+                            .toList();
+                    player.recordMatchRound(
+                            round,
+                            roundOutcome,
+                            entries.stream()
+                                    .mapToInt(CombatSystem.DamageEntry::damage)
+                                    .sum(),
+                            entries.stream()
+                                    .mapToInt(CombatSystem.DamageEntry::healing)
+                                    .sum(),
+                            entries.stream()
+                                    .mapToInt(CombatSystem.DamageEntry::shielding)
+                                    .sum());
+                });
+    }
 
     private CombatOutcome determineCombatOutcome(
             boolean isTimeout, CombatSystem.CombatResult result, List<Player> participants) {

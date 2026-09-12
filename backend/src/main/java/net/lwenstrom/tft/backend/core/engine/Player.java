@@ -16,6 +16,9 @@ import net.lwenstrom.tft.backend.core.model.GameState.PlayerState;
 import net.lwenstrom.tft.backend.core.model.GameUnit;
 import net.lwenstrom.tft.backend.core.model.LootOrb;
 import net.lwenstrom.tft.backend.core.model.LootType;
+import net.lwenstrom.tft.backend.core.model.MatchStats;
+import net.lwenstrom.tft.backend.core.model.MatchStats.RoundOutcome;
+import net.lwenstrom.tft.backend.core.model.MatchStats.RoundResult;
 import net.lwenstrom.tft.backend.core.model.SelectedAugment;
 import net.lwenstrom.tft.backend.core.random.RandomProvider;
 
@@ -52,6 +55,14 @@ public class Player {
     private boolean ghost = false;
     private boolean bot = false;
     private BotPersonality botPersonality;
+
+    private int totalDamageDealt;
+    private int totalHealingDone;
+    private int totalShieldingDone;
+    private int roundsWon;
+    private int roundsLost;
+    private int roundsDrawn;
+    private final List<RoundResult> roundResults = new ArrayList<>();
 
     @Setter(AccessLevel.NONE)
     private boolean emergencyDropTriggered = false;
@@ -592,6 +603,29 @@ public class Player {
         return ghostPlayer;
     }
 
+    public void recordMatchRound(int round, RoundOutcome outcome, int damageDealt, int healingDone, int shieldingDone) {
+        totalDamageDealt += damageDealt;
+        totalHealingDone += healingDone;
+        totalShieldingDone += shieldingDone;
+        switch (outcome) {
+            case WIN -> roundsWon++;
+            case LOSS -> roundsLost++;
+            case DRAW -> roundsDrawn++;
+        }
+        roundResults.add(new RoundResult(round, outcome));
+    }
+
+    public MatchStats getMatchStats() {
+        return new MatchStats(
+                totalDamageDealt,
+                totalHealingDone,
+                totalShieldingDone,
+                roundsWon,
+                roundsLost,
+                roundsDrawn,
+                roundResults);
+    }
+
     public PlayerState toState() {
         return new PlayerState(
                 id,
@@ -611,7 +645,8 @@ public class Player {
                 new ArrayList<>(selectedAugments),
                 ghost,
                 bot,
-                botPersonality);
+                botPersonality,
+                getMatchStats());
     }
 
     // Legacy getter for backward compatibility with tests

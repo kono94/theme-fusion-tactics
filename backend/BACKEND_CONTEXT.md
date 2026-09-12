@@ -208,8 +208,11 @@ planningTimerPaused, planningReadyPlayerId, planningPauseReason
 
 ```text
 playerId, name, health, gold, level, xp, nextLevelXp, place, combatSide,
-bench, board, shop, lootOrbs, augmentChoices, selectedAugments, isGhost, isBot, botPersonality
+bench, board, shop, lootOrbs, augmentChoices, selectedAugments, isGhost, isBot, botPersonality, matchStats
 ```
+
+`matchStats` is an in-memory, per-player summary of total damage, healing, and shielding plus win/loss/draw counts and
+round results. It records each real participant once when combat resolves and ignores donor-ghost contributions.
 
 There is no `activeTraits` field in the wire contract. Trait effects are applied by `TraitManager`; trait display metadata
 comes from `/api/traits` and the board is used to derive display counts.

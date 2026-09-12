@@ -161,9 +161,10 @@ The backend currently emits `SOLO_READY` or null; `AUGMENT_SELECTION` remains in
 offers do not pause the timer. Unanswered offers are auto-selected when combat begins.
 
 `PlayerState` contains player/economy fields, `bench`, `board`, `shop`, `lootOrbs`, `augmentChoices`,
-`selectedAugments`, `isGhost`, `isBot`, and nullable `botPersonality`. The player list presents the server-assigned bot
-personality. There is no `activeTraits` wire field. Trait display is derived from board units plus metadata loaded from
-`/api/traits?mode=...`.
+`selectedAugments`, `isGhost`, `isBot`, nullable `botPersonality`, and `matchStats`. The player list presents the
+server-assigned bot personality. The end screen uses `matchStats` for aggregate damage, healing, shielding, and the
+round-by-round result strip. There is no `activeTraits` wire field. Trait display is derived from board units plus
+metadata loaded from `/api/traits?mode=...`.
 
 Current combat event types are `DAMAGE`, `SKILL`, `DEATH`, `HEAL`, and `SHIELD`. Events contain only timestamp, type,
 source ID, target ID, value, and optional skill name. Do not add cast/status/zone/coordinate assumptions without first

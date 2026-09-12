@@ -67,6 +67,15 @@ function player(health: number, place: number): PlayerState {
         isGhost: false,
         isBot: false,
         botPersonality: null,
+        matchStats: {
+            damageDealt: 0,
+            healingDone: 0,
+            shieldingDone: 0,
+            roundsWon: 0,
+            roundsLost: 0,
+            roundsDrawn: 0,
+            rounds: [],
+        },
     }
 }
 

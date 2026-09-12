@@ -43,6 +43,7 @@ For detailed architectural information, refer to the context documents:
 - **Role-based unit identity** — Every form is labeled Damage, Tank, or Support; Pokemon evolutions can change roles
 - **Unified DEF combat stat** — DEF mitigates attacks, abilities, and damage-over-time and can be buffed or shredded
 - **Tabbed damage report** — Post-combat tracking for your units vs opponent with visual damage bars
+- **End-of-match summary** — Total damage, healing, shielding, and a round-by-round result history
 - **Per-unit attack animations** — Punch, slash, projectile with directional orientation
 - **Ability patterns** — Single-target, line, and AoE effects with range-based targeting
 

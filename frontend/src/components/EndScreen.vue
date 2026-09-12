@@ -18,6 +18,43 @@
             You finished <span :class="getPlaceClass(myPlace)">#{{ myPlace || '-' }}</span>
          </div>
 
+        <section class="match-summary" aria-labelledby="match-summary-title">
+            <header class="match-summary__header">
+                <h2 id="match-summary-title">Match Summary</h2>
+                <span class="match-record">
+                    <strong class="win">{{ matchStats.roundsWon }}W</strong>
+                    <strong class="loss">{{ matchStats.roundsLost }}L</strong>
+                    <strong v-if="matchStats.roundsDrawn" class="draw">{{ matchStats.roundsDrawn }}D</strong>
+                </span>
+            </header>
+            <div class="match-summary__totals">
+                <div>
+                    <span>Damage dealt</span>
+                    <strong>{{ formatStat(matchStats.damageDealt) }}</strong>
+                </div>
+                <div>
+                    <span>Healing done</span>
+                    <strong>{{ formatStat(matchStats.healingDone) }}</strong>
+                </div>
+                <div>
+                    <span>Shielding done</span>
+                    <strong>{{ formatStat(matchStats.shieldingDone) }}</strong>
+                </div>
+            </div>
+            <div v-if="matchStats.rounds.length" class="round-history" aria-label="Round results">
+                <span
+                    v-for="round in matchStats.rounds"
+                    :key="round.round"
+                    class="round-result"
+                    :class="round.outcome.toLowerCase()"
+                    :title="`Round ${round.round}: ${round.outcome.toLowerCase()}`"
+                >
+                    <small>R{{ round.round }}</small>
+                    <strong>{{ round.outcome.charAt(0) }}</strong>
+                </span>
+            </div>
+        </section>
+
         <div class="end-screen__rankings">
              <div class="end-screen__rankings-header">
                 <span>Player</span>
@@ -79,6 +116,17 @@ const sortedPlayers = computed(() => {
 const myPlayer = computed(() => props.players.find(p => p.playerId === props.myPlayerId));
 const myPlace = computed(() => myPlayer.value ? myPlayer.value.place : '?');
 const isWinner = computed(() => myPlace.value === 1);
+const matchStats = computed(() => myPlayer.value?.matchStats ?? {
+    damageDealt: 0,
+    healingDone: 0,
+    shieldingDone: 0,
+    roundsWon: 0,
+    roundsLost: 0,
+    roundsDrawn: 0,
+    rounds: [],
+});
+
+const formatStat = (value: number) => new Intl.NumberFormat().format(value);
 
 function getPlaceClass(place: number | string | null | undefined) {
   if (place === 1) return 'place--gold';
@@ -214,7 +262,9 @@ function triggerBurst() {
     align-items: center; /* keep everything centered */
     gap: 24px;
     position: relative;
-    overflow: hidden;
+    max-height: calc(100vh - 32px);
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 .end-screen__accent {
@@ -272,6 +322,102 @@ function triggerBurst() {
     font-size: 20px;
     color: #cbd5e1;
     font-weight: 500;
+}
+
+.match-summary {
+    width: 100%;
+    padding: 16px;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    background: rgba(15, 23, 42, 0.7);
+    box-sizing: border-box;
+    text-align: left;
+}
+
+.match-summary__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.match-summary__header h2 {
+    margin: 0;
+    color: #e2e8f0;
+    font-size: 15px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.match-record {
+    display: flex;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.match-record .win,
+.round-result.win {
+    color: #4ade80;
+}
+
+.match-record .loss,
+.round-result.loss {
+    color: #f87171;
+}
+
+.match-record .draw,
+.round-result.draw {
+    color: #facc15;
+}
+
+.match-summary__totals {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.match-summary__totals div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px;
+    border-radius: 7px;
+    background: #1e293b;
+}
+
+.match-summary__totals span {
+    color: #94a3b8;
+    font-size: 11px;
+}
+
+.match-summary__totals strong {
+    color: #f8fafc;
+    font-size: 18px;
+}
+
+.round-history {
+    display: flex;
+    gap: 6px;
+    margin-top: 12px;
+    padding-bottom: 2px;
+    overflow-x: auto;
+}
+
+.round-result {
+    display: grid;
+    flex: 0 0 auto;
+    min-width: 31px;
+    padding: 5px;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    background: #0f172a;
+    place-items: center;
+}
+
+.round-result small {
+    color: #64748b;
+    font-size: 9px;
 }
 
 .end-screen__rankings {

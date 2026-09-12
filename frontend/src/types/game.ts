@@ -15,6 +15,8 @@ export type UnitRole = 'DAMAGE' | 'TANK' | 'SUPPORT'
 
 export type BotPersonality = 'BALANCED' | 'ECONOMY' | 'REROLL' | 'FAST_LEVEL' | 'TRAIT_FOCUSED'
 
+export type MatchRoundOutcome = 'WIN' | 'LOSS' | 'DRAW'
+
 export type ActionType =
     | 'BUY'
     | 'SELL'
@@ -165,6 +167,21 @@ export interface SelectedAugment {
     image?: string | null
 }
 
+export interface MatchRoundResult {
+    round: number
+    outcome: MatchRoundOutcome
+}
+
+export interface MatchStats {
+    damageDealt: number
+    healingDone: number
+    shieldingDone: number
+    roundsWon: number
+    roundsLost: number
+    roundsDrawn: number
+    rounds: MatchRoundResult[]
+}
+
 // ============================================================================
 // Player State
 // ============================================================================
@@ -188,6 +205,7 @@ export interface PlayerState {
     isGhost: boolean
     isBot: boolean
     botPersonality: BotPersonality | null
+    matchStats: MatchStats
     boardUnits?: GameUnit[] // Alternative name for board in some contexts
 }
 
