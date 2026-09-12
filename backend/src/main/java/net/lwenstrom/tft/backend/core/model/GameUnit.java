@@ -132,6 +132,20 @@ public interface GameUnit {
 
     default void setStunSecondsRemaining(float seconds) {}
 
+    @JsonIgnore
+    default int getRecentStunCount() {
+        return 0;
+    }
+
+    default void setRecentStunCount(int count) {}
+
+    @JsonIgnore
+    default long getLastStunAppliedAt() {
+        return Long.MIN_VALUE;
+    }
+
+    default void setLastStunAppliedAt(long time) {}
+
     // Attack buff multiplier (1.0 = no buff)
     default float getAtkBuff() {
         return 1.0f;

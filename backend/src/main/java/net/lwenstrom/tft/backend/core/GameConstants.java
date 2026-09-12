@@ -7,6 +7,8 @@ public final class GameConstants {
     public static final float MANA_ON_DIRECT_HIT_PERCENT = 0.05f;
     public static final long ABILITY_COOLDOWN_MS = 1000L;
     public static final long COMBAT_PHASE_MS = 32000L;
+    public static final long STUN_DIMINISHING_RETURNS_RESET_MS = 4000L;
+    public static final float MIN_DIMINISHED_STUN_SECONDS = 0.25f;
 
     // Economy
     public static final int XP_PER_PHASE = 2;

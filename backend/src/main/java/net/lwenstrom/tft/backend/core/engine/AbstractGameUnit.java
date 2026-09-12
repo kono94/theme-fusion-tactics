@@ -43,6 +43,8 @@ public abstract class AbstractGameUnit implements GameUnit {
 
     // Combat buffs (reset after combat)
     private float stunSecondsRemaining = 0;
+    private int recentStunCount = 0;
+    private long lastStunAppliedAt = Long.MIN_VALUE;
     private float atkBuff = 1.0f;
     private float spdBuff = 1.0f;
     private int shield = 0;
@@ -164,6 +166,8 @@ public abstract class AbstractGameUnit implements GameUnit {
 
         // Combat buffs
         this.stunSecondsRemaining = other.stunSecondsRemaining;
+        this.recentStunCount = other.recentStunCount;
+        this.lastStunAppliedAt = other.lastStunAppliedAt;
         this.atkBuff = other.atkBuff;
         this.spdBuff = other.spdBuff;
 
@@ -340,6 +344,16 @@ public abstract class AbstractGameUnit implements GameUnit {
     }
 
     @Override
+    public int getRecentStunCount() {
+        return recentStunCount;
+    }
+
+    @Override
+    public long getLastStunAppliedAt() {
+        return lastStunAppliedAt;
+    }
+
+    @Override
     public float getAtkBuff() {
         return atkBuff;
     }
@@ -424,6 +438,16 @@ public abstract class AbstractGameUnit implements GameUnit {
     @Override
     public void setStunSecondsRemaining(float seconds) {
         this.stunSecondsRemaining = seconds;
+    }
+
+    @Override
+    public void setRecentStunCount(int count) {
+        this.recentStunCount = count;
+    }
+
+    @Override
+    public void setLastStunAppliedAt(long time) {
+        this.lastStunAppliedAt = time;
     }
 
     @Override
@@ -530,6 +554,8 @@ public abstract class AbstractGameUnit implements GameUnit {
         }
         // Reset combat buffs
         this.stunSecondsRemaining = 0;
+        this.recentStunCount = 0;
+        this.lastStunAppliedAt = Long.MIN_VALUE;
         this.atkBuff = 1.0f;
         this.spdBuff = 1.0f;
         this.activeMusicianBuff = 0.0f;

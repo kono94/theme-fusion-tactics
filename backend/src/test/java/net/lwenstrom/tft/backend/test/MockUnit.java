@@ -355,6 +355,8 @@ public class MockUnit implements GameUnit {
         this.attackSpeed = this.savedAttackSpeed;
         this.mana = Math.min(this.savedMana, this.maxMana);
         this.stunSecondsRemaining = 0;
+        this.recentStunCount = 0;
+        this.lastStunAppliedAt = Long.MIN_VALUE;
         this.atkBuff = 1.0f;
         this.spdBuff = 1.0f;
         this.abilityDamageMultiplier = 1.0f;
@@ -401,6 +403,8 @@ public class MockUnit implements GameUnit {
 
     // Stun/buff fields for combat effects
     private float stunSecondsRemaining = 0;
+    private int recentStunCount = 0;
+    private long lastStunAppliedAt = Long.MIN_VALUE;
     private float atkBuff = 1.0f;
     private float spdBuff = 1.0f;
 
@@ -412,6 +416,26 @@ public class MockUnit implements GameUnit {
     @Override
     public void setStunSecondsRemaining(float seconds) {
         this.stunSecondsRemaining = seconds;
+    }
+
+    @Override
+    public int getRecentStunCount() {
+        return recentStunCount;
+    }
+
+    @Override
+    public void setRecentStunCount(int count) {
+        this.recentStunCount = count;
+    }
+
+    @Override
+    public long getLastStunAppliedAt() {
+        return lastStunAppliedAt;
+    }
+
+    @Override
+    public void setLastStunAppliedAt(long time) {
+        this.lastStunAppliedAt = time;
     }
 
     @Override
@@ -661,6 +685,8 @@ public class MockUnit implements GameUnit {
         clone.ability = this.ability;
         clone.activeAbility = this.activeAbility;
         clone.stunSecondsRemaining = this.stunSecondsRemaining;
+        clone.recentStunCount = this.recentStunCount;
+        clone.lastStunAppliedAt = this.lastStunAppliedAt;
         clone.atkBuff = this.atkBuff;
         clone.spdBuff = this.spdBuff;
         clone.abilityDamageMultiplier = this.abilityDamageMultiplier;

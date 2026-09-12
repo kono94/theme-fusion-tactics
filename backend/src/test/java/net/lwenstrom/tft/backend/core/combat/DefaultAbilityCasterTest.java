@@ -46,6 +46,44 @@ class DefaultAbilityCasterTest {
     }
 
     @Test
+    void repeatedStunsRefreshWithDiminishingReturnsAndResetAfterFourSeconds() {
+        var ability = new AbilityDefinition(
+                "Pin Down",
+                "Stuns for $value seconds.",
+                AbilityType.STUN,
+                AbilityPattern.SINGLE,
+                List.of(0, 0, 0),
+                List.of(1, 1, 1),
+                List.of(),
+                List.of(),
+                List.of(2.0f, 2.0f, 2.0f));
+        var source = MockUnit.create("source", "P1").withAbility(ability);
+        var target = MockUnit.create("target", "P2");
+        var caster = new DefaultAbilityCaster();
+        var units = List.<GameUnit>of(source, target);
+        var callback = new AbilityCaster.CombatStatCallback() {};
+
+        caster.castAbility(source, units, (unit, ignored) -> target, callback, 0L);
+        assertEquals(2.0f, target.getStunSecondsRemaining());
+
+        target.setStunSecondsRemaining(0.5f);
+        caster.castAbility(source, units, (unit, ignored) -> target, callback, 1000L);
+        assertEquals(1.6f, target.getStunSecondsRemaining());
+
+        target.setStunSecondsRemaining(0.5f);
+        caster.castAbility(source, units, (unit, ignored) -> target, callback, 2000L);
+        assertEquals(1.2f, target.getStunSecondsRemaining());
+
+        target.setStunSecondsRemaining(0.5f);
+        caster.castAbility(source, units, (unit, ignored) -> target, callback, 3000L);
+        assertEquals(1.2f, target.getStunSecondsRemaining());
+
+        target.setStunSecondsRemaining(0.5f);
+        caster.castAbility(source, units, (unit, ignored) -> target, callback, 7000L);
+        assertEquals(2.0f, target.getStunSecondsRemaining());
+    }
+
+    @Test
     void lineDamageAbilityHitsOffAxisSelectedTarget() {
         var ability = lineDamageAbility();
         var source = MockUnit.create("source", "P1").withPosition(0, 5).withAbility(ability);

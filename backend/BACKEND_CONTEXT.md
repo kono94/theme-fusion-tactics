@@ -258,7 +258,9 @@ Movement uses its own cooldown and falls back to the shortest reachable enemy ap
 blocked. Stun and cast recovery still prevent movement. Enemy spells resolve living in-range targets before committing;
 an empty cast preserves mana, and a full-mana unit outside its offensive ability range paths toward the target using the
 ability range rather than its basic-attack range. Target-dependent damage modifiers are evaluated per hit.
-`AbilityCaster` returns whether the cast executed; only executed casts consume mana and start recovery.
+Stuns refresh the longer remaining duration rather than stacking; repeated applications within four seconds use
+100%/80%/60% duration before resetting. `AbilityCaster` returns whether the cast executed; only executed casts consume
+mana and start recovery.
 
 ## 10. REST and analytics
 

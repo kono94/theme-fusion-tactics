@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
+import net.lwenstrom.tft.backend.core.GameConstants;
 import net.lwenstrom.tft.backend.core.engine.AbstractGameUnit;
 import net.lwenstrom.tft.backend.core.engine.AugmentManager;
 import net.lwenstrom.tft.backend.core.engine.Grid;
@@ -23,6 +24,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class DefaultAbilityCaster implements AbilityCaster {
+    private static final float[] STUN_DURATION_MULTIPLIERS = {1.0f, 0.8f, 0.6f};
+
     private DamageResolver damageResolver = new DamageResolver();
 
     @Override
@@ -75,7 +78,8 @@ public class DefaultAbilityCaster implements AbilityCaster {
                         targets,
                         ability,
                         ability.getStunDurationForLevel(source.getStarLevel()),
-                        callback);
+                        callback,
+                        currentTime);
             case HEAL -> castHealAbility(source, allUnits, ability, value, callback);
             case BUFF_ATK -> castBuffAtkAbility(source, allUnits, ability, value, callback, currentTime);
             case BUFF_SPD -> castBuffSpdAbility(source, allUnits, ability, value, callback);
@@ -104,7 +108,7 @@ public class DefaultAbilityCaster implements AbilityCaster {
             if (isFinalKill(target)) {
                 AugmentManager.applyTeamAttackDamageOnKill(source, allUnits);
             }
-            applyStunAndKnockbackModifiers(source, target, ability, allUnits);
+            applyStunAndKnockbackModifiers(source, target, ability, allUnits, currentTime);
             applyDotModifiers(source, target, ability, currentTime);
             totalDamageDealt += effectiveDamage;
             callback.onDamage(source.getId(), source.getName(), target.getId(), effectiveDamage);
@@ -123,9 +127,10 @@ public class DefaultAbilityCaster implements AbilityCaster {
             List<GameUnit> targets,
             AbilityDefinition ability,
             float stunSeconds,
-            CombatStatCallback callback) {
+            CombatStatCallback callback,
+            long currentTime) {
         targets.forEach(target -> {
-            target.setStunSecondsRemaining(target.getStunSecondsRemaining() + stunSeconds);
+            applyStun(target, stunSeconds, currentTime);
             callback.onSkill(source.getId(), source.getName(), target.getId(), 0);
         });
     }
@@ -419,19 +424,40 @@ public class DefaultAbilityCaster implements AbilityCaster {
     }
 
     private void applyStunAndKnockbackModifiers(
-            GameUnit source, GameUnit target, AbilityDefinition ability, List<GameUnit> allUnits) {
+            GameUnit source, GameUnit target, AbilityDefinition ability, List<GameUnit> allUnits, long currentTime) {
         if (target == null) return;
         int starLevel = source.getStarLevel();
 
         for (var modifier : ability.modifiers()) {
             if (modifier instanceof StunModifier stunModifier) {
                 int seconds = stunModifier.getStunSeconds(starLevel);
-                target.setStunSecondsRemaining(target.getStunSecondsRemaining() + seconds);
+                applyStun(target, seconds, currentTime);
             } else if (modifier instanceof KnockbackModifier knockbackModifier) {
                 int cells = knockbackModifier.getCells(starLevel);
                 applyKnockback(source, target, cells, allUnits);
             }
         }
+    }
+
+    private void applyStun(GameUnit target, float stunSeconds, long currentTime) {
+        if (stunSeconds <= 0) {
+            return;
+        }
+
+        var recentStunCount = target.getRecentStunCount();
+        var lastStunAppliedAt = target.getLastStunAppliedAt();
+        if (recentStunCount == 0
+                || currentTime < lastStunAppliedAt
+                || currentTime - lastStunAppliedAt >= GameConstants.STUN_DIMINISHING_RETURNS_RESET_MS) {
+            recentStunCount = 0;
+        }
+
+        var multiplier = STUN_DURATION_MULTIPLIERS[Math.min(recentStunCount, STUN_DURATION_MULTIPLIERS.length - 1)];
+        var diminishedDuration =
+                Math.min(stunSeconds, Math.max(GameConstants.MIN_DIMINISHED_STUN_SECONDS, stunSeconds * multiplier));
+        target.setStunSecondsRemaining(Math.max(target.getStunSecondsRemaining(), diminishedDuration));
+        target.setRecentStunCount(Math.min(recentStunCount + 1, STUN_DURATION_MULTIPLIERS.length));
+        target.setLastStunAppliedAt(currentTime);
     }
 
     private void applyDotModifiers(GameUnit source, GameUnit target, AbilityDefinition ability, long currentTime) {
