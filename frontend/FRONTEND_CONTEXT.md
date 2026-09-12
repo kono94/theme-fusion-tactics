@@ -24,7 +24,7 @@ The application supports One Piece and Pokemon rooms. The host can change mode w
 | Build | Vite 8.2, `vue-tsc` 3.3 |
 | Realtime | `@stomp/stompjs` 7.3 over native WebSocket |
 | Styling | Global and scoped vanilla CSS; no Tailwind or component framework |
-| Tests | Vitest 4, Vue Test Utils, jsdom, V8 coverage |
+| Tests | Vitest 5, Vue Test Utils, jsdom, V8 coverage |
 | Routing | Manual view state plus hash routes for admin and the development gallery |
 
 Supported Node versions are encoded in `package.json`: Node 26+.

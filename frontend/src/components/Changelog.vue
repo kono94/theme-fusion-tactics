@@ -6,6 +6,7 @@ defineOptions({
 defineEmits(['back'])
 
 const nextVersionCommits = [
+  { hash: 'pending', title: 'Upgrade Vitest 4.1.11 => 5.0.0' },
   { hash: 'b7f496b', title: 'Upgrade routine Maven, frontend, and container dependencies' },
   { hash: '8ebecda', title: 'Add reroll and hover-to-sell keyboard shortcuts' },
   { hash: '90a7bac', title: 'Add an end-of-match combat summary and round history' },
@@ -98,6 +99,7 @@ const version160Commits = [
             and trait-focused plans while obeying the same shop, XP, upgrade, and gold rules as human players. The
             released 2.0.0 history was corrected with its final version label and commit hashes. Routine maintenance
             updates Spring Boot and the frontend toolchain while refreshing the pinned production container images.
+            The test toolchain now uses Vitest 4.1.11 => 5.0.0 with matching V8 coverage support.
           </p>
         </div>
         <article class="release-panel">
