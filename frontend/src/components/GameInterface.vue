@@ -686,7 +686,6 @@ watch(effectiveViewedPlayerId, (playerId) => {
                     <div class="sell-content">
                         <span class="sell-icon">💰</span>
                         <span class="sell-text">{{ draggedUnit ? 'SELL UNIT FOR' : 'DRAG HERE TO SELL' }}</span>
-                        <kbd class="shortcut-key" title="Hover a unit and press S to sell">S</kbd>
                         <div v-if="draggedUnit" class="sell-refund">+{{ calculateSellRefund(draggedUnit) }} gold</div>
                     </div>
                 </div>
@@ -718,7 +717,6 @@ watch(effectiveViewedPlayerId, (playerId) => {
                     <button class="reroll-btn horizontal" @click="refreshShop" :disabled="!canManageShopAndBench || myPlayer.gold < 2">
                         <span class="refresh-icon">⚓</span>
                         <span class="btn-text">Refresh Shop</span>
-                        <kbd class="shortcut-key">R</kbd>
                         <span class="cost">2g</span>
                     </button>
                 </div>
@@ -1527,21 +1525,6 @@ watch(effectiveViewedPlayerId, (playerId) => {
 
 .reroll-btn {
     background: #ef4444; 
-}
-
-.shortcut-key {
-    display: inline-grid;
-    min-width: 20px;
-    height: 20px;
-    padding: 0 5px;
-    border: 1px solid rgba(255, 255, 255, 0.42);
-    border-radius: 4px;
-    background: rgba(15, 23, 42, 0.58);
-    color: #f8fafc;
-    font: inherit;
-    font-size: 10px;
-    line-height: 1;
-    place-items: center;
 }
 
 .fade-enter-active,
