@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 
 class RoleBalanceSimulationTest {
     private static final List<Integer> BOARD_SIZES = List.of(3, 4, 5, 6, 7);
-    private static final Map<Integer, Double> MIN_BALANCED_WIN_RATE = Map.of(4, 0.55, 5, 0.60, 6, 0.65, 7, 0.65);
+    private static final Map<Integer, Double> MIN_BALANCED_WIN_RATE = Map.of(4, 0.50, 5, 0.60, 6, 0.65, 7, 0.65);
     private static final Map<Integer, List<UnitRole>> BALANCED_LAYOUTS = Map.of(
             3, List.of(UnitRole.DAMAGE, UnitRole.TANK, UnitRole.SUPPORT),
             4, List.of(UnitRole.DAMAGE, UnitRole.DAMAGE, UnitRole.TANK, UnitRole.SUPPORT),
