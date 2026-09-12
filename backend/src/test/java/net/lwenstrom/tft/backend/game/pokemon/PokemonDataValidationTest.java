@@ -95,7 +95,7 @@ class PokemonDataValidationTest {
         assertEquals(List.of(45, 55, 55), porygon.maxMana());
 
         var caterpie = find(units, "caterpie");
-        assertEquals(2f, caterpie.getAbility(1).getStunDurationForLevel(1));
+        assertEquals(2.25f, caterpie.getAbility(1).getStunDurationForLevel(1));
         assertEquals(650, caterpie.getAbility(2).getValueForLevel(2));
         assertEquals(List.of(630, 1832, 2200), caterpie.maxHealth());
         assertEquals(List.of(40, 65, 50), caterpie.maxMana());

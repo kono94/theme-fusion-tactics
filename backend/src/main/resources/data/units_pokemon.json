@@ -306,7 +306,7 @@
       "type": "STUN",
       "pattern": "SINGLE",
       "values": [1, 1, 2],
-      "stunDurationSeconds": [2, 1, 2],
+      "stunDurationSeconds": [2.25, 1, 2],
       "range": [3, 3, 4]
     },
     "forms": [
@@ -324,7 +324,7 @@
           "type": "STUN",
           "pattern": "SINGLE",
           "values": [1, 1, 2],
-          "stunDurationSeconds": [2, 1, 2],
+          "stunDurationSeconds": [2.25, 1, 2],
           "range": [3, 3, 4]
         }
       },

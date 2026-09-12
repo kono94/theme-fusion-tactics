@@ -94,6 +94,24 @@ const version160Commits = [
               </li>
             </ul>
           </article>
+          <article class="balance-panel">
+            <div class="section-heading">
+              <span class="marker balance"></span>
+              <h3>Balance Changes</h3>
+            </div>
+            <div class="balance-block">
+              <div class="balance-title">
+                <span class="tag buff">Buff</span>
+                <h4>Caterpie</h4>
+              </div>
+              <p>
+                String Shot stun at 1★:
+                <span class="old-value">2 seconds</span>
+                <span class="change-arrow">&nbsp;=>&nbsp;</span>
+                <strong class="value buff">2.25 seconds</strong>.
+              </p>
+            </div>
+          </article>
         </div>
       </section>
 
