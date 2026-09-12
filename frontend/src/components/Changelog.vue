@@ -5,16 +5,16 @@ defineOptions({
 
 defineEmits(['back'])
 
-const nextVersionCommits = [
-  { hash: 'pending', title: 'Make legendary birds ranged' },
-  { hash: 'pending', title: 'Replace free bot armies with persistent teams using normal gold, shops, upgrades, and XP' },
-  { hash: 'pending', title: 'Fix blocked melee movement, empty casts, and per-target spell modifiers' },
-  { hash: 'pending', title: 'Allow shop economy and bench management during combat' },
-  { hash: 'pending', title: 'Add final-composition analytics with selectable build-cohort filters' },
-  { hash: 'pending', title: 'Remove retired mode assets, animation paths, and unsupported wire modes' },
-  { hash: 'pending', title: 'Replace hosted Renovate with Codex-assisted local dependency maintenance' },
-  { hash: 'pending', title: 'Upgrade ESLint 9.39.5 => 10.8.0 and TypeScript 5.9.3 => 6.0.3' },
-  { hash: 'pending', title: 'Standardize frontend development and CI on Node.js 26' },
+const version200Commits = [
+  { hash: 'f2cf1b3', title: 'Make legendary birds ranged' },
+  { hash: '0821074', title: 'Replace free bot armies with persistent teams using normal gold, shops, upgrades, and XP' },
+  { hash: '421ffee', title: 'Fix blocked melee movement, empty casts, and per-target spell modifiers' },
+  { hash: '9eac5b0', title: 'Allow shop economy and bench management during combat' },
+  { hash: '8ea4378', title: 'Add final-composition analytics with selectable build-cohort filters' },
+  { hash: '6f11936', title: 'Remove retired mode assets, animation paths, and unsupported wire modes' },
+  { hash: '6e1b2b2', title: 'Replace hosted Renovate with Codex-assisted local dependency maintenance' },
+  { hash: '7838013', title: 'Upgrade ESLint 9.39.5 => 10.8.0 and TypeScript 5.9.3 => 6.0.3' },
+  { hash: '7838013', title: 'Standardize frontend development and CI on Node.js 26' },
   { hash: '937bfaa', title: 'Upgrade CI actions to Node 24 runtimes' },
   { hash: 'd477638', title: 'Refresh architecture guides and pending release notes' },
   { hash: 'ac1da68', title: 'Use stable player identity in the frontend' },
@@ -82,8 +82,8 @@ const version160Commits = [
     <div class="release-history">
       <section class="release-section latest-release">
         <div class="release-header">
-          <p class="eyebrow">Next</p>
-          <h2>Version 2.0.0-rc5</h2>
+          <p class="eyebrow">Latest</p>
+          <h2>Version 2.0.0</h2>
           <p>
             Room creation and player identity now use explicit private acknowledgements, all room mutations share one
             serialized authority boundary, invalid phase actions are rejected by the backend, and decisive combat
@@ -91,10 +91,8 @@ const version160Commits = [
             fails fast without an analytics admin password. Java 25 test startup, refund
             previews, dependency security, CI release gates, obsolete deployment-time mode selection, and the
             backend/frontend architecture guides were also corrected. Human-involved combats now keep normal pacing;
-            once they all resolve, remaining bot-only combats are drained immediately. Renovate now processes one
-            routine dependency update each week, automatically merging non-major updates only after all required
-            checks pass and leaving failures open for repair. Major updates remain listed in the Dependency Dashboard
-            for separate AI-assisted migrations. This maintenance inventory found no compatible non-major updates;
+            once they all resolve, remaining bot-only combats are drained immediately. Renovate is now run locally for
+            dependency inventory, with routine and major upgrades handled through separate Codex-assisted workflows.
             The frontend toolchain now uses ESLint 9.39.5 => 10.8.0 and TypeScript 5.9.3 => 6.0.3, and frontend
             development, CI, and the production build image now target Node.js 26. Renovate commits use
             repository-owned, privacy-preserving attribution.
@@ -107,7 +105,7 @@ const version160Commits = [
         </div>
         <article class="release-panel">
           <ul class="commit-list">
-            <li v-for="commit in nextVersionCommits" :key="`${commit.hash}-${commit.title}`">
+            <li v-for="commit in version200Commits" :key="`${commit.hash}-${commit.title}`">
               <span class="hash">{{ commit.hash }}</span>
               <span>{{ commit.title }}</span>
             </li>
