@@ -6,7 +6,7 @@ defineOptions({
 defineEmits(['back'])
 
 const nextVersionCommits = [
-  { hash: 'pending', title: 'Upgrade routine Maven, frontend, and container dependencies' },
+  { hash: 'b7f496b', title: 'Upgrade routine Maven, frontend, and container dependencies' },
   { hash: '8ebecda', title: 'Add reroll and hover-to-sell keyboard shortcuts' },
   { hash: '90a7bac', title: 'Add an end-of-match combat summary and round history' },
   { hash: '4e34da1', title: 'Give fair-economy bots distinct planning personalities' },
