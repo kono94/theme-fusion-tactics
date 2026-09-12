@@ -13,6 +13,8 @@ export type GameMode = 'onepiece' | 'pokemon'
 
 export type UnitRole = 'DAMAGE' | 'TANK' | 'SUPPORT'
 
+export type BotPersonality = 'BALANCED' | 'ECONOMY' | 'REROLL' | 'FAST_LEVEL' | 'TRAIT_FOCUSED'
+
 export type ActionType =
     | 'BUY'
     | 'SELL'
@@ -184,6 +186,8 @@ export interface PlayerState {
     augmentChoices: AugmentOffer[]
     selectedAugments: SelectedAugment[]
     isGhost: boolean
+    isBot: boolean
+    botPersonality: BotPersonality | null
     boardUnits?: GameUnit[] // Alternative name for board in some contexts
 }
 

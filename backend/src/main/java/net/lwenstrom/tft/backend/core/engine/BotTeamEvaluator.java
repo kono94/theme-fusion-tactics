@@ -1,5 +1,6 @@
 package net.lwenstrom.tft.backend.core.engine;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -9,9 +10,15 @@ import net.lwenstrom.tft.backend.core.model.TraitMetadata;
 
 public final class BotTeamEvaluator {
     private final List<TraitMetadata> traits;
+    private final Comparator<Score> scoreComparator;
 
     public BotTeamEvaluator(List<TraitMetadata> traits) {
+        this(traits, Comparator.naturalOrder());
+    }
+
+    public BotTeamEvaluator(List<TraitMetadata> traits, Comparator<Score> scoreComparator) {
         this.traits = List.copyOf(traits);
+        this.scoreComparator = scoreComparator;
     }
 
     public Score score(List<GameUnit> units) {
@@ -35,6 +42,14 @@ public final class BotTeamEvaluator {
                 tiers,
                 (int) units.stream().map(GameUnit::getRole).distinct().count(),
                 units.stream().mapToInt(GameUnit::getCost).sum());
+    }
+
+    public int compare(Score first, Score second) {
+        return scoreComparator.compare(first, second);
+    }
+
+    public Comparator<Score> scoreComparator() {
+        return scoreComparator;
     }
 
     public record Score(int stars, int traitTiers, int roles, int cost) implements Comparable<Score> {

@@ -29,6 +29,8 @@ function gameState(gameMode: GameState['gameMode'] = 'pokemon'): GameState {
                 augmentChoices: [],
                 selectedAugments: [],
                 isGhost: false,
+                isBot: false,
+                botPersonality: null,
             },
         },
         matchups: {},

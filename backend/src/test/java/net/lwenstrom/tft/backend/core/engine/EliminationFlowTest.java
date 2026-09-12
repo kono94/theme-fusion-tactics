@@ -36,9 +36,10 @@ class EliminationFlowTest {
         // P2 has no units - will lose combat
 
         // Set P2 health low so they get eliminated quickly
-        p2.setHealth(5);
+        p2.setHealth(3);
 
         room.startMatch();
+        room.getPlayers().stream().filter(Player::isBot).forEach(bot -> bot.setHealth(0));
 
         // Use TestClock for deterministic phase transitions
         for (int i = 0; i < 10; i++) {

@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
 import net.lwenstrom.tft.backend.core.DataLoader;
 import net.lwenstrom.tft.backend.core.GameModeRegistry;
+import net.lwenstrom.tft.backend.core.model.BotPersonality;
 import net.lwenstrom.tft.backend.core.model.GameMode;
 import net.lwenstrom.tft.backend.game.onepiece.OnePieceGameModeProvider;
 import net.lwenstrom.tft.backend.game.pokemon.PokemonGameModeProvider;
@@ -16,6 +17,38 @@ import org.junit.jupiter.params.provider.EnumSource;
 import tools.jackson.databind.json.JsonMapper;
 
 class GameRoomBotTest {
+    @ParameterizedTest
+    @EnumSource(GameMode.class)
+    void assignsDistinctPlanningPersonalities(GameMode mode) {
+        var mapper = JsonMapper.builder().build();
+        var registry = new GameModeRegistry(
+                List.of(new OnePieceGameModeProvider(mapper), new PokemonGameModeProvider(mapper)));
+        var loader = new DataLoader(registry, mapper);
+        var room = new GameRoom(
+                "personalities",
+                loader,
+                registry,
+                TestHelpers.createTestClock(),
+                TestHelpers.createSeededRandomProvider(),
+                mode);
+        room.addPlayer("human");
+
+        var bots = List.of(
+                room.addBot().orElseThrow(),
+                room.addBot().orElseThrow(),
+                room.addBot().orElseThrow(),
+                room.addBot().orElseThrow());
+
+        assertEquals(
+                List.of(
+                        BotPersonality.ECONOMY,
+                        BotPersonality.REROLL,
+                        BotPersonality.FAST_LEVEL,
+                        BotPersonality.TRAIT_FOCUSED),
+                bots.stream().map(Player::getBotPersonality).toList());
+        assertTrue(bots.stream().allMatch(bot -> bot.toState().isBot()));
+    }
+
     @ParameterizedTest
     @EnumSource(GameMode.class)
     void botsBuyNormalUnitsOncePerPlanningRound(GameMode mode) {

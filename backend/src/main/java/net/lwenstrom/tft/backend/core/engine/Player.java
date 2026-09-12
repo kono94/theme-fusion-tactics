@@ -10,6 +10,7 @@ import lombok.Setter;
 import net.lwenstrom.tft.backend.core.DataLoader;
 import net.lwenstrom.tft.backend.core.GameConstants;
 import net.lwenstrom.tft.backend.core.model.AugmentOffer;
+import net.lwenstrom.tft.backend.core.model.BotPersonality;
 import net.lwenstrom.tft.backend.core.model.GameMode;
 import net.lwenstrom.tft.backend.core.model.GameState.PlayerState;
 import net.lwenstrom.tft.backend.core.model.GameUnit;
@@ -50,6 +51,7 @@ public class Player {
     private boolean inCombat = false;
     private boolean ghost = false;
     private boolean bot = false;
+    private BotPersonality botPersonality;
 
     @Setter(AccessLevel.NONE)
     private boolean emergencyDropTriggered = false;
@@ -607,7 +609,9 @@ public class Player {
                 new ArrayList<>(lootOrbs),
                 new ArrayList<>(augmentChoices),
                 new ArrayList<>(selectedAugments),
-                ghost);
+                ghost,
+                bot,
+                botPersonality);
     }
 
     // Legacy getter for backward compatibility with tests

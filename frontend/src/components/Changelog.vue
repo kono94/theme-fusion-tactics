@@ -5,6 +5,11 @@ defineOptions({
 
 defineEmits(['back'])
 
+const nextVersionCommits = [
+  { hash: 'pending', title: 'Give fair-economy bots distinct planning personalities' },
+  { hash: '2e587f7', title: 'Correct the released 2.0.0 changelog history' },
+]
+
 const version200Commits = [
   { hash: 'f2cf1b3', title: 'Make legendary birds ranged' },
   { hash: '0821074', title: 'Replace free bot armies with persistent teams using normal gold, shops, upgrades, and XP' },
@@ -81,6 +86,26 @@ const version160Commits = [
 
     <div class="release-history">
       <section class="release-section latest-release">
+        <div class="release-header">
+          <p class="eyebrow">Next</p>
+          <h2>Version X.X.X</h2>
+          <p>
+            Bots now pursue distinct economy, reroll, fast-level, and trait-focused plans while obeying the same shop,
+            XP, upgrade, and gold rules as human players. The released 2.0.0 history was also corrected with its final
+            version label and commit hashes.
+          </p>
+        </div>
+        <article class="release-panel">
+          <ul class="commit-list">
+            <li v-for="commit in nextVersionCommits" :key="`${commit.hash}-${commit.title}`">
+              <span class="hash">{{ commit.hash }}</span>
+              <span>{{ commit.title }}</span>
+            </li>
+          </ul>
+        </article>
+      </section>
+
+      <section class="release-section">
         <div class="release-header">
           <p class="eyebrow">Latest</p>
           <h2>Version 2.0.0</h2>

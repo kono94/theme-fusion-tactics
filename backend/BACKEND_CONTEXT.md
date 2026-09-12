@@ -58,7 +58,7 @@ BackendApplication
 ```
 
 Core code does not import a franchise package. `GameModeProvider` supplies resource paths, trait registration, optional
-affinity data. Bot strategy is shared across modes. One Piece and Pokemon are provider/data configurations.
+affinity data. Bot strategies are shared across modes. One Piece and Pokemon are provider/data configurations.
 
 ## 4. Ownership and concurrency
 
@@ -103,13 +103,11 @@ LOBBY → PLANNING ⇄ COMBAT → END_CELEBRATION → END
 
 Bots keep their units, gold, and XP across rounds. `BotController` runs once per living bot after planning income,
 paid shop refresh, loot, and augment offers, including round 1. It collects loot, chooses a random offered augment,
-and uses normal purchase, sale, XP, reroll, upgrade, and movement operations. Lobby bots have no generated army.
-`BotTeamEvaluator` ranks boards by stars, active trait tiers (distinct lines and evolved traits), role coverage, then cost.
-Bots favor immediate upgrades, empty slots, improved boards, and copies of deployed lines. They save up to
-`min(30, round * 5)` gold, except for filling empty slots or at 30 health and below. XP is bought only when it can
-reach the next level and a reserve can fill it. Rerolls are capped at two (four at low health), and economy actions at
-40 per pass. Tanks/melee deploy in front; ranged units behind. No opponent scouting or bot-only economy/stat grants.
-The existing human-only emergency drop remains unchanged. `Player.buyXp()` is shared by bot and human actions.
+and uses normal purchase, sale, XP, reroll, upgrade, and movement operations. Lobby bots have no generated army or
+hidden economy/stat grants. Each bot is initialized with an economy, reroll, fast-level, or trait-focused `BotStrategy`.
+Strategies vary reserve, reroll, leveling, and team-scoring policy while sharing the same authoritative player actions.
+All bots favor immediate upgrades and legal board improvements, act at most 40 times per planning pass, and position
+tanks/melee in front with ranged units behind. The existing human-only emergency drop remains unchanged.
 
 ## 6. Modes and data loading
 
@@ -210,7 +208,7 @@ planningTimerPaused, planningReadyPlayerId, planningPauseReason
 
 ```text
 playerId, name, health, gold, level, xp, nextLevelXp, place, combatSide,
-bench, board, shop, lootOrbs, augmentChoices, selectedAugments, isGhost
+bench, board, shop, lootOrbs, augmentChoices, selectedAugments, isGhost, isBot, botPersonality
 ```
 
 There is no `activeTraits` field in the wire contract. Trait effects are applied by `TraitManager`; trait display metadata

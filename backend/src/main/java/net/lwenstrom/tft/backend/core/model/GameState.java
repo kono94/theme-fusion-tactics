@@ -37,7 +37,9 @@ public record GameState(
             List<LootOrb> lootOrbs,
             List<AugmentOffer> augmentChoices,
             List<SelectedAugment> selectedAugments,
-            boolean isGhost) {}
+            boolean isGhost,
+            boolean isBot,
+            BotPersonality botPersonality) {}
 
     public record CombatEvent(
             long timestamp,

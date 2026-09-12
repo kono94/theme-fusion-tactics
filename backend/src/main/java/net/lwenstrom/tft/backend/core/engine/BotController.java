@@ -36,12 +36,21 @@ public final class BotController {
             augments.selectAugment(
                     player, offers.get(random.nextInt(offers.size())).id(), round);
         }
-        var evaluator = new BotTeamEvaluator(dataLoader.getTraitMetadata(player.getGameMode()));
-        var reserve = player.getHealth() <= 30 ? 0 : Math.min(30, round * 5);
-        var rerollLimit = player.getHealth() <= 30 ? 4 : 2;
+        var strategy = BotStrategies.forPersonality(player.getBotPersonality());
+        var evaluator =
+                new BotTeamEvaluator(dataLoader.getTraitMetadata(player.getGameMode()), strategy.scoreComparator());
+        var reserve = strategy.goldReserve(player, round);
+        var rerollLimit = strategy.rerollLimit(player, round);
         var actions = 0;
         var rerolls = 0;
         while (actions < MAX_ACTIONS) {
+            if (strategy.levelBeforeShopping()) {
+                var xpActions = buyXpTowardNextLevel(player, reserve, actions);
+                if (xpActions > 0) {
+                    actions += xpActions;
+                    continue;
+                }
+            }
             arrangeBoard(player, evaluator);
             var purchase = choosePurchase(player, evaluator, reserve);
             if (purchase != null) {
@@ -55,15 +64,9 @@ public final class BotController {
                 actions++;
                 continue;
             }
-            var xpPurchases = purchasesToLevel(player);
-            if (!player.getBenchSlots().isEmpty()
-                    && xpPurchases > 0
-                    && actions + xpPurchases <= MAX_ACTIONS
-                    && player.getGold() - xpPurchases * GameConstants.XP_BUY_COST >= reserve) {
-                for (var i = 0; i < xpPurchases; i++) {
-                    player.buyXp();
-                    actions++;
-                }
+            var xpActions = buyXpTowardNextLevel(player, reserve, actions);
+            if (xpActions > 0) {
+                actions += xpActions;
                 continue;
             }
             if (rerolls >= rerollLimit
@@ -78,6 +81,22 @@ public final class BotController {
         arrangeBoard(player, evaluator);
         positionBoard(player);
         return actions;
+    }
+
+    private int buyXpTowardNextLevel(Player player, int reserve, int actions) {
+        var xpPurchases = purchasesToLevel(player);
+        var ownsUnit =
+                !player.getBoardUnits().isEmpty() || !player.getBenchSlots().isEmpty();
+        if (!ownsUnit
+                || xpPurchases <= 0
+                || actions + xpPurchases > MAX_ACTIONS
+                || player.getGold() - xpPurchases * GameConstants.XP_BUY_COST < reserve) {
+            return 0;
+        }
+        for (var i = 0; i < xpPurchases; i++) {
+            player.buyXp();
+        }
+        return xpPurchases;
     }
 
     private boolean canAffordRerolledUnit(Player player, int reserve) {
@@ -112,7 +131,7 @@ public final class BotController {
             var fillsSlot = player.getBoardUnits().size() < player.getLevel();
             if (!fillsSlot && player.getGold() - definition.cost() < reserve) continue;
             var improvedScore = bestAdditionScore(player.getBoardUnits(), candidate, player.getLevel(), evaluator);
-            var improves = improvedScore.compareTo(evaluator.score(player.getBoardUnits())) > 0;
+            var improves = evaluator.compare(improvedScore, evaluator.score(player.getBoardUnits())) > 0;
             var priority = deployed && oneStarCopies >= GameConstants.COPIES_TO_UPGRADE_TO_TWO_STAR - 1
                     ? 4
                     : fillsSlot ? 3 : improves ? 2 : deployed ? 1 : 0;
@@ -124,7 +143,8 @@ public final class BotController {
         }
         random.shuffle(purchases);
         return purchases.stream()
-                .max(Comparator.comparingInt(Purchase::priority).thenComparing(Purchase::score))
+                .max(Comparator.comparingInt(Purchase::priority)
+                        .thenComparing(Purchase::score, evaluator.scoreComparator()))
                 .orElse(null);
     }
 
@@ -158,7 +178,7 @@ public final class BotController {
             var replacement = new ArrayList<>(board);
             replacement.set(index, candidate);
             var score = evaluator.score(replacement);
-            if (score.compareTo(best) > 0) best = score;
+            if (evaluator.compare(score, best) > 0) best = score;
         }
         return best;
     }
@@ -176,7 +196,7 @@ public final class BotController {
                     var expanded = new ArrayList<>(board);
                     expanded.add(candidate);
                     var score = evaluator.score(expanded);
-                    if (score.compareTo(bestScore) > 0) {
+                    if (evaluator.compare(score, bestScore) > 0) {
                         bestScore = score;
                         incoming = candidate;
                         outgoing = null;
@@ -186,7 +206,7 @@ public final class BotController {
                         var replacement = new ArrayList<>(board);
                         replacement.set(index, candidate);
                         var score = evaluator.score(replacement);
-                        if (score.compareTo(bestScore) > 0) {
+                        if (evaluator.compare(score, bestScore) > 0) {
                             bestScore = score;
                             incoming = candidate;
                             outgoing = board.get(index);

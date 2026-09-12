@@ -65,6 +65,8 @@ function player(health: number, place: number): PlayerState {
         augmentChoices: [],
         selectedAugments: [],
         isGhost: false,
+        isBot: false,
+        botPersonality: null,
     }
 }
 

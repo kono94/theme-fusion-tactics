@@ -36,6 +36,9 @@
                 {{ player.health }}
               </span>
            </div>
+           <span v-if="player.isBot && player.botPersonality" class="bot-personality">
+             {{ botPersonalityLabel(player.botPersonality) }}
+           </span>
            
            <!-- HP Bar -->
            <div class="hp-bar-bg">
@@ -53,7 +56,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { PlayerState } from '../types';
+import type { BotPersonality, PlayerState } from '../types';
 
 const props = defineProps<{
   players: PlayerState[];
@@ -99,6 +102,17 @@ function isSelectable(player: PlayerState) {
 function selectPlayer(player: PlayerState) {
     if (!isSelectable(player)) return;
     emit('select-player', player.playerId);
+}
+
+function botPersonalityLabel(personality: BotPersonality) {
+    const labels: Record<BotPersonality, string> = {
+        BALANCED: 'Balanced',
+        ECONOMY: 'Economy',
+        REROLL: 'Reroll',
+        FAST_LEVEL: 'Fast level',
+        TRAIT_FOCUSED: 'Trait focused',
+    }
+    return labels[personality]
 }
 
 function getHealthColor(health: number) {
@@ -232,6 +246,19 @@ function getHealthBarClass(health: number) {
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 100px;
+}
+
+.bot-personality {
+    align-self: flex-start;
+    padding: 1px 5px;
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 999px;
+    color: #7dd3fc;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    line-height: 1.4;
+    text-transform: uppercase;
 }
 
 .health-text {

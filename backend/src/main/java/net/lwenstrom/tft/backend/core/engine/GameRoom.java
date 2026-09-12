@@ -21,6 +21,7 @@ import net.lwenstrom.tft.backend.core.combat.BfsUnitMover;
 import net.lwenstrom.tft.backend.core.combat.DefaultAbilityCaster;
 import net.lwenstrom.tft.backend.core.combat.NearestEnemyTargetSelector;
 import net.lwenstrom.tft.backend.core.model.AugmentTier;
+import net.lwenstrom.tft.backend.core.model.BotPersonality;
 import net.lwenstrom.tft.backend.core.model.EmergencyDropPayload;
 import net.lwenstrom.tft.backend.core.model.GameAction;
 import net.lwenstrom.tft.backend.core.model.GameMode;
@@ -36,6 +37,9 @@ import net.lwenstrom.tft.backend.core.time.Clock;
 
 @Slf4j
 public class GameRoom {
+    private static final List<BotPersonality> BOT_PERSONALITIES = List.of(
+            BotPersonality.ECONOMY, BotPersonality.REROLL, BotPersonality.FAST_LEVEL, BotPersonality.TRAIT_FOCUSED);
+
     private final String id;
     private final String analyticsMatchKey = UUID.randomUUID().toString();
     private String hostId;
@@ -65,6 +69,7 @@ public class GameRoom {
     private final List<GameState.CombatEvent> lastTickEvents = new ArrayList<>();
     private final Map<String, CombatSystem.DamageEntry> currentRoundDamageLog = new ConcurrentHashMap<>();
     private final List<PendingEmergencyDrop> pendingEmergencyDrops = new ArrayList<>();
+    private int nextBotPersonalityIndex;
 
     private CombatResultListener combatResultListener;
 
@@ -331,6 +336,8 @@ public class GameRoom {
         var botId = "Bot-" + UUID.randomUUID().toString().substring(0, 4);
         var bot = new Player(botId, gameMode, dataLoader, randomProvider);
         bot.setBot(true);
+        bot.setBotPersonality(BOT_PERSONALITIES.get(nextBotPersonalityIndex % BOT_PERSONALITIES.size()));
+        nextBotPersonalityIndex++;
         players.put(bot.getId(), bot);
         bot.refreshShop();
         updateGameState(phaseEndTime - clock.currentTimeMillis());
