@@ -78,9 +78,13 @@
 - In unit JSON files, keep arrays of exactly three numeric values on one line.
 
 ## 6. Changelog & Release Notes
-- When adding a commit-worthy change or any balance change, also update the in-app changelog page in `frontend/src/components/Changelog.vue`.
-- The changelog should list all commits after the latest git tag under a temporary next-version heading like `Version X.X.X`.
+- When adding a player-facing change or any balance change, also update the in-app changelog page in `frontend/src/components/Changelog.vue`.
+- The changelog should cover all player-visible changes after the latest git tag under a temporary next-version heading like `Version X.X.X`.
 - Before creating a release tag, replace the temporary `Version X.X.X` heading with the actual git tag/version.
+- Write changelog entries for players and customers, not developers. Use a short release summary followed by concrete, player-facing highlights that explain how to use a feature or what changes during play.
+- Do not expose commit hashes or copy terse commit messages into new release sections. Do not include dependency versions, build tooling, CI, refactors, internal architecture, documentation maintenance, or other development-only work unless it directly changes the player experience.
+- Use the established release grid for new sections: player-facing highlights stay in the bounded left column and balance changes stay in the right column. Keep the highlights in the left column even when a release has no balance changes.
+- Once a final release exists, remove its standalone prerelease sections and fold only their player-visible changes into the final release notes.
 - Balance notes must include both new and previous values (passed through) and "=>" before the new values, and should visually distinguish buffs and nerfs when shown in the changelog UI.
 - Follow the established balance-entry style: give each character or unit its own `.balance-block` with its name in the heading, and keep each old value, `=>` arrow, and new value in separate styled spans/elements. Do not combine multiple character changes into a wall of text.
 - When reformatting an existing release, change only the presentation and preserve the existing changelog entries and values; do not add new changelog items or alter balance values unless explicitly requested.

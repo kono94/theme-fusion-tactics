@@ -5,36 +5,20 @@ defineOptions({
 
 defineEmits(['back'])
 
-const version210Commits = [
-  { hash: '8ebecda', title: 'Add reroll and hover-to-sell keyboard shortcuts' },
-  { hash: '90a7bac', title: 'Add an end-of-match combat summary and round history' },
-  { hash: '4e34da1', title: 'Give fair-economy bots distinct planning personalities' },
+const version210Highlights = [
+  'Press “R” to reroll the shop, or hover an owned unit and press “S” to sell it without dragging it to the sell zone.',
+  'The end screen now shows total damage, healing, shielding, and every round’s win, loss, or draw result.',
+  'Bots now have distinct planning personalities: some pivot toward active traits, some reroll aggressively for upgrades, and others spend gold to level quickly.',
 ]
 
-const version200Commits = [
-  { hash: 'f2cf1b3', title: 'Make legendary birds ranged' },
-  { hash: '0821074', title: 'Replace free bot armies with persistent teams using normal gold, shops, upgrades, and XP' },
-  { hash: '421ffee', title: 'Fix blocked melee movement, empty casts, and per-target spell modifiers' },
-  { hash: '9eac5b0', title: 'Allow shop economy and bench management during combat' },
-  { hash: '8ea4378', title: 'Add final-composition analytics with selectable build-cohort filters' },
-  { hash: '6f11936', title: 'Remove retired mode assets, animation paths, and unsupported wire modes' },
-  { hash: '6e1b2b2', title: 'Replace hosted Renovate with Codex-assisted local dependency maintenance' },
-  { hash: '7838013', title: 'Upgrade ESLint 9.39.5 => 10.8.0 and TypeScript 5.9.3 => 6.0.3' },
-  { hash: '7838013', title: 'Standardize frontend development and CI on Node.js 26' },
-  { hash: '937bfaa', title: 'Upgrade CI actions to Node 24 runtimes' },
-  { hash: 'd477638', title: 'Refresh architecture guides and pending release notes' },
-  { hash: 'ac1da68', title: 'Use stable player identity in the frontend' },
-  { hash: '3724062', title: 'Serialize room authority and accelerate resolved bot combat' },
-  { hash: '7545cf4', title: 'Make game mode providers own data and bot policies' },
-  { hash: '5529eef', title: 'Harden production configuration and CI verification' },
-  { hash: 'ba9706b', title: 'Refine lobby theme selection layout' },
-  { hash: '69fc53c', title: 'Fix landing page footer layout' }
-]
-
-const version200rc1Commits = [
-  { hash: 'bf23b7f', title: 'Fix frontend container builds that consume shared backend unit definitions' },
-  { hash: '89a7170', title: 'Externalize Pokemon affinity relationships into the shared data-driven resolver' },
-  { hash: '89a7170', title: 'Rename the product to Theme Fusion Tactics (TFT)' }
+const version200Highlights = [
+  'The game has been renamed to Theme Fusion Tactics (TFT).',
+  'Rejoining an active match from the same browser tab now restores your player and game state more reliably.',
+  'Bots now keep persistent teams instead of receiving free armies, and follow the same gold, shop, XP, and upgrade rules as players.',
+  'During combat, you can buy units, reroll, buy XP, lock the shop, reorder the bench, and sell bench units.',
+  'Melee units move around blocked allies more reliably, while abilities no longer cast without a valid target or apply effects to the wrong targets.',
+  'After every human battle finishes, remaining bot-only battles resolve immediately so the next round starts sooner.',
+  'The lobby theme selector and landing page footer have cleaner layouts.',
 ]
 
 const version180Commits = [
@@ -86,113 +70,89 @@ const version160Commits = [
     <button class="back-button" type="button" @click="$emit('back')">Back</button>
 
     <div class="release-history">
-      <section class="release-section latest-release">
+      <section class="release-section">
         <div class="release-header">
           <p class="eyebrow">Latest</p>
           <h2>Version 2.1.0</h2>
-          <p>
-            Rerolling and selling can now be done with keyboard shortcuts. The end screen summarizes total damage,
-            healing, shielding, and every round result. Bots also pursue distinct economy, reroll, fast-level, and
-            trait-focused plans while obeying the same shop, XP, upgrade, and gold rules as human players.
-          </p>
+          <p>Faster shop controls, clearer post-match results, and more varied bot opponents.</p>
         </div>
-        <article class="release-panel">
-          <ul class="commit-list">
-            <li v-for="commit in version210Commits" :key="`${commit.hash}-${commit.title}`">
-              <span class="hash">{{ commit.hash }}</span>
-              <span>{{ commit.title }}</span>
-            </li>
-          </ul>
-        </article>
+        <div class="release-grid">
+          <article class="release-panel">
+            <div class="section-heading">
+              <span class="marker release"></span>
+              <h3>Highlights</h3>
+            </div>
+            <ul class="commit-list highlight-list">
+              <li v-for="highlight in version210Highlights" :key="highlight">
+                <span>{{ highlight }}</span>
+              </li>
+            </ul>
+          </article>
+        </div>
       </section>
 
       <section class="release-section">
         <div class="release-header">
           <p class="eyebrow">Previous</p>
           <h2>Version 2.0.0</h2>
-          <p>
-            Room creation and player identity now use explicit private acknowledgements, all room mutations share one
-            serialized authority boundary, invalid phase actions are rejected by the backend, and decisive combat
-            events are retained. Room IDs now stay canonical across subscriptions and reconnect state, while production
-            fails fast without an analytics admin password. Java 25 test startup, refund
-            previews, dependency security, CI release gates, obsolete deployment-time mode selection, and the
-            backend/frontend architecture guides were also corrected. Human-involved combats now keep normal pacing;
-            once they all resolve, remaining bot-only combats are drained immediately. Renovate is now run locally for
-            dependency inventory, with routine and major upgrades handled through separate Codex-assisted workflows.
-            The frontend toolchain now uses ESLint 9.39.5 => 10.8.0 and TypeScript 5.9.3 => 6.0.3, and frontend
-            development, CI, and the production build image now target Node.js 26. Renovate commits use
-            repository-owned, privacy-preserving attribution.
-            Final deployed boards are now captured once per human run, and the protected analytics dashboard can compare
-            unit presence across isolated mode/version/commit cohorts with historical-image fallbacks and filter using
-            all distinct modes, versions, commits, build cohorts, and anonymous player IDs in the selected date range.
-            Combat now accepts the shop, XP, reroll, lock, and bench-management actions already exposed by the UI while
-            continuing to reject board mutations and orb collection.
-          </p>
+          <p>A major match-flow update with fairer bots, combat fixes, in-combat team management, and a new game name.</p>
         </div>
-        <article class="release-panel">
-          <ul class="commit-list">
-            <li v-for="commit in version200Commits" :key="`${commit.hash}-${commit.title}`">
-              <span class="hash">{{ commit.hash }}</span>
-              <span>{{ commit.title }}</span>
-            </li>
-          </ul>
-          <div class="balance-block">
-            <div class="balance-title">
-              <span class="tag buff">Buff</span>
-              <h4>Articuno</h4>
+        <div class="release-grid">
+          <article class="release-panel">
+            <div class="section-heading">
+              <span class="marker release"></span>
+              <h3>Highlights</h3>
             </div>
-            <p>
-              Attack range at all star levels:
-              <span class="old-value">1</span>
-              <span class="change-arrow">&nbsp;=>&nbsp;</span>
-              <strong class="value buff">3</strong>.
-            </p>
-          </div>
-          <div class="balance-block">
-            <div class="balance-title">
-              <span class="tag buff">Buff</span>
-              <h4>Zapdos</h4>
-            </div>
-            <p>
-              Attack range at all star levels:
-              <span class="old-value">1</span>
-              <span class="change-arrow">&nbsp;=>&nbsp;</span>
-              <strong class="value buff">3</strong>.
-            </p>
-          </div>
-          <div class="balance-block">
-            <div class="balance-title">
-              <span class="tag buff">Buff</span>
-              <h4>Moltres</h4>
-            </div>
-            <p>
-              Attack range at all star levels:
-              <span class="old-value">1</span>
-              <span class="change-arrow">&nbsp;=>&nbsp;</span>
-              <strong class="value buff">3</strong>.
-            </p>
-          </div>
-        </article>
-      </section>
+            <ul class="commit-list highlight-list">
+              <li v-for="highlight in version200Highlights" :key="highlight">
+                <span>{{ highlight }}</span>
+              </li>
+            </ul>
+          </article>
 
-      <section class="release-section">
-        <div class="release-header">
-          <p class="eyebrow">Previous</p>
-          <h2>Version 2.0.0-rc1</h2>
-          <p>
-            Pokemon affinity relationships were externalized into the shared data-driven resolver, while the product
-            was renamed to Theme Fusion Tactics (TFT) and frontend container builds were aligned with shared backend
-            unit definitions.
-          </p>
+          <article class="balance-panel">
+            <div class="section-heading">
+              <span class="marker balance"></span>
+              <h3>Balance Changes</h3>
+            </div>
+            <div class="balance-block">
+              <div class="balance-title">
+                <span class="tag buff">Buff</span>
+                <h4>Articuno</h4>
+              </div>
+              <p>
+                Attack range at all star levels:
+                <span class="old-value">1</span>
+                <span class="change-arrow">&nbsp;=>&nbsp;</span>
+                <strong class="value buff">3</strong>.
+              </p>
+            </div>
+            <div class="balance-block">
+              <div class="balance-title">
+                <span class="tag buff">Buff</span>
+                <h4>Zapdos</h4>
+              </div>
+              <p>
+                Attack range at all star levels:
+                <span class="old-value">1</span>
+                <span class="change-arrow">&nbsp;=>&nbsp;</span>
+                <strong class="value buff">3</strong>.
+              </p>
+            </div>
+            <div class="balance-block">
+              <div class="balance-title">
+                <span class="tag buff">Buff</span>
+                <h4>Moltres</h4>
+              </div>
+              <p>
+                Attack range at all star levels:
+                <span class="old-value">1</span>
+                <span class="change-arrow">&nbsp;=>&nbsp;</span>
+                <strong class="value buff">3</strong>.
+              </p>
+            </div>
+          </article>
         </div>
-        <article class="release-panel">
-          <ul class="commit-list">
-            <li v-for="commit in version200rc1Commits" :key="`${commit.hash}-${commit.title}`">
-              <span class="hash">{{ commit.hash }}</span>
-              <span>{{ commit.title }}</span>
-            </li>
-          </ul>
-        </article>
       </section>
 
       <section class="release-section">
@@ -2452,6 +2412,11 @@ const version160Commits = [
     border: 1px solid rgba(148, 163, 184, 0.16);
     border-radius: 6px;
     background: rgba(30, 41, 59, 0.62);
+}
+
+.highlight-list li {
+    grid-template-columns: 1fr;
+    line-height: 1.5;
 }
 
 .hash {
