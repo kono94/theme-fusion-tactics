@@ -5,8 +5,8 @@ defineOptions({
 
 defineEmits(['back'])
 
-const nextVersionCommits = [
-  { hash: 'pending', title: 'Upgrade Vitest 4.1.11 => 5.0.0' },
+const version210Commits = [
+  { hash: 'faae2a9', title: 'Upgrade Vitest 4.1.11 => 5.0.0' },
   { hash: 'b7f496b', title: 'Upgrade routine Maven, frontend, and container dependencies' },
   { hash: '8ebecda', title: 'Add reroll and hover-to-sell keyboard shortcuts' },
   { hash: '90a7bac', title: 'Add an end-of-match combat summary and round history' },
@@ -91,20 +91,20 @@ const version160Commits = [
     <div class="release-history">
       <section class="release-section latest-release">
         <div class="release-header">
-          <p class="eyebrow">Next</p>
+          <p class="eyebrow">Latest</p>
           <h2>Version 2.1.0</h2>
           <p>
-            Rerolling and selling can now be done with discoverable keyboard shortcuts. The end screen summarizes total
-            damage, healing, shielding, and every round result. Bots also pursue distinct economy, reroll, fast-level,
-            and trait-focused plans while obeying the same shop, XP, upgrade, and gold rules as human players. The
-            released 2.0.0 history was corrected with its final version label and commit hashes. Routine maintenance
-            updates Spring Boot and the frontend toolchain while refreshing the pinned production container images.
-            The test toolchain now uses Vitest 4.1.11 => 5.0.0 with matching V8 coverage support.
+            Rerolling and selling can now be done with keyboard shortcuts. The end screen summarizes total damage,
+            healing, shielding, and every round result. Bots also pursue distinct economy, reroll, fast-level, and
+            trait-focused plans while obeying the same shop, XP, upgrade, and gold rules as human players. The released
+            2.0.0 history was corrected with its final version label and commit hashes. Routine maintenance updates
+            Spring Boot and the frontend toolchain while refreshing the pinned production container images. The test
+            toolchain now uses Vitest 4.1.11 => 5.0.0 with matching V8 coverage support.
           </p>
         </div>
         <article class="release-panel">
           <ul class="commit-list">
-            <li v-for="commit in nextVersionCommits" :key="`${commit.hash}-${commit.title}`">
+            <li v-for="commit in version210Commits" :key="`${commit.hash}-${commit.title}`">
               <span class="hash">{{ commit.hash }}</span>
               <span>{{ commit.title }}</span>
             </li>
@@ -114,7 +114,7 @@ const version160Commits = [
 
       <section class="release-section">
         <div class="release-header">
-          <p class="eyebrow">Latest</p>
+          <p class="eyebrow">Previous</p>
           <h2>Version 2.0.0</h2>
           <p>
             Room creation and player identity now use explicit private acknowledgements, all room mutations share one
