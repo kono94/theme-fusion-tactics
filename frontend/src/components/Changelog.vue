@@ -6,7 +6,7 @@ defineOptions({
 defineEmits(['back'])
 
 const nextVersionCommits = [
-  { hash: 'pending', title: 'Add reroll and hover-to-sell keyboard shortcuts' },
+  { hash: '8ebecda', title: 'Add reroll and hover-to-sell keyboard shortcuts' },
   { hash: '90a7bac', title: 'Add an end-of-match combat summary and round history' },
   { hash: '4e34da1', title: 'Give fair-economy bots distinct planning personalities' },
   { hash: '2e587f7', title: 'Correct the released 2.0.0 changelog history' },
