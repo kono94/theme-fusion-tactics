@@ -2,7 +2,7 @@
 
 **Theme Fusion Tactics (TFT)** is a browser-based **auto-battler game** inspired by Teamfight Tactics, featuring a theme-swappable engine with lobby-selectable One Piece (default) and Pokemon modes and real-time multiplayer via WebSockets.
 
-![Java 25](https://img.shields.io/badge/Java-25-orange) ![Spring Boot 4](https://img.shields.io/badge/Spring%20Boot-4.1.0-green) ![Vue 3](https://img.shields.io/badge/Vue.js-3.5-blue) ![TypeScript](https://img.shields.io/badge/TypeScript-6.0-blue)
+![Java 25](https://img.shields.io/badge/Java-25-orange) ![Spring Boot 4](https://img.shields.io/badge/Spring%20Boot-4.1.1-green) ![Vue 3](https://img.shields.io/badge/Vue.js-3.5-blue) ![TypeScript](https://img.shields.io/badge/TypeScript-6.0-blue)
 
 ![Theme Fusion Tactics Board](docs/board_preview.jpg)
 
@@ -98,7 +98,7 @@ For detailed architectural information, refer to the context documents:
 | Technology | Version | Purpose |
 |------------|---------|---------|
 | Java | 25 (Preview) | Core language |
-| Spring Boot | 4.1.0 | Application framework |
+| Spring Boot | 4.1.1 | Application framework |
 | WebSocket (STOMP) | — | Real-time communication |
 | Maven | — | Build tool |
 | Lombok | — | Boilerplate reduction |

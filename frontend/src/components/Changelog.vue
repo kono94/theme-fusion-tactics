@@ -6,6 +6,7 @@ defineOptions({
 defineEmits(['back'])
 
 const nextVersionCommits = [
+  { hash: 'pending', title: 'Upgrade routine Maven, frontend, and container dependencies' },
   { hash: '8ebecda', title: 'Add reroll and hover-to-sell keyboard shortcuts' },
   { hash: '90a7bac', title: 'Add an end-of-match combat summary and round history' },
   { hash: '4e34da1', title: 'Give fair-economy bots distinct planning personalities' },
@@ -90,12 +91,13 @@ const version160Commits = [
       <section class="release-section latest-release">
         <div class="release-header">
           <p class="eyebrow">Next</p>
-          <h2>Version X.X.X</h2>
+          <h2>Version 2.1.0</h2>
           <p>
             Rerolling and selling can now be done with discoverable keyboard shortcuts. The end screen summarizes total
             damage, healing, shielding, and every round result. Bots also pursue distinct economy, reroll, fast-level,
             and trait-focused plans while obeying the same shop, XP, upgrade, and gold rules as human players. The
-            released 2.0.0 history was corrected with its final version label and commit hashes.
+            released 2.0.0 history was corrected with its final version label and commit hashes. Routine maintenance
+            updates Spring Boot and the frontend toolchain while refreshing the pinned production container images.
           </p>
         </div>
         <article class="release-panel">
