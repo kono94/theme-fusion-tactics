@@ -1,7 +1,11 @@
 import { mount } from '@vue/test-utils'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { PlayerState } from '../types'
 import EndScreen from './EndScreen.vue'
+
+afterEach(() => {
+    vi.useRealTimers()
+})
 
 function player(): PlayerState {
     return {
@@ -49,5 +53,21 @@ describe('EndScreen match summary', () => {
         expect(wrapper.get('.match-record').text()).toContain('1L')
         expect(wrapper.get('.match-summary__totals').text()).toContain('12,345')
         expect(wrapper.findAll('.round-result').map(result => result.text())).toEqual(['R1W', 'R2L', 'R3W'])
+
+        wrapper.unmount()
+    })
+
+    it('cancels pending animation timers when unmounted', () => {
+        vi.useFakeTimers()
+        const wrapper = mount(EndScreen, {
+            props: { players: [player()], myPlayerId: 'player-1' },
+        })
+
+        expect(vi.getTimerCount()).toBe(1)
+
+        wrapper.unmount()
+
+        expect(vi.getTimerCount()).toBe(0)
+        expect(() => vi.runAllTimers()).not.toThrow()
     })
 })

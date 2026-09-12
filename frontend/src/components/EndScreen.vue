@@ -95,7 +95,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import type { PlayerState } from '../types';
 
 const props = defineProps<{
@@ -159,12 +159,24 @@ function returnHome() {
 
 // === GOLDEN BURST & CONFETTI ===
 const burstContainer = ref<HTMLElement | null>(null);
+const animationTimers = new Set<number>();
+
+function scheduleAnimation(callback: () => void, delay: number) {
+    const timer = window.setTimeout(() => {
+        animationTimers.delete(timer);
+        callback();
+    }, delay);
+    animationTimers.add(timer);
+}
 
 onMounted(() => {
     // Slight delay to ensure DOM is ready and entry animation is playing
-    setTimeout(() => {
-        triggerBurst();
-    }, 100);
+    scheduleAnimation(triggerBurst, 100);
+});
+
+onUnmounted(() => {
+    animationTimers.forEach(timer => window.clearTimeout(timer));
+    animationTimers.clear();
 });
 
 function triggerBurst() {
@@ -202,7 +214,7 @@ function triggerBurst() {
         p.style.transform = `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(0)`;
         p.style.opacity = '0';
 
-        setTimeout(() => { p.remove(); }, duration * 1000);
+        scheduleAnimation(() => p.remove(), duration * 1000);
     }
 
     // Confetti (falling from top)
@@ -230,7 +242,7 @@ function triggerBurst() {
         c.style.left = `calc(${c.style.left} + ${drift})`;
         c.style.transform = `rotate(${Math.random() * 720}deg)`;
 
-        setTimeout(() => { c.remove(); }, duration * 1000);
+        scheduleAnimation(() => c.remove(), duration * 1000);
     }
 }
 </script>
