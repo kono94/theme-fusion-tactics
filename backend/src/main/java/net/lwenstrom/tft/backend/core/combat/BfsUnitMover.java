@@ -25,16 +25,22 @@ public class BfsUnitMover implements UnitMover {
 
     @Override
     public void moveTowards(GameUnit mover, GameUnit target, List<GameUnit> allUnits, long currentTime) {
+        moveTowards(mover, target, allUnits, mover.getRange(), currentTime);
+    }
+
+    @Override
+    public void moveTowards(
+            GameUnit mover, GameUnit target, List<GameUnit> allUnits, int desiredRange, long currentTime) {
         if (currentTime < mover.getNextMoveTime()) {
             return;
         }
 
-        var nextStep = findNextStep(mover, List.of(target), allUnits);
-        if (nextStep == null && CombatUtils.getDistance(mover, target) > mover.getRange()) {
+        var nextStep = findNextStep(mover, List.of(target), allUnits, desiredRange);
+        if (nextStep == null && CombatUtils.getDistance(mover, target) > desiredRange) {
             var enemies = allUnits.stream()
                     .filter(unit -> unit.getCurrentHealth() > 0 && CombatUtils.isEnemy(mover, unit))
                     .toList();
-            nextStep = findNextStep(mover, enemies, allUnits);
+            nextStep = findNextStep(mover, enemies, allUnits, desiredRange);
         }
 
         if (nextStep != null) {
@@ -43,7 +49,7 @@ public class BfsUnitMover implements UnitMover {
         }
     }
 
-    private Point findNextStep(GameUnit start, List<GameUnit> targets, List<GameUnit> allUnits) {
+    private Point findNextStep(GameUnit start, List<GameUnit> targets, List<GameUnit> allUnits, int desiredRange) {
         int rows = Grid.COMBAT_ROWS;
         int cols = Grid.COLS;
 
@@ -69,7 +75,7 @@ public class BfsUnitMover implements UnitMover {
             var inRange = targets.stream()
                     .anyMatch(target ->
                             Math.max(Math.abs(current.x() - target.getX()), Math.abs(current.y() - target.getY()))
-                                    <= start.getRange());
+                                    <= desiredRange);
             if (inRange) {
                 if (current.equals(startPt) || !occupied[current.y()][current.x()]) {
                     foundDest = current;

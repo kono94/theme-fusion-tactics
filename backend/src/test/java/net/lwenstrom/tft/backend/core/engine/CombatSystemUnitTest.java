@@ -316,7 +316,7 @@ class CombatSystemUnitTest {
     }
 
     @Test
-    void emptyCastsRetainManaAndAllowMovementThenCastOnceInRange() {
+    void fullManaCastersUseAbilityRangeForSingleSurroundAndLineMovement() {
         for (var pattern : AbilityPattern.values()) {
             var system = createTestCombatSystem();
             var p1 = new Player("caster", GameMode.ONEPIECE, createMockDataLoader(), createSeededRandomProvider());
@@ -325,9 +325,10 @@ class CombatSystemUnitTest {
                     "short spell", "", AbilityType.DAMAGE, pattern, List.of(1), List.of(20), List.of());
             var caster = MockUnit.create("caster", p1.getId())
                     .withPosition(0, 0)
+                    .withRange(3)
                     .withMana(100, 100)
                     .withAbility(ability);
-            var target = MockUnit.create("enemy", p2.getId()).withPosition(4, 0).withHealth(1000, 1000);
+            var target = MockUnit.create("enemy", p2.getId()).withPosition(3, 0).withHealth(1000, 1000);
             target.setStunSecondsRemaining(10);
             TestHelpers.addUnitToPlayer(p1, caster);
             TestHelpers.addUnitToPlayer(p2, target);
@@ -343,6 +344,87 @@ class CombatSystemUnitTest {
             assertEquals(980, target.getCurrentHealth());
             assertEquals(1, caster.getX(), "Cast recovery prevents movement");
         }
+    }
+
+    @Test
+    void fullManaCasterMovesDiagonallyIntoAbilityRangeBeforeCasting() {
+        var p1 = new Player("caster", GameMode.ONEPIECE, createMockDataLoader(), createSeededRandomProvider());
+        var p2 = new Player("enemy", GameMode.ONEPIECE, createMockDataLoader(), createSeededRandomProvider());
+        var ability = new AbilityDefinition(
+                "diagonal spell", "", AbilityType.DAMAGE, AbilityPattern.SINGLE, List.of(2), List.of(20), List.of());
+        var caster = MockUnit.create("caster", p1.getId())
+                .withPosition(0, 0)
+                .withRange(3)
+                .withMana(100, 100)
+                .withAbility(ability);
+        var target = MockUnit.create("enemy", p2.getId()).withPosition(3, 3).withHealth(1000, 1000);
+        target.setStunSecondsRemaining(10);
+        TestHelpers.addUnitToPlayer(p1, caster);
+        TestHelpers.addUnitToPlayer(p2, target);
+
+        combatSystem.simulateTick(List.of(p1, p2), 0);
+        assertEquals(100, caster.getMana());
+        assertEquals(1, caster.getY());
+        combatSystem.simulateTick(List.of(p1, p2), 800);
+        assertEquals(1, caster.getX());
+        combatSystem.simulateTick(List.of(p1, p2), 900);
+
+        assertEquals(0, caster.getMana());
+        assertEquals(980, target.getCurrentHealth());
+    }
+
+    @Test
+    void fullManaCasterMovesIntoAbilityRangeDuringBasicAttackCooldown() {
+        var p1 = new Player("caster", GameMode.ONEPIECE, createMockDataLoader(), createSeededRandomProvider());
+        var p2 = new Player("enemy", GameMode.ONEPIECE, createMockDataLoader(), createSeededRandomProvider());
+        var ability = new AbilityDefinition(
+                "close spell", "", AbilityType.DAMAGE, AbilityPattern.SINGLE, List.of(1), List.of(20), List.of());
+        var caster = MockUnit.create("caster", p1.getId())
+                .withPosition(0, 0)
+                .withRange(3)
+                .withMana(100, 100)
+                .withAbility(ability);
+        var target = MockUnit.create("enemy", p2.getId()).withPosition(3, 0).withHealth(1000, 1000);
+        caster.setNextAttackTime(1000);
+        target.setStunSecondsRemaining(10);
+        TestHelpers.addUnitToPlayer(p1, caster);
+        TestHelpers.addUnitToPlayer(p2, target);
+
+        combatSystem.simulateTick(List.of(p1, p2), 0);
+
+        assertEquals(1, caster.getX());
+        assertEquals(100, caster.getMana());
+        assertEquals(1000, target.getCurrentHealth());
+    }
+
+    @Test
+    void fullManaCasterPathsAroundBlockedCellToCast() {
+        var p1 = new Player("caster", GameMode.ONEPIECE, createMockDataLoader(), createSeededRandomProvider());
+        var p2 = new Player("enemy", GameMode.ONEPIECE, createMockDataLoader(), createSeededRandomProvider());
+        var ability = new AbilityDefinition(
+                "close spell", "", AbilityType.DAMAGE, AbilityPattern.SINGLE, List.of(1), List.of(20), List.of());
+        var caster = MockUnit.create("caster", p1.getId())
+                .withPosition(0, 0)
+                .withRange(3)
+                .withMana(100, 100)
+                .withAbility(ability);
+        var blocker = MockUnit.create("blocker", p1.getId()).withPosition(1, 0);
+        var target = MockUnit.create("enemy", p2.getId()).withPosition(3, 0).withHealth(1000, 1000);
+        blocker.setStunSecondsRemaining(10);
+        target.setStunSecondsRemaining(10);
+        TestHelpers.addUnitToPlayer(p1, caster);
+        TestHelpers.addUnitToPlayer(p1, blocker);
+        TestHelpers.addUnitToPlayer(p2, target);
+
+        combatSystem.simulateTick(List.of(p1, p2), 0);
+        assertEquals(0, caster.getX());
+        assertEquals(1, caster.getY());
+        combatSystem.simulateTick(List.of(p1, p2), 800);
+        combatSystem.simulateTick(List.of(p1, p2), 1600);
+        combatSystem.simulateTick(List.of(p1, p2), 1700);
+
+        assertEquals(0, caster.getMana());
+        assertEquals(980, target.getCurrentHealth());
     }
 
     @Test

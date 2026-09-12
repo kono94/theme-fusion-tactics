@@ -219,71 +219,79 @@ public class CombatSystem {
                 continue;
             }
 
-            if (attackReady && unit.getMaxMana() > 0 && unit.getMana() >= unit.getMaxMana()) {
-                var cast = abilityCaster.castAbility(
-                        unit,
-                        allUnits,
-                        targetSelector,
-                        new AbilityCaster.CombatStatCallback() {
-                            @Override
-                            public void onDamage(String unitId, String unitName, String targetId, int damage) {
-                                accumulateDamage(unitId, unitName, unit.getDefinitionId(), unit.getOwnerId(), damage);
-                                recentEvents.add(new GameState.CombatEvent(
-                                        currentTime,
-                                        "SKILL",
-                                        unitId,
-                                        targetId,
-                                        damage,
-                                        unit.getAbility().name()));
-                            }
+            if (unit.getMaxMana() > 0 && unit.getMana() >= unit.getMaxMana()) {
+                if (attackReady) {
+                    var cast = abilityCaster.castAbility(
+                            unit,
+                            allUnits,
+                            targetSelector,
+                            new AbilityCaster.CombatStatCallback() {
+                                @Override
+                                public void onDamage(String unitId, String unitName, String targetId, int damage) {
+                                    accumulateDamage(
+                                            unitId, unitName, unit.getDefinitionId(), unit.getOwnerId(), damage);
+                                    recentEvents.add(new GameState.CombatEvent(
+                                            currentTime,
+                                            "SKILL",
+                                            unitId,
+                                            targetId,
+                                            damage,
+                                            unit.getAbility().name()));
+                                }
 
-                            @Override
-                            public void onDirectHit(GameUnit target) {
-                                grantDirectHitMana(target);
-                            }
+                                @Override
+                                public void onDirectHit(GameUnit target) {
+                                    grantDirectHitMana(target);
+                                }
 
-                            @Override
-                            public void onHealing(String unitId, String unitName, String targetId, int healing) {
-                                accumulateHealing(unitId, unitName, unit.getDefinitionId(), unit.getOwnerId(), healing);
-                                recentEvents.add(new GameState.CombatEvent(
-                                        currentTime,
-                                        "HEAL",
-                                        unitId,
-                                        targetId,
-                                        healing,
-                                        unit.getAbility().name()));
-                            }
+                                @Override
+                                public void onHealing(String unitId, String unitName, String targetId, int healing) {
+                                    accumulateHealing(
+                                            unitId, unitName, unit.getDefinitionId(), unit.getOwnerId(), healing);
+                                    recentEvents.add(new GameState.CombatEvent(
+                                            currentTime,
+                                            "HEAL",
+                                            unitId,
+                                            targetId,
+                                            healing,
+                                            unit.getAbility().name()));
+                                }
 
-                            @Override
-                            public void onShielding(String unitId, String unitName, String targetId, int shielding) {
-                                accumulateShielding(
-                                        unitId, unitName, unit.getDefinitionId(), unit.getOwnerId(), shielding);
-                                recentEvents.add(new GameState.CombatEvent(
-                                        currentTime,
-                                        "SHIELD",
-                                        unitId,
-                                        targetId,
-                                        shielding,
-                                        unit.getAbility().name()));
-                            }
+                                @Override
+                                public void onShielding(
+                                        String unitId, String unitName, String targetId, int shielding) {
+                                    accumulateShielding(
+                                            unitId, unitName, unit.getDefinitionId(), unit.getOwnerId(), shielding);
+                                    recentEvents.add(new GameState.CombatEvent(
+                                            currentTime,
+                                            "SHIELD",
+                                            unitId,
+                                            targetId,
+                                            shielding,
+                                            unit.getAbility().name()));
+                                }
 
-                            @Override
-                            public void onSkill(String unitId, String unitName, String targetId, int value) {
-                                recentEvents.add(new GameState.CombatEvent(
-                                        currentTime,
-                                        "SKILL",
-                                        unitId,
-                                        targetId,
-                                        value,
-                                        unit.getAbility().name()));
-                            }
-                        },
-                        currentTime);
-                if (cast) {
-                    unit.setMana(0);
-                    unit.setNextAttackTime(currentTime + GameConstants.ABILITY_COOLDOWN_MS);
-                    unit.setNextMoveTime(
-                            Math.max(unit.getNextMoveTime(), currentTime + GameConstants.ABILITY_COOLDOWN_MS));
+                                @Override
+                                public void onSkill(String unitId, String unitName, String targetId, int value) {
+                                    recentEvents.add(new GameState.CombatEvent(
+                                            currentTime,
+                                            "SKILL",
+                                            unitId,
+                                            targetId,
+                                            value,
+                                            unit.getAbility().name()));
+                                }
+                            },
+                            currentTime);
+                    if (cast) {
+                        unit.setMana(0);
+                        unit.setNextAttackTime(currentTime + GameConstants.ABILITY_COOLDOWN_MS);
+                        unit.setNextMoveTime(
+                                Math.max(unit.getNextMoveTime(), currentTime + GameConstants.ABILITY_COOLDOWN_MS));
+                        continue;
+                    }
+                }
+                if (moveIntoAbilityRange(unit, allUnits, currentTime)) {
                     continue;
                 }
             }
@@ -412,6 +420,32 @@ public class CombatSystem {
 
         var manaGain = Math.max(1, Math.round(target.getMaxMana() * GameConstants.MANA_ON_DIRECT_HIT_PERCENT));
         target.gainMana(manaGain);
+    }
+
+    private boolean moveIntoAbilityRange(GameUnit unit, List<GameUnit> allUnits, long currentTime) {
+        var ability = unit.getAbility();
+        if (ability == null) {
+            return false;
+        }
+        var targetsEnemy =
+                switch (ability.type()) {
+                    case DAMAGE, STUN, DEBUFF_DEF -> true;
+                    default -> false;
+                };
+        if (!targetsEnemy) {
+            return false;
+        }
+
+        var target = targetSelector.findTarget(unit, allUnits);
+        var abilityRange = ability.getRangeForLevel(unit.getStarLevel());
+        if (target == null || CombatUtils.getDistance(unit, target) <= abilityRange) {
+            return false;
+        }
+
+        var previousX = unit.getX();
+        var previousY = unit.getY();
+        unitMover.moveTowards(unit, target, allUnits, abilityRange, currentTime);
+        return unit.getX() != previousX || unit.getY() != previousY;
     }
 
     private void processDotEffects(List<GameUnit> allUnits, long currentTime) {

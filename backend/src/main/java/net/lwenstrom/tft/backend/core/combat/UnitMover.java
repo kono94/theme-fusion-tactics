@@ -10,4 +10,9 @@ public interface UnitMover {
     default void moveTowards(GameUnit mover, GameUnit target, List<GameUnit> allUnits, long currentTime) {
         moveTowards(mover, target, allUnits);
     }
+
+    default void moveTowards(
+            GameUnit mover, GameUnit target, List<GameUnit> allUnits, int desiredRange, long currentTime) {
+        moveTowards(mover, target, allUnits, currentTime);
+    }
 }

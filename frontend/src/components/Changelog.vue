@@ -5,6 +5,10 @@ defineOptions({
 
 defineEmits(['back'])
 
+const versionNextHighlights = [
+  'Units at full mana now move into their ability range before casting, even when their normal attack range is longer.',
+]
+
 const version210Highlights = [
   'Press “R” to reroll the shop, or hover an owned unit and press “S” to sell it without dragging it to the sell zone.',
   'The end screen now shows total damage, healing, shielding, and every round’s win, loss, or draw result.',
@@ -73,6 +77,27 @@ const version160Commits = [
       <section class="release-section">
         <div class="release-header">
           <p class="eyebrow">Latest</p>
+          <h2>Version X.X.X</h2>
+          <p>More reliable ability casting for ranged units.</p>
+        </div>
+        <div class="release-grid">
+          <article class="release-panel">
+            <div class="section-heading">
+              <span class="marker release"></span>
+              <h3>Highlights</h3>
+            </div>
+            <ul class="commit-list highlight-list">
+              <li v-for="highlight in versionNextHighlights" :key="highlight">
+                <span>{{ highlight }}</span>
+              </li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="release-section">
+        <div class="release-header">
+          <p class="eyebrow">Previous</p>
           <h2>Version 2.1.0</h2>
           <p>Faster shop controls, clearer post-match results, and more varied bot opponents.</p>
         </div>
