@@ -12,6 +12,11 @@ export interface AnimationRenderPolicy {
     particleCap: number
 }
 
+export interface AttackParticleAllocation {
+    trail: number
+    impact: number
+}
+
 export function getAnimationRenderPolicy(
     config: Pick<AbilityAnimationConfig, 'particleScale' | 'screenShake' | 'durationScale'>,
     options: AnimationRenderOptions = {}
@@ -37,6 +42,21 @@ export function getAttackParticleBudget(
 ) {
     const scale = options.reducedMotion ? 0.18 : options.crowded ? 0.42 : 1
     return Math.min(options.reducedMotion ? 4 : options.crowded ? 10 : 24, Math.round((config.particles ?? 0) * scale))
+}
+
+export function getAttackParticleAllocation(
+    config: Pick<AttackAnimationConfig, 'particles'>,
+    crowded: boolean,
+    attackRange: number
+): AttackParticleAllocation {
+    if (crowded) {
+        return attackRange === 1 ? { trail: 2, impact: 3 } : { trail: 3, impact: 4 }
+    }
+
+    return {
+        trail: Math.min(config.particles ?? 10, 20),
+        impact: 14
+    }
 }
 
 export function prefersReducedMotion() {

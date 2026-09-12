@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
-import { chooseEffectEvictionIndex, getRenderEffectPriority } from '../../animations/renderPolicy'
+import {
+  chooseEffectEvictionIndex,
+  getAttackParticleAllocation,
+  getRenderEffectPriority
+} from '../../animations/renderPolicy'
 import type { GamePhase, RenderedUnit } from '../../types'
 import type { NormalizedCombatVisualEvent, RenderLayer } from '../../types/combatEffects'
 
@@ -526,11 +530,15 @@ function addEffect(kind: EffectInstance['kind'], layer: RenderLayer, event: Norm
 }
 
 function spawnAttackParticles(event: NormalizedCombatVisualEvent, simplified: boolean) {
-  const count = simplified ? 4 : Math.min(event.attack?.particles ?? 10, 20)
+  const particleAllocation = getAttackParticleAllocation(
+    event.attack ?? {},
+    simplified,
+    event.source.range
+  )
   const color = event.attack?.color ?? '#f8fafc'
   const secondary = event.attack?.secondaryColor ?? color
-  spawnLineParticles(event.start, event.end, color, secondary, count, 'trail', 0.45, MAX_AUTO_PARTICLES)
-  spawnBurst(event.end.x, event.end.y, color, secondary, simplified ? 5 : 14, 'impact', 0.72, MAX_AUTO_PARTICLES)
+  spawnLineParticles(event.start, event.end, color, secondary, particleAllocation.trail, 'trail', 0.45, MAX_AUTO_PARTICLES)
+  spawnBurst(event.end.x, event.end.y, color, secondary, particleAllocation.impact, 'impact', 0.72, MAX_AUTO_PARTICLES)
 }
 
 function spawnUltimateParticles(event: NormalizedCombatVisualEvent, crowded: boolean) {

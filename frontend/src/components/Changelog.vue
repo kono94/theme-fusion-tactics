@@ -8,6 +8,7 @@ defineEmits(['back'])
 const versionNextHighlights = [
   'Units at full mana now move into their ability range before casting, even when their normal attack range is longer.',
   'Repeated stuns now refresh instead of stacking: the second lasts 80%, later stuns last 60%, and full duration returns after four seconds.',
+  'Crowded fights now use fewer auto-attack particles while keeping melee hits, ranged projectiles, abilities, and screen shake readable.',
 ]
 
 const version210Highlights = [
@@ -79,7 +80,7 @@ const version160Commits = [
         <div class="release-header">
           <p class="eyebrow">Latest</p>
           <h2>Version X.X.X</h2>
-          <p>More reliable ability casting and fairer crowd control.</p>
+          <p>More reliable ability casting, fairer crowd control, and clearer crowded combat.</p>
         </div>
         <div class="release-grid">
           <article class="release-panel">
