@@ -54,7 +54,7 @@ For detailed architectural information, refer to the context documents:
 - **Git-based version display** — Build metadata (tag, commit, timestamp) in bottom-left corner
 - **Smart unit tooltips** — Role, melee/ranged, trait-color, and DEF badges with star-level ability highlighting
 - **Player board spectating** — Click alive players in the right panel to view their board and combat from their perspective
-- **Keyboard shortcuts** — Enter key support for room creation/joining
+- **Keyboard shortcuts** — Enter creates/joins rooms, `R` rerolls, and `S` sells the hovered owned unit
 - **Bench reordering** — Swap and rearrange units during planning
 - **Team-colored health bars** — Emerald for allies, red for opponents
 

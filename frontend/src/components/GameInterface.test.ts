@@ -188,4 +188,44 @@ describe('GameInterface end celebration', () => {
 
         wrapper.unmount()
     })
+
+    it('rerolls with R and sells the hovered owned unit with S', async () => {
+        const state = gameState('PLANNING', 100, 1)
+        state.players['player-1'].bench = [benchUnit()]
+        const wrapper = mount(GameInterface, {
+            props: {
+                state,
+                currentPlayerId: 'player-1',
+            },
+            global: { stubs: childStubs },
+        })
+
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'r' }))
+        await wrapper.get('.bench-unit').trigger('mouseenter')
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 's' }))
+
+        const emittedActions = wrapper.emitted('action') as [GameAction][]
+        expect(emittedActions.map(([action]) => action.type)).toEqual(['REROLL', 'SELL'])
+        expect(emittedActions[1][0].unitId).toBe('bench-unit')
+
+        wrapper.unmount()
+    })
+
+    it('does not trigger gameplay shortcuts while typing', () => {
+        const state = gameState('PLANNING', 100, 1)
+        const wrapper = mount(GameInterface, {
+            props: {
+                state,
+                currentPlayerId: 'player-1',
+            },
+            global: { stubs: childStubs },
+        })
+        const input = document.createElement('input')
+        wrapper.element.appendChild(input)
+
+        input.dispatchEvent(new KeyboardEvent('keydown', { key: 'r', bubbles: true }))
+
+        expect(wrapper.emitted('action')).toBeUndefined()
+        wrapper.unmount()
+    })
 })

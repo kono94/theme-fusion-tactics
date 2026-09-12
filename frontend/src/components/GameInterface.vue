@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch, onUnmounted } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import GameCanvas from './GameCanvas.vue'
 import UnitTooltip from './UnitTooltip.vue'
 import PhaseAnnouncement from './PhaseAnnouncement.vue'
@@ -258,9 +258,15 @@ const activeTooltip = ref<{
     placement: 'top' | 'bottom',
     shift?: 'left' | 'more-left' | 'center'
 } | null>(null)
+const hoveredOwnedUnitId = ref<string | null>(null)
+
+function findOwnedUnit(unitId: string): GameUnit | null {
+    return [...benchUnits.value, ...myPlayerBoardUnits.value].find(unit => unit?.id === unitId) ?? null
+}
 
 const handleShowTooltip = (rect: DOMRect, unit: GameUnit | UnitDefinition, placement: 'top' | 'bottom' = 'top', shift?: 'left' | 'more-left' | 'center') => {
     if (isDraggingUnit.value) return
+    hoveredOwnedUnitId.value = findOwnedUnit(unit.id)?.id ?? null
     activeTooltip.value = {
         unit,
         rect,
@@ -271,6 +277,7 @@ const handleShowTooltip = (rect: DOMRect, unit: GameUnit | UnitDefinition, place
 
 const handleHideTooltip = () => {
     activeTooltip.value = null
+    hoveredOwnedUnitId.value = null
 }
 
 // ========== DRAG AND SELL STATE ==========
@@ -284,6 +291,39 @@ const isOverGrid = ref(false)
 function sellUnit(unitId: string) {
     if (!myPlayer.value || !canManageShopAndBench.value) return
     emit('action', { type: 'SELL', unitId, playerId: myPlayer.value.playerId })
+}
+
+function isTextEntryTarget(target: EventTarget | null) {
+    return target instanceof HTMLElement
+        && target.matches('input, textarea, select, [contenteditable="true"]')
+}
+
+function handleKeyboardShortcut(event: KeyboardEvent) {
+    if (event.defaultPrevented
+        || event.repeat
+        || event.ctrlKey
+        || event.metaKey
+        || event.altKey
+        || isTextEntryTarget(event.target)
+        || isAbandonDialogVisible.value
+        || hasPendingAugmentChoices.value
+        || props.state?.phase === 'END_CELEBRATION'
+        || props.state?.phase === 'END') return
+
+    const key = event.key.toLowerCase()
+    if (key === 'r' && canManageShopAndBench.value && (myPlayer.value?.gold ?? 0) >= 2) {
+        event.preventDefault()
+        refreshShop()
+        return
+    }
+
+    if (key !== 's' || !hoveredOwnedUnitId.value || !canManageShopAndBench.value) return
+    const unitId = hoveredOwnedUnitId.value
+    const isBenchUnit = benchUnits.value.some(unit => unit?.id === unitId)
+    if (props.state?.phase === 'COMBAT' && !isBenchUnit) return
+    event.preventDefault()
+    sellUnit(unitId)
+    handleHideTooltip()
 }
 
 const onSellDragOver = (evt: DragEvent) => {
@@ -338,8 +378,13 @@ const STAR_UP_ANIMATION_DURATION = 1200
 // Cleanup timers on unmount
 const starUpTimers = ref<number[]>([])
 onUnmounted(() => {
+    window.removeEventListener('keydown', handleKeyboardShortcut)
     cleanupBenchDragPreview()
     starUpTimers.value.forEach(timer => clearTimeout(timer))
+})
+
+onMounted(() => {
+    window.addEventListener('keydown', handleKeyboardShortcut)
 })
 
 function triggerStarUpCelebration(unitId: string) {
@@ -641,6 +686,7 @@ watch(effectiveViewedPlayerId, (playerId) => {
                     <div class="sell-content">
                         <span class="sell-icon">💰</span>
                         <span class="sell-text">{{ draggedUnit ? 'SELL UNIT FOR' : 'DRAG HERE TO SELL' }}</span>
+                        <kbd class="shortcut-key" title="Hover a unit and press S to sell">S</kbd>
                         <div v-if="draggedUnit" class="sell-refund">+{{ calculateSellRefund(draggedUnit) }} gold</div>
                     </div>
                 </div>
@@ -672,6 +718,7 @@ watch(effectiveViewedPlayerId, (playerId) => {
                     <button class="reroll-btn horizontal" @click="refreshShop" :disabled="!canManageShopAndBench || myPlayer.gold < 2">
                         <span class="refresh-icon">⚓</span>
                         <span class="btn-text">Refresh Shop</span>
+                        <kbd class="shortcut-key">R</kbd>
                         <span class="cost">2g</span>
                     </button>
                 </div>
@@ -1480,6 +1527,21 @@ watch(effectiveViewedPlayerId, (playerId) => {
 
 .reroll-btn {
     background: #ef4444; 
+}
+
+.shortcut-key {
+    display: inline-grid;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 5px;
+    border: 1px solid rgba(255, 255, 255, 0.42);
+    border-radius: 4px;
+    background: rgba(15, 23, 42, 0.58);
+    color: #f8fafc;
+    font: inherit;
+    font-size: 10px;
+    line-height: 1;
+    place-items: center;
 }
 
 .fade-enter-active,

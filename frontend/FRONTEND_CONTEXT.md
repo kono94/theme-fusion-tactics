@@ -187,6 +187,7 @@ onto one half of the 9×6 combat canvas.
 
 - Resolves the authoritative local player through `state.players[currentPlayerId]`.
 - Owns shop, bench, drag/drop, sell, XP, reroll, lock, augment, ready, and spectating presentation.
+- Handles `R` to reroll and hover + `S` to sell without firing from text inputs, overlays, or invalid action phases.
 - Keeps shop controls and bench-only drag/sell interactions available during combat while board movement and orb
   collection remain planning-only.
 - Emits `GameAction` objects upward to `App.vue`.

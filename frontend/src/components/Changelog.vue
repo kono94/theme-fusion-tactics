@@ -6,7 +6,8 @@ defineOptions({
 defineEmits(['back'])
 
 const nextVersionCommits = [
-  { hash: 'pending', title: 'Add an end-of-match combat summary and round history' },
+  { hash: 'pending', title: 'Add reroll and hover-to-sell keyboard shortcuts' },
+  { hash: '90a7bac', title: 'Add an end-of-match combat summary and round history' },
   { hash: '4e34da1', title: 'Give fair-economy bots distinct planning personalities' },
   { hash: '2e587f7', title: 'Correct the released 2.0.0 changelog history' },
 ]
@@ -91,10 +92,10 @@ const version160Commits = [
           <p class="eyebrow">Next</p>
           <h2>Version X.X.X</h2>
           <p>
-            The end screen now summarizes total damage, healing, shielding, and every round result. Bots also pursue
-            distinct economy, reroll, fast-level, and trait-focused plans while obeying the same shop, XP, upgrade, and
-            gold rules as human players. The released 2.0.0 history was corrected with its final version label and
-            commit hashes.
+            Rerolling and selling can now be done with discoverable keyboard shortcuts. The end screen summarizes total
+            damage, healing, shielding, and every round result. Bots also pursue distinct economy, reroll, fast-level,
+            and trait-focused plans while obeying the same shop, XP, upgrade, and gold rules as human players. The
+            released 2.0.0 history was corrected with its final version label and commit hashes.
           </p>
         </div>
         <article class="release-panel">
