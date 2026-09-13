@@ -35,6 +35,9 @@ import {
     loadActiveRoomSession,
     setActiveRoomPlayerId,
 } from './utils/clientIdentity'
+import { generateRoomCode, isInviteRoute, parseInviteRoomId } from './utils/roomInvite'
+
+type PendingRoomRequestKind = 'create' | 'join' | 'restore'
 
 const isConnected = ref(false)
 const gameState = ref<GameState | null>(null)
@@ -54,9 +57,12 @@ const ultimateGalleryMode = ref<GameMode>('onepiece')
 const UltimateGallery = shallowRef<Component | null>(null)
 const viewedPlayerId = ref<string | null>(null)
 const pendingJoinRoomId = ref<string | null>(null)
+const pendingRoomRequestKind = ref<PendingRoomRequestKind | null>(null)
+const pendingInviteRoomId = ref<string | null>(null)
 const lobbyError = ref('')
 let traitRequestGeneration = 0
 let restoredRoomTimeout: number | null = null
+let generatedCreateAttempts = 0
 
 const activeVisualMode = computed<GameMode>(() => gameState.value?.gameMode ?? defaultMode.value)
 const gameTitle = 'Theme Fusion Tactics'
@@ -114,9 +120,11 @@ onMounted(async () => {
             subscribeToRoomResults()
             const activeRoom = loadActiveRoomSession()
             if (activeRoom) {
+                if (pendingInviteRoomId.value) consumeInviteRoute()
                 gameState.value = null
                 currentRoomId.value = activeRoom.roomId
                 pendingJoinRoomId.value = activeRoom.roomId
+                pendingRoomRequestKind.value = 'restore'
                 subscribeToRoom(activeRoom.roomId)
                 client.value?.publish({
                     destination: '/app/join',
@@ -129,6 +137,10 @@ onMounted(async () => {
                 })
                 currentView.value = 'game'
                 startRestoredRoomTimeout(activeRoom.roomId)
+            } else if (pendingInviteRoomId.value) {
+                const invitedRoomId = pendingInviteRoomId.value
+                consumeInviteRoute()
+                handleJoin(invitedRoomId)
             }
         },
         onDisconnect: () => {
@@ -273,15 +285,25 @@ const subscribeToRoomResults = () => {
     roomResultSubscription.value = client.value?.subscribe('/user/queue/room-result', (message) => {
         try {
             const result = JSON.parse(message.body) as RoomRequestResult
+            if (pendingJoinRoomId.value && result.roomId && result.roomId !== pendingJoinRoomId.value) return
             if (!result.accepted || !result.roomId || !result.playerId) {
+                if (
+                    pendingRoomRequestKind.value === 'create'
+                    && result.code === 'ROOM_EXISTS'
+                    && generatedCreateAttempts < 3
+                ) {
+                    startGeneratedRoomCreation()
+                    return
+                }
                 rejectPendingJoin(result.message || 'The room request was rejected.')
                 return
             }
-            if (pendingJoinRoomId.value && result.roomId !== pendingJoinRoomId.value) return
 
             currentPlayerId.value = result.playerId
             setActiveRoomPlayerId(result.roomId, result.playerId)
             pendingJoinRoomId.value = null
+            pendingRoomRequestKind.value = null
+            generatedCreateAttempts = 0
             clearRestoredRoomTimeout()
         } catch (error) {
             console.error('Failed to parse room result', error)
@@ -306,6 +328,8 @@ const rejectPendingJoin = (message: string) => {
     clearRoomSubscriptions()
     clearActiveRoomSession()
     pendingJoinRoomId.value = null
+    pendingRoomRequestKind.value = null
+    generatedCreateAttempts = 0
     currentView.value = 'lobby'
     gameState.value = null
     currentRoomId.value = ''
@@ -415,7 +439,12 @@ const clearEmergencyDropPresentation = () => {
     emergencyDrop.value = null
 }
 
-const handleCreate = (roomId: string) => {
+const beginRoomRequest = (
+    roomId: string,
+    destination: '/app/create' | '/app/join',
+    kind: PendingRoomRequestKind,
+    timeoutMessage: string,
+) => {
     if (!client.value || !isConnected.value) return
     const normalizedRoomId = roomId.trim()
     if (!normalizedRoomId) {
@@ -423,15 +452,17 @@ const handleCreate = (roomId: string) => {
         return
     }
     lobbyError.value = ''
+    clearRoomSubscriptions()
     pendingJoinRoomId.value = normalizedRoomId
+    pendingRoomRequestKind.value = kind
     currentPlayerId.value = null
     currentRoomId.value = normalizedRoomId
     const roomSession = createActiveRoomSession(normalizedRoomId, PLAYER_NAME)
     
     subscribeToRoom(normalizedRoomId)
     
-    client.value.publish({ 
-        destination: '/app/create', 
+    client.value.publish({
+        destination,
         body: JSON.stringify({
             roomId: normalizedRoomId,
             playerName: PLAYER_NAME,
@@ -439,38 +470,24 @@ const handleCreate = (roomId: string) => {
             reconnectToken: roomSession.reconnectToken,
         })
     })
-    
+
     currentView.value = 'game'
-    startRestoredRoomTimeout(normalizedRoomId, 'The room could not be created.')
+    startRestoredRoomTimeout(normalizedRoomId, timeoutMessage)
+}
+
+const startGeneratedRoomCreation = () => {
+    generatedCreateAttempts += 1
+    beginRoomRequest(generateRoomCode(), '/app/create', 'create', 'The room could not be created.')
+}
+
+const handleCreate = () => {
+    generatedCreateAttempts = 0
+    startGeneratedRoomCreation()
 }
 
 const handleJoin = (roomId: string) => {
-    if (!client.value || !isConnected.value) return
-    const normalizedRoomId = roomId.trim()
-    if (!normalizedRoomId) {
-        lobbyError.value = 'Room ID is required.'
-        return
-    }
-    lobbyError.value = ''
-    pendingJoinRoomId.value = normalizedRoomId
-    currentPlayerId.value = null
-    currentRoomId.value = normalizedRoomId
-    const roomSession = createActiveRoomSession(normalizedRoomId, PLAYER_NAME)
-    
-    subscribeToRoom(normalizedRoomId)
-    
-    client.value.publish({ 
-        destination: '/app/join', 
-        body: JSON.stringify({
-            roomId: normalizedRoomId,
-            playerName: PLAYER_NAME,
-            analyticsClientId,
-            reconnectToken: roomSession.reconnectToken,
-        })
-    })
-    
-    currentView.value = 'game'
-    startRestoredRoomTimeout(normalizedRoomId, 'That room did not respond.')
+    generatedCreateAttempts = 0
+    beginRoomRequest(roomId, '/app/join', 'join', 'That room did not respond.')
 }
 
 const handleGameAction = (action: GameAction) => {
@@ -537,6 +554,9 @@ const resetToLobby = () => {
     traitRequestGeneration += 1
     viewedPlayerId.value = null
     pendingJoinRoomId.value = null
+    pendingRoomRequestKind.value = null
+    pendingInviteRoomId.value = null
+    generatedCreateAttempts = 0
     currentPlayerId.value = null
 
     applyThemeMeta(defaultMode.value)
@@ -583,6 +603,11 @@ const loadUltimateGallery = async () => {
     UltimateGallery.value = galleryModule.default
 }
 
+const consumeInviteRoute = () => {
+    pendingInviteRoomId.value = null
+    window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`)
+}
+
 const updateStandaloneRoute = () => {
     const wasAdmin = isAdminAnalytics.value
     const isAdmin = window.location.hash.startsWith('#/admin/analytics')
@@ -597,6 +622,19 @@ const updateStandaloneRoute = () => {
     if (wasAdmin) {
         window.location.reload()
         return
+    }
+    if (isInviteRoute(window.location.hash)) {
+        const roomId = parseInviteRoomId(window.location.hash)
+        if (!roomId) {
+            lobbyError.value = 'That invite link is invalid.'
+            consumeInviteRoute()
+            return
+        }
+        pendingInviteRoomId.value = roomId
+        if (isConnected.value && !loadActiveRoomSession()) {
+            consumeInviteRoute()
+            handleJoin(roomId)
+        }
     }
     const parsedGalleryMode = parseGalleryModeHash(window.location.hash)
     const isGallery = import.meta.env.DEV && parsedGalleryMode !== null

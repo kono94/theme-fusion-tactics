@@ -13,10 +13,12 @@ const props = withDefaults(defineProps<{
   themeClass: 'theme-generic',
 })
 
-const createId = ref('')
 const joinId = ref('')
 
-defineEmits(['create', 'join'])
+defineEmits<{
+    create: []
+    join: [roomId: string]
+}>()
 </script>
 
 <template>
@@ -30,9 +32,8 @@ defineEmits(['create', 'join'])
     <div class="actions">
        <div class="card">
          <h3>Create New Room</h3>
-         <p>Start a game with 7 AI bots</p>
-         <input v-model="createId" placeholder="Enter Room ID" @keyup.enter="createId && $emit('create', createId)" />
-         <button @click="$emit('create', createId)" :disabled="!createId">Create Game</button>
+         <p>Get a generated room code and invite other players</p>
+         <button @click="$emit('create')">Create Game</button>
        </div>
        
        <div class="separator">OR</div>

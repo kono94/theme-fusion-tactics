@@ -183,6 +183,7 @@ onto one half of the 9×6 combat canvas.
 
 - Uses `currentPlayerId === gameState.hostId` for host controls.
 - Marks the current user by player ID, not name.
+- Lets every player copy a `#/join/{roomId}` invite that automatically joins after the WebSocket connects.
 - Shows backend-configured mode choices in stable One Piece/Pokemon order.
 - Emits mode selection, start, and leave; it does not publish STOMP directly.
 

@@ -11,6 +11,10 @@ const stomp = vi.hoisted(() => ({
     subscriptions: [] as Array<{ destination: string; callback: (message: { body: string }) => void }>,
 }))
 
+const roomInvite = vi.hoisted(() => ({
+    generateRoomCode: vi.fn(),
+}))
+
 vi.mock('@stomp/stompjs', () => ({
     Client: vi.fn(function MockClient(options: { onConnect?: () => void }) {
         stomp.onConnect = options.onConnect
@@ -29,6 +33,11 @@ vi.mock('@stomp/stompjs', () => ({
 vi.mock('./components/GameInterface.vue', () => ({
     default: { template: '<div data-test="game-interface" />' },
 }))
+
+vi.mock('./utils/roomInvite', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('./utils/roomInvite')>()
+    return { ...actual, generateRoomCode: roomInvite.generateRoomCode }
+})
 
 import App from './App.vue'
 
@@ -68,6 +77,8 @@ describe('App game-mode bootstrap', () => {
         stomp.publish.mockClear()
         stomp.onConnect = undefined
         stomp.subscriptions.length = 0
+        roomInvite.generateRoomCode.mockReset()
+        roomInvite.generateRoomCode.mockReturnValue('ABC234')
         localStorage.clear()
         sessionStorage.clear()
         Object.keys(TRAIT_DATA).forEach((key) => delete TRAIT_DATA[key])
@@ -214,10 +225,7 @@ describe('App game-mode bootstrap', () => {
         wrapper.unmount()
     })
 
-    it.each([
-        { inputIndex: 0, destination: '/app/create' },
-        { inputIndex: 1, destination: '/app/join' },
-    ])('normalizes room ids before publishing to $destination', async ({ inputIndex, destination }) => {
+    it('creates a room with a generated code', async () => {
         vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
             ok: true,
             json: async () => ({ defaultGameMode: 'onepiece', availableModes: ['onepiece', 'pokemon'] }),
@@ -226,20 +234,90 @@ describe('App game-mode bootstrap', () => {
         await vi.waitFor(() => expect(stomp.onConnect).toBeDefined())
 
         stomp.onConnect?.()
-        await vi.waitFor(() => expect(wrapper.findAll('.card input')).toHaveLength(2))
-        await wrapper.findAll('.card input')[inputIndex].setValue('  canonical-room  ')
-        await wrapper.findAll('.card button')[inputIndex].trigger('click')
+        await vi.waitFor(() => expect(wrapper.findAll('.card input')).toHaveLength(1))
+        await wrapper.find('.card button').trigger('click')
 
         expect(stomp.subscriptions.map(({ destination: subscribedTo }) => subscribedTo)).toEqual(
             expect.arrayContaining([
-                '/topic/room/canonical-room',
-                '/topic/room/canonical-room/event',
+                '/topic/room/ABC234',
+                '/topic/room/ABC234/event',
             ])
         )
-        const publishedRequest = stomp.publish.mock.calls.find(([request]) => request.destination === destination)?.[0]
+        const publishedRequest = stomp.publish.mock.calls.find(([request]) => request.destination === '/app/create')?.[0]
         expect(publishedRequest).toBeDefined()
+        expect(JSON.parse(publishedRequest.body).roomId).toBe('ABC234')
+        expect(JSON.parse(sessionStorage.getItem('tactics.activeRoom') || '{}').roomId).toBe('ABC234')
+        wrapper.unmount()
+    })
+
+    it('normalizes a manually entered room id before joining', async () => {
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+            ok: true,
+            json: async () => ({ defaultGameMode: 'onepiece', availableModes: ['onepiece', 'pokemon'] }),
+        }))
+        const wrapper = mount(App)
+        await vi.waitFor(() => expect(stomp.onConnect).toBeDefined())
+
+        stomp.onConnect?.()
+        await vi.waitFor(() => expect(wrapper.find('.card input').exists()).toBe(true))
+        await wrapper.find('.card input').setValue('  canonical-room  ')
+        await wrapper.find('.secondary').trigger('click')
+
+        const publishedRequest = stomp.publish.mock.calls.find(([request]) => request.destination === '/app/join')?.[0]
         expect(JSON.parse(publishedRequest.body).roomId).toBe('canonical-room')
-        expect(JSON.parse(sessionStorage.getItem('tactics.activeRoom') || '{}').roomId).toBe('canonical-room')
+        wrapper.unmount()
+    })
+
+    it('automatically joins a valid invite link', async () => {
+        window.location.hash = '#/join/FRIEND'
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+            ok: true,
+            json: async () => ({ defaultGameMode: 'onepiece', availableModes: ['onepiece', 'pokemon'] }),
+        }))
+        const wrapper = mount(App)
+        await vi.waitFor(() => expect(stomp.onConnect).toBeDefined())
+
+        stomp.onConnect?.()
+
+        await vi.waitFor(() => {
+            const request = stomp.publish.mock.calls.find(([published]) => published.destination === '/app/join')?.[0]
+            expect(JSON.parse(request.body).roomId).toBe('FRIEND')
+        })
+        expect(window.location.hash).toBe('')
+        wrapper.unmount()
+    })
+
+    it('retries a generated code collision', async () => {
+        roomInvite.generateRoomCode
+            .mockReturnValueOnce('COLLIDE')
+            .mockReturnValueOnce('NEW234')
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+            ok: true,
+            json: async () => ({ defaultGameMode: 'onepiece', availableModes: ['onepiece', 'pokemon'] }),
+        }))
+        const wrapper = mount(App)
+        await vi.waitFor(() => expect(stomp.onConnect).toBeDefined())
+        stomp.onConnect?.()
+        await vi.waitFor(() => expect(wrapper.find('.card button').exists()).toBe(true))
+        await wrapper.find('.card button').trigger('click')
+
+        const resultSubscription = stomp.subscriptions.find(({ destination }) => destination === '/user/queue/room-result')
+        resultSubscription?.callback({
+            body: JSON.stringify({
+                accepted: false,
+                roomId: 'COLLIDE',
+                playerId: null,
+                code: 'ROOM_EXISTS',
+                message: 'A room with that ID already exists.',
+            }),
+        })
+
+        await vi.waitFor(() => {
+            const roomIds = stomp.publish.mock.calls
+                .filter(([request]) => request.destination === '/app/create')
+                .map(([request]) => JSON.parse(request.body).roomId)
+            expect(roomIds).toEqual(['COLLIDE', 'NEW234'])
+        })
         wrapper.unmount()
     })
 })

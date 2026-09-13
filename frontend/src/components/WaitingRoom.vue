@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onUnmounted, ref, watch } from 'vue'
 import type { GameMode, GameState, PlayerState } from '../types'
 import { getGameModeMetadata, sortGameModes } from '../data/gameModeMetadata'
+import { buildInviteUrl } from '../utils/roomInvite'
 
 const props = defineProps<{
   gameState: GameState
@@ -50,6 +51,28 @@ const themeClass = computed(() => {
     return props.themeClass ?? getGameModeMetadata(props.gameState?.gameMode ?? props.defaultMode).themeClass
 })
 
+const copyState = ref<'idle' | 'copied' | 'failed'>('idle')
+let copyResetTimer: number | null = null
+
+async function copyInviteLink() {
+    try {
+        await navigator.clipboard.writeText(buildInviteUrl(props.gameState.roomId))
+        copyState.value = 'copied'
+    } catch {
+        copyState.value = 'failed'
+    }
+
+    if (copyResetTimer !== null) window.clearTimeout(copyResetTimer)
+    copyResetTimer = window.setTimeout(() => {
+        copyState.value = 'idle'
+        copyResetTimer = null
+    }, 2000)
+}
+
+onUnmounted(() => {
+    if (copyResetTimer !== null) window.clearTimeout(copyResetTimer)
+})
+
 function selectMode(mode: GameMode) {
     if (mode === selectedMode.value) return
 
@@ -63,6 +86,9 @@ function selectMode(mode: GameMode) {
   <div :class="['waiting-room', themeClass]">
     <div class="header">
         <h2>Lobby: {{ gameState.roomId }}</h2>
+        <button class="invite-btn" type="button" @click="copyInviteLink">
+            {{ copyState === 'copied' ? 'Copied!' : copyState === 'failed' ? 'Copy failed' : 'Copy Invite Link' }}
+        </button>
     </div>
 
     <div class="player-list">
@@ -148,6 +174,24 @@ function selectMode(mode: GameMode) {
 .header {
     text-align: center;
     margin-bottom: 14px;
+}
+
+.invite-btn {
+    margin-top: 10px;
+    padding: 8px 14px;
+    border: 1px solid color-mix(in srgb, var(--room-accent) 55%, transparent);
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.5);
+    color: var(--room-fg);
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.invite-btn:hover {
+    border-color: var(--room-accent);
+    background: rgba(15, 23, 42, 0.72);
 }
 
 .header h2 {

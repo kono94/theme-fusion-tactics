@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import WaitingRoom from './WaitingRoom.vue'
 import type { GameState } from '../types'
 
@@ -87,5 +87,27 @@ describe('WaitingRoom mode selection', () => {
         expect(wrapper.findAll('.mode-option').every((button) => button.attributes('disabled') !== undefined)).toBe(true)
         expect(wrapper.find('.mode-option.active').text()).toContain('Pokemon')
         expect(wrapper.emitted('mode-change')).toBeUndefined()
+    })
+
+    it('copies a direct invite link for the room', async () => {
+        const writeText = vi.fn().mockResolvedValue(undefined)
+        Object.defineProperty(navigator, 'clipboard', {
+            configurable: true,
+            value: { writeText },
+        })
+        const wrapper = mount(WaitingRoom, {
+            props: {
+                gameState: gameState(),
+                currentPlayerId: 'player-1',
+                availableModes: ['onepiece', 'pokemon'],
+                defaultMode: 'onepiece',
+            },
+        })
+
+        await wrapper.get('.invite-btn').trigger('click')
+
+        expect(writeText).toHaveBeenCalledWith(expect.stringMatching(/#\/join\/mode-room$/))
+        expect(wrapper.get('.invite-btn').text()).toBe('Copied!')
+        wrapper.unmount()
     })
 })

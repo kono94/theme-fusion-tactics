@@ -9,6 +9,7 @@ const version230Highlights = [
   'Hover an active trait to see every unit line that can contribute, ordered by cost in rows of five.',
   'Trait rosters highlight units currently contributing from the viewed combat grid and show complete unit details when you hover their icons.',
   'Hovering a trait now lights up its contributing units directly on the viewed board.',
+  'New rooms now receive a generated code, and a lobby invite link lets friends join without typing it.',
   'Pokemon traits that appear after evolution now show the first form that can activate the trait.',
 ]
 
