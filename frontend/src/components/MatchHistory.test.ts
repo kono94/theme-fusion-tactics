@@ -15,6 +15,7 @@ vi.mock('../services/matchHistoryClient', () => ({
 const getMatchHistoryMock = vi.mocked(getMatchHistory)
 
 const match = {
+    historyId: 'history-1',
     mode: 'pokemon',
     completedAt: '2026-09-13T18:00:00Z',
     finalRound: 14,
@@ -41,7 +42,16 @@ describe('MatchHistory', () => {
         expect(wrapper.text()).toContain('Final round 14')
         expect(wrapper.text()).toContain('1 real player vs 7 bots')
         expect(wrapper.text()).toContain('★')
-        expect(wrapper.text()).toContain('item-1')
+        expect(wrapper.text()).toContain('Item 1')
+    })
+
+    it('uses the server history ID for distinct cards with matching metadata', async () => {
+        getMatchHistoryMock.mockResolvedValue({
+            matches: [match, { ...match, historyId: 'history-2' }],
+        })
+        const wrapper = mount(MatchHistory)
+
+        await vi.waitFor(() => expect(wrapper.findAll('[data-test="match-history-card"]')).toHaveLength(2))
     })
 
     it('shows an empty state when no matches qualify', async () => {

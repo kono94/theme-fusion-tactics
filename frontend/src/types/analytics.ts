@@ -61,11 +61,12 @@ export interface AnalyticsBoardUnit {
 }
 
 export interface PublicMatch {
+    historyId: string
     mode: string
     completedAt: string
     finalRound: number
     finalPlacement: number
-    finalComposition: AnalyticsBoardUnit[]
+    finalComposition: AnalyticsBoardUnit[] | null
 }
 
 export interface PublicMatchHistoryResponse {

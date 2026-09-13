@@ -60,4 +60,27 @@ describe('FinalCompositionStrip', () => {
         await board.find('img').trigger('error')
         expect(board.find('img').attributes('src')).toBe('/assets/units/placeholder.svg')
     })
+
+    it('can render readable labels for public compositions', () => {
+        const board = mount(FinalCompositionStrip, {
+            props: {
+                mode: 'pokemon',
+                readableLabels: true,
+                composition: [
+                    {
+                        definitionId: 'bulbasaur_v1',
+                        lineId: 'bulbasaur',
+                        starLevel: 1,
+                        itemIds: ['item-1', 'attack_speed'],
+                    },
+                ],
+            },
+        })
+
+        expect(board.find('.composition-name').text()).toBe('Bulbasaur')
+        expect(board.findAll('.item-badge').map((badge) => badge.text())).toEqual([
+            'Item 1',
+            'Attack Speed',
+        ])
+    })
 })

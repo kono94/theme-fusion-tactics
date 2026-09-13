@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -32,6 +33,7 @@ public class PublicMatchHistoryRepository {
 
     private Match mapMatch(ResultSet resultSet, int rowNumber) throws SQLException {
         return new Match(
+                resultSet.getString("id"),
                 canonicalMode(resultSet.getString("mode")),
                 Instant.ofEpochMilli(resultSet.getLong("ended_at")),
                 resultSet.getInt("final_round"),
@@ -39,25 +41,28 @@ public class PublicMatchHistoryRepository {
                 parseBoard(resultSet.getString("final_board_json")));
     }
 
-    private ArrayList<FinalBoardUnit> parseBoard(String json) {
+    private List<FinalBoardUnit> parseBoard(String json) {
+        if (json == null || json.isBlank()) {
+            return null;
+        }
         try {
             var node = objectMapper.readTree(json);
-            var units = new ArrayList<FinalBoardUnit>();
             if (!node.isArray()) {
-                return units;
+                return null;
             }
+            var units = new ArrayList<FinalBoardUnit>();
             node.forEach(unit -> units.add(new FinalBoardUnit(
                     unit.path("definitionId").asText(),
                     unit.path("lineId").asText(),
                     unit.path("starLevel").asInt(),
                     itemIds(unit))));
             return units;
-        } catch (JacksonException exception) {
-            throw new IllegalStateException("Invalid analytics board JSON", exception);
+        } catch (JacksonException | IllegalArgumentException exception) {
+            return null;
         }
     }
 
-    private java.util.List<String> itemIds(JsonNode unit) {
+    private List<String> itemIds(JsonNode unit) {
         var itemIds = new ArrayList<String>();
         var items = unit.get("itemIds");
         if (items != null && items.isArray()) {
@@ -70,14 +75,15 @@ public class PublicMatchHistoryRepository {
         return mode == null ? "unknown" : mode.toLowerCase().replace("_", "");
     }
 
-    public record Response(java.util.List<Match> matches) {}
+    public record Response(List<Match> matches) {}
 
     public record Match(
+            String historyId,
             String mode,
             Instant completedAt,
             int finalRound,
             int finalPlacement,
-            java.util.List<FinalBoardUnit> finalComposition) {}
+            List<FinalBoardUnit> finalComposition) {}
 
-    public record FinalBoardUnit(String definitionId, String lineId, int starLevel, java.util.List<String> itemIds) {}
+    public record FinalBoardUnit(String definitionId, String lineId, int starLevel, List<String> itemIds) {}
 }

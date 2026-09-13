@@ -69,7 +69,7 @@ onBeforeUnmount(() => {
       No completed solo matches yet.
     </div>
     <section v-else class="match-history-list" aria-label="Last completed matches">
-      <article v-for="match in matches" :key="`${match.completedAt}-${match.finalRound}-${match.finalPlacement}`" class="match-history-card" data-test="match-history-card">
+      <article v-for="match in matches" :key="match.historyId" class="match-history-card" data-test="match-history-card">
         <div class="match-history-card__meta">
           <div>
             <h2>{{ modeLabel(match.mode) }} solo match</h2>
@@ -81,7 +81,12 @@ onBeforeUnmount(() => {
           </div>
         </div>
         <p class="match-history-card__round">Final round <strong>{{ match.finalRound }}</strong> · 1 real player vs 7 bots</p>
-        <FinalCompositionStrip :mode="match.mode" :composition="match.finalComposition" compact />
+        <FinalCompositionStrip
+          :mode="match.mode"
+          :composition="match.finalComposition"
+          readable-labels
+          compact
+        />
       </article>
     </section>
   </main>

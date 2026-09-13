@@ -276,8 +276,9 @@ Public endpoints:
 - `GET /api/traits?mode={mode}` returns trait metadata plus the resolved unit roster for each trait
 - `GET /api/match-history` returns at most 20 completed solo matches. A row is included only when exactly one human
   run completed without abandonment, has a valid placement and captured final board, and its match has a completion
-  timestamp and final round. The response exposes mode, completion time, final round, placement, and final board units;
-  room IDs, run IDs, player names/IDs, analytics client IDs, and build metadata are never serialized.
+  timestamp and final round. The response exposes an opaque history ID, mode, completion time, final round, placement,
+  and final board units; a malformed stored board is represented as an unavailable composition so one bad row does not
+  break the feed. Room IDs, run IDs, player names/IDs, analytics client IDs, and build metadata are never serialized.
 
 Admin endpoints:
 

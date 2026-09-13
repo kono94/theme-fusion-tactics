@@ -3,6 +3,7 @@ package net.lwenstrom.tft.backend.analytics;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.nio.file.Files;
+import java.util.List;
 import java.util.UUID;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.BeforeEach;
@@ -71,12 +72,12 @@ class PublicMatchHistoryRepositoryTest {
                 .extracting(PublicMatchHistoryRepository.Match::mode)
                 .containsExactly("pokemon", "onepiece");
         assertThat(response.matches().getFirst()).satisfies(match -> {
+            assertThat(match.historyId()).isEqualTo("newer");
             assertThat(match.completedAt().toEpochMilli()).isEqualTo(2_000);
             assertThat(match.finalRound()).isEqualTo(14);
             assertThat(match.finalPlacement()).isEqualTo(3);
             assertThat(match.finalComposition())
-                    .containsExactly(new PublicMatchHistoryRepository.FinalBoardUnit(
-                            "mewtwo", "mewtwo", 1, java.util.List.of()));
+                    .containsExactly(new PublicMatchHistoryRepository.FinalBoardUnit("mewtwo", "mewtwo", 1, List.of()));
         });
     }
 
@@ -91,6 +92,30 @@ class PublicMatchHistoryRepositoryTest {
         assertThat(response.matches()).hasSize(20);
         assertThat(response.matches().getFirst().completedAt().toEpochMilli()).isEqualTo(24);
         assertThat(response.matches().getLast().completedAt().toEpochMilli()).isEqualTo(5);
+    }
+
+    @Test
+    void keepsTheFeedAvailableWhenAStoredBoardIsInvalid() {
+        insertMatch("invalid-json", "POKEMON", 2_000, 14, 3, "{not-json", "COMPLETED", "COMPLETED", null);
+        insertMatch(
+                "valid-board",
+                "POKEMON",
+                1_500,
+                12,
+                2,
+                "[{\"definitionId\":\"pikachu\",\"lineId\":\"pikachu\",\"starLevel\":2,\"itemIds\":[]}]",
+                "COMPLETED",
+                "COMPLETED",
+                null);
+        insertMatch("not-an-array", "POKEMON", 1_000, 10, 4, "{\"board\":[]}", "COMPLETED", "COMPLETED", null);
+
+        var response = repository.latest();
+
+        assertThat(response.matches()).hasSize(3);
+        assertThat(response.matches().get(0).finalComposition()).isNull();
+        assertThat(response.matches().get(1).finalComposition())
+                .containsExactly(new PublicMatchHistoryRepository.FinalBoardUnit("pikachu", "pikachu", 2, List.of()));
+        assertThat(response.matches().get(2).finalComposition()).isNull();
     }
 
     private void insertMatch(

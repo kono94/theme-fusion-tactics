@@ -260,8 +260,10 @@ excluded from `tsconfig.build.json`; do not document the gallery as a production
 ## 11. Admin analytics
 
 `#/match-history` renders `MatchHistory.vue` without starting the game WebSocket and loads the public latest-20 feed from
-`matchHistoryClient.ts`. It displays local completion time, mode, final round, placement, and a shared
-`FinalCompositionStrip.vue` board renderer with star and item badges, plus loading, empty, retry, and Back states.
+`matchHistoryClient.ts`. It uses the server-provided opaque history ID for card identity, displays local completion time,
+mode, final round, placement, and a shared `FinalCompositionStrip.vue` board renderer with readable star and item labels.
+Unavailable historical board JSON is shown per card, without preventing the rest of the feed from rendering. The page also
+provides loading, empty, retry, and Back states.
 `#/admin/analytics` renders `AdminAnalytics.vue` without starting the game WebSocket. `analyticsClient.ts` handles login,
 bearer token storage for the current tab, summary queries, paginated run queries, final-composition unit-presence
 comparisons, run detail, and logout. The dashboard defaults to completed, non-abandoned runs and exposes exact mode,

@@ -8,9 +8,18 @@ const props = defineProps<{
     mode: string
     composition: AnalyticsBoardUnit[] | null
     compact?: boolean
+    readableLabels?: boolean
 }>()
 
 const failedImages = ref(new Set<string>())
+
+const labelFor = (value: string) => {
+    if (!props.readableLabels) return value
+    return value
+        .replace(/(?:[_-]v\d+)$/i, '')
+        .replace(/[_-]+/g, ' ')
+        .replace(/\b\w/g, (character) => character.toUpperCase())
+}
 
 const portraitKey = (unit: AnalyticsBoardUnit) => `${props.mode}:${unit.definitionId}`
 const imagePath = (unit: AnalyticsBoardUnit) =>
@@ -21,6 +30,9 @@ const imagePath = (unit: AnalyticsBoardUnit) =>
 const markMissing = (unit: AnalyticsBoardUnit) => {
     failedImages.value = new Set(failedImages.value).add(portraitKey(unit))
 }
+
+const unitLabel = (unit: AnalyticsBoardUnit) => labelFor(unit.definitionId)
+const itemLabel = (itemId: string) => labelFor(itemId)
 </script>
 
 <template>
@@ -34,19 +46,19 @@ const markMissing = (unit: AnalyticsBoardUnit) => {
     <div v-for="(unit, index) in composition" :key="`${unit.definitionId}-${unit.lineId}-${index}`" class="composition-unit" role="listitem">
       <img
         :src="imagePath(unit)"
-        :alt="unit.definitionId"
+        :alt="unitLabel(unit)"
         @error="markMissing(unit)"
       />
-      <span class="composition-name">{{ unit.definitionId }}</span>
+      <span class="composition-name">{{ unitLabel(unit) }}</span>
       <span class="composition-stars" :aria-label="`${unit.starLevel} star`">{{ '★'.repeat(unit.starLevel) }}</span>
       <span
         v-if="unit.itemIds.length"
         class="composition-items"
         role="list"
-        :aria-label="`Items: ${unit.itemIds.join(', ')}`"
+        :aria-label="`Items: ${unit.itemIds.map(itemLabel).join(', ')}`"
       >
         <span v-for="(itemId, itemIndex) in unit.itemIds" :key="`${itemId}-${itemIndex}`" class="item-badge" role="listitem">
-          {{ itemId }}
+          {{ itemLabel(itemId) }}
         </span>
       </span>
     </div>

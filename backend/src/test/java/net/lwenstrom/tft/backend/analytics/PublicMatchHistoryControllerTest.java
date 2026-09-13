@@ -16,6 +16,7 @@ class PublicMatchHistoryControllerTest {
     @Test
     void returnsThePublicHistoryResponseWithoutPrivateIdentifiers() {
         var response = new PublicMatchHistoryRepository.Response(List.of(new PublicMatchHistoryRepository.Match(
+                "history-1",
                 "pokemon",
                 Instant.parse("2026-09-13T18:00:00Z"),
                 14,
