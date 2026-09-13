@@ -8,6 +8,7 @@ import { getUnitIconPath } from '../utils/iconUtils'
 import { getRarityColor, TEAM_COLORS } from '../utils/colorUtils'
 import { setUnitDragPreview } from '../utils/dragPreview'
 import { isBenchCoordinate, projectBoardCoordinate, type BoardProjectionPhase } from '../utils/boardProjection'
+import { normalizeTraitId } from '../data/traitData'
 
 const props = defineProps<{
     state: GameState | null,
@@ -15,6 +16,7 @@ const props = defineProps<{
     viewedPlayerId?: string,
     isReadOnly?: boolean,
     isDraggingProp?: boolean,
+    highlightedTraitId?: string | null,
     emergencyDrop?: EmergencyDropPayload | null,
     emergencyDropActive?: boolean
 }>()
@@ -46,6 +48,15 @@ function reportInvalidCoordinate(unit: GameUnit, phase: BoardProjectionPhase) {
 
 const currentViewedPlayerId = computed(() => props.viewedPlayerId || props.actingPlayerId)
 const isHomeView = computed(() => !!props.actingPlayerId && currentViewedPlayerId.value === props.actingPlayerId)
+
+function isHighlightedTraitContributor(unit: DisplayedUnit): boolean {
+    if (!props.highlightedTraitId || !unit.isMine || unit.isDying) return false
+    return unit.traits.some((trait) => normalizeTraitId(trait) === props.highlightedTraitId)
+}
+
+function isDimmedByTraitHighlight(unit: DisplayedUnit): boolean {
+    return !!props.highlightedTraitId && unit.isMine && !unit.isDying && !isHighlightedTraitContributor(unit)
+}
 
 const renderedUnits = computed((): RenderedUnit[] => {
     const state = props.state
@@ -955,7 +966,9 @@ const onOrbClick = (orbId: string) => {
                             'hit-flash': hitFlashUnits.has(unit.id),
                             'attacking-lunge': attackingUnits.has(unit.id),
                             'casting-glow': castingUnits.has(unit.id),
-                            'ultimate-caster': castingUnits.has(unit.id) && (unit.starLevel || 1) >= 3
+                            'ultimate-caster': castingUnits.has(unit.id) && (unit.starLevel || 1) >= 3,
+                            'trait-contributor': isHighlightedTraitContributor(unit),
+                            'trait-dimmed': isDimmedByTraitHighlight(unit)
                          }"
                          :draggable="unit.ownerId === actingPlayerId && !isReadOnly && props.state?.phase !== 'COMBAT' && !unit.isDying"
                          @dragstart="(e) => onDragStart(e, unit)"
@@ -1389,6 +1402,21 @@ const onOrbClick = (orbId: string) => {
 }
 .unit.mine:active {
     cursor: grabbing;
+}
+
+.unit.trait-contributor {
+    z-index: 30;
+    border-color: #fde047;
+    filter: brightness(1.2) saturate(1.15);
+    box-shadow:
+        0 0 0 3px rgba(253, 224, 71, 0.34),
+        0 0 24px rgba(250, 204, 21, 0.9),
+        0 4px 6px rgba(0, 0, 0, 0.5);
+}
+
+.unit.trait-dimmed {
+    filter: grayscale(0.75) brightness(0.55);
+    opacity: 0.45;
 }
 
 .unit.hit-flash {

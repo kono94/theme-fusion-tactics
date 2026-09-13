@@ -35,6 +35,7 @@ const allPlayers = computed((): PlayerState[] => {
 })
 
 const viewedPlayerId = ref<string | null>(null)
+const hoveredTraitId = ref<string | null>(null)
 
 const effectiveViewedPlayerId = computed(() => {
     return viewedPlayerId.value || myPlayer.value?.playerId
@@ -562,6 +563,7 @@ watch(effectiveViewedPlayerId, (playerId) => {
                 v-if="viewedPlayer"
                 :units="viewedPlayerBoardUnits"
                 :game-mode="state.gameMode"
+                @hover-trait="(traitId) => hoveredTraitId = traitId"
             />
             <div v-if="isSpectating && viewedPlayer" class="spectator-notice">
                 <span>Viewing {{ viewedPlayer.name }}</span>
@@ -572,6 +574,7 @@ watch(effectiveViewedPlayerId, (playerId) => {
                 :viewed-player-id="effectiveViewedPlayerId"
                 :is-read-only="isSpectating || !canManageTeam"
                 :is-dragging-prop="isDraggingUnit"
+                :highlighted-trait-id="hoveredTraitId"
                 :emergency-drop="emergencyDrop || queuedEmergencyDrop"
                 :emergency-drop-active="!!emergencyDrop"
                 @move="handleBoardMove" 

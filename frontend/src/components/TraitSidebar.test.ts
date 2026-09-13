@@ -170,4 +170,24 @@ describe('TraitSidebar', () => {
 
         expect(wrapper.get('.trait-count').text()).toContain('1 / 1')
     })
+
+    it('emits the active trait while its tooltip is hovered', async () => {
+        setTraitData([{
+            id: 'fighter',
+            name: 'Fighter',
+            description: 'Fighter trait',
+            effects: [{ minUnits: 1, description: '+5% ATK', style: 'bronze' }],
+            type: 'class',
+            iconColor: '#ef4444',
+            units: [rosterUnit(0)],
+        }])
+        const wrapper = mount(TraitSidebar, {
+            props: { units: [boardUnit()], gameMode: 'onepiece' },
+        })
+
+        await wrapper.get('.trait-item').trigger('mouseenter')
+        await wrapper.get('.trait-item').trigger('mouseleave')
+
+        expect(wrapper.emitted('hover-trait')).toEqual([['fighter'], [null]])
+    })
 })

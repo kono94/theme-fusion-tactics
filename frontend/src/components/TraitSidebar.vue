@@ -18,6 +18,10 @@ const props = defineProps<{
     gameMode: GameMode
 }>()
 
+const emit = defineEmits<{
+    'hover-trait': [traitId: string | null]
+}>()
+
 const hoveredTraitId = ref<string | null>(null)
 const activeUnitTooltip = ref<{
     unit: GameUnit | TraitRosterUnit
@@ -117,7 +121,13 @@ function hideUnitTooltip() {
 
 function hideTraitTooltip() {
     hoveredTraitId.value = null
+    emit('hover-trait', null)
     hideUnitTooltip()
+}
+
+function showTraitTooltip(traitId: string) {
+    hoveredTraitId.value = traitId
+    emit('hover-trait', traitId)
 }
 </script>
 
@@ -128,7 +138,7 @@ function hideTraitTooltip() {
           :key="item.id"
           class="trait-item"
           :class="item.style"
-          @mouseenter="hoveredTraitId = item.id"
+          @mouseenter="showTraitTooltip(item.id)"
           @mouseleave="hideTraitTooltip"
       >
           <div class="trait-icon" :style="{ backgroundColor: item.def.iconColor || '#94a3b8' }">
