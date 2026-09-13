@@ -6,6 +6,7 @@ defineOptions({
 defineEmits(['back'])
 
 const version230Highlights = [
+  'Choose your own player name before creating or joining a room. Your name is remembered on this device, and invite links wait for you to confirm it before joining.',
   'Hover an active trait to see every unit line that can contribute, ordered by cost in rows of five.',
   'Trait rosters highlight units currently contributing from the viewed combat grid and show complete unit details when you hover their icons.',
   'Hovering a trait now lights up its contributing units directly on the viewed board.',
@@ -96,8 +97,8 @@ const version160Commits = [
           <p class="eyebrow">Latest</p>
           <h2>Version 2.3.0</h2>
           <p>
-            Share rooms faster, read your trait setup clearly, and review every unit's full-match
-            combat impact.
+            Make rooms more personal, share them faster, read your trait setup clearly, and review
+            every unit's full-match combat impact.
           </p>
         </div>
         <div class="release-grid">

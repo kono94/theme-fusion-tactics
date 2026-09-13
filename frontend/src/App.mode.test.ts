@@ -234,7 +234,8 @@ describe('App game-mode bootstrap', () => {
         await vi.waitFor(() => expect(stomp.onConnect).toBeDefined())
 
         stomp.onConnect?.()
-        await vi.waitFor(() => expect(wrapper.findAll('.card input')).toHaveLength(1))
+        await vi.waitFor(() => expect(wrapper.find('[data-test="player-name-input"]').exists()).toBe(true))
+        await wrapper.find('[data-test="player-name-input"]').setValue('  Luffy  ')
         await wrapper.find('.card button').trigger('click')
 
         expect(stomp.subscriptions.map(({ destination: subscribedTo }) => subscribedTo)).toEqual(
@@ -246,7 +247,26 @@ describe('App game-mode bootstrap', () => {
         const publishedRequest = stomp.publish.mock.calls.find(([request]) => request.destination === '/app/create')?.[0]
         expect(publishedRequest).toBeDefined()
         expect(JSON.parse(publishedRequest.body).roomId).toBe('ABC234')
+        expect(JSON.parse(publishedRequest.body).playerName).toBe('Luffy')
+        expect(localStorage.getItem('tactics.playerName')).toBe('Luffy')
         expect(JSON.parse(sessionStorage.getItem('tactics.activeRoom') || '{}').roomId).toBe('ABC234')
+        wrapper.unmount()
+    })
+
+    it('restores the saved player name on a later visit', async () => {
+        localStorage.setItem('tactics.playerName', 'Chopper')
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+            ok: true,
+            json: async () => ({ defaultGameMode: 'onepiece', availableModes: ['onepiece', 'pokemon'] }),
+        }))
+        const wrapper = mount(App)
+        await vi.waitFor(() => expect(stomp.onConnect).toBeDefined())
+
+        stomp.onConnect?.()
+
+        await vi.waitFor(() => {
+            expect(wrapper.get<HTMLInputElement>('[data-test="player-name-input"]').element.value).toBe('Chopper')
+        })
         wrapper.unmount()
     })
 
@@ -259,8 +279,9 @@ describe('App game-mode bootstrap', () => {
         await vi.waitFor(() => expect(stomp.onConnect).toBeDefined())
 
         stomp.onConnect?.()
-        await vi.waitFor(() => expect(wrapper.find('.card input').exists()).toBe(true))
-        await wrapper.find('.card input').setValue('  canonical-room  ')
+        await vi.waitFor(() => expect(wrapper.find('[data-test="room-id-input"]').exists()).toBe(true))
+        await wrapper.find('[data-test="player-name-input"]').setValue('Zoro')
+        await wrapper.find('[data-test="room-id-input"]').setValue('  canonical-room  ')
         await wrapper.find('.secondary').trigger('click')
 
         const publishedRequest = stomp.publish.mock.calls.find(([request]) => request.destination === '/app/join')?.[0]
@@ -268,7 +289,7 @@ describe('App game-mode bootstrap', () => {
         wrapper.unmount()
     })
 
-    it('automatically joins a valid invite link', async () => {
+    it('waits for a player name before joining a valid invite link', async () => {
         window.location.hash = '#/join/FRIEND'
         vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
             ok: true,
@@ -279,10 +300,16 @@ describe('App game-mode bootstrap', () => {
 
         stomp.onConnect?.()
 
-        await vi.waitFor(() => {
-            const request = stomp.publish.mock.calls.find(([published]) => published.destination === '/app/join')?.[0]
-            expect(JSON.parse(request.body).roomId).toBe('FRIEND')
-        })
+        await vi.waitFor(() => expect(wrapper.find('.subtitle').text()).toContain('FRIEND'))
+        expect(stomp.publish.mock.calls.some(([published]) => published.destination === '/app/join')).toBe(false)
+        expect(wrapper.get<HTMLInputElement>('[data-test="room-id-input"]').element.value).toBe('FRIEND')
+        expect(wrapper.get<HTMLButtonElement>('.secondary').element.disabled).toBe(true)
+
+        await wrapper.find('[data-test="player-name-input"]').setValue('Robin')
+        await wrapper.find('.secondary').trigger('click')
+
+        const request = stomp.publish.mock.calls.find(([published]) => published.destination === '/app/join')?.[0]
+        expect(JSON.parse(request.body)).toMatchObject({ roomId: 'FRIEND', playerName: 'Robin' })
         expect(window.location.hash).toBe('')
         wrapper.unmount()
     })
@@ -299,6 +326,7 @@ describe('App game-mode bootstrap', () => {
         await vi.waitFor(() => expect(stomp.onConnect).toBeDefined())
         stomp.onConnect?.()
         await vi.waitFor(() => expect(wrapper.find('.card button').exists()).toBe(true))
+        await wrapper.find('[data-test="player-name-input"]').setValue('Sanji')
         await wrapper.find('.card button').trigger('click')
 
         const resultSubscription = stomp.subscriptions.find(({ destination }) => destination === '/user/queue/room-result')

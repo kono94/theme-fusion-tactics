@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { PLAYER_NAME_MAX_LENGTH } from '../utils/clientIdentity'
 
 defineOptions({
   name: 'GameLobby'
@@ -7,33 +8,71 @@ defineOptions({
 
 const props = withDefaults(defineProps<{
   title: string
+  playerName?: string
+  inviteRoomId?: string
   themeClass?: string
   error?: string
 }>(), {
+  playerName: '',
+  inviteRoomId: '',
   themeClass: 'theme-generic',
 })
 
-const joinId = ref('')
-
-defineEmits<{
+const emit = defineEmits<{
+    'update:playerName': [playerName: string]
     create: []
     join: [roomId: string]
 }>()
+
+const joinId = ref(props.inviteRoomId)
+const playerNameModel = computed({
+    get: () => props.playerName,
+    set: (playerName: string) => emit('update:playerName', playerName),
+})
+const hasValidPlayerName = computed(() => {
+    const playerName = props.playerName.trim()
+    return playerName.length > 0 && playerName.length <= PLAYER_NAME_MAX_LENGTH
+})
+const canJoin = computed(() => hasValidPlayerName.value && joinId.value.trim().length > 0)
+
+watch(
+    () => props.inviteRoomId,
+    (roomId) => {
+        if (roomId) joinId.value = roomId
+    },
+)
 </script>
 
 <template>
   <div :class="['lobby', props.themeClass]">
     <div class="title">
         <h1>{{ props.title }}</h1>
-        <p class="subtitle">Create or join a tactics room</p>
+        <p class="subtitle">
+          {{ props.inviteRoomId ? `You've been invited to room ${props.inviteRoomId}` : 'Create or join a tactics room' }}
+        </p>
     </div>
     <div v-if="props.error" class="lobby-error">{{ props.error }}</div>
+
+    <div class="player-name-field">
+      <label for="player-name">Player name</label>
+      <input
+        id="player-name"
+        v-model="playerNameModel"
+        data-test="player-name-input"
+        type="text"
+        autocomplete="nickname"
+        placeholder="Enter your player name"
+        :maxlength="PLAYER_NAME_MAX_LENGTH"
+        @keyup.enter="canJoin && emit('join', joinId)"
+      />
+      <span>Your name is remembered on this device.</span>
+    </div>
     
     <div class="actions">
        <div class="card">
          <h3>Create New Room</h3>
          <p>Get a generated room code and invite other players</p>
-         <button @click="$emit('create')">Create Game</button>
+         <button :disabled="!hasValidPlayerName" @click="emit('create')">Create Game</button>
        </div>
        
        <div class="separator">OR</div>
@@ -41,8 +80,13 @@ defineEmits<{
        <div class="card">
          <h3>Join Existing Room</h3>
          <p>Play with others</p>
-         <input v-model="joinId" placeholder="Enter Room ID" @keyup.enter="joinId && $emit('join', joinId)" />
-         <button @click="$emit('join', joinId)" :disabled="!joinId" class="secondary">Join Game</button>
+         <input
+           v-model="joinId"
+           data-test="room-id-input"
+           placeholder="Enter Room ID"
+           @keyup.enter="canJoin && emit('join', joinId)"
+         />
+         <button :disabled="!canJoin" class="secondary" @click="emit('join', joinId)">Join Game</button>
        </div>
     </div>
   </div>
@@ -90,11 +134,29 @@ defineEmits<{
     font-weight: 600;
 }
 
+.player-name-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: min(92vw, 420px);
+    margin-top: 30px;
+}
+
+.player-name-field label {
+    color: var(--room-fg);
+    font-weight: 800;
+}
+
+.player-name-field span {
+    color: var(--room-muted);
+    font-size: 0.82rem;
+}
+
 .actions {
     display: flex;
     gap: 40px;
     align-items: center;
-    margin-top: 50px;
+    margin-top: 34px;
 }
 
 .lobby-error {

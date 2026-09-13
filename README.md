@@ -54,7 +54,8 @@ For detailed architectural information, refer to the context documents:
 - **Git-based version display** — Build metadata (tag, commit, timestamp) in bottom-left corner
 - **Smart unit tooltips** — Role, melee/ranged, trait-color, and DEF badges with star-level ability highlighting
 - **Player board spectating** — Click alive players in the right panel to view their board and combat from their perspective
-- **Shareable room invites** — New rooms receive a short generated code and a lobby link that joins friends directly
+- **Shareable room invites** — New rooms receive a short generated code and a lobby link that prefills it for friends
+- **Remembered player names** — Choose a display name before creating or joining; invite links wait for name confirmation
 - **Keyboard shortcuts** — Enter joins a typed room code, `R` rerolls, and `S` sells the hovered owned unit
 - **Bench reordering** — Swap and rearrange units during planning
 - **Team-colored health bars** — Emerald for allies, red for opponents

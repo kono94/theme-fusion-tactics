@@ -3,7 +3,9 @@ import {
     clearActiveRoomSession,
     createActiveRoomSession,
     getAnalyticsClientId,
+    loadPlayerName,
     loadActiveRoomSession,
+    savePlayerName,
     setActiveRoomPlayerId,
 } from './clientIdentity'
 
@@ -19,6 +21,15 @@ describe('client identity', () => {
     it('keeps the anonymous analytics id across visits', () => {
         expect(getAnalyticsClientId()).toBe('10000000-0000-4000-8000-000000000001')
         expect(getAnalyticsClientId()).toBe('10000000-0000-4000-8000-000000000001')
+    })
+
+    it('persists a normalized player name across visits', () => {
+        savePlayerName('  Nami  ')
+        expect(loadPlayerName()).toBe('Nami')
+        expect(localStorage.getItem('tactics.playerName')).toBe('Nami')
+
+        savePlayerName('   ')
+        expect(loadPlayerName()).toBe('')
     })
 
     it('stores reconnect credentials only for the active tab', () => {

@@ -32,7 +32,10 @@ import {
     clearActiveRoomSession,
     createActiveRoomSession,
     getAnalyticsClientId,
+    loadPlayerName,
     loadActiveRoomSession,
+    PLAYER_NAME_MAX_LENGTH,
+    savePlayerName,
     setActiveRoomPlayerId,
 } from './utils/clientIdentity'
 import { generateRoomCode, isInviteRoute, parseInviteRoomId } from './utils/roomInvite'
@@ -68,7 +71,8 @@ const activeVisualMode = computed<GameMode>(() => gameState.value?.gameMode ?? d
 const gameTitle = 'Theme Fusion Tactics'
 
 const restoredRoom = loadActiveRoomSession()
-const PLAYER_NAME = restoredRoom?.playerName ?? "Player_" + Math.floor(Math.random() * 10000)
+const playerName = ref(loadPlayerName())
+const activePlayerName = ref(restoredRoom?.playerName ?? '')
 const currentPlayerId = ref<string | null>(restoredRoom?.playerId ?? null)
 const analyticsClientId = getAnalyticsClientId()
 
@@ -138,9 +142,7 @@ onMounted(async () => {
                 currentView.value = 'game'
                 startRestoredRoomTimeout(activeRoom.roomId)
             } else if (pendingInviteRoomId.value) {
-                const invitedRoomId = pendingInviteRoomId.value
-                consumeInviteRoute()
-                handleJoin(invitedRoomId)
+                currentView.value = 'lobby'
             }
         },
         onDisconnect: () => {
@@ -445,11 +447,16 @@ const beginRoomRequest = (
     kind: PendingRoomRequestKind,
     timeoutMessage: string,
 ) => {
-    if (!client.value || !isConnected.value) return
+    if (!client.value || !isConnected.value) return false
     const normalizedRoomId = roomId.trim()
+    const normalizedPlayerName = playerName.value.trim()
     if (!normalizedRoomId) {
         lobbyError.value = 'Room ID is required.'
-        return
+        return false
+    }
+    if (!normalizedPlayerName || normalizedPlayerName.length > PLAYER_NAME_MAX_LENGTH) {
+        lobbyError.value = `Player name must be between 1 and ${PLAYER_NAME_MAX_LENGTH} characters.`
+        return false
     }
     lobbyError.value = ''
     clearRoomSubscriptions()
@@ -457,7 +464,9 @@ const beginRoomRequest = (
     pendingRoomRequestKind.value = kind
     currentPlayerId.value = null
     currentRoomId.value = normalizedRoomId
-    const roomSession = createActiveRoomSession(normalizedRoomId, PLAYER_NAME)
+    activePlayerName.value = normalizedPlayerName
+    savePlayerName(normalizedPlayerName)
+    const roomSession = createActiveRoomSession(normalizedRoomId, normalizedPlayerName)
     
     subscribeToRoom(normalizedRoomId)
     
@@ -465,7 +474,7 @@ const beginRoomRequest = (
         destination,
         body: JSON.stringify({
             roomId: normalizedRoomId,
-            playerName: PLAYER_NAME,
+            playerName: normalizedPlayerName,
             analyticsClientId,
             reconnectToken: roomSession.reconnectToken,
         })
@@ -473,6 +482,7 @@ const beginRoomRequest = (
 
     currentView.value = 'game'
     startRestoredRoomTimeout(normalizedRoomId, timeoutMessage)
+    return true
 }
 
 const startGeneratedRoomCreation = () => {
@@ -487,7 +497,15 @@ const handleCreate = () => {
 
 const handleJoin = (roomId: string) => {
     generatedCreateAttempts = 0
-    beginRoomRequest(roomId, '/app/join', 'join', 'That room did not respond.')
+    if (beginRoomRequest(roomId, '/app/join', 'join', 'That room did not respond.')) {
+        consumeInviteRoute()
+    }
+}
+
+const handlePlayerNameChange = (updatedPlayerName: string) => {
+    playerName.value = updatedPlayerName
+    savePlayerName(updatedPlayerName)
+    lobbyError.value = ''
 }
 
 const handleGameAction = (action: GameAction) => {
@@ -509,7 +527,7 @@ const handleStartGame = () => {
     console.log("Publishing /app/start for room:", currentRoomId.value);
     client.value.publish({
         destination: '/app/start',
-        body: JSON.stringify({ roomId: currentRoomId.value, playerName: PLAYER_NAME })
+        body: JSON.stringify({ roomId: currentRoomId.value, playerName: activePlayerName.value })
     })
 }
 
@@ -537,7 +555,7 @@ const handleModeChange = (mode: GameMode) => {
     if (!client.value || !isConnected.value) return
     client.value.publish({
         destination: `/app/room/${currentRoomId.value}/mode`,
-        body: JSON.stringify({ playerName: PLAYER_NAME, gameMode: mode })
+        body: JSON.stringify({ playerName: activePlayerName.value, gameMode: mode })
     })
 }
 
@@ -558,6 +576,7 @@ const resetToLobby = () => {
     pendingInviteRoomId.value = null
     generatedCreateAttempts = 0
     currentPlayerId.value = null
+    activePlayerName.value = ''
 
     applyThemeMeta(defaultMode.value)
 }
@@ -566,7 +585,7 @@ const leaveCurrentGame = () => {
     if (client.value && isConnected.value && currentRoomId.value) {
         client.value.publish({
             destination: '/app/leave',
-            body: JSON.stringify({ roomId: currentRoomId.value, playerName: PLAYER_NAME })
+            body: JSON.stringify({ roomId: currentRoomId.value, playerName: activePlayerName.value })
         })
     }
     resetToLobby()
@@ -576,7 +595,7 @@ const abandonCurrentGame = () => {
     if (client.value && isConnected.value && currentRoomId.value) {
         client.value.publish({
             destination: '/app/abandon',
-            body: JSON.stringify({ roomId: currentRoomId.value, playerName: PLAYER_NAME })
+            body: JSON.stringify({ roomId: currentRoomId.value, playerName: activePlayerName.value })
         })
     }
     resetToLobby()
@@ -631,10 +650,8 @@ const updateStandaloneRoute = () => {
             return
         }
         pendingInviteRoomId.value = roomId
-        if (isConnected.value && !loadActiveRoomSession()) {
-            consumeInviteRoute()
-            handleJoin(roomId)
-        }
+    } else {
+        pendingInviteRoomId.value = null
     }
     const parsedGalleryMode = parseGalleryModeHash(window.location.hash)
     const isGallery = import.meta.env.DEV && parsedGalleryMode !== null
@@ -685,8 +702,11 @@ const applyThemeMeta = (mode: GameMode) => {
     <template v-else>
         <Lobby v-if="currentView === 'lobby'" 
                :title="gameTitle"
+               :player-name="playerName"
+               :invite-room-id="pendingInviteRoomId || ''"
                :theme-class="activeThemeClass"
                :error="lobbyError"
+               @update:player-name="handlePlayerNameChange"
                @create="handleCreate" 
                @join="handleJoin" />
 

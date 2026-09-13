@@ -102,8 +102,10 @@ The client reconnect delay is five seconds. On connection:
 - A restored active-match player presents the reconnect token; the backend rebinds the new STOMP session.
 - `leave` preserves the active-match player for reconnect grace; `abandon` permanently gives up the match.
 
-`localStorage` contains only the anonymous analytics client ID. Room/reconnect identity uses `sessionStorage`, so it is
-tab-scoped.
+`localStorage` contains the anonymous analytics client ID and the player's preferred display name. Room/reconnect
+identity, including the name used when that room was joined, uses `sessionStorage`, so it remains tab-scoped and stable
+for reconnects. Invite routes prefill the room ID in the lobby and wait for the player to confirm a valid name before
+joining.
 
 ## 6. STOMP contracts
 

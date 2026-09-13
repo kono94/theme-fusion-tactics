@@ -1,5 +1,8 @@
 const ANALYTICS_ID_KEY = 'tactics.analytics.clientId'
 const ACTIVE_ROOM_KEY = 'tactics.activeRoom'
+const PLAYER_NAME_KEY = 'tactics.playerName'
+
+export const PLAYER_NAME_MAX_LENGTH = 32
 
 export interface ActiveRoomSession {
     roomId: string
@@ -16,6 +19,21 @@ export const getAnalyticsClientId = () => {
     const id = randomId()
     localStorage.setItem(ANALYTICS_ID_KEY, id)
     return id
+}
+
+export const loadPlayerName = () => {
+    const playerName = localStorage.getItem(PLAYER_NAME_KEY)?.trim() ?? ''
+    return playerName.length <= PLAYER_NAME_MAX_LENGTH ? playerName : ''
+}
+
+export const savePlayerName = (playerName: string) => {
+    const normalizedPlayerName = playerName.trim()
+    if (!normalizedPlayerName) {
+        localStorage.removeItem(PLAYER_NAME_KEY)
+        return
+    }
+
+    localStorage.setItem(PLAYER_NAME_KEY, normalizedPlayerName.slice(0, PLAYER_NAME_MAX_LENGTH))
 }
 
 export const createActiveRoomSession = (roomId: string, playerName: string): ActiveRoomSession => {
