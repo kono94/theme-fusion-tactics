@@ -162,8 +162,9 @@ offers do not pause the timer. Unanswered offers are auto-selected when combat b
 
 `PlayerState` contains player/economy fields, `bench`, `board`, `shop`, `lootOrbs`, `augmentChoices`,
 `selectedAugments`, `isGhost`, `isBot`, nullable `botPersonality`, and `matchStats`. The player list presents the
-server-assigned bot personality. The end screen uses `matchStats` for aggregate damage, healing, shielding, and the
-round-by-round result strip. There is no `activeTraits` wire field. Trait display is derived from board units plus
+server-assigned bot personality. The end screen uses `matchStats` for aggregate and per-unit damage dealt, damage taken,
+healing, shielding, and the round-by-round result strip. Rankings are selectable so any player's full-run summary can
+be inspected. There is no `activeTraits` wire field. Trait display is derived from board units plus
 metadata loaded from `/api/traits?mode=...`. Each trait definition includes a cost-ordered roster resolved by the
 backend to the earliest form that carries the trait. `TraitSidebar` renders those lines in a five-column grid, replaces
 the representative with the viewed player's live board form when it contributes, and leaves bench or inactive forms
@@ -197,7 +198,8 @@ onto one half of the 9×6 combat canvas.
 - Emits `GameAction` objects upward to `App.vue`.
 - Uses `utils/economy.ts` for refund previews. Refund copies are 1/3/6 at stars 1/2/3, matching the backend's
   two-copy second upgrade.
-- Shows the end screen as soon as `END_CELEBRATION` arrives, including for an already eliminated player.
+- Shows the end screen as soon as `END_CELEBRATION` arrives, including for an already eliminated player, with selectable
+  player summaries and lifetime per-unit totals.
 
 The backend accepts shop/economy commands during planning and combat. Combat movement and selling are restricted to the
 bench; board movement and orb collection remain planning-only. The UI mirrors those rules, but backend rejection remains
@@ -216,8 +218,8 @@ the safety boundary.
 ### Player navigation and reports
 
 `PlayerList` emits a viewed player ID. `GameInterface` treats a different viewed ID as read-only spectating.
-`DamageReport` receives the selected participant and opponent IDs and uses backend `damage`, `healing`, and `shielding`
-totals.
+`DamageReport` receives the selected participant and opponent IDs and switches between backend `damage`, `damageTaken`,
+and combined `healing`/`shielding` totals. Damage dealt and taken are actual post-mitigation health and shield removed.
 
 ## 9. Modes, assets, and styling
 

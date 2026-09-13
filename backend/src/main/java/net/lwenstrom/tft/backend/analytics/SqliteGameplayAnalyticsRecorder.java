@@ -3,6 +3,7 @@ package net.lwenstrom.tft.backend.analytics;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -14,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.lwenstrom.tft.backend.core.analytics.GameplayAnalyticsRecorder;
 import net.lwenstrom.tft.backend.core.engine.Player;
 import net.lwenstrom.tft.backend.core.model.GameMode;
+import net.lwenstrom.tft.backend.core.model.UnitCombatStats;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -146,6 +148,19 @@ public class SqliteGameplayAnalyticsRecorder implements GameplayAnalyticsRecorde
             String loserId,
             boolean draw,
             List<Player> participants) {
+        combatResolved(roomId, round, occurredAt, winnerId, loserId, draw, participants, Map.of());
+    }
+
+    @Override
+    public void combatResolved(
+            String roomId,
+            int round,
+            long occurredAt,
+            String winnerId,
+            String loserId,
+            boolean draw,
+            List<Player> participants,
+            Map<String, List<UnitCombatStats>> unitStatsByPlayer) {
         var outcomes = humanPlayers(participants).stream()
                 .map(player -> roundOutcome(player, winnerId, loserId, draw, opponentType(player, participants)))
                 .filter(Objects::nonNull)
@@ -166,6 +181,29 @@ public class SqliteGameplayAnalyticsRecorder implements GameplayAnalyticsRecorde
                             player.health(),
                             runId,
                             round);
+                    unitStatsByPlayer
+                            .getOrDefault(player.playerId(), List.of())
+                            .forEach(stats -> jdbcTemplate.update(
+                                    "INSERT INTO analytics_unit_combat_stat"
+                                            + " (id, run_id, round_number, line_id, definition_id, unit_name, star_level,"
+                                            + " damage_dealt, damage_taken, healing_done, shielding_done)"
+                                            + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                                            + " ON CONFLICT(run_id, round_number, line_id) DO UPDATE SET"
+                                            + " definition_id = excluded.definition_id, unit_name = excluded.unit_name,"
+                                            + " star_level = excluded.star_level, damage_dealt = excluded.damage_dealt,"
+                                            + " damage_taken = excluded.damage_taken, healing_done = excluded.healing_done,"
+                                            + " shielding_done = excluded.shielding_done",
+                                    UUID.randomUUID().toString(),
+                                    runId,
+                                    round,
+                                    stats.lineId(),
+                                    stats.definitionId(),
+                                    stats.unitName(),
+                                    stats.starLevel(),
+                                    stats.damageDealt(),
+                                    stats.damageTaken(),
+                                    stats.healingDone(),
+                                    stats.shieldingDone()));
                 }));
     }
 

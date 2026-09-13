@@ -104,14 +104,16 @@ public class DefaultAbilityCaster implements AbilityCaster {
                     (applyScalingModifiers(source, target, ability, damage) * source.getAbilityDamageMultiplier());
             var finalDamage = applyExecuteModifier(source, target, ability, scaledDamage);
             var effectiveDamage = damageResolver.apply(source, target, finalDamage);
+            var effectiveHealthBefore = effectiveHealth(target);
             target.takeAbilityDamage(effectiveDamage);
+            var actualDamage = Math.max(0, effectiveHealthBefore - effectiveHealth(target));
             if (isFinalKill(target)) {
                 AugmentManager.applyTeamAttackDamageOnKill(source, allUnits);
             }
             applyStunAndKnockbackModifiers(source, target, ability, allUnits, currentTime);
             applyDotModifiers(source, target, ability, currentTime);
             totalDamageDealt += effectiveDamage;
-            callback.onDamage(source.getId(), source.getName(), target.getId(), effectiveDamage);
+            callback.onDamageResolved(source.getId(), source.getName(), target.getId(), effectiveDamage, actualDamage);
             callback.onDirectHit(target);
         }
         applyLifestealModifier(source, ability, totalDamageDealt, callback);
@@ -476,6 +478,8 @@ public class DefaultAbilityCaster implements AbilityCaster {
                         source.getId(),
                         source.getName(),
                         source.getDefinitionId(),
+                        source.getLineId(),
+                        source.getStarLevel(),
                         source.getOwnerId(),
                         damagePerTick,
                         currentTime + tickIntervalMs,
@@ -484,6 +488,10 @@ public class DefaultAbilityCaster implements AbilityCaster {
                         dotModifier.dotType().name()));
             }
         }
+    }
+
+    private int effectiveHealth(GameUnit unit) {
+        return Math.max(0, unit.getCurrentHealth()) + Math.max(0, unit.getShield());
     }
 
     private void applyKnockback(GameUnit source, GameUnit target, int cells, List<GameUnit> allUnits) {

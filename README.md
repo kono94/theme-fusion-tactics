@@ -42,8 +42,8 @@ For detailed architectural information, refer to the context documents:
 - **Data-loaded elemental combat** — Pokemon auto attacks and damage abilities derive their offensive element from traits using the best-attacker-trait rule and mode-owned affinity data; One Piece remains neutral
 - **Role-based unit identity** — Every form is labeled Damage, Tank, or Support; Pokemon evolutions can change roles
 - **Unified DEF combat stat** — DEF mitigates attacks, abilities, and damage-over-time and can be buffed or shredded
-- **Tabbed damage report** — Post-combat tracking for your units vs opponent with visual damage bars
-- **End-of-match summary** — Total damage, healing, shielding, and a round-by-round result history
+- **Tabbed combat report** — Live dealt, taken, healing, and shielding totals for your units versus the opponent
+- **End-of-match summary** — Select any player to inspect full-run team and per-unit dealt, taken, healing, shielding, and round results
 - **Per-unit attack animations** — Punch, slash, projectile with directional orientation
 - **Ability patterns** — Single-target, line, and AoE effects with range-based targeting
 

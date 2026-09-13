@@ -35,5 +35,13 @@ class GameRoomMatchStatsTest {
         assertEquals(
                 List.of(RoundOutcome.LOSS),
                 secondStats.rounds().stream().map(round -> round.outcome()).toList());
+        assertEquals(1, firstStats.unitStats().size());
+        assertEquals("strong", firstStats.unitStats().getFirst().lineId());
+        assertEquals(firstStats.damageDealt(), firstStats.unitStats().getFirst().damageDealt());
+        assertEquals(
+                secondStats.damageTaken(),
+                secondStats.unitStats().stream()
+                        .mapToInt(stats -> stats.damageTaken())
+                        .sum());
     }
 }

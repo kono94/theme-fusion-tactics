@@ -1,7 +1,9 @@
 package net.lwenstrom.tft.backend.core.engine;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 import lombok.AccessLevel;
@@ -20,6 +22,7 @@ import net.lwenstrom.tft.backend.core.model.MatchStats;
 import net.lwenstrom.tft.backend.core.model.MatchStats.RoundOutcome;
 import net.lwenstrom.tft.backend.core.model.MatchStats.RoundResult;
 import net.lwenstrom.tft.backend.core.model.SelectedAugment;
+import net.lwenstrom.tft.backend.core.model.UnitCombatStats;
 import net.lwenstrom.tft.backend.core.random.RandomProvider;
 
 @Getter
@@ -57,12 +60,14 @@ public class Player {
     private BotPersonality botPersonality;
 
     private int totalDamageDealt;
+    private int totalDamageTaken;
     private int totalHealingDone;
     private int totalShieldingDone;
     private int roundsWon;
     private int roundsLost;
     private int roundsDrawn;
     private final List<RoundResult> roundResults = new ArrayList<>();
+    private final Map<String, UnitCombatStats> unitCombatTotals = new LinkedHashMap<>();
 
     @Setter(AccessLevel.NONE)
     private boolean emergencyDropTriggered = false;
@@ -124,6 +129,7 @@ public class Player {
         this.lootOrbs.clear();
         this.augmentChoices.clear();
         this.selectedAugments.clear();
+        resetMatchStats();
         this.emergencyDropTriggered = false;
         bench.clearAll();
         removeAllUnits();
@@ -597,6 +603,7 @@ public class Player {
 
         for (var unit : this.boardUnits) {
             var cloned = unit.cloneUnit();
+            cloned.setOwnerId(ghostPlayer.id);
             ghostPlayer.boardUnits.add(cloned);
             ghostPlayer.grid.placeUnit(cloned, cloned.getX(), cloned.getY());
         }
@@ -607,6 +614,23 @@ public class Player {
         totalDamageDealt += damageDealt;
         totalHealingDone += healingDone;
         totalShieldingDone += shieldingDone;
+        recordRoundOutcome(round, outcome);
+    }
+
+    public void recordMatchRound(int round, RoundOutcome outcome, List<UnitCombatStats> unitStats) {
+        totalDamageDealt +=
+                unitStats.stream().mapToInt(UnitCombatStats::damageDealt).sum();
+        totalDamageTaken +=
+                unitStats.stream().mapToInt(UnitCombatStats::damageTaken).sum();
+        totalHealingDone +=
+                unitStats.stream().mapToInt(UnitCombatStats::healingDone).sum();
+        totalShieldingDone +=
+                unitStats.stream().mapToInt(UnitCombatStats::shieldingDone).sum();
+        unitStats.forEach(stats -> unitCombatTotals.merge(stats.lineId(), stats, UnitCombatStats::add));
+        recordRoundOutcome(round, outcome);
+    }
+
+    private void recordRoundOutcome(int round, RoundOutcome outcome) {
         switch (outcome) {
             case WIN -> roundsWon++;
             case LOSS -> roundsLost++;
@@ -615,15 +639,29 @@ public class Player {
         roundResults.add(new RoundResult(round, outcome));
     }
 
+    private void resetMatchStats() {
+        totalDamageDealt = 0;
+        totalDamageTaken = 0;
+        totalHealingDone = 0;
+        totalShieldingDone = 0;
+        roundsWon = 0;
+        roundsLost = 0;
+        roundsDrawn = 0;
+        roundResults.clear();
+        unitCombatTotals.clear();
+    }
+
     public MatchStats getMatchStats() {
         return new MatchStats(
                 totalDamageDealt,
+                totalDamageTaken,
                 totalHealingDone,
                 totalShieldingDone,
                 roundsWon,
                 roundsLost,
                 roundsDrawn,
-                roundResults);
+                roundResults,
+                new ArrayList<>(unitCombatTotals.values()));
     }
 
     public PlayerState toState() {

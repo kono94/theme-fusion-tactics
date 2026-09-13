@@ -1,6 +1,6 @@
 <script setup lang="ts">
 defineOptions({
-  name: 'GameChangelog'
+  name: 'GameChangelog',
 })
 
 defineEmits(['back'])
@@ -10,6 +10,7 @@ const version230Highlights = [
   'Trait rosters highlight units currently contributing from the viewed combat grid and show complete unit details when you hover their icons.',
   'Hovering a trait now lights up its contributing units directly on the viewed board.',
   'New rooms now receive a generated code, and a lobby invite link lets friends join without typing it.',
+  'The combat report now tracks damage taken, and the final standings let you inspect lifetime dealt, taken, healing, and shielding totals for every unit used by any player.',
   'Pokemon traits that appear after evolution now show the first form that can activate the trait.',
 ]
 
@@ -36,18 +37,24 @@ const version200Highlights = [
 ]
 
 const version180Commits = [
-  { hash: '2baa71c', title: 'Retune four-cost area damage and combat-unit outliers across both sets' },
-  { hash: '99d9336', title: 'Add emergency drops, combat follow-up balance, and clearer tooltip tags' },
+  {
+    hash: '2baa71c',
+    title: 'Retune four-cost area damage and combat-unit outliers across both sets',
+  },
+  {
+    hash: '99d9336',
+    title: 'Add emergency drops, combat follow-up balance, and clearer tooltip tags',
+  },
   { hash: '13bdc4d', title: 'Fix end celebration rendering for eliminated and winning players' },
   { hash: 'ce65e88', title: 'Add unit roles and unified DEF while rebalancing both sets' },
   { hash: 'f618d8f', title: 'Update README simulation run counts' },
-  { hash: '754a2db', title: 'Rebalance AoE abilities, progression, Pokemon traits, and augments' }
+  { hash: '754a2db', title: 'Rebalance AoE abilities, progression, Pokemon traits, and augments' },
 ]
 
 const version170Commits = [
   { hash: '87beff9', title: 'Nerf bot star-level scaling' },
   { hash: '843830d', title: 'Nerf three-star Geodude' },
-  { hash: 'ff96dae', title: 'Add analytics, SQLite storage, and reconnect recovery' }
+  { hash: 'ff96dae', title: 'Add analytics, SQLite storage, and reconnect recovery' },
 ]
 
 const version162Commits = [
@@ -57,13 +64,13 @@ const version162Commits = [
   { hash: '282d2cf', title: 'Rebalance Pokemon units from combat simulation results' },
   { hash: 'f49c6d9', title: 'Add backend combat simulation reports and randomized board modes' },
   { hash: '96a6c5e', title: 'Add deterministic combat simulation reports' },
-  { hash: '405a32b', title: 'Upgrade third-party dependencies' }
+  { hash: '405a32b', title: 'Upgrade third-party dependencies' },
 ]
 
 const version161Commits = [
   { hash: '92d4a30', title: 'Prevent completed unit lines from reappearing' },
   { hash: '8833a6f', title: 'Balance augments' },
-  { hash: 'f3a35cd', title: 'Balance bot opponent scaling' }
+  { hash: 'f3a35cd', title: 'Balance bot opponent scaling' },
 ]
 
 const version160Commits = [
@@ -75,7 +82,7 @@ const version160Commits = [
   { hash: 'e5dba11', title: 'Fix unit drag preview rendering' },
   { hash: '989c37b', title: 'Prevent joining started games' },
   { hash: '700c520', title: 'Fix ghost unit board state sync' },
-  { hash: 'c9fe5e5', title: 'Fix knockback combat grid bounds' }
+  { hash: 'c9fe5e5', title: 'Fix knockback combat grid bounds' },
 ]
 </script>
 
@@ -88,7 +95,10 @@ const version160Commits = [
         <div class="release-header">
           <p class="eyebrow">Latest</p>
           <h2>Version 2.3.0</h2>
-          <p>Discover every trait's roster at a glance and chase two powerful new Poison breakpoints.</p>
+          <p>
+            Share rooms faster, read your trait setup clearly, and review every unit's full-match
+            combat impact.
+          </p>
         </div>
         <div class="release-grid">
           <article class="release-panel">
@@ -193,7 +203,10 @@ const version160Commits = [
         <div class="release-header">
           <p class="eyebrow">Previous</p>
           <h2>Version 2.0.0</h2>
-          <p>A major match-flow update with fairer bots, combat fixes, in-combat team management, and a new game name.</p>
+          <p>
+            A major match-flow update with fairer bots, combat fixes, in-combat team management, and
+            a new game name.
+          </p>
         </div>
         <div class="release-grid">
           <article class="release-panel">
@@ -258,12 +271,13 @@ const version160Commits = [
           <p class="eyebrow">Previous</p>
           <h2>Version 1.8.0</h2>
           <p>
-            Every One Piece and Pokemon unit now has a Damage, Tank, or Support identity. Pokemon evolutions can change
-            roles as they upgrade, and the previously unused Armor and Magic Resist fields have been replaced by one
-            functional DEF stat. Multi-target abilities are also less capable of erasing entire boards, late levels are
-            easier to reach, and combat augments compete more effectively with economy choices. Unit tooltips now label
-            melee and ranged attackers and color their trait tags, while low-health emergency loot drops receive a
-            dedicated outcome-aware announcement and staggered orb arrival.
+            Every One Piece and Pokemon unit now has a Damage, Tank, or Support identity. Pokemon
+            evolutions can change roles as they upgrade, and the previously unused Armor and Magic
+            Resist fields have been replaced by one functional DEF stat. Multi-target abilities are
+            also less capable of erasing entire boards, late levels are easier to reach, and combat
+            augments compete more effectively with economy choices. Unit tooltips now label melee
+            and ranged attackers and color their trait tags, while low-health emergency loot drops
+            receive a dedicated outcome-aware announcement and staggered orb arrival.
           </p>
         </div>
         <article class="release-panel">
@@ -300,8 +314,8 @@ const version160Commits = [
               Harden at 2★:
               <span class="old-value">75 max mana, 400 shield</span>
               <span class="change-arrow">&nbsp;=>&nbsp;</span>
-              <strong class="value buff">65 max mana, 650 shield</strong>. The additional shield remains self-only;
-              area-shield values are unchanged.
+              <strong class="value buff">65 max mana, 650 shield</strong>. The additional shield
+              remains self-only; area-shield values are unchanged.
             </p>
           </div>
           <div class="balance-block">
@@ -436,8 +450,8 @@ const version160Commits = [
               Fixed-seed Pokémon balanced-board win rate at sizes 3/4:
               <span class="old-value">47.87%/53.17%</span>
               <span class="change-arrow">&nbsp;=>&nbsp;</span>
-              <strong class="value buff">49.78%/55.12%</strong>, clearing the 55% size-4 threshold while keeping the
-              three-unit matchup effectively even.
+              <strong class="value buff">49.78%/55.12%</strong>, clearing the 55% size-4 threshold
+              while keeping the three-unit matchup effectively even.
             </p>
           </div>
           <div class="balance-block">
@@ -448,11 +462,12 @@ const version160Commits = [
             <p>
               Unit identities changed from unlabeled forms
               <span class="change-arrow">&nbsp;=>&nbsp;</span>
-              <strong class="value mixed">Damage, Tank, or Support</strong>, with Pokemon evolutions able to change role.
-              Armor and Magic Resist were consolidated into functional DEF, role packages were recalibrated, and area
-              damage was reduced globally with a selective premium recovery for high-cost damage units. Shielding is part
-              of this same next-version balance pass: shield amounts were reduced and capped, while shield-focused forms
-              received modest durability compensation.
+              <strong class="value mixed">Damage, Tank, or Support</strong>, with Pokemon evolutions
+              able to change role. Armor and Magic Resist were consolidated into functional DEF,
+              role packages were recalibrated, and area damage was reduced globally with a selective
+              premium recovery for high-cost damage units. Shielding is part of this same
+              next-version balance pass: shield amounts were reduced and capped, while
+              shield-focused forms received modest durability compensation.
             </p>
           </div>
           <div class="balance-block">
@@ -464,20 +479,22 @@ const version160Commits = [
               Unit role labels:
               <span class="old-value">none</span>
               <span class="change-arrow">&nbsp;=>&nbsp;</span>
-              <strong class="value buff">Damage, Tank, or Support on every unit tooltip</strong>. Damage baseline
-              Health/DEF/Attack/ability damage:
+              <strong class="value buff">Damage, Tank, or Support on every unit tooltip</strong>.
+              Damage baseline Health/DEF/Attack/ability damage:
               <span class="old-value">100%/100%/100%/100%</span>
               <span class="change-arrow">&nbsp;=>&nbsp;</span>
               <strong class="value mixed">85%/75%/115%/115%</strong>. Tank baseline:
               <span class="old-value">100%/100%/100%/100%</span>
               <span class="change-arrow">&nbsp;=>&nbsp;</span>
-              <strong class="value mixed">125%/140%/75%/65%</strong>. Support Attack/direct damage/utility/max mana:
+              <strong class="value mixed">125%/140%/75%/65%</strong>. Support Attack/direct
+              damage/utility/max mana:
               <span class="old-value">100%/100%/100%/100%</span>
               <span class="change-arrow">&nbsp;=>&nbsp;</span>
-              <strong class="value mixed">75%/60%/120%/85%</strong>. Whitebeard keeps Tank durability but retains
-              <strong>100% Attack and 85% Quake damage</strong>. Fixed 5% primary-package corrections were then
-              applied from the deterministic simulation report; Damage output never falls below its pre-role baseline,
-              and Tank durability never falls below the 125% HP/140% DEF route.
+              <strong class="value mixed">75%/60%/120%/85%</strong>. Whitebeard keeps Tank
+              durability but retains <strong>100% Attack and 85% Quake damage</strong>. Fixed 5%
+              primary-package corrections were then applied from the deterministic simulation
+              report; Damage output never falls below its pre-role baseline, and Tank durability
+              never falls below the 125% HP/140% DEF route.
             </p>
             <p>Pokemon role-changing upgrades:</p>
             <p>
@@ -563,8 +580,9 @@ const version160Commits = [
               <span class="old-value">unmeasured</span>
               <span class="change-arrow">&nbsp;=>&nbsp;</span>
               <strong>One Piece 57.64/57.90/79.00/73.96/70.38%</strong> and
-              <strong>Pokemon 52.03/55.56/72.25/71.49/71.19%</strong>. Damage-only remains viable on three-unit boards,
-              while Tank/Support coverage becomes increasingly important from four units onward.
+              <strong>Pokemon 52.03/55.56/72.25/71.49/71.19%</strong>. Damage-only remains viable on
+              three-unit boards, while Tank/Support coverage becomes increasingly important from
+              four units onward.
             </p>
           </div>
           <div class="balance-block">
@@ -576,8 +594,9 @@ const version160Commits = [
               Defensive stats:
               <span class="old-value">Armor and Magic Resist displayed but unused</span>
               <span class="change-arrow">&nbsp;=>&nbsp;</span>
-              <strong class="value buff">one DEF stat reducing attacks, abilities, and damage-over-time</strong>.
-              Damage multiplier:
+              <strong class="value buff"
+                >one DEF stat reducing attacks, abilities, and damage-over-time</strong
+              >. Damage multiplier:
               <span class="old-value">100%</span>
               <span class="change-arrow">&nbsp;=>&nbsp;</span>
               <strong>100 / (100 + DEF)</strong>. Marine bonuses:
@@ -778,8 +797,8 @@ const version160Commits = [
               LINE and SURROUND ability strength:
               <span class="old-value">100%</span>
               <span class="change-arrow">&nbsp;=>&nbsp;</span>
-              <strong class="value nerf">70%</strong>. This applies to damage, healing, shielding, buffs, and control in
-              both modes.
+              <strong class="value nerf">70%</strong>. This applies to damage, healing, shielding,
+              buffs, and control in both modes.
             </p>
           </div>
           <div class="balance-block">
@@ -800,17 +819,17 @@ const version160Commits = [
               <h4>Premium Area Damage</h4>
             </div>
             <p>
-              Five-cost DAMAGE abilities with LINE or SURROUND patterns retain their premium recovery after the global
-              area-effect nerf:
+              Five-cost DAMAGE abilities with LINE or SURROUND patterns retain their premium
+              recovery after the global area-effect nerf:
               <span class="old-value">70%</span>
               <span class="change-arrow">&nbsp;=>&nbsp;</span>
-              <strong class="value buff">80.5% effective damage</strong>. Direct damage values and their damage-over-time
-              ticks remain 15% above the post-area-nerf baseline. The equivalent four-cost recovery was reduced after
-              follow-up simulation:
+              <strong class="value buff">80.5% effective damage</strong>. Direct damage values and
+              their damage-over-time ticks remain 15% above the post-area-nerf baseline. The
+              equivalent four-cost recovery was reduced after follow-up simulation:
               <span class="old-value">80.5% effective damage, +15%</span>
               <span class="change-arrow">&nbsp;=>&nbsp;</span>
-              <strong class="value nerf">77% effective damage, +10%</strong>. SINGLE abilities and lower-cost units are
-              unchanged.
+              <strong class="value nerf">77% effective damage, +10%</strong>. SINGLE abilities and
+              lower-cost units are unchanged.
             </p>
           </div>
           <div class="balance-block">
@@ -834,11 +853,12 @@ const version160Commits = [
               Shield ability values on shield-bearing forms:
               <span class="old-value">100%</span>
               <span class="change-arrow">&nbsp;=>&nbsp;</span>
-              <strong class="value nerf">80% / 70% / 60% at 1★ / 2★ / 3★</strong>. A runtime cap now limits total shield to
+              <strong class="value nerf">80% / 70% / 60% at 1★ / 2★ / 3★</strong>. A runtime cap now
+              limits total shield to
               <span class="old-value">uncapped</span>
               <span class="change-arrow">&nbsp;=>&nbsp;</span>
-              <strong class="value nerf">min(50% max HP, current HP)</strong>. Active shield forms receive a small
-              compensation of
+              <strong class="value nerf">min(50% max HP, current HP)</strong>. Active shield forms
+              receive a small compensation of
               <span class="old-value">0% max HP and 0 DEF</span>
               <span class="change-arrow">&nbsp;=>&nbsp;</span>
               <strong class="value buff">+5% max HP and +3 DEF</strong>.
@@ -1012,8 +1032,9 @@ const version160Commits = [
               Human players crossing the red-health threshold from
               <span class="old-value">above 20 HP with 0 rescue drops</span>
               <span class="change-arrow">&nbsp;=>&nbsp;</span>
-              <strong class="value buff">20 HP or lower with 10–15 normal gold/unit orbs</strong> once per match. The
-              drops arrive in the following planning phase with a dedicated announcement and staggered presentation.
+              <strong class="value buff">20 HP or lower with 10–15 normal gold/unit orbs</strong>
+              once per match. The drops arrive in the following planning phase with a dedicated
+              announcement and staggered presentation.
             </p>
           </div>
           <div class="balance-block">
@@ -1025,7 +1046,8 @@ const version160Commits = [
               XP requirements from levels 1 through 9:
               <span class="old-value">2/6/10/20/36/56/80/100</span>
               <span class="change-arrow">&nbsp;=>&nbsp;</span>
-              <strong class="value buff">2/6/10/20/26/36/44/50</strong>. Level 9 is now the maximum level.
+              <strong class="value buff">2/6/10/20/26/36/44/50</strong>. Level 9 is now the maximum
+              level.
             </p>
           </div>
           <div class="balance-block">
@@ -1079,8 +1101,8 @@ const version160Commits = [
               <strong class="value buff">5/15/25/38%</strong>. Dragon Ability Damage:
               <span class="old-value">8/26%</span>
               <span class="change-arrow">&nbsp;=>&nbsp;</span>
-              <strong class="value nerf">8/24%</strong>. Electric remains
-              <strong>4/12/20%</strong>, but now scales as a true percentage. Overlapping traits now stack.
+              <strong class="value nerf">8/24%</strong>. Electric remains <strong>4/12/20%</strong>,
+              but now scales as a true percentage. Overlapping traits now stack.
             </p>
           </div>
           <div class="balance-block">
@@ -1101,11 +1123,12 @@ const version160Commits = [
               <strong class="value nerf">10/15/20</strong>. Ranged Attack Damage:
               <span class="old-value">7/12/18 One Piece, 5/8/12 Pokemon</span>
               <span class="change-arrow">&nbsp;=>&nbsp;</span>
-              <strong class="value buff">9/15/24 One Piece, 7/11/16 Pokemon</strong>. Ability Damage remains
-              <strong>10/18/30%</strong>. Team Attack Damage:
+              <strong class="value buff">9/15/24 One Piece, 7/11/16 Pokemon</strong>. Ability Damage
+              remains <strong>10/18/30%</strong>. Team Attack Damage:
               <span class="old-value">6/10/16 One Piece, 4/7/10 Pokemon</span>
               <span class="change-arrow">&nbsp;=>&nbsp;</span>
-              <strong class="value buff">8/14/22 One Piece, 6/10/15 Pokemon</strong>. Melee Lifesteal:
+              <strong class="value buff">8/14/22 One Piece, 6/10/15 Pokemon</strong>. Melee
+              Lifesteal:
               <span class="old-value">10/16/24%</span>
               <span class="change-arrow">&nbsp;=>&nbsp;</span>
               <strong class="value buff">12/20/30%</strong>. Mana Gain:
@@ -1125,11 +1148,12 @@ const version160Commits = [
           <p class="eyebrow">Previous</p>
           <h2>Version 1.7.0</h2>
           <p>
-            Gameplay analytics now persist anonymous match outcomes in SQLite, with a password-protected production
-            dashboard and human-vs-bot results broken down by round. Matches now complete as soon as every human has
-            been eliminated, rather than continuing with bots only. Active matches can also recover from a same-tab
-            reconnect, return safely to the lobby after a game, and be explicitly abandoned from the in-game controls.
-            Bot 3★ units now follow a cost-based round progression rather than appearing at any stage.
+            Gameplay analytics now persist anonymous match outcomes in SQLite, with a
+            password-protected production dashboard and human-vs-bot results broken down by round.
+            Matches now complete as soon as every human has been eliminated, rather than continuing
+            with bots only. Active matches can also recover from a same-tab reconnect, return safely
+            to the lobby after a game, and be explicitly abandoned from the in-game controls. Bot 3★
+            units now follow a cost-based round progression rather than appearing at any stage.
           </p>
         </div>
         <article class="release-panel">
@@ -1154,8 +1178,9 @@ const version160Commits = [
               3★ round gate for 1-4 cost units:
               <span class="old-value">no cost-based cap</span>
               <span class="change-arrow">&nbsp;=>&nbsp;</span>
-              <strong class="value nerf">1-cost: round 6, 2-cost: round 8, 3-cost: round 12, 4-cost: round 16</strong>.
-              5-cost bots remain capped at 2★.
+              <strong class="value nerf"
+                >1-cost: round 6, 2-cost: round 8, 3-cost: round 12, 4-cost: round 16</strong
+              >. 5-cost bots remain capped at 2★.
             </p>
           </div>
           <div class="balance-block">
@@ -1190,9 +1215,10 @@ const version160Commits = [
           <p class="eyebrow">Previous</p>
           <h2>Version 1.6.2</h2>
           <p>
-            Frontend and backend dependencies have been refreshed for the current security baseline, including Vite 8,
-            Spring Boot 4.1, Vue 3.5, and updated build tooling. One Piece and Pokemon unit balance has also been
-            adjusted from same-star and randomized-star combat simulation results.
+            Frontend and backend dependencies have been refreshed for the current security baseline,
+            including Vite 8, Spring Boot 4.1, Vue 3.5, and updated build tooling. One Piece and
+            Pokemon unit balance has also been adjusted from same-star and randomized-star combat
+            simulation results.
           </p>
         </div>
 
@@ -1217,8 +1243,9 @@ const version160Commits = [
                 <h3>Simulation</h3>
               </div>
               <p>
-                Balance tooling now supports deterministic tick-based reports, randomized-star and randomized-board
-                modes, board-size rankings, trait impact tables, coverage diagnostics, and parallel workers.
+                Balance tooling now supports deterministic tick-based reports, randomized-star and
+                randomized-board modes, board-size rankings, trait impact tables, coverage
+                diagnostics, and parallel workers.
               </p>
             </aside>
           </div>
@@ -1520,7 +1547,8 @@ const version160Commits = [
                 <strong class="value buff">430 damage + 56 poison</strong>. 3★ Megahorn:
                 <span class="old-value">692 damage, 35% threshold, 50% bonus</span>
                 <span class="change-arrow">&nbsp;=>&nbsp;</span>
-                <strong class="value buff">950 damage, 45% threshold, 70% bonus</strong>. Both lines' Mana:
+                <strong class="value buff">950 damage, 45% threshold, 70% bonus</strong>. Both
+                lines' Mana:
                 <span class="old-value">55/55/55</span>
                 <span class="change-arrow">&nbsp;=>&nbsp;</span>
                 <strong class="value buff">55/50/45</strong>.
@@ -1548,13 +1576,15 @@ const version160Commits = [
                 <strong class="value buff">0.70</strong>. Absorb:
                 <span class="old-value">173/387/832 damage, 30/38/48% healing</span>
                 <span class="change-arrow">&nbsp;=>&nbsp;</span>
-                <strong class="value buff">220/495/1060 damage, 40/50/65% healing</strong>. 2★ Stun Spore:
+                <strong class="value buff">220/495/1060 damage, 40/50/65% healing</strong>. 2★ Stun
+                Spore:
                 <span class="old-value">1s at 2 range</span>
                 <span class="change-arrow">&nbsp;=>&nbsp;</span>
                 <strong class="value buff">2s at 3 range</strong>. 3★ Petal Dance:
                 <span class="old-value">617 damage + 92 poison at 3 range</span>
                 <span class="change-arrow">&nbsp;=>&nbsp;</span>
-                <strong class="value buff">800 damage + 120 poison at 4 range</strong>. Follow-up 3★ tuning:
+                <strong class="value buff">800 damage + 120 poison at 4 range</strong>. Follow-up 3★
+                tuning:
                 <span class="old-value">1785 health, 60 mana, 850 damage + 130 poison</span>
                 <span class="change-arrow">&nbsp;=>&nbsp;</span>
                 <strong class="value nerf">1700 health, 65 mana, 800 damage + 120 poison</strong>.
@@ -1610,7 +1640,8 @@ const version160Commits = [
                 <strong class="value buff">0.75</strong>. Sleep Powder stun:
                 <span class="old-value">2s at 3 range</span>
                 <span class="change-arrow">&nbsp;=>&nbsp;</span>
-                <strong class="value buff">3s at 4 range</strong>. Caterpie and Metapod remain unchanged.
+                <strong class="value buff">3s at 4 range</strong>. Caterpie and Metapod remain
+                unchanged.
               </p>
             </div>
 
@@ -1638,7 +1669,8 @@ const version160Commits = [
                 <strong class="value buff">175/395/840</strong>. 2★ Fire Spin:
                 <span class="old-value">329 damage + 60 burn at 2 range</span>
                 <span class="change-arrow">&nbsp;=>&nbsp;</span>
-                <strong class="value buff">460 damage + 90 burn at 3 range</strong>. Mystical Fire damage:
+                <strong class="value buff">460 damage + 90 burn at 3 range</strong>. Mystical Fire
+                damage:
                 <span class="old-value">161/364/774</span>
                 <span class="change-arrow">&nbsp;=>&nbsp;</span>
                 <strong class="value buff">200/450/1200</strong>. 3★ Mystical Fire burn:
@@ -1753,7 +1785,8 @@ const version160Commits = [
                 <strong class="value buff">430 damage + 58 burn</strong>. 3★ Magnetic Field:
                 <span class="old-value">874 shield at 3 range</span>
                 <span class="change-arrow">&nbsp;=>&nbsp;</span>
-                <strong class="value buff">1150 shield at 4 range</strong>. 1★ Magnemite is unchanged.
+                <strong class="value buff">1150 shield at 4 range</strong>. 1★ Magnemite is
+                unchanged.
               </p>
             </div>
 
@@ -1778,10 +1811,12 @@ const version160Commits = [
                 <strong class="value buff">0.67/0.72/0.78</strong>. 2★ Extreme Speed:
                 <span class="old-value">364 damage, 32% threshold, 30% bonus</span>
                 <span class="change-arrow">&nbsp;=>&nbsp;</span>
-                <strong class="value buff">500 damage, 38% threshold, 45% bonus</strong>. 3★ Flare Blitz:
+                <strong class="value buff">500 damage, 38% threshold, 45% bonus</strong>. 3★ Flare
+                Blitz:
                 <span class="old-value">774 damage + 130 burn for 4s at 5 range</span>
                 <span class="change-arrow">&nbsp;=>&nbsp;</span>
-                <strong class="value buff">1100 damage + 180 burn for 5s at 6 range</strong>. 1★ Growlithe is unchanged.
+                <strong class="value buff">1100 damage + 180 burn for 5s at 6 range</strong>. 1★
+                Growlithe is unchanged.
               </p>
             </div>
 
@@ -1803,7 +1838,8 @@ const version160Commits = [
                 <strong class="value buff">220</strong>. Shell Smash:
                 <span class="old-value">40% at 3 range</span>
                 <span class="change-arrow">&nbsp;=>&nbsp;</span>
-                <strong class="value buff">55% at 4 range</strong>. Shellder and 2★ Cloyster are unchanged.
+                <strong class="value buff">55% at 4 range</strong>. Shellder and 2★ Cloyster are
+                unchanged.
               </p>
             </div>
 
@@ -1853,7 +1889,9 @@ const version160Commits = [
                 <strong class="value buff">0.85</strong>. Cross Poison:
                 <span class="old-value">774 damage + 128 poison, 35% threshold, 50% bonus</span>
                 <span class="change-arrow">&nbsp;=>&nbsp;</span>
-                <strong class="value buff">1050 damage + 160 poison, 42% threshold, 65% bonus</strong>.
+                <strong class="value buff"
+                  >1050 damage + 160 poison, 42% threshold, 65% bonus</strong
+                >.
               </p>
             </div>
 
@@ -1878,10 +1916,12 @@ const version160Commits = [
                 <strong class="value buff">0.62/0.66/0.70</strong>. 2★ Rollout:
                 <span class="old-value">364 damage, 1-cell knockback at 3 range</span>
                 <span class="change-arrow">&nbsp;=>&nbsp;</span>
-                <strong class="value buff">450 damage, 2-cell knockback at 4 range</strong>. 3★ Stealth Rock:
+                <strong class="value buff">450 damage, 2-cell knockback at 4 range</strong>. 3★
+                Stealth Rock:
                 <span class="old-value">699 damage, 35% threshold, 40% bonus at 3 range</span>
                 <span class="change-arrow">&nbsp;=>&nbsp;</span>
-                <strong class="value buff">1000 damage, 42% threshold, 55% bonus at 4 range</strong>.
+                <strong class="value buff">1000 damage, 42% threshold, 55% bonus at 4 range</strong
+                >.
               </p>
             </div>
 
@@ -1906,7 +1946,8 @@ const version160Commits = [
                 <strong class="value buff">0.75</strong>. Power Whip:
                 <span class="old-value">996 damage, 45% threshold, 58% bonus at 3 range</span>
                 <span class="change-arrow">&nbsp;=>&nbsp;</span>
-                <strong class="value buff">1350 damage, 50% threshold, 75% bonus at 4 range</strong>.
+                <strong class="value buff">1350 damage, 50% threshold, 75% bonus at 4 range</strong
+                >.
               </p>
             </div>
 
@@ -1950,7 +1991,8 @@ const version160Commits = [
                 <strong class="value buff">70</strong>. Perish Song stun:
                 <span class="old-value">2s at 3 range</span>
                 <span class="change-arrow">&nbsp;=>&nbsp;</span>
-                <strong class="value buff">3s at 4 range</strong>. Seel and 2★ Dewgong are unchanged.
+                <strong class="value buff">3s at 4 range</strong>. Seel and 2★ Dewgong are
+                unchanged.
               </p>
             </div>
 
@@ -2057,8 +2099,9 @@ const version160Commits = [
           <p class="eyebrow">Previous</p>
           <h2>Version 1.6.1</h2>
           <p>
-            Bot opponents now scale more deliberately, completed 3-star character lines stop appearing in shops and unit
-            loot, and augment rewards have a tighter combat-versus-economy balance.
+            Bot opponents now scale more deliberately, completed 3-star character lines stop
+            appearing in shops and unit loot, and augment rewards have a tighter
+            combat-versus-economy balance.
           </p>
         </div>
 
@@ -2100,8 +2143,8 @@ const version160Commits = [
                 <strong class="value buff">10/16/24%</strong>. Starting Shield:
                 <span class="old-value">100/180/300</span>
                 <span class="change-arrow">&nbsp;=>&nbsp;</span>
-                <strong class="value buff">125/225/375</strong>. Ability Power now increases damaging ability output by
-                <strong class="value buff">10/18/30%</strong>.
+                <strong class="value buff">125/225/375</strong>. Ability Power now increases
+                damaging ability output by <strong class="value buff">10/18/30%</strong>.
               </p>
             </div>
 
@@ -2114,8 +2157,8 @@ const version160Commits = [
                 Overall bot power level:
                 <span class="old-value">too low</span>
                 <span class="change-arrow">&nbsp;=>&nbsp;</span>
-                <strong class="value buff">greatly improved</strong>, with more pressure from early upgraded boards and
-                stronger late-game threats.
+                <strong class="value buff">greatly improved</strong>, with more pressure from early
+                upgraded boards and stronger late-game threats.
               </p>
             </div>
           </article>
@@ -2127,8 +2170,8 @@ const version160Commits = [
           <p class="eyebrow">Previous</p>
           <h2>Version 1.6.0</h2>
           <p>
-            Combat reliability fixes, lobby safeguards, drag polish, mana flow, and Pokemon plus One Piece balance
-            passes.
+            Combat reliability fixes, lobby safeguards, drag polish, mana flow, and Pokemon plus One
+            Piece balance passes.
           </p>
         </div>
 
@@ -2337,281 +2380,280 @@ const version160Commits = [
 
 <style scoped>
 .changelog-page {
-    position: relative;
-    height: 100vh;
-    overflow-y: auto;
-    padding: 36px clamp(18px, 5vw, 72px) 56px;
-    color: #f8fafc;
-    background:
-        linear-gradient(135deg, rgba(14, 165, 233, 0.14), transparent 34%),
-        radial-gradient(circle at 92% 14%, rgba(244, 114, 182, 0.16), transparent 28%),
-        #0b1120;
+  position: relative;
+  height: 100vh;
+  overflow-y: auto;
+  padding: 36px clamp(18px, 5vw, 72px) 56px;
+  color: #f8fafc;
+  background:
+    linear-gradient(135deg, rgba(14, 165, 233, 0.14), transparent 34%),
+    radial-gradient(circle at 92% 14%, rgba(244, 114, 182, 0.16), transparent 28%), #0b1120;
 }
 
 .back-button {
-    position: sticky;
-    top: 0;
-    z-index: 2;
-    margin-bottom: 18px;
-    padding: 10px 14px;
-    border: 1px solid rgba(148, 163, 184, 0.34);
-    border-radius: 6px;
-    background: rgba(15, 23, 42, 0.86);
-    color: #e2e8f0;
-    font-weight: 800;
-    cursor: pointer;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  margin-bottom: 18px;
+  padding: 10px 14px;
+  border: 1px solid rgba(148, 163, 184, 0.34);
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.86);
+  color: #e2e8f0;
+  font-weight: 800;
+  cursor: pointer;
 }
 
 .eyebrow {
-    margin: 0 0 8px;
-    color: #38bdf8;
-    font-size: 13px;
-    font-weight: 900;
-    text-transform: uppercase;
+  margin: 0 0 8px;
+  color: #38bdf8;
+  font-size: 13px;
+  font-weight: 900;
+  text-transform: uppercase;
 }
 
 .release-history {
-    display: grid;
-    gap: 42px;
+  display: grid;
+  gap: 42px;
 }
 
 .release-section {
-    max-width: 1180px;
-    margin: 0 auto;
+  max-width: 1180px;
+  margin: 0 auto;
 }
 
 .latest-release {
-    max-width: 1400px;
+  max-width: 1400px;
 }
 
 .release-header {
-    margin-bottom: 18px;
+  margin-bottom: 18px;
 }
 
 .release-header h2 {
-    margin: 0;
-    font-size: clamp(30px, 4vw, 48px);
-    line-height: 1;
+  margin: 0;
+  font-size: clamp(30px, 4vw, 48px);
+  line-height: 1;
 }
 
 .release-header p:last-child {
-    max-width: 720px;
-    margin: 12px 0 0;
-    color: #cbd5e1;
-    font-size: 17px;
+  max-width: 720px;
+  margin: 12px 0 0;
+  color: #cbd5e1;
+  font-size: 17px;
 }
 
 .release-grid {
-    display: grid;
-    grid-template-columns: minmax(280px, 0.9fr) minmax(320px, 1.3fr);
-    gap: 22px;
-    margin: 0;
+  display: grid;
+  grid-template-columns: minmax(280px, 0.9fr) minmax(320px, 1.3fr);
+  gap: 22px;
+  margin: 0;
 }
 
 .latest-release-grid {
-    grid-template-columns: minmax(280px, 340px) minmax(620px, 1fr);
-    align-items: start;
+  grid-template-columns: minmax(280px, 340px) minmax(620px, 1fr);
+  align-items: start;
 }
 
 .release-sidebar {
-    display: grid;
-    gap: 16px;
+  display: grid;
+  gap: 16px;
 }
 
 .release-panel,
 .balance-panel,
 .simulation-note {
-    border: 1px solid rgba(148, 163, 184, 0.22);
-    border-radius: 8px;
-    background: rgba(15, 23, 42, 0.72);
-    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.72);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
 }
 
 .release-panel {
-    padding: 24px;
+  padding: 24px;
 }
 
 .balance-panel {
-    padding: 24px;
+  padding: 24px;
 }
 
 .simulation-note {
-    padding: 16px;
-    background: rgba(15, 23, 42, 0.54);
+  padding: 16px;
+  background: rgba(15, 23, 42, 0.54);
 }
 
 .simulation-note p {
-    margin: 0;
-    color: #cbd5e1;
-    font-size: 14px;
-    line-height: 1.5;
+  margin: 0;
+  color: #cbd5e1;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .section-heading,
 .balance-title {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .section-heading {
-    margin-bottom: 18px;
+  margin-bottom: 18px;
 }
 
 .compact-heading {
-    margin-bottom: 10px;
+  margin-bottom: 10px;
 }
 
 .section-heading h3,
 .balance-title h4 {
-    margin: 0;
+  margin: 0;
 }
 
 .section-heading h3 {
-    font-size: 22px;
+  font-size: 22px;
 }
 
 .compact-heading h3 {
-    font-size: 16px;
+  font-size: 16px;
 }
 
 .balance-title h4 {
-    font-size: 18px;
+  font-size: 18px;
 }
 
 .marker {
-    width: 10px;
-    height: 28px;
-    border-radius: 6px;
+  width: 10px;
+  height: 28px;
+  border-radius: 6px;
 }
 
 .marker.release {
-    background: #38bdf8;
+  background: #38bdf8;
 }
 
 .marker.balance {
-    background: #f59e0b;
+  background: #f59e0b;
 }
 
 .commit-list {
-    display: grid;
-    gap: 12px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .commit-list li {
-    display: grid;
-    grid-template-columns: 76px 1fr;
-    gap: 12px;
-    align-items: center;
-    padding: 12px;
-    border: 1px solid rgba(148, 163, 184, 0.16);
-    border-radius: 6px;
-    background: rgba(30, 41, 59, 0.62);
+  display: grid;
+  grid-template-columns: 76px 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 6px;
+  background: rgba(30, 41, 59, 0.62);
 }
 
 .highlight-list li {
-    grid-template-columns: 1fr;
-    line-height: 1.5;
+  grid-template-columns: 1fr;
+  line-height: 1.5;
 }
 
 .hash {
-    color: #67e8f9;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    font-size: 13px;
-    font-weight: 900;
+  color: #67e8f9;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+  font-weight: 900;
 }
 
 .balance-block {
-    padding: 16px 0;
-    border-top: 1px solid rgba(148, 163, 184, 0.18);
+  padding: 16px 0;
+  border-top: 1px solid rgba(148, 163, 184, 0.18);
 }
 
 .balance-block:first-of-type {
-    border-top: 0;
-    padding-top: 0;
+  border-top: 0;
+  padding-top: 0;
 }
 
 .balance-block p {
-    margin: 8px 0 0;
-    color: #dbeafe;
-    font-size: 16px;
+  margin: 8px 0 0;
+  color: #dbeafe;
+  font-size: 16px;
 }
 
 .tag {
-    min-width: 68px;
-    padding: 4px 8px;
-    border-radius: 5px;
-    font-size: 12px;
-    font-weight: 900;
-    text-align: center;
-    text-transform: uppercase;
+  min-width: 68px;
+  padding: 4px 8px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 900;
+  text-align: center;
+  text-transform: uppercase;
 }
 
 .tag.nerf,
 .value.nerf {
-    color: #fca5a5;
+  color: #fca5a5;
 }
 
 .tag.nerf {
-    background: rgba(239, 68, 68, 0.18);
+  background: rgba(239, 68, 68, 0.18);
 }
 
 .tag.buff,
 .value.buff {
-    color: #86efac;
+  color: #86efac;
 }
 
 .tag.buff {
-    background: rgba(34, 197, 94, 0.18);
+  background: rgba(34, 197, 94, 0.18);
 }
 
 .tag.mixed {
-    color: #fde68a;
-    background: rgba(245, 158, 11, 0.18);
+  color: #fde68a;
+  background: rgba(245, 158, 11, 0.18);
 }
 
 .value {
-    font-weight: 900;
+  font-weight: 900;
 }
 
 .character-name {
-    display: inline-block;
-    min-width: 112px;
-    color: #f8fafc;
-    font-weight: 900;
+  display: inline-block;
+  min-width: 112px;
+  color: #f8fafc;
+  font-weight: 900;
 }
 
 .old-value {
-    display: inline-block;
-    margin: 0 4px;
-    color: #cbd5e1;
-    font-weight: 900;
-    text-decoration-line: line-through;
-    text-decoration-thickness: 2px;
-    text-decoration-color: rgba(203, 213, 225, 0.74);
+  display: inline-block;
+  margin: 0 4px;
+  color: #cbd5e1;
+  font-weight: 900;
+  text-decoration-line: line-through;
+  text-decoration-thickness: 2px;
+  text-decoration-color: rgba(203, 213, 225, 0.74);
 }
 
 .change-arrow {
-    margin: 0 4px;
-    color: #64748b;
-    font-size: 13px;
-    font-weight: 900;
+  margin: 0 4px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 900;
 }
 
 @media (max-width: 820px) {
-    .release-grid {
-        grid-template-columns: 1fr;
-    }
+  .release-grid {
+    grid-template-columns: 1fr;
+  }
 
-    .latest-release-grid {
-        grid-template-columns: 1fr;
-    }
+  .latest-release-grid {
+    grid-template-columns: 1fr;
+  }
 
-    .commit-list li {
-        grid-template-columns: 1fr;
-    }
+  .commit-list li {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

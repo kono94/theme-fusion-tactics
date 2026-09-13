@@ -7,6 +7,7 @@ import java.util.Map;
 import net.lwenstrom.tft.backend.core.engine.Player;
 import net.lwenstrom.tft.backend.core.model.GameItem;
 import net.lwenstrom.tft.backend.core.model.GameMode;
+import net.lwenstrom.tft.backend.core.model.UnitCombatStats;
 import net.lwenstrom.tft.backend.test.TestHelpers;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.Test;
@@ -66,7 +67,17 @@ class SqliteGameplayAnalyticsRecorderTest {
         recorder.matchStarted("match-key", GameMode.ONEPIECE, 1_000, List.of(player, fallbackPlayer));
         recorder.roundStarted("match-key", 1, 1_100, List.of(player));
         player.takeDamage(12);
-        recorder.combatResolved("match-key", 1, 1_200, player.getId(), bot.getId(), false, List.of(player, bot));
+        recorder.combatResolved(
+                "match-key",
+                1,
+                1_200,
+                player.getId(),
+                bot.getId(),
+                false,
+                List.of(player, bot),
+                Map.of(
+                        player.getId(),
+                        List.of(new UnitCombatStats("test-line", "test-unit-1", "Test Unit", 2, 321, 210, 45, 67))));
         recorder.playerAbandoned("match-key", player.getId(), 1_250);
         player.setPlace(1);
         fallbackPlayer.setPlace(2);
@@ -106,6 +117,15 @@ class SqliteGameplayAnalyticsRecorderTest {
                 .isEqualTo(88);
         assertThat(jdbcTemplate.queryForObject("SELECT opponent_type FROM analytics_player_round", String.class))
                 .isEqualTo("BOT");
+        assertThat(jdbcTemplate.queryForMap("SELECT * FROM analytics_unit_combat_stat"))
+                .containsEntry("line_id", "test-line")
+                .containsEntry("definition_id", "test-unit-1")
+                .containsEntry("unit_name", "Test Unit")
+                .containsEntry("star_level", 2)
+                .containsEntry("damage_dealt", 321)
+                .containsEntry("damage_taken", 210)
+                .containsEntry("healing_done", 45)
+                .containsEntry("shielding_done", 67);
         assertThat(jdbcTemplate.queryForObject("SELECT board_json FROM analytics_player_round", String.class))
                 .contains("\"definitionId\":\"test-unit-1\"")
                 .contains("\"starLevel\":1")

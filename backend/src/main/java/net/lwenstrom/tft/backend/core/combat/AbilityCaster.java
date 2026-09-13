@@ -23,6 +23,10 @@ public interface AbilityCaster {
     interface CombatStatCallback {
         default void onDamage(String unitId, String unitName, String targetId, int damage) {}
 
+        default void onDamageResolved(String unitId, String unitName, String targetId, int damage, int actualDamage) {
+            onDamage(unitId, unitName, targetId, damage);
+        }
+
         default void onDirectHit(GameUnit target) {}
 
         default void onHealing(String unitId, String unitName, String targetId, int healing) {}

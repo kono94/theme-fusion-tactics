@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -33,6 +34,7 @@ import net.lwenstrom.tft.backend.core.model.LootOrb;
 import net.lwenstrom.tft.backend.core.model.LootType;
 import net.lwenstrom.tft.backend.core.model.MatchStats.RoundOutcome;
 import net.lwenstrom.tft.backend.core.model.PlanningPauseReason;
+import net.lwenstrom.tft.backend.core.model.UnitCombatStats;
 import net.lwenstrom.tft.backend.core.random.RandomProvider;
 import net.lwenstrom.tft.backend.core.time.Clock;
 
@@ -971,6 +973,8 @@ public class GameRoom {
             applyDamageToLoser(outcome.winner(), outcome.loser());
         }
 
+        var unitStatsByPlayer = recordMatchStats(outcome, result, participants);
+
         recordAnalytics(() -> analyticsRecorder.combatResolved(
                 analyticsMatchKey,
                 round,
@@ -978,9 +982,8 @@ public class GameRoom {
                 outcome.winner() != null && !outcome.isDraw() ? outcome.winner().getId() : null,
                 outcome.loser() != null && !outcome.isDraw() ? outcome.loser().getId() : null,
                 outcome.isDraw(),
-                participants));
-
-        recordMatchStats(outcome, result, participants);
+                participants,
+                unitStatsByPlayer));
 
         checkAndTriggerGameEnd();
 
@@ -989,8 +992,10 @@ public class GameRoom {
 
     private record CombatOutcome(Player winner, Player loser, boolean isDraw) {}
 
-    private void recordMatchStats(CombatOutcome outcome, CombatSystem.CombatResult result, List<Player> participants) {
+    private Map<String, List<UnitCombatStats>> recordMatchStats(
+            CombatOutcome outcome, CombatSystem.CombatResult result, List<Player> participants) {
         var damageLog = result != null ? result.damageLog() : combatSystem.getDamageLog();
+        var statsByPlayer = new LinkedHashMap<String, List<UnitCombatStats>>();
         participants.stream()
                 .filter(player -> !player.isGhost())
                 .filter(player -> players.containsKey(player.getId()))
@@ -998,22 +1003,41 @@ public class GameRoom {
                     var roundOutcome = outcome.isDraw()
                             ? RoundOutcome.DRAW
                             : player == outcome.winner() ? RoundOutcome.WIN : RoundOutcome.LOSS;
-                    var entries = damageLog.values().stream()
-                            .filter(entry -> player.getId().equals(entry.ownerId()))
-                            .toList();
-                    player.recordMatchRound(
-                            round,
-                            roundOutcome,
-                            entries.stream()
-                                    .mapToInt(CombatSystem.DamageEntry::damage)
-                                    .sum(),
-                            entries.stream()
-                                    .mapToInt(CombatSystem.DamageEntry::healing)
-                                    .sum(),
-                            entries.stream()
-                                    .mapToInt(CombatSystem.DamageEntry::shielding)
-                                    .sum());
+                    var unitStats = buildRoundUnitStats(player, damageLog);
+                    player.recordMatchRound(round, roundOutcome, unitStats);
+                    statsByPlayer.put(player.getId(), unitStats);
                 });
+        return Map.copyOf(statsByPlayer);
+    }
+
+    private List<UnitCombatStats> buildRoundUnitStats(Player player, Map<String, CombatSystem.DamageEntry> damageLog) {
+        var statsByLine = new LinkedHashMap<String, UnitCombatStats>();
+        player.getBoardUnits()
+                .forEach(unit -> statsByLine.merge(
+                        unit.getLineId(),
+                        new UnitCombatStats(
+                                unit.getLineId(),
+                                unit.getDefinitionId(),
+                                unit.getName(),
+                                unit.getStarLevel(),
+                                0,
+                                0,
+                                0,
+                                0),
+                        UnitCombatStats::add));
+        damageLog.values().stream()
+                .filter(entry -> player.getId().equals(entry.ownerId()))
+                .map(entry -> new UnitCombatStats(
+                        entry.lineId(),
+                        entry.definitionId(),
+                        entry.unitName(),
+                        entry.starLevel(),
+                        entry.damage(),
+                        entry.damageTaken(),
+                        entry.healing(),
+                        entry.shielding()))
+                .forEach(stats -> statsByLine.merge(stats.lineId(), stats, UnitCombatStats::add));
+        return List.copyOf(statsByLine.values());
     }
 
     private CombatOutcome determineCombatOutcome(

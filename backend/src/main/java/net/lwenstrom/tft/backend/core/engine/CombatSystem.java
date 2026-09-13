@@ -35,7 +35,15 @@ public class CombatSystem {
     private List<GameState.CombatEvent> recentEvents = new ArrayList<>();
 
     public record DamageEntry(
-            String unitName, String definitionId, String ownerId, int damage, int healing, int shielding) {}
+            String unitName,
+            String definitionId,
+            String lineId,
+            int starLevel,
+            String ownerId,
+            int damage,
+            int damageTaken,
+            int healing,
+            int shielding) {}
 
     public CombatSystem(
             TraitManager traitManager,
@@ -92,29 +100,103 @@ public class CombatSystem {
         this.abilityCaster.setDamageResolver(this.damageResolver);
     }
 
-    private void accumulateDamage(String unitId, String unitName, String defId, String ownerId, int damage) {
+    private void accumulateStats(
+            String unitId,
+            String unitName,
+            String definitionId,
+            String lineId,
+            int starLevel,
+            String ownerId,
+            int damage,
+            int damageTaken,
+            int healing,
+            int shielding) {
         damageLog.compute(
                 unitId,
                 (k, v) -> v == null
-                        ? new DamageEntry(unitName, defId, ownerId, damage, 0, 0)
-                        : new DamageEntry(unitName, defId, ownerId, v.damage() + damage, v.healing(), v.shielding()));
-    }
-
-    private void accumulateHealing(String unitId, String unitName, String defId, String ownerId, int healing) {
-        damageLog.compute(
-                unitId,
-                (k, v) -> v == null
-                        ? new DamageEntry(unitName, defId, ownerId, 0, healing, 0)
-                        : new DamageEntry(unitName, defId, ownerId, v.damage(), v.healing() + healing, v.shielding()));
-    }
-
-    private void accumulateShielding(String unitId, String unitName, String defId, String ownerId, int shielding) {
-        damageLog.compute(
-                unitId,
-                (k, v) -> v == null
-                        ? new DamageEntry(unitName, defId, ownerId, 0, 0, shielding)
+                        ? new DamageEntry(
+                                unitName,
+                                definitionId,
+                                lineId,
+                                starLevel,
+                                ownerId,
+                                damage,
+                                damageTaken,
+                                healing,
+                                shielding)
                         : new DamageEntry(
-                                unitName, defId, ownerId, v.damage(), v.healing(), v.shielding() + shielding));
+                                unitName,
+                                definitionId,
+                                lineId,
+                                starLevel,
+                                ownerId,
+                                v.damage() + damage,
+                                v.damageTaken() + damageTaken,
+                                v.healing() + healing,
+                                v.shielding() + shielding));
+    }
+
+    private void accumulateDamage(GameUnit unit, int damage) {
+        accumulateStats(
+                unit.getId(),
+                unit.getName(),
+                unit.getDefinitionId(),
+                unit.getLineId(),
+                unit.getStarLevel(),
+                unit.getOwnerId(),
+                damage,
+                0,
+                0,
+                0);
+    }
+
+    private void accumulateDamageTaken(GameUnit unit, int damageTaken) {
+        accumulateStats(
+                unit.getId(),
+                unit.getName(),
+                unit.getDefinitionId(),
+                unit.getLineId(),
+                unit.getStarLevel(),
+                unit.getOwnerId(),
+                0,
+                damageTaken,
+                0,
+                0);
+    }
+
+    private void accumulateHealing(GameUnit unit, int healing) {
+        accumulateStats(
+                unit.getId(),
+                unit.getName(),
+                unit.getDefinitionId(),
+                unit.getLineId(),
+                unit.getStarLevel(),
+                unit.getOwnerId(),
+                0,
+                0,
+                healing,
+                0);
+    }
+
+    private void accumulateShielding(GameUnit unit, int shielding) {
+        accumulateStats(
+                unit.getId(),
+                unit.getName(),
+                unit.getDefinitionId(),
+                unit.getLineId(),
+                unit.getStarLevel(),
+                unit.getOwnerId(),
+                0,
+                0,
+                0,
+                shielding);
+    }
+
+    private int applyAndMeasureDamage(GameUnit target, Runnable damageAction) {
+        var effectiveHealthBefore = Math.max(0, target.getCurrentHealth()) + Math.max(0, target.getShield());
+        damageAction.run();
+        var effectiveHealthAfter = Math.max(0, target.getCurrentHealth()) + Math.max(0, target.getShield());
+        return Math.max(0, effectiveHealthBefore - effectiveHealthAfter);
     }
 
     public Map<String, DamageEntry> getDamageLog() {
@@ -227,15 +309,19 @@ public class CombatSystem {
                             targetSelector,
                             new AbilityCaster.CombatStatCallback() {
                                 @Override
-                                public void onDamage(String unitId, String unitName, String targetId, int damage) {
-                                    accumulateDamage(
-                                            unitId, unitName, unit.getDefinitionId(), unit.getOwnerId(), damage);
+                                public void onDamageResolved(
+                                        String unitId, String unitName, String targetId, int damage, int actualDamage) {
+                                    accumulateDamage(unit, actualDamage);
+                                    allUnits.stream()
+                                            .filter(target -> target.getId().equals(targetId))
+                                            .findFirst()
+                                            .ifPresent(target -> accumulateDamageTaken(target, actualDamage));
                                     recentEvents.add(new GameState.CombatEvent(
                                             currentTime,
                                             "SKILL",
                                             unitId,
                                             targetId,
-                                            damage,
+                                            actualDamage,
                                             unit.getAbility().name()));
                                 }
 
@@ -246,8 +332,7 @@ public class CombatSystem {
 
                                 @Override
                                 public void onHealing(String unitId, String unitName, String targetId, int healing) {
-                                    accumulateHealing(
-                                            unitId, unitName, unit.getDefinitionId(), unit.getOwnerId(), healing);
+                                    accumulateHealing(unit, healing);
                                     recentEvents.add(new GameState.CombatEvent(
                                             currentTime,
                                             "HEAL",
@@ -260,8 +345,7 @@ public class CombatSystem {
                                 @Override
                                 public void onShielding(
                                         String unitId, String unitName, String targetId, int shielding) {
-                                    accumulateShielding(
-                                            unitId, unitName, unit.getDefinitionId(), unit.getOwnerId(), shielding);
+                                    accumulateShielding(unit, shielding);
                                     recentEvents.add(new GameState.CombatEvent(
                                             currentTime,
                                             "SHIELD",
@@ -324,7 +408,8 @@ public class CombatSystem {
                     log.debug("{} attacks {} for {}", unit.getName(), target.getName(), effectiveDamage);
 
                     // Handle Revive (Big Mom Pirates)
-                    target.takeDamage(effectiveDamage);
+                    var attackDamage = effectiveDamage;
+                    var actualDamage = applyAndMeasureDamage(target, () -> target.takeDamage(attackDamage));
                     grantDirectHitMana(target);
                     applyOnHitDot(unit, target, currentTime);
                     if (target.getCurrentHealth() <= 0) {
@@ -341,10 +426,10 @@ public class CombatSystem {
                         }
                     }
 
-                    accumulateDamage(
-                            unit.getId(), unit.getName(), unit.getDefinitionId(), unit.getOwnerId(), effectiveDamage);
+                    accumulateDamage(unit, actualDamage);
+                    accumulateDamageTaken(target, actualDamage);
                     recentEvents.add(new GameState.CombatEvent(
-                            currentTime, "DAMAGE", unit.getId(), target.getId(), effectiveDamage, null));
+                            currentTime, "DAMAGE", unit.getId(), target.getId(), actualDamage, null));
 
                     // Lifesteal (Big Mom Pirates)
                     if (unit.getLifesteal() > 0) {
@@ -356,12 +441,7 @@ public class CombatSystem {
                         unit.setCurrentHealth(Math.min(unit.getMaxHealth(), unit.getCurrentHealth() + heal));
                         int effectiveHeal = unit.getCurrentHealth() - previousHealth;
                         if (effectiveHeal > 0) {
-                            accumulateHealing(
-                                    unit.getId(),
-                                    unit.getName(),
-                                    unit.getDefinitionId(),
-                                    unit.getOwnerId(),
-                                    effectiveHeal);
+                            accumulateHealing(unit, effectiveHeal);
                             recentEvents.add(new GameState.CombatEvent(
                                     currentTime, "HEAL", unit.getId(), unit.getId(), effectiveHeal, null));
                         }
@@ -474,15 +554,21 @@ public class CombatSystem {
                 var damage = source == null
                         ? effect.damagePerTick()
                         : damageResolver.apply(source, target, effect.damagePerTick());
-                target.takeAbilityDamage(damage);
-                accumulateDamage(
+                var actualDamage = applyAndMeasureDamage(target, () -> target.takeAbilityDamage(damage));
+                accumulateStats(
                         effect.sourceId(),
                         effect.sourceName(),
                         effect.sourceDefinitionId(),
+                        effect.sourceLineId(),
+                        effect.sourceStarLevel(),
                         effect.sourceOwnerId(),
-                        damage);
+                        actualDamage,
+                        0,
+                        0,
+                        0);
+                accumulateDamageTaken(target, actualDamage);
                 recentEvents.add(new GameState.CombatEvent(
-                        currentTime, "DAMAGE", effect.sourceId(), target.getId(), damage, effect.skillName()));
+                        currentTime, "DAMAGE", effect.sourceId(), target.getId(), actualDamage, effect.skillName()));
 
                 iterator.remove();
                 if (target.getCurrentHealth() > 0 && currentTime + effect.tickIntervalMs() < effect.expiresAt()) {
@@ -522,6 +608,8 @@ public class CombatSystem {
                 source.getId(),
                 source.getName(),
                 source.getDefinitionId(),
+                source.getLineId(),
+                source.getStarLevel(),
                 source.getOwnerId(),
                 damagePerTick,
                 currentTime + tickIntervalMs,
@@ -539,8 +627,7 @@ public class CombatSystem {
                     int shieldAmount = (int) (deadUnit.getMaxHealth() * 0.15f);
                     var effectiveAmount = u.addShield(shieldAmount);
                     if (effectiveAmount > 0) {
-                        accumulateShielding(
-                                u.getId(), u.getName(), u.getDefinitionId(), u.getOwnerId(), effectiveAmount);
+                        accumulateShielding(u, effectiveAmount);
                         recentEvents.add(new GameState.CombatEvent(
                                 currentTime, "SHIELD", u.getId(), u.getId(), effectiveAmount, null));
                         log.debug(

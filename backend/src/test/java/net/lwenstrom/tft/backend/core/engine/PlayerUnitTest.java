@@ -21,6 +21,16 @@ class PlayerUnitTest {
     }
 
     @Test
+    void ghostOwnsItsClonedBoardUnits() {
+        var player = TestHelpers.createTestPlayer("Player");
+        player.addUnitToBoard(TestHelpers.createDefaultUnitDef(), 0, 0);
+
+        var ghost = player.createGhost();
+
+        assertEquals(ghost.getId(), ghost.getBoardUnits().getFirst().getOwnerId());
+    }
+
+    @Test
     void testTakeDamage_ReducesHealth() {
         var player = TestHelpers.createTestPlayer("TestPlayer");
         assertEquals(100, player.getHealth());

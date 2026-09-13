@@ -228,8 +228,11 @@ are `DAMAGE`, `SKILL`, `DEATH`, `HEAL`, and `SHIELD`. The decisive combat tick r
 record DamageEntry(
     String unitName,
     String definitionId,
+    String lineId,
+    int starLevel,
     String ownerId,
     int damage,
+    int damageTaken,
     int healing,
     int shielding
 )
@@ -286,7 +289,9 @@ password safely disables login in development. A production-scoped startup valid
 `ANALYTICS_ADMIN_PASSWORD`, including an empty value supplied by Docker Compose. Build tag, commit, and timestamp are
 constructor-injected into analytics rows.
 
-The recorder stores match/run/round snapshots asynchronously in SQLite. Each human run has one first-wins final-board
+The recorder stores match/run/round snapshots asynchronously in SQLite. Combat resolution also stores one per-round
+row per participating unit line with damage dealt, post-mitigation damage taken, healing, and shielding. Match state
+accumulates those rows by unit line for the end screen while retaining the highest-star form used. Each human run has one first-wins final-board
 snapshot of deployed `definitionId`, `lineId`, `starLevel`, and `itemIds`; captured `[]` is distinct from a null legacy
 snapshot. Placement finalization is routed through `GameRoom` for combat elimination, explicit abandonment,
 last-player resolution, and winner placement; disconnect grace records abandonment without finalizing placement.

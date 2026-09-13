@@ -1,13 +1,21 @@
 <template>
   <div class="damage-report-wrapper" :class="{ 'is-collapsed': isCollapsed }">
     <!-- Toggle Button (Tab) -->
-	    <button
-      @click="isCollapsed = !isCollapsed"
-      class="toggle-btn"
-    >
+    <button @click="isCollapsed = !isCollapsed" class="toggle-btn">
       <div class="tab-label">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-4 h-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+          />
         </svg>
         <span>COMBAT REPORT</span>
       </div>
@@ -21,24 +29,39 @@
             class="metric-tab-btn"
             :class="{ active: selectedMetric === 'damage' }"
             @click="selectedMetric = 'damage'"
-          >Damage</button>
+          >
+            Dealt
+          </button>
+          <button
+            class="metric-tab-btn"
+            :class="{ active: selectedMetric === 'damageTaken' }"
+            @click="selectedMetric = 'damageTaken'"
+          >
+            Taken
+          </button>
           <button
             class="metric-tab-btn"
             :class="{ active: selectedMetric === 'support' }"
             @click="selectedMetric = 'support'"
-          >Heal & Shield</button>
+          >
+            Heal & Shield
+          </button>
         </div>
         <div class="tabs-container">
-	          <button
-	            class="tab-btn"
-	            :class="{ active: selectedTab === 'me' }"
-	            @click="selectedTab = 'me'"
-	          >{{ primaryTabLabel }}</button>
-	          <button
-	            class="tab-btn"
-	            :class="{ active: selectedTab === 'opponent' }"
-	            @click="selectedTab = 'opponent'"
-	          >{{ opponentTabLabel }}</button>
+          <button
+            class="tab-btn"
+            :class="{ active: selectedTab === 'me' }"
+            @click="selectedTab = 'me'"
+          >
+            {{ primaryTabLabel }}
+          </button>
+          <button
+            class="tab-btn"
+            :class="{ active: selectedTab === 'opponent' }"
+            @click="selectedTab = 'opponent'"
+          >
+            {{ opponentTabLabel }}
+          </button>
         </div>
       </div>
 
@@ -46,50 +69,50 @@
         <div v-if="sortedEntries.length > 0" class="entries-list">
           <div v-for="entry in sortedEntries" :key="entry.unitId" class="entry-row">
             <div class="unit-icon">
-               <img :src="entry.image" class="unit-img" />
+              <img :src="entry.image" class="unit-img" />
             </div>
             <div class="unit-details">
-                <div class="name-dmg-row">
-                  <span class="unit-name">{{ entry.unitName }}</span>
-                  <span v-if="selectedMetric === 'damage'" class="dmg-val">
-                    {{ entry.damage.toLocaleString() }}
+              <div class="name-dmg-row">
+                <span class="unit-name">{{ entry.unitName }}</span>
+                <span v-if="selectedMetric !== 'support'" class="dmg-val">
+                  {{ entry.value.toLocaleString() }}
+                </span>
+                <span v-else class="support-values">
+                  <span class="support-total">{{ entry.totalSupport.toLocaleString() }}</span>
+                  <span class="support-breakdown">
+                    <span class="heal-val">{{ entry.healing.toLocaleString() }}</span>
+                    <span class="shield-val">{{ entry.shielding.toLocaleString() }}</span>
                   </span>
-                  <span v-else class="support-values">
-                    <span class="support-total">{{ entry.totalSupport.toLocaleString() }}</span>
-                    <span class="support-breakdown">
-                      <span class="heal-val">{{ entry.healing.toLocaleString() }}</span>
-                      <span class="shield-val">{{ entry.shielding.toLocaleString() }}</span>
-                    </span>
-                  </span>
-                </div>
-                <div class="dmg-bar-container">
+                </span>
+              </div>
+              <div class="dmg-bar-container">
+                <div
+                  v-if="selectedMetric !== 'support'"
+                  class="dmg-bar"
+                  :style="{ width: `${(entry.value / maxValue) * 100}%` }"
+                ></div>
+                <div
+                  v-else
+                  class="support-bar"
+                  :style="{ width: `${(entry.value / maxValue) * 100}%` }"
+                >
                   <div
-                    v-if="selectedMetric === 'damage'"
-                    class="dmg-bar"
-                    :style="{ width: `${(entry.value / maxValue) * 100}%` }"
+                    v-if="entry.healing > 0"
+                    class="healing-bar"
+                    :style="{ width: `${entry.healingShare}%` }"
                   ></div>
                   <div
-                    v-else
-                    class="support-bar"
-                    :style="{ width: `${(entry.value / maxValue) * 100}%` }"
-                  >
-                    <div
-                      v-if="entry.healing > 0"
-                      class="healing-bar"
-                      :style="{ width: `${entry.healingShare}%` }"
-                    ></div>
-                    <div
-                      v-if="entry.shielding > 0"
-                      class="shielding-bar"
-                      :style="{ width: `${entry.shieldingShare}%` }"
-                    ></div>
-                  </div>
+                    v-if="entry.shielding > 0"
+                    class="shielding-bar"
+                    :style="{ width: `${entry.shieldingShare}%` }"
+                  ></div>
                 </div>
+              </div>
             </div>
           </div>
         </div>
         <div v-else class="empty-state">
-            <p>{{ emptyStateMessage }}</p>
+          <p>{{ emptyStateMessage }}</p>
         </div>
       </div>
     </div>
@@ -97,41 +120,51 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
-import type { DamageEntry } from '../../types';
+import { computed, ref, watch } from 'vue'
+import type { DamageEntry } from '../../types'
 import { getUnitIconPath } from '../../utils/iconUtils'
 
 const props = defineProps<{
-	  damageLog: Record<string, DamageEntry> | null,
-	  myPlayerId?: string,
-	  myPlayerName?: string,
-	  opponentId?: string,
-	  opponentName?: string,
-	  gameMode?: string
-}>();
+  damageLog: Record<string, DamageEntry> | null
+  myPlayerId?: string
+  myPlayerName?: string
+  opponentId?: string
+  opponentName?: string
+  gameMode?: string
+}>()
 
-const isCollapsed = ref(true);
-const selectedTab = ref<'me' | 'opponent'>('me');
-const selectedMetric = ref<'damage' | 'support'>('damage');
+const isCollapsed = ref(true)
+const selectedTab = ref<'me' | 'opponent'>('me')
+const selectedMetric = ref<'damage' | 'damageTaken' | 'support'>('damage')
 
-const currentOwnerId = computed(() => selectedTab.value === 'me' ? props.myPlayerId : props.opponentId);
-const primaryTabLabel = computed(() => props.myPlayerName || 'YOU');
-const opponentTabLabel = computed(() => props.opponentName || 'OPPONENT');
+const currentOwnerId = computed(() =>
+  selectedTab.value === 'me' ? props.myPlayerId : props.opponentId,
+)
+const primaryTabLabel = computed(() => props.myPlayerName || 'YOU')
+const opponentTabLabel = computed(() => props.opponentName || 'OPPONENT')
 
-watch(() => props.myPlayerId, () => {
-  selectedTab.value = 'me';
-});
+watch(
+  () => props.myPlayerId,
+  () => {
+    selectedTab.value = 'me'
+  },
+)
 
 const sortedEntries = computed(() => {
-  if (!props.damageLog || !currentOwnerId.value) return [];
-  
+  if (!props.damageLog || !currentOwnerId.value) return []
+
   return Object.entries(props.damageLog)
     .filter(([, data]) => data.ownerId === currentOwnerId.value)
     .map(([unitId, data]) => {
-      const healing = data.healing || 0;
-      const shielding = data.shielding || 0;
-      const totalSupport = healing + shielding;
-      const value = selectedMetric.value === 'damage' ? data.damage : totalSupport;
+      const healing = data.healing || 0
+      const shielding = data.shielding || 0
+      const totalSupport = healing + shielding
+      const value =
+        selectedMetric.value === 'damage'
+          ? data.damage
+          : selectedMetric.value === 'damageTaken'
+            ? data.damageTaken
+            : totalSupport
 
       return {
         unitId,
@@ -143,21 +176,23 @@ const sortedEntries = computed(() => {
         value,
         healingShare: totalSupport > 0 ? (healing / totalSupport) * 100 : 0,
         shieldingShare: totalSupport > 0 ? (shielding / totalSupport) * 100 : 0,
-        image: getUnitIconPath(data.definitionId, props.gameMode)
-      };
+        image: getUnitIconPath(data.definitionId, props.gameMode),
+      }
     })
-    .filter(entry => entry.value > 0)
-    .sort((a, b) => b.value - a.value);
-});
+    .filter((entry) => entry.value > 0)
+    .sort((a, b) => b.value - a.value)
+})
 
 const maxValue = computed(() => {
-  if (sortedEntries.value.length === 0) return 1;
-  return Math.max(...sortedEntries.value.map(e => e.value));
-});
+  if (sortedEntries.value.length === 0) return 1
+  return Math.max(...sortedEntries.value.map((e) => e.value))
+})
 
 const emptyStateMessage = computed(() =>
-  selectedMetric.value === 'damage' ? 'No damage data available' : 'No heal or shield data available'
-);
+  selectedMetric.value === 'support'
+    ? 'No heal or shield data available'
+    : `No damage ${selectedMetric.value === 'damage' ? 'dealt' : 'taken'} data available`,
+)
 </script>
 
 <style scoped>
@@ -165,7 +200,7 @@ const emptyStateMessage = computed(() =>
   position: fixed;
   top: 100px;
   right: 0;
-  bottom: 200px; 
+  bottom: 200px;
   width: 260px;
   z-index: 1000;
   display: flex;
@@ -191,7 +226,7 @@ const emptyStateMessage = computed(() =>
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: -4px 0 15px rgba(0,0,0,0.4);
+  box-shadow: -4px 0 15px rgba(0, 0, 0, 0.4);
 }
 
 .tab-label {
@@ -221,7 +256,7 @@ const emptyStateMessage = computed(() =>
 
 .header {
   padding: 0;
-  background: rgba(0,0,0,0.3);
+  background: rgba(0, 0, 0, 0.3);
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
@@ -236,7 +271,7 @@ const emptyStateMessage = computed(() =>
   width: 100%;
   padding: 6px;
   gap: 6px;
-  background: rgba(0,0,0,0.25);
+  background: rgba(0, 0, 0, 0.25);
 }
 
 .metric-tab-btn {
@@ -322,7 +357,7 @@ const emptyStateMessage = computed(() =>
   width: 32px;
   height: 32px;
   background: #000;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   overflow: hidden;
   flex-shrink: 0;
@@ -352,7 +387,7 @@ const emptyStateMessage = computed(() =>
 .unit-name {
   font-size: 11px;
   font-weight: 700;
-  color: rgba(255,255,255,0.9);
+  color: rgba(255, 255, 255, 0.9);
   text-transform: uppercase;
   white-space: nowrap;
   overflow: hidden;
@@ -399,7 +434,7 @@ const emptyStateMessage = computed(() =>
 
 .dmg-bar-container {
   height: 6px;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   border-radius: 3px;
   overflow: hidden;
 }
@@ -433,7 +468,7 @@ const emptyStateMessage = computed(() =>
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: rgba(255,255,255,0.2);
+  color: rgba(255, 255, 255, 0.2);
   font-size: 10px;
   text-transform: uppercase;
   font-weight: 700;

@@ -172,8 +172,10 @@ class CombatSystemUnitTest {
         var result = combatSystem.simulateTick(List.of(p1, p2));
 
         assertTrue(result.ended());
-        assertTrue(result.events().stream().anyMatch(event -> event.type().equals("DAMAGE")));
+        assertTrue(result.events().stream().anyMatch(event -> event.type().equals("DAMAGE") && event.value() == 100));
         assertTrue(result.events().stream().anyMatch(event -> event.type().equals("DEATH")));
+        assertEquals(100, result.damageLog().get(attacker.getId()).damage());
+        assertEquals(100, result.damageLog().get(target.getId()).damageTaken());
     }
 
     @Test

@@ -61,12 +61,14 @@ function player(playerId: string, board: GameUnit[], combatSide: PlayerState['co
         botPersonality: null,
         matchStats: {
             damageDealt: 0,
+            damageTaken: 0,
             healingDone: 0,
             shieldingDone: 0,
             roundsWon: 0,
             roundsLost: 0,
             roundsDrawn: 0,
             rounds: [],
+            unitStats: [],
         },
     }
 }

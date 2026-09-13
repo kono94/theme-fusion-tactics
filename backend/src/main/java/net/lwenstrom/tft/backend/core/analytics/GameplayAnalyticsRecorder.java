@@ -1,8 +1,10 @@
 package net.lwenstrom.tft.backend.core.analytics;
 
 import java.util.List;
+import java.util.Map;
 import net.lwenstrom.tft.backend.core.engine.Player;
 import net.lwenstrom.tft.backend.core.model.GameMode;
+import net.lwenstrom.tft.backend.core.model.UnitCombatStats;
 
 public interface GameplayAnalyticsRecorder {
     GameplayAnalyticsRecorder NO_OP = new GameplayAnalyticsRecorder() {};
@@ -19,6 +21,18 @@ public interface GameplayAnalyticsRecorder {
             String loserId,
             boolean draw,
             List<Player> participants) {}
+
+    default void combatResolved(
+            String roomId,
+            int round,
+            long occurredAt,
+            String winnerId,
+            String loserId,
+            boolean draw,
+            List<Player> participants,
+            Map<String, List<UnitCombatStats>> unitStatsByPlayer) {
+        combatResolved(roomId, round, occurredAt, winnerId, loserId, draw, participants);
+    }
 
     default void playerAbandoned(String roomId, String playerId, long occurredAt) {}
 
