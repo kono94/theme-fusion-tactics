@@ -11,6 +11,7 @@ import OutcomeOverlay from './components/game/OutcomeOverlay.vue'
 import DamageReport from './components/game/DamageReport.vue'
 import VersionDisplay from './components/VersionDisplay.vue'
 import AdminAnalytics from './components/admin/AdminAnalytics.vue'
+import MatchHistory from './components/MatchHistory.vue'
 
 import { setTraitData } from './data/traitData'
 import {
@@ -56,6 +57,7 @@ const eventSubscription = ref<StompSubscription | null>(null)
 const roomResultSubscription = ref<StompSubscription | null>(null)
 const isUltimateGallery = ref(false)
 const isAdminAnalytics = ref(false)
+const isMatchHistory = ref(false)
 const ultimateGalleryMode = ref<GameMode>('onepiece')
 const UltimateGallery = shallowRef<Component | null>(null)
 const viewedPlayerId = ref<string | null>(null)
@@ -79,7 +81,7 @@ const analyticsClientId = getAnalyticsClientId()
 onMounted(async () => {
     updateStandaloneRoute()
     window.addEventListener('hashchange', updateStandaloneRoute)
-    if (isUltimateGallery.value || isAdminAnalytics.value) return
+    if (isUltimateGallery.value || isAdminAnalytics.value || isMatchHistory.value) return
 
     applyThemeMeta(defaultMode.value)
     try {
@@ -609,6 +611,14 @@ const handleLeaveLobby = () => {
     leaveCurrentGame()
 }
 
+const handleMatchHistoryBack = () => {
+    window.location.hash = ''
+}
+
+const handleOpenMatchHistory = () => {
+    window.location.hash = '#/match-history'
+}
+
 const activeThemeClass = computed(() => getGameModeMetadata(activeVisualMode.value).themeClass)
 
 const themeClass = computed(() => {
@@ -633,8 +643,11 @@ const consumeInviteRoute = () => {
 
 const updateStandaloneRoute = () => {
     const wasAdmin = isAdminAnalytics.value
+    const wasMatchHistory = isMatchHistory.value
     const isAdmin = window.location.hash.startsWith('#/admin/analytics')
+    const isHistory = window.location.hash === '#/match-history'
     isAdminAnalytics.value = isAdmin
+    isMatchHistory.value = isHistory
     if (isAdmin) {
         const validAdminRoute = /^#\/admin\/analytics(?:\/runs\/[^/?#]+)?$/.test(window.location.hash)
         if (!validAdminRoute) window.location.hash = '#/admin/analytics'
@@ -642,7 +655,12 @@ const updateStandaloneRoute = () => {
         client.value?.deactivate()
         return
     }
-    if (wasAdmin) {
+    if (isHistory) {
+        document.title = 'Match History'
+        client.value?.deactivate()
+        return
+    }
+    if (wasAdmin || wasMatchHistory) {
         window.location.reload()
         return
     }
@@ -696,13 +714,20 @@ const applyThemeMeta = (mode: GameMode) => {
 </script>
 
 <template>
-  <AdminAnalytics v-if="isAdminAnalytics" />
+  <MatchHistory v-if="isMatchHistory" @back="handleMatchHistoryBack" />
+  <AdminAnalytics v-else-if="isAdminAnalytics" />
   <div v-else :class="['app-container', themeClass]">
     <button v-if="showVersion && currentView === 'lobby'"
             class="changelog-dock"
             type="button"
             @click="currentView = 'changelog'">
         Changelog
+    </button>
+    <button v-if="showVersion && currentView === 'lobby'"
+            class="match-history-dock"
+            type="button"
+            @click="handleOpenMatchHistory">
+        Match history
     </button>
     <VersionDisplay :visible="showVersion" />
 
@@ -839,10 +864,10 @@ body {
   animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.changelog-dock {
+.changelog-dock,
+.match-history-dock {
   position: fixed;
   bottom: 30px;
-  left: 8px;
   z-index: 10000;
   padding: 5px 8px;
   border: 1px solid rgba(251, 191, 36, 0.34);
@@ -857,7 +882,16 @@ body {
   transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
-.changelog-dock:hover {
+.changelog-dock {
+  left: 8px;
+}
+
+.match-history-dock {
+  left: 90px;
+}
+
+.changelog-dock:hover,
+.match-history-dock:hover {
   border-color: rgba(251, 191, 36, 0.68);
   background: rgba(30, 41, 59, 0.92);
   color: #fef3c7;

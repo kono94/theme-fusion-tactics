@@ -25,7 +25,7 @@ The application supports One Piece and Pokemon rooms. The host can change mode w
 | Realtime | `@stomp/stompjs` 7.3 over native WebSocket |
 | Styling | Global and scoped vanilla CSS; no Tailwind or component framework |
 | Tests | Vitest 5, Vue Test Utils, jsdom, V8 coverage |
-| Routing | Manual view state plus hash routes for admin and the development gallery |
+| Routing | Manual view state plus hash routes for public history, admin, and the development gallery |
 
 Supported Node versions are encoded in `package.json`: Node 26+.
 
@@ -45,6 +45,8 @@ src/
 │   ├── PhaseAnnouncement.vue       phase/ready/emergency messaging
 │   ├── EndScreen.vue               placement and exit controls
 │   ├── Changelog.vue               in-app release notes
+│   ├── MatchHistory.vue            public completed solo-match feed
+│   ├── FinalCompositionStrip.vue   shared final-board composition renderer
 │   ├── admin/AdminAnalytics.vue    protected analytics dashboard
 │   └── game/
 │       ├── CombatEffectsCanvas.vue layered animation renderer
@@ -54,6 +56,7 @@ src/
 ├── animations/                     shared animation render policy and gallery registry
 ├── data/                           mode metadata, shop odds, trait cache, gallery rosters
 ├── services/analyticsClient.ts     admin REST client/token handling
+├── services/matchHistoryClient.ts  public latest-match REST client
 ├── types/                          backend DTO mirrors and render-only types
 └── utils/
     ├── clientIdentity.ts           analytics id and per-tab reconnect session
@@ -255,14 +258,15 @@ excluded from `tsconfig.build.json`; do not document the gallery as a production
 
 ## 11. Admin analytics
 
+`#/match-history` renders `MatchHistory.vue` without starting the game WebSocket and loads the public latest-20 feed from
+`matchHistoryClient.ts`. It displays local completion time, mode, final round, placement, and a shared
+`FinalCompositionStrip.vue` board renderer with star and item badges, plus loading, empty, retry, and Back states.
 `#/admin/analytics` renders `AdminAnalytics.vue` without starting the game WebSocket. `analyticsClient.ts` handles login,
 bearer token storage for the current tab, summary queries, paginated run queries, final-composition unit-presence
 comparisons, run detail, and logout. The dashboard defaults to completed, non-abandoned runs and exposes exact mode,
 version, commit, placement, completion, abandonment, and anonymous-player filters. Mode, version, commit, build-cohort,
-and anonymous-player selections come from all distinct values in the summary date range. `FinalCompositionStrip.vue` renders
-captured empty boards separately from unavailable legacy snapshots, with mode-aware portraits, star/item badges, and a
-placeholder when historical assets are missing. The admin REST API is protected by the backend; frontend route hiding
-is not security.
+and anonymous-player selections come from all distinct values in the summary date range. The admin REST API is protected
+by the backend; frontend route hiding is not security.
 
 ## 12. Build, test, and deploy
 
@@ -301,7 +305,7 @@ Current focused tests cover:
 - Overall line coverage is low because canvas rendering and drag/drop paths are expensive to exercise in jsdom. The
   coverage command makes this visible; prioritize contract and pure-function extraction when touching these areas.
 - Full snapshots arrive every game tick. The client has no delta/revision protocol.
-- Hash routing is manual and sufficient for the current two standalone routes, but it will not scale to a larger app.
+- Hash routing is manual and sufficient for the current three standalone routes, but it will not scale to a larger app.
 - Runtime payload parsing uses TypeScript assertions, not a schema validator. Backend/frontend integration tests are the
   primary contract guard today.
 

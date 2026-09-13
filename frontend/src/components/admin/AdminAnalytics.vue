@@ -19,7 +19,7 @@ import type {
     AnalyticsSummary,
     AnalyticsUnitPresenceResponse,
 } from '../../types/analytics'
-import FinalCompositionStrip from './FinalCompositionStrip.vue'
+import FinalCompositionStrip from '../FinalCompositionStrip.vue'
 
 const session = ref<AdminSession | null>(loadAdminSession())
 const password = ref('')

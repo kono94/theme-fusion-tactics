@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { AnalyticsBoardUnit } from '../../types/analytics'
-import type { GameMode } from '../../types'
-import { getUnitIconPath, UNIT_ICON_PLACEHOLDER } from '../../utils/iconUtils'
+import type { AnalyticsBoardUnit } from '../types/analytics'
+import type { GameMode } from '../types'
+import { getUnitIconPath, UNIT_ICON_PLACEHOLDER } from '../utils/iconUtils'
 
 const props = defineProps<{
     mode: string

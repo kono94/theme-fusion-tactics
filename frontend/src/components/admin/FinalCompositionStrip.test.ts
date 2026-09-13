@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
-import FinalCompositionStrip from './FinalCompositionStrip.vue'
+import FinalCompositionStrip from '../FinalCompositionStrip.vue'
 
 describe('FinalCompositionStrip', () => {
     it('distinguishes unavailable and captured-empty boards', () => {

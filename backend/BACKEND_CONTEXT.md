@@ -54,7 +54,7 @@ BackendApplication
 ├── core/combat                     generic targeting, movement, ability, affinity logic
 ├── core/model                      command, state, event, and data records
 ├── game/{mode}                     mode providers and trait registration
-└── analytics                       async recorder, protected REST API, bearer sessions
+└── analytics                       async recorder, public history, protected REST API, bearer sessions
 ```
 
 Core code does not import a franchise package. `GameModeProvider` supplies resource paths, trait registration, optional
@@ -274,6 +274,10 @@ Public endpoints:
 - `GET /api/config`
 - `GET /api/mode`
 - `GET /api/traits?mode={mode}` returns trait metadata plus the resolved unit roster for each trait
+- `GET /api/match-history` returns at most 20 completed solo matches. A row is included only when exactly one human
+  run completed without abandonment, has a valid placement and captured final board, and its match has a completion
+  timestamp and final round. The response exposes mode, completion time, final round, placement, and final board units;
+  room IDs, run IDs, player names/IDs, analytics client IDs, and build metadata are never serialized.
 
 Admin endpoints:
 

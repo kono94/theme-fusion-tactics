@@ -56,6 +56,7 @@ For detailed architectural information, refer to the context documents:
 - **Player board spectating** — Click alive players in the right panel to view their board and combat from their perspective
 - **Shareable room invites** — New rooms receive a short generated code and a lobby link that prefills it for friends
 - **Remembered player names** — Choose a display name before creating or joining; invite links wait for name confirmation
+- **Public solo match history** — Browse the latest completed human-versus-seven-bot matches and their final boards
 - **Keyboard shortcuts** — Enter joins a typed room code, `R` rerolls, and `S` sells the hovered owned unit
 - **Bench reordering** — Swap and rearrange units during planning
 - **Team-colored health bars** — Emerald for allies, red for opponents
@@ -198,14 +199,16 @@ Augment choices are included in each player's `GameState` snapshot as `augmentCh
 | `/api/config` | GET | Default game mode and available lobby modes |
 | `/api/mode` | GET | Default game mode |
 | `/api/traits?mode={mode}` | GET | Trait definitions and cost-ordered unit rosters for the selected mode |
+| `/api/match-history` | GET | Public latest-20 completed solo matches with final placements and compositions |
 | `/api/admin/auth/login` | POST | Exchange the configured admin password for an eight-hour bearer token |
 | `/api/admin/auth/logout` | POST | Revoke the current bearer token |
 | `/api/admin/analytics/summary` | GET | Protected aggregate gameplay analytics |
 | `/api/admin/analytics/runs` | GET | Protected, paginated player runs |
 | `/api/admin/analytics/runs/{runId}` | GET | Protected round-level detail for one player run |
 
-The production analytics dashboard is available at `/#/admin/analytics`. Match state remains backend-authoritative and
-in memory; only anonymous analytics snapshots are written to SQLite. See the deployment guide for password and storage
+The public match history is available at `/#/match-history`; it uses REST only and never opens the game WebSocket. The
+production analytics dashboard is available at `/#/admin/analytics`. Match state remains backend-authoritative and in
+memory; only anonymous analytics snapshots are written to SQLite. See the deployment guide for password and storage
 configuration.
 
 ---

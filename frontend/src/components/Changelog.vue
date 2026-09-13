@@ -9,6 +9,7 @@ const versionNextHighlights = [
   'Build deeper Pokemon type teams with new trait breakpoints that reward every additional matching unit.',
   'Invite links now join you immediately when your player name is remembered. New visitors only choose a name and continue.',
   'More Pokemon now fight from range, and damage abilities always reach their unit’s auto-attack distance.',
+  'Browse the latest completed solo matches publicly, including final placement and the units on each final board.',
 ]
 
 const version230Highlights = [

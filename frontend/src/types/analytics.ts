@@ -60,6 +60,18 @@ export interface AnalyticsBoardUnit {
     itemIds: string[]
 }
 
+export interface PublicMatch {
+    mode: string
+    completedAt: string
+    finalRound: number
+    finalPlacement: number
+    finalComposition: AnalyticsBoardUnit[]
+}
+
+export interface PublicMatchHistoryResponse {
+    matches: PublicMatch[]
+}
+
 export interface AnalyticsAugment {
     id: string
     tier: string
