@@ -8,6 +8,7 @@ defineEmits(['back'])
 const versionNextHighlights = [
   'Build deeper Pokemon type teams with new trait breakpoints that reward every additional matching unit.',
   'Invite links now join you immediately when your player name is remembered. New visitors only choose a name and continue.',
+  'More Pokemon now fight from range, and damage abilities always reach their unit’s auto-attack distance.',
 ]
 
 const version230Highlights = [
@@ -160,6 +161,25 @@ const version160Commits = [
               <p>Breakpoints: <span class="old-value">1 / 2 / 3 / 4</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 2 / 3 / 4 / 5</strong>.</p>
               <p>DEF: <span class="old-value">5 / 14 / 25 / 40</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">5 / 14 / 25 / 34 / 44</strong>.</p>
             </div>
+            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Bulbasaur</h4></div><p>Attack range: <span class="old-value">1 / 1 / 1</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">2 / 2 / 2</strong>.</p></div>
+            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Charmander</h4></div><p>Attack range: <span class="old-value">1 / 1 / 1</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">2 / 2 / 2</strong>.</p></div>
+            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Weedle</h4></div><p>Attack range: <span class="old-value">1 / 1 / 1</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">2 / 2 / 2</strong>.</p></div>
+            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Poliwag</h4></div><p>Attack range: <span class="old-value">1 / 1 / 1</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">3 / 3 / 3</strong>.</p></div>
+            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Pikachu</h4></div><p>Attack range: <span class="old-value">1 / 1 / 1</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">3 / 3 / 3</strong>.</p></div>
+            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Grimer</h4></div><p>Attack range: <span class="old-value">1 / 1 / 1</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">2 / 2 / 2</strong>.</p></div>
+            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Aerodactyl</h4></div><p>Attack range: <span class="old-value">1 / 1 / 1</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">3 / 3 / 3</strong>.</p></div>
+            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Mewtwo</h4></div><p>Attack range: <span class="old-value">1 / 1 / 1</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">4 / 4 / 4</strong>.</p></div>
+            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Ivysaur</h4></div><p>Razor Leaf range: <span class="old-value">1 / 1 / 2</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 2 / 2</strong>.</p></div>
+            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Charmeleon</h4></div><p>Fire Fang range: <span class="old-value">1 / 1 / 1</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 2 / 2</strong>.</p></div>
+            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Kakuna</h4></div><p>Iron Defense range: <span class="old-value">1 / 1 / 1</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 2 / 2</strong>.</p></div>
+            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Poliwrath</h4></div><p>Dynamic Punch range: <span class="old-value">1 / 1 / 1</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 3 / 3</strong>.</p></div>
+            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Raichu</h4></div><p>Thunder range: <span class="old-value">2 / 2 / 3</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">2 / 3 / 3</strong>.</p></div>
+            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Pidgey</h4></div><p>Gust range: <span class="old-value">3 / 3 / 4</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">4 / 3 / 4</strong>.</p></div>
+            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Spearow</h4></div><p>Peck range: <span class="old-value">2 / 2 / 3</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">4 / 2 / 3</strong>.</p></div>
+            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Vulpix</h4></div><p>Will-O-Wisp range: <span class="old-value">2 / 2 / 3</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">3 / 2 / 3</strong>.</p></div>
+            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Wigglytuff</h4></div><p>Play Rough range: <span class="old-value">1 / 1 / 2</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 1 / 3</strong>.</p></div>
+            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Kingdra</h4></div><p>Draco Meteor range: <span class="old-value">2 / 3 / 3</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">2 / 3 / 4</strong>.</p></div>
+            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Dragonair</h4></div><p>Aqua Tail range: <span class="old-value">2 / 2 / 3</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">2 / 4 / 3</strong>.</p></div>
           </article>
         </div>
       </section>

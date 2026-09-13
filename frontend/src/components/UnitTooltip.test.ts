@@ -37,6 +37,28 @@ describe('UnitTooltip', () => {
         }
     })
 
+    it.each([
+        ['bulbasaur', [2, 2, 2]],
+        ['charmander', [2, 2, 2]],
+        ['weedle', [2, 2, 2]],
+        ['poliwag', [3, 3, 3]],
+        ['pikachu', [3, 3, 3]],
+        ['grimer', [2, 2, 2]],
+        ['aerodactyl', [3, 3, 3]],
+        ['mewtwo', [4, 4, 4]],
+    ])('shows the configured attack range for %s at every star', (id, expectedRanges) => {
+        const definition = pokemonUnits.find((unit) => unit.id === id)!
+        expect(definition.range).toEqual(expectedRanges)
+
+        definition.range.forEach((range) => {
+            const wrapper = mount(UnitTooltip, {
+                props: { unit: unitDefinition({ id, name: definition.name, range }) }
+            })
+            expect(wrapper.get('.range-badge').text()).toBe('RANGED')
+            expect(wrapper.get('.stats-grid').text()).toContain(`Range:${range}`)
+        })
+    })
+
     it('renders the current role and defense stat', () => {
         const wrapper = mount(UnitTooltip, {
             props: {

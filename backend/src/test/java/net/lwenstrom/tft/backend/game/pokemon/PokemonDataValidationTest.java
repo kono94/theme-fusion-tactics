@@ -71,6 +71,58 @@ class PokemonDataValidationTest {
     }
 
     @Test
+    void pokemonRangedUnitLinesUseConfiguredAttackRangesAndReachTheirTargets() throws Exception {
+        var units = loadPokemonUnits();
+        var expectedRanges = Map.of(
+                "bulbasaur", List.of(2, 2, 2),
+                "charmander", List.of(2, 2, 2),
+                "weedle", List.of(2, 2, 2),
+                "poliwag", List.of(3, 3, 3),
+                "pikachu", List.of(3, 3, 3),
+                "grimer", List.of(2, 2, 2),
+                "aerodactyl", List.of(3, 3, 3),
+                "mewtwo", List.of(4, 4, 4));
+
+        expectedRanges.forEach((id, expected) -> {
+            var unit = find(units, id);
+            assertEquals(expected, unit.range(), id + " attack ranges");
+            for (var starLevel = 1; starLevel <= 3; starLevel++) {
+                var ability = unit.getAbility(starLevel);
+                assertTrue(
+                        ability.getRangeForLevel(starLevel) >= unit.getActiveRange(starLevel),
+                        id + " " + starLevel + "-star ability must reach its attack range");
+            }
+        });
+    }
+
+    @Test
+    void pokemonDamageAbilitiesReachTheirActiveAttackRange() throws Exception {
+        for (var unit : loadPokemonUnits()) {
+            for (var starLevel = 1; starLevel <= 3; starLevel++) {
+                var ability = unit.getAbility(starLevel);
+                if (ability.type() == AbilityType.DAMAGE) {
+                    assertTrue(
+                            ability.getRangeForLevel(starLevel) >= unit.getActiveRange(starLevel),
+                            unit.id() + " " + starLevel + "-star damage ability must reach its attack range");
+                }
+            }
+        }
+    }
+
+    @Test
+    void pokemonDamageAbilityRangeAdjustmentsMatchThePatch() throws Exception {
+        var units = loadPokemonUnits();
+        assertEquals(List.of(4, 3, 4), find(units, "pidgey").getAbility(1).range());
+        assertEquals(List.of(4, 2, 3), find(units, "spearow").getAbility(1).range());
+        assertEquals(List.of(3, 2, 3), find(units, "vulpix").getAbility(1).range());
+        assertEquals(List.of(1, 1, 3), find(units, "jigglypuff").getAbility(3).range());
+        assertEquals(List.of(2, 3, 4), find(units, "horsea").getAbility(3).range());
+        assertEquals(List.of(2, 4, 3), find(units, "dratini").getAbility(2).range());
+        assertEquals(List.of(1, 3, 3), find(units, "poliwag").getAbility(3).range());
+        assertEquals(List.of(2, 3, 3), find(units, "pikachu").getAbility(2).range());
+    }
+
+    @Test
     void pokemonSupportKitsUseControlHealingAndDefenseEffects() throws Exception {
         var units = loadPokemonUnits();
 
