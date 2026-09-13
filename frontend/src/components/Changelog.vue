@@ -10,6 +10,7 @@ const version240Highlights = [
   'Invite links now join you immediately when your player name is remembered. New visitors only choose a name and continue.',
   'More Pokemon now fight from range, and damage abilities always reach their unit’s auto-attack distance.',
   'Browse the latest completed solo matches publicly, including final placement and the units on each final board.',
+  'Public match history now shows the completion date without a time for a cleaner feed.',
 ]
 
 const version230Highlights = [

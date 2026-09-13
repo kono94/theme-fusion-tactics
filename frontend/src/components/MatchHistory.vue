@@ -38,7 +38,7 @@ const loadMatches = async () => {
 }
 
 const formatDate = (value: string) =>
-    new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value))
+    new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(new Date(value))
 
 const modeLabel = (mode: string) => mode === 'onepiece' ? 'One Piece' : mode === 'pokemon' ? 'Pokemon' : mode
 

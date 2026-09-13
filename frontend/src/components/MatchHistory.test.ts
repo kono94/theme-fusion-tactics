@@ -43,6 +43,9 @@ describe('MatchHistory', () => {
         expect(wrapper.text()).toContain('1 real player vs 7 bots')
         expect(wrapper.text()).toContain('★')
         expect(wrapper.text()).toContain('Item 1')
+        expect(wrapper.get('time').text()).toBe(
+            new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(new Date(match.completedAt)),
+        )
     })
 
     it('uses the server history ID for distinct cards with matching metadata', async () => {
