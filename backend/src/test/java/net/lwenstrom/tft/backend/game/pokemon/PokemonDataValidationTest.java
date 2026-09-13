@@ -230,10 +230,17 @@ class PokemonDataValidationTest {
         assertEquals(0.30, doubleValue(flying, 3, "as"));
 
         var poison = effects(findTrait(traits, "poison"));
-        assertEquals(0.05, doubleValue(poison, 0, "damageRatio"));
-        assertEquals(0.10, doubleValue(poison, 1, "damageRatio"));
-        assertEquals(0.18, doubleValue(poison, 2, "damageRatio"));
-        assertEquals(0.30, doubleValue(poison, 3, "damageRatio"));
+        assertEquals(
+                List.of(1, 2, 3, 4, 5, 6),
+                poison.stream().map(effect -> minUnits(effect)).toList());
+        assertEquals(
+                List.of(0.05, 0.10, 0.18, 0.30, 0.45, 0.60),
+                poison.stream()
+                        .map(effect -> doubleValue(effect, "damageRatio"))
+                        .toList());
+        assertEquals(
+                List.of("bronze", "silver", "gold", "gold", "prismatic", "prismatic"),
+                poison.stream().map(effect -> effect.get("style")).toList());
         assertTrue(poison.stream().allMatch(effect -> intValue(effect, "durationMs") == 3000));
         assertTrue(poison.stream().allMatch(effect -> intValue(effect, "tickIntervalMs") == 1000));
 
@@ -338,7 +345,11 @@ class PokemonDataValidationTest {
     }
 
     private double doubleValue(List<Map<String, Object>> effects, int index, String key) {
-        return ((Number) values(effects.get(index)).get(key)).doubleValue();
+        return doubleValue(effects.get(index), key);
+    }
+
+    private double doubleValue(Map<String, Object> effect, String key) {
+        return ((Number) values(effect).get(key)).doubleValue();
     }
 
     private int intValue(Map<String, Object> effect, String key) {

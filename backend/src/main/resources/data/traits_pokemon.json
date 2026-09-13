@@ -400,9 +400,29 @@
             {
                 "minUnits": 4,
                 "description": "3s DoT: 30% ATK per tick",
-                "style": "prismatic",
+                "style": "gold",
                 "values": {
                     "damageRatio": 0.3,
+                    "durationMs": 3000,
+                    "tickIntervalMs": 1000
+                }
+            },
+            {
+                "minUnits": 5,
+                "description": "3s DoT: 45% ATK per tick",
+                "style": "prismatic",
+                "values": {
+                    "damageRatio": 0.45,
+                    "durationMs": 3000,
+                    "tickIntervalMs": 1000
+                }
+            },
+            {
+                "minUnits": 6,
+                "description": "3s DoT: 60% ATK per tick",
+                "style": "prismatic",
+                "values": {
+                    "damageRatio": 0.6,
                     "durationMs": 3000,
                     "tickIntervalMs": 1000
                 }

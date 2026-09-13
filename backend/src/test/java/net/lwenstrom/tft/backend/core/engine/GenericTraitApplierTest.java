@@ -92,6 +92,28 @@ class GenericTraitApplierTest {
         assertEquals(40, unit.getDamageReduction());
     }
 
+    @Test
+    void selectsTheHighestMatchingBreakpoint() throws Exception {
+        var applier = new GenericTraitApplier("poison", EffectType.ON_HIT_DOT, TraitTargetScope.TEAM, effects("""
+                [
+                  {"minUnits":1,"values":{"damageRatio":0.05}},
+                  {"minUnits":2,"values":{"damageRatio":0.10}},
+                  {"minUnits":3,"values":{"damageRatio":0.18}},
+                  {"minUnits":4,"values":{"damageRatio":0.30}},
+                  {"minUnits":5,"values":{"damageRatio":0.45}},
+                  {"minUnits":6,"values":{"damageRatio":0.60}}
+                ]
+                """));
+        var fiveUnitTarget = MockUnit.create("five", "P1");
+        var sixUnitTarget = MockUnit.create("six", "P1");
+
+        applier.apply(5, List.of(fiveUnitTarget));
+        applier.apply(6, List.of(sixUnitTarget));
+
+        assertEquals(0.45f, fiveUnitTarget.getOnHitDotDamageRatio(), 0.001f);
+        assertEquals(0.60f, sixUnitTarget.getOnHitDotDamageRatio(), 0.001f);
+    }
+
     private List<JsonNode> effects(String json) throws Exception {
         var result = new ArrayList<JsonNode>();
         var array = jsonMapper.readTree(json);
