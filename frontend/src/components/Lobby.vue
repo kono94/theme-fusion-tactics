@@ -34,6 +34,7 @@ const hasValidPlayerName = computed(() => {
     return playerName.length > 0 && playerName.length <= PLAYER_NAME_MAX_LENGTH
 })
 const canJoin = computed(() => hasValidPlayerName.value && joinId.value.trim().length > 0)
+const canContinueInvite = computed(() => hasValidPlayerName.value && Boolean(props.inviteRoomId))
 
 watch(
     () => props.inviteRoomId,
@@ -63,12 +64,25 @@ watch(
         autocomplete="nickname"
         placeholder="Enter your player name"
         :maxlength="PLAYER_NAME_MAX_LENGTH"
-        @keyup.enter="canJoin && emit('join', joinId)"
+        @keyup.enter="props.inviteRoomId
+          ? canContinueInvite && emit('join', props.inviteRoomId)
+          : canJoin && emit('join', joinId)"
       />
       <span>Your name is remembered on this device.</span>
     </div>
-    
-    <div class="actions">
+
+    <div v-if="props.inviteRoomId" class="invite-actions">
+      <button
+        class="secondary invite-continue"
+        data-test="invite-continue"
+        :disabled="!canContinueInvite"
+        @click="emit('join', props.inviteRoomId)"
+      >
+        Continue
+      </button>
+    </div>
+
+    <div v-else class="actions">
        <div class="card">
          <h3>Create New Room</h3>
          <p>Get a generated room code and invite other players</p>

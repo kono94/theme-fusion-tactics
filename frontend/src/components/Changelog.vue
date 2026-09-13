@@ -7,6 +7,7 @@ defineEmits(['back'])
 
 const versionNextHighlights = [
   'Build deeper Pokemon type teams with new trait breakpoints that reward every additional matching unit.',
+  'Invite links now join you immediately when your player name is remembered. New visitors only choose a name and continue.',
 ]
 
 const version230Highlights = [

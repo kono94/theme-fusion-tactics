@@ -142,7 +142,11 @@ onMounted(async () => {
                 currentView.value = 'game'
                 startRestoredRoomTimeout(activeRoom.roomId)
             } else if (pendingInviteRoomId.value) {
-                currentView.value = 'lobby'
+                if (playerName.value.trim().length > 0 && playerName.value.trim().length <= PLAYER_NAME_MAX_LENGTH) {
+                    handleJoin(pendingInviteRoomId.value)
+                } else {
+                    currentView.value = 'lobby'
+                }
             }
         },
         onDisconnect: () => {
@@ -650,6 +654,15 @@ const updateStandaloneRoute = () => {
             return
         }
         pendingInviteRoomId.value = roomId
+        if (
+            isConnected.value
+            && !gameState.value
+            && !pendingJoinRoomId.value
+            && playerName.value.trim().length > 0
+            && playerName.value.trim().length <= PLAYER_NAME_MAX_LENGTH
+        ) {
+            handleJoin(roomId)
+        }
     } else {
         pendingInviteRoomId.value = null
     }

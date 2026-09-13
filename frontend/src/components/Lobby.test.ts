@@ -25,7 +25,7 @@ describe('Lobby mode theme', () => {
         expect(wrapper.emitted('join')).toEqual([['FRIEND']])
     })
 
-    it('requires a name and prefills an invited room', async () => {
+    it('shows an invite-only name confirmation without a room field', async () => {
         const wrapper = mount(Lobby, {
             props: {
                 title: 'Theme Fusion Tactics',
@@ -35,7 +35,13 @@ describe('Lobby mode theme', () => {
         })
 
         expect(wrapper.find('.subtitle').text()).toContain('FRIEND')
-        expect(wrapper.get<HTMLInputElement>('[data-test="room-id-input"]').element.value).toBe('FRIEND')
-        expect(wrapper.get<HTMLButtonElement>('.secondary').element.disabled).toBe(true)
+        expect(wrapper.find('[data-test="room-id-input"]').exists()).toBe(false)
+        expect(wrapper.find('.actions').exists()).toBe(false)
+        expect(wrapper.get<HTMLButtonElement>('[data-test="invite-continue"]').element.disabled).toBe(true)
+
+        await wrapper.get('[data-test="player-name-input"]').setValue('Robin')
+        await wrapper.setProps({ playerName: 'Robin' })
+        await wrapper.get('[data-test="invite-continue"]').trigger('click')
+        expect(wrapper.emitted('join')).toEqual([['FRIEND']])
     })
 })

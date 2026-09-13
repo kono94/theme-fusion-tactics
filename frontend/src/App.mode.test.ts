@@ -302,15 +302,37 @@ describe('App game-mode bootstrap', () => {
 
         await vi.waitFor(() => expect(wrapper.find('.subtitle').text()).toContain('FRIEND'))
         expect(stomp.publish.mock.calls.some(([published]) => published.destination === '/app/join')).toBe(false)
-        expect(wrapper.get<HTMLInputElement>('[data-test="room-id-input"]').element.value).toBe('FRIEND')
-        expect(wrapper.get<HTMLButtonElement>('.secondary').element.disabled).toBe(true)
+        expect(wrapper.find('[data-test="room-id-input"]').exists()).toBe(false)
+        expect(wrapper.get<HTMLButtonElement>('[data-test="invite-continue"]').element.disabled).toBe(true)
 
         await wrapper.find('[data-test="player-name-input"]').setValue('Robin')
-        await wrapper.find('.secondary').trigger('click')
+        await wrapper.find('[data-test="invite-continue"]').trigger('click')
 
         const request = stomp.publish.mock.calls.find(([published]) => published.destination === '/app/join')?.[0]
         expect(JSON.parse(request.body)).toMatchObject({ roomId: 'FRIEND', playerName: 'Robin' })
         expect(window.location.hash).toBe('')
+        wrapper.unmount()
+    })
+
+    it('joins a valid invite automatically when a player name is remembered', async () => {
+        window.location.hash = '#/join/FRIEND'
+        localStorage.setItem('tactics.playerName', 'Robin')
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+            ok: true,
+            json: async () => ({ defaultGameMode: 'onepiece', availableModes: ['onepiece', 'pokemon'] }),
+        }))
+        const wrapper = mount(App)
+        await vi.waitFor(() => expect(stomp.onConnect).toBeDefined())
+
+        stomp.onConnect?.()
+
+        await vi.waitFor(() => {
+            const requests = stomp.publish.mock.calls.filter(([published]) => published.destination === '/app/join')
+            expect(requests).toHaveLength(1)
+            expect(JSON.parse(requests[0][0].body)).toMatchObject({ roomId: 'FRIEND', playerName: 'Robin' })
+        })
+        expect(window.location.hash).toBe('')
+        expect(wrapper.find('[data-test="player-name-input"]').exists()).toBe(false)
         wrapper.unmount()
     })
 
