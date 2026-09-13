@@ -34,10 +34,42 @@
             },
             {
                 "minUnits": 4,
-                "description": "+22% ATK",
+                "description": "+19% ATK",
+                "style": "gold",
+                "values": {
+                    "atkBuff": 0.19
+                }
+            },
+            {
+                "minUnits": 5,
+                "description": "+23% ATK",
+                "style": "gold",
+                "values": {
+                    "atkBuff": 0.23
+                }
+            },
+            {
+                "minUnits": 6,
+                "description": "+28% ATK",
+                "style": "gold",
+                "values": {
+                    "atkBuff": 0.28
+                }
+            },
+            {
+                "minUnits": 7,
+                "description": "+34% ATK",
                 "style": "prismatic",
                 "values": {
-                    "atkBuff": 0.22
+                    "atkBuff": 0.34
+                }
+            },
+            {
+                "minUnits": 8,
+                "description": "+40% ATK",
+                "style": "prismatic",
+                "values": {
+                    "atkBuff": 0.4
                 }
             }
         ]
@@ -77,10 +109,18 @@
             },
             {
                 "minUnits": 4,
-                "description": "+32% Ability Damage",
+                "description": "+28% Ability Damage",
+                "style": "gold",
+                "values": {
+                    "abilityDamage": 0.28
+                }
+            },
+            {
+                "minUnits": 5,
+                "description": "+34% Ability Damage",
                 "style": "prismatic",
                 "values": {
-                    "abilityDamage": 0.32
+                    "abilityDamage": 0.34
                 }
             }
         ]
@@ -120,10 +160,42 @@
             },
             {
                 "minUnits": 4,
-                "description": "+90% Mana Gain",
+                "description": "+78% Mana Gain",
+                "style": "gold",
+                "values": {
+                    "manaGain": 0.78
+                }
+            },
+            {
+                "minUnits": 5,
+                "description": "+92% Mana Gain",
+                "style": "gold",
+                "values": {
+                    "manaGain": 0.92
+                }
+            },
+            {
+                "minUnits": 6,
+                "description": "+103% Mana Gain",
+                "style": "gold",
+                "values": {
+                    "manaGain": 1.03
+                }
+            },
+            {
+                "minUnits": 7,
+                "description": "+114% Mana Gain",
                 "style": "prismatic",
                 "values": {
-                    "manaGain": 0.9
+                    "manaGain": 1.14
+                }
+            },
+            {
+                "minUnits": 8,
+                "description": "+125% Mana Gain",
+                "style": "prismatic",
+                "values": {
+                    "manaGain": 1.25
                 }
             }
         ]
@@ -233,10 +305,26 @@
             },
             {
                 "minUnits": 4,
-                "description": "+35% Max Mana at start",
+                "description": "+30% Max Mana at start",
+                "style": "gold",
+                "values": {
+                    "manaPercent": 0.3
+                }
+            },
+            {
+                "minUnits": 5,
+                "description": "+36% Max Mana at start",
                 "style": "prismatic",
                 "values": {
-                    "manaPercent": 0.35
+                    "manaPercent": 0.36
+                }
+            },
+            {
+                "minUnits": 6,
+                "description": "+42% Max Mana at start",
+                "style": "prismatic",
+                "values": {
+                    "manaPercent": 0.42
                 }
             }
         ]
@@ -349,10 +437,46 @@
             },
             {
                 "minUnits": 4,
-                "description": "+30% AS below 50% HP",
+                "description": "+26% AS below 50% HP",
+                "style": "gold",
+                "values": {
+                    "as": 0.26,
+                    "hpThreshold": 0.5
+                }
+            },
+            {
+                "minUnits": 5,
+                "description": "+31% AS below 50% HP",
+                "style": "gold",
+                "values": {
+                    "as": 0.31,
+                    "hpThreshold": 0.5
+                }
+            },
+            {
+                "minUnits": 6,
+                "description": "+37% AS below 50% HP",
+                "style": "gold",
+                "values": {
+                    "as": 0.37,
+                    "hpThreshold": 0.5
+                }
+            },
+            {
+                "minUnits": 7,
+                "description": "+43% AS below 50% HP",
                 "style": "prismatic",
                 "values": {
-                    "as": 0.3,
+                    "as": 0.43,
+                    "hpThreshold": 0.5
+                }
+            },
+            {
+                "minUnits": 8,
+                "description": "+50% AS below 50% HP",
+                "style": "prismatic",
+                "values": {
+                    "as": 0.5,
                     "hpThreshold": 0.5
                 }
             }
@@ -399,30 +523,50 @@
             },
             {
                 "minUnits": 4,
-                "description": "3s DoT: 30% ATK per tick",
+                "description": "3s DoT: 28% ATK per tick",
                 "style": "gold",
                 "values": {
-                    "damageRatio": 0.3,
+                    "damageRatio": 0.28,
                     "durationMs": 3000,
                     "tickIntervalMs": 1000
                 }
             },
             {
                 "minUnits": 5,
-                "description": "3s DoT: 45% ATK per tick",
-                "style": "prismatic",
+                "description": "3s DoT: 40% ATK per tick",
+                "style": "gold",
                 "values": {
-                    "damageRatio": 0.45,
+                    "damageRatio": 0.4,
                     "durationMs": 3000,
                     "tickIntervalMs": 1000
                 }
             },
             {
                 "minUnits": 6,
-                "description": "3s DoT: 60% ATK per tick",
+                "description": "3s DoT: 52% ATK per tick",
+                "style": "gold",
+                "values": {
+                    "damageRatio": 0.52,
+                    "durationMs": 3000,
+                    "tickIntervalMs": 1000
+                }
+            },
+            {
+                "minUnits": 7,
+                "description": "3s DoT: 61% ATK per tick",
                 "style": "prismatic",
                 "values": {
-                    "damageRatio": 0.6,
+                    "damageRatio": 0.61,
+                    "durationMs": 3000,
+                    "tickIntervalMs": 1000
+                }
+            },
+            {
+                "minUnits": 8,
+                "description": "3s DoT: 68% ATK per tick",
+                "style": "prismatic",
+                "values": {
+                    "damageRatio": 0.68,
                     "durationMs": 3000,
                     "tickIntervalMs": 1000
                 }
@@ -499,10 +643,18 @@
             },
             {
                 "minUnits": 4,
-                "description": "+38% ATK",
+                "description": "+33% ATK",
+                "style": "gold",
+                "values": {
+                    "atkBuff": 0.33
+                }
+            },
+            {
+                "minUnits": 5,
+                "description": "+40% ATK",
                 "style": "prismatic",
                 "values": {
-                    "atkBuff": 0.38
+                    "atkBuff": 0.4
                 }
             }
         ]
@@ -542,10 +694,18 @@
             },
             {
                 "minUnits": 4,
-                "description": "+40 DEF",
+                "description": "+34 DEF",
+                "style": "gold",
+                "values": {
+                    "defense": 34
+                }
+            },
+            {
+                "minUnits": 5,
+                "description": "+44 DEF",
                 "style": "prismatic",
                 "values": {
-                    "defense": 40
+                    "defense": 44
                 }
             }
         ]

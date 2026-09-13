@@ -5,6 +5,10 @@ defineOptions({
 
 defineEmits(['back'])
 
+const versionNextHighlights = [
+  'Build deeper Pokemon type teams with new trait breakpoints that reward every additional matching unit.',
+]
+
 const version230Highlights = [
   'Choose your own player name before creating or joining a room. Your name is remembered on this device, and invite links wait for you to confirm it before joining.',
   'Hover an active trait to see every unit line that can contribute, ordered by cost in rows of five.',
@@ -95,6 +99,73 @@ const version160Commits = [
       <section class="release-section">
         <div class="release-header">
           <p class="eyebrow">Latest</p>
+          <h2>Version X.X.X</h2>
+          <p>Chase deeper Pokemon type synergies with smoother power growth and new capstones.</p>
+        </div>
+        <div class="release-grid">
+          <article class="release-panel">
+            <div class="section-heading">
+              <span class="marker release"></span>
+              <h3>Highlights</h3>
+            </div>
+            <ul class="commit-list highlight-list">
+              <li v-for="highlight in versionNextHighlights" :key="highlight">
+                <span>{{ highlight }}</span>
+              </li>
+            </ul>
+          </article>
+          <article class="balance-panel">
+            <div class="section-heading">
+              <span class="marker balance"></span>
+              <h3>Balance Changes</h3>
+            </div>
+            <div class="balance-block">
+              <div class="balance-title"><span class="tag buff">Rework</span><h4>Normal</h4></div>
+              <p>Breakpoints: <span class="old-value">1 / 2 / 3 / 4</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 2 / 3 / 4 / 5 / 6 / 7 / 8</strong>.</p>
+              <p>ATK: <span class="old-value">2% / 7% / 14% / 22%</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">2% / 7% / 14% / 19% / 23% / 28% / 34% / 40%</strong>.</p>
+            </div>
+            <div class="balance-block">
+              <div class="balance-title"><span class="tag buff">Rework</span><h4>Flying</h4></div>
+              <p>Breakpoints: <span class="old-value">1 / 2 / 3 / 4</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 2 / 3 / 4 / 5 / 6 / 7 / 8</strong>.</p>
+              <p>Low-health AS: <span class="old-value">3% / 10% / 20% / 30%</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">3% / 10% / 20% / 26% / 31% / 37% / 43% / 50%</strong>.</p>
+            </div>
+            <div class="balance-block">
+              <div class="balance-title"><span class="tag buff">Rework</span><h4>Water</h4></div>
+              <p>Breakpoints: <span class="old-value">1 / 2 / 3 / 4</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 2 / 3 / 4 / 5 / 6 / 7 / 8</strong>.</p>
+              <p>Mana gain: <span class="old-value">15% / 40% / 65% / 90%</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">15% / 40% / 65% / 78% / 92% / 103% / 114% / 125%</strong>.</p>
+            </div>
+            <div class="balance-block">
+              <div class="balance-title"><span class="tag buff">Rework</span><h4>Poison</h4></div>
+              <p>Breakpoints: <span class="old-value">1 / 2 / 3 / 4 / 5 / 6</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 2 / 3 / 4 / 5 / 6 / 7 / 8</strong>.</p>
+              <p>Damage per tick: <span class="old-value">5% / 10% / 18% / 30% / 45% / 60% ATK</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">5% / 10% / 18% / 28% / 40% / 52% / 61% / 68% ATK</strong>.</p>
+            </div>
+            <div class="balance-block">
+              <div class="balance-title"><span class="tag buff">Rework</span><h4>Psychic</h4></div>
+              <p>Breakpoints: <span class="old-value">1 / 2 / 3 / 4</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 2 / 3 / 4 / 5 / 6</strong>.</p>
+              <p>Starting mana: <span class="old-value">4% / 14% / 24% / 35%</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">4% / 14% / 24% / 30% / 36% / 42%</strong>.</p>
+            </div>
+            <div class="balance-block">
+              <div class="balance-title"><span class="tag buff">Rework</span><h4>Fire</h4></div>
+              <p>Breakpoints: <span class="old-value">1 / 2 / 3 / 4</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 2 / 3 / 4 / 5</strong>.</p>
+              <p>Ability damage: <span class="old-value">4% / 14% / 22% / 32%</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">4% / 14% / 22% / 28% / 34%</strong>.</p>
+            </div>
+            <div class="balance-block">
+              <div class="balance-title"><span class="tag buff">Rework</span><h4>Fighting</h4></div>
+              <p>Breakpoints: <span class="old-value">1 / 2 / 3 / 4</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 2 / 3 / 4 / 5</strong>.</p>
+              <p>ATK: <span class="old-value">5% / 15% / 25% / 38%</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">5% / 15% / 25% / 33% / 40%</strong>.</p>
+            </div>
+            <div class="balance-block">
+              <div class="balance-title"><span class="tag buff">Rework</span><h4>Ice</h4></div>
+              <p>Breakpoints: <span class="old-value">1 / 2 / 3 / 4</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 2 / 3 / 4 / 5</strong>.</p>
+              <p>DEF: <span class="old-value">5 / 14 / 25 / 40</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">5 / 14 / 25 / 34 / 44</strong>.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="release-section">
+        <div class="release-header">
+          <p class="eyebrow">Previous</p>
           <h2>Version 2.3.0</h2>
           <p>
             Make rooms more personal, share them faster, read your trait setup clearly, and review

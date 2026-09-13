@@ -214,35 +214,42 @@ class PokemonDataValidationTest {
         var traits = loadPokemonTraits();
 
         var normal = effects(findTrait(traits, "normal"));
-        assertEquals(1, minUnits(normal, 0));
-        assertEquals(0.02, doubleValue(normal, 0, "atkBuff"));
-        assertEquals(0.07, doubleValue(normal, 1, "atkBuff"));
-        assertEquals(0.14, doubleValue(normal, 2, "atkBuff"));
-        assertEquals(0.22, doubleValue(normal, 3, "atkBuff"));
+        assertTraitValues(
+                normal,
+                List.of(1, 2, 3, 4, 5, 6, 7, 8),
+                "atkBuff",
+                List.of(0.02, 0.07, 0.14, 0.19, 0.23, 0.28, 0.34, 0.40));
 
         var flying = effects(findTrait(traits, "flying"));
-        assertEquals(
-                List.of(1, 2, 3, 4),
-                flying.stream().map(effect -> minUnits(effect)).toList());
-        assertEquals(0.03, doubleValue(flying, 0, "as"));
-        assertEquals(0.10, doubleValue(flying, 1, "as"));
-        assertEquals(0.20, doubleValue(flying, 2, "as"));
-        assertEquals(0.30, doubleValue(flying, 3, "as"));
+        assertTraitValues(
+                flying, List.of(1, 2, 3, 4, 5, 6, 7, 8), "as", List.of(0.03, 0.10, 0.20, 0.26, 0.31, 0.37, 0.43, 0.50));
+        assertTrue(flying.stream().allMatch(effect -> doubleValue(effect, "hpThreshold") == 0.5));
+
+        var water = effects(findTrait(traits, "water"));
+        assertTraitValues(
+                water,
+                List.of(1, 2, 3, 4, 5, 6, 7, 8),
+                "manaGain",
+                List.of(0.15, 0.40, 0.65, 0.78, 0.92, 1.03, 1.14, 1.25));
 
         var poison = effects(findTrait(traits, "poison"));
-        assertEquals(
-                List.of(1, 2, 3, 4, 5, 6),
-                poison.stream().map(effect -> minUnits(effect)).toList());
-        assertEquals(
-                List.of(0.05, 0.10, 0.18, 0.30, 0.45, 0.60),
-                poison.stream()
-                        .map(effect -> doubleValue(effect, "damageRatio"))
-                        .toList());
-        assertEquals(
-                List.of("bronze", "silver", "gold", "gold", "prismatic", "prismatic"),
-                poison.stream().map(effect -> effect.get("style")).toList());
+        assertTraitValues(
+                poison,
+                List.of(1, 2, 3, 4, 5, 6, 7, 8),
+                "damageRatio",
+                List.of(0.05, 0.10, 0.18, 0.28, 0.40, 0.52, 0.61, 0.68));
         assertTrue(poison.stream().allMatch(effect -> intValue(effect, "durationMs") == 3000));
         assertTrue(poison.stream().allMatch(effect -> intValue(effect, "tickIntervalMs") == 1000));
+
+        var psychic = effects(findTrait(traits, "psychic"));
+        assertTraitValues(
+                psychic, List.of(1, 2, 3, 4, 5, 6), "manaPercent", List.of(0.04, 0.14, 0.24, 0.30, 0.36, 0.42));
+
+        var fire = effects(findTrait(traits, "fire"));
+        assertTraitValues(fire, List.of(1, 2, 3, 4, 5), "abilityDamage", List.of(0.04, 0.14, 0.22, 0.28, 0.34));
+
+        var fighting = effects(findTrait(traits, "fighting"));
+        assertTraitValues(fighting, List.of(1, 2, 3, 4, 5), "atkBuff", List.of(0.05, 0.15, 0.25, 0.33, 0.40));
 
         var grass = effects(findTrait(traits, "grass"));
         assertEquals(
@@ -256,8 +263,18 @@ class PokemonDataValidationTest {
 
         var ice = effects(findTrait(traits, "ice"));
         assertEquals(
-                List.of(5, 14, 25, 40),
+                List.of(5, 14, 25, 34, 44),
                 ice.stream().map(effect -> intValue(effect, "defense")).toList());
+
+        assertEquals(
+                List.of("bronze", "silver", "gold", "gold", "gold", "gold", "prismatic", "prismatic"),
+                normal.stream().map(effect -> effect.get("style")).toList());
+        assertEquals(
+                List.of("bronze", "silver", "gold", "gold", "prismatic", "prismatic"),
+                psychic.stream().map(effect -> effect.get("style")).toList());
+        assertEquals(
+                List.of("bronze", "silver", "gold", "gold", "prismatic"),
+                fire.stream().map(effect -> effect.get("style")).toList());
     }
 
     @Test
@@ -350,6 +367,14 @@ class PokemonDataValidationTest {
 
     private double doubleValue(Map<String, Object> effect, String key) {
         return ((Number) values(effect).get(key)).doubleValue();
+    }
+
+    private void assertTraitValues(
+            List<Map<String, Object>> effects, List<Integer> breakpoints, String key, List<Double> expectedValues) {
+        assertEquals(breakpoints, effects.stream().map(this::minUnits).toList());
+        assertEquals(
+                expectedValues,
+                effects.stream().map(effect -> doubleValue(effect, key)).toList());
     }
 
     private int intValue(Map<String, Object> effect, String key) {

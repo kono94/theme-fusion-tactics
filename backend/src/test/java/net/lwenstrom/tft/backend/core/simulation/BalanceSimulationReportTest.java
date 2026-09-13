@@ -27,7 +27,7 @@ import net.lwenstrom.tft.backend.test.SeededRandomProvider;
 import org.junit.jupiter.api.Test;
 
 class BalanceSimulationReportTest {
-    private static final List<Integer> BOARD_SIZES = List.of(2, 3, 4, 5, 6, 7);
+    private static final List<Integer> BOARD_SIZES = List.of(2, 3, 4, 5, 6, 7, 8);
     private static final List<Integer> STAR_LEVELS = List.of(1, 2, 3);
     private static final Map<Integer, List<List<Integer>>> COST_PROFILES_BY_BOARD_SIZE =
             createCostProfilesByBoardSize();
