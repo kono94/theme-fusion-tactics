@@ -336,6 +336,95 @@ describe('App game-mode bootstrap', () => {
         wrapper.unmount()
     })
 
+    it('joins an invite added after the WebSocket connects when a name is remembered', async () => {
+        localStorage.setItem('tactics.playerName', 'Robin')
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+            ok: true,
+            json: async () => ({ defaultGameMode: 'onepiece', availableModes: ['onepiece', 'pokemon'] }),
+        }))
+        const wrapper = mount(App)
+        await vi.waitFor(() => expect(stomp.onConnect).toBeDefined())
+
+        stomp.onConnect?.()
+        await vi.waitFor(() => expect(wrapper.find('[data-test="player-name-input"]').exists()).toBe(true))
+
+        window.location.hash = '#/join/LATER'
+
+        await vi.waitFor(() => {
+            const requests = stomp.publish.mock.calls.filter(([published]) => published.destination === '/app/join')
+            expect(requests).toHaveLength(1)
+            expect(JSON.parse(requests[0][0].body)).toMatchObject({ roomId: 'LATER', playerName: 'Robin' })
+        })
+        expect(window.location.hash).toBe('')
+        wrapper.unmount()
+    })
+
+    it('returns to the lobby when an automatically joined invite is rejected', async () => {
+        window.location.hash = '#/join/MISSING'
+        localStorage.setItem('tactics.playerName', 'Robin')
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+            ok: true,
+            json: async () => ({ defaultGameMode: 'onepiece', availableModes: ['onepiece', 'pokemon'] }),
+        }))
+        const wrapper = mount(App)
+        await vi.waitFor(() => expect(stomp.onConnect).toBeDefined())
+
+        stomp.onConnect?.()
+        await vi.waitFor(() => expect(
+            stomp.publish.mock.calls.some(([published]) => published.destination === '/app/join'),
+        ).toBe(true))
+
+        const resultSubscription = stomp.subscriptions.find(({ destination }) => destination === '/user/queue/room-result')
+        resultSubscription?.callback({
+            body: JSON.stringify({
+                accepted: false,
+                roomId: 'MISSING',
+                playerId: null,
+                code: 'ROOM_NOT_FOUND',
+                message: 'That room does not exist.',
+            }),
+        })
+
+        await vi.waitFor(() => expect(wrapper.find('.lobby-error').text()).toContain('That room does not exist.'))
+        expect(wrapper.find('[data-test="room-id-input"]').exists()).toBe(true)
+        expect(sessionStorage.getItem('tactics.activeRoom')).toBeNull()
+        wrapper.unmount()
+    })
+
+    it('uses the active invite session to recover after reconnecting before acknowledgement', async () => {
+        window.location.hash = '#/join/RECOVER'
+        localStorage.setItem('tactics.playerName', 'Robin')
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+            ok: true,
+            json: async () => ({ defaultGameMode: 'onepiece', availableModes: ['onepiece', 'pokemon'] }),
+        }))
+        const wrapper = mount(App)
+        await vi.waitFor(() => expect(stomp.onConnect).toBeDefined())
+
+        stomp.onConnect?.()
+        await vi.waitFor(() => expect(
+            stomp.publish.mock.calls.filter(([published]) => published.destination === '/app/join'),
+        ).toHaveLength(1))
+        const firstRequest = stomp.publish.mock.calls.find(([published]) => published.destination === '/app/join')?.[0]
+        const firstBody = JSON.parse(firstRequest.body)
+
+        stomp.onConnect?.()
+
+        await vi.waitFor(() => expect(
+            stomp.publish.mock.calls.filter(([published]) => published.destination === '/app/join'),
+        ).toHaveLength(2))
+        const joinRequests = stomp.publish.mock.calls
+            .filter(([published]) => published.destination === '/app/join')
+            .map(([published]) => JSON.parse(published.body))
+
+        expect(joinRequests[1]).toMatchObject({
+            roomId: 'RECOVER',
+            playerName: 'Robin',
+            reconnectToken: firstBody.reconnectToken,
+        })
+        wrapper.unmount()
+    })
+
     it('retries a generated code collision', async () => {
         roomInvite.generateRoomCode
             .mockReturnValueOnce('COLLIDE')

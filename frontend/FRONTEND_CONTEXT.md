@@ -107,8 +107,8 @@ The client reconnect delay is five seconds. On connection:
 
 `localStorage` contains the anonymous analytics client ID and the player's preferred display name. Room/reconnect
 identity, including the name used when that room was joined, uses `sessionStorage`, so it remains tab-scoped and stable
-for reconnects. Invite routes prefill the room ID in the lobby and wait for the player to confirm a valid name before
-joining.
+for reconnects. Invite routes show a focused room invitation; a valid remembered name joins automatically after the
+WebSocket connects, while new visitors confirm their name before joining.
 
 ## 6. STOMP contracts
 
@@ -189,7 +189,8 @@ onto one half of the 9×6 combat canvas.
 
 - Uses `currentPlayerId === gameState.hostId` for host controls.
 - Marks the current user by player ID, not name.
-- Lets every player copy a `#/join/{roomId}` invite that automatically joins after the WebSocket connects.
+- Lets every player copy a `#/join/{roomId}` invite. Recipients with a valid remembered name join automatically after
+  the WebSocket connects; new visitors confirm their name first.
 - Shows backend-configured mode choices in stable One Piece/Pokemon order.
 - Emits mode selection, start, and leave; it does not publish STOMP directly.
 

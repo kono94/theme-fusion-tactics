@@ -173,6 +173,13 @@ watch(
     margin-top: 34px;
 }
 
+.invite-actions {
+    display: flex;
+    justify-content: center;
+    width: min(92vw, 420px);
+    margin-top: 34px;
+}
+
 .lobby-error {
     margin-top: 20px;
     padding: 10px 14px;
