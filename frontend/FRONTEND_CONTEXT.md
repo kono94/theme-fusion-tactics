@@ -1,6 +1,6 @@
 # Frontend Context
 
-> Last verified: 2026-07-31
+> Last verified: 2026-09-13
 >
 > Scope: the current Vue application, backend contracts, animation pipeline, analytics UI, and test/build workflow.
 >
@@ -164,7 +164,10 @@ offers do not pause the timer. Unanswered offers are auto-selected when combat b
 `selectedAugments`, `isGhost`, `isBot`, nullable `botPersonality`, and `matchStats`. The player list presents the
 server-assigned bot personality. The end screen uses `matchStats` for aggregate damage, healing, shielding, and the
 round-by-round result strip. There is no `activeTraits` wire field. Trait display is derived from board units plus
-metadata loaded from `/api/traits?mode=...`.
+metadata loaded from `/api/traits?mode=...`. Each trait definition includes a cost-ordered roster resolved by the
+backend to the earliest form that carries the trait. `TraitSidebar` renders those lines in a five-column grid, replaces
+the representative with the viewed player's live board form when it contributes, and leaves bench or inactive forms
+gray.
 
 Current combat event types are `DAMAGE`, `SKILL`, `DEATH`, `HEAL`, and `SHIELD`. Events contain only timestamp, type,
 source ID, target ID, value, and optional skill name. Do not add cast/status/zone/coordinate assumptions without first

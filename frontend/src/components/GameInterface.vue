@@ -558,7 +558,11 @@ watch(effectiveViewedPlayerId, (playerId) => {
 
         <!-- Main Game Area -->
         <div class="main-area" :class="{ 'dead-state': isDead }">
-            <TraitSidebar v-if="viewedPlayer" :units="viewedPlayerBoardUnits" />
+            <TraitSidebar
+                v-if="viewedPlayer"
+                :units="viewedPlayerBoardUnits"
+                :game-mode="state.gameMode"
+            />
             <div v-if="isSpectating && viewedPlayer" class="spectator-notice">
                 <span>Viewing {{ viewedPlayer.name }}</span>
                 <button class="home-btn" type="button" @click="returnHome">Home</button>

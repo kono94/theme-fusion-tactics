@@ -16,7 +16,7 @@ import net.lwenstrom.tft.backend.core.model.GameAction;
 import net.lwenstrom.tft.backend.core.model.GameMode;
 import net.lwenstrom.tft.backend.core.model.RoomEvent;
 import net.lwenstrom.tft.backend.core.model.RoomEventType;
-import net.lwenstrom.tft.backend.core.model.TraitMetadata;
+import net.lwenstrom.tft.backend.core.model.TraitCatalogEntry;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -42,7 +42,7 @@ public class GameController {
 
     private final SimpMessagingTemplate messagingTemplate;
     private final GameEngine gameEngine;
-    private final DataLoader dataLoader;
+    private final TraitCatalogService traitCatalogService;
     private final GameModeRegistry gameModeRegistry;
     private final Map<String, SessionPlayer> sessionPlayers = new ConcurrentHashMap<>();
 
@@ -53,14 +53,14 @@ public class GameController {
     }
 
     @GetMapping("/api/traits")
-    public List<TraitMetadata> getTraits(@RequestParam(required = false) String mode) {
+    public List<TraitCatalogEntry> getTraits(@RequestParam(required = false) String mode) {
         GameMode resolvedMode;
         try {
             resolvedMode = mode != null ? GameMode.fromString(mode) : gameModeRegistry.getDefaultMode();
         } catch (IllegalArgumentException exception) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "mode is invalid", exception);
         }
-        return dataLoader.getTraitMetadata(resolvedMode);
+        return traitCatalogService.getTraits(resolvedMode);
     }
 
     @GetMapping("/api/mode")

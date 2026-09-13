@@ -1,9 +1,30 @@
 
+import type { AbilityDefinition, UnitRole } from '../types'
+
 export interface TraitEffect {
     minUnits: number;
     description: string;
     style: 'bronze' | 'silver' | 'gold' | 'prismatic';
     values?: Record<string, unknown>;
+}
+
+export interface TraitRosterUnit {
+    lineId: string
+    cost: number
+    starLevel: number
+    definitionId: string
+    name: string
+    role: UnitRole
+    maxHealth: number
+    maxMana: number
+    attackDamage: number
+    abilityPower: number
+    defense: number
+    attackSpeed: number
+    range: number
+    traits: string[]
+    ability: AbilityDefinition | null
+    formattedAbilityDescription: string
 }
 
 export interface TraitDefinition {
@@ -16,6 +37,7 @@ export interface TraitDefinition {
     iconColor: string; // Simple hex for placeholder
     iconGlyph?: string;
     effectType?: string;
+    units?: TraitRosterUnit[];
 }
 
 // Global store for traits, populated by App.vue from backend

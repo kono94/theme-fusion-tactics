@@ -5,6 +5,12 @@ defineOptions({
 
 defineEmits(['back'])
 
+const version230Highlights = [
+  'Hover an active trait to see every unit line that can contribute, ordered by cost in rows of five.',
+  'Trait rosters highlight units currently contributing from the viewed combat grid and show complete unit details when you hover their icons.',
+  'Pokemon traits that appear after evolution now show the first form that can activate the trait.',
+]
+
 const version220Highlights = [
   'Units at full mana now move into their ability range before casting, even when their normal attack range is longer.',
   'Repeated stuns now refresh instead of stacking: the second lasts 80%, later stuns last 60%, and full duration returns after four seconds.',
@@ -79,6 +85,51 @@ const version160Commits = [
       <section class="release-section">
         <div class="release-header">
           <p class="eyebrow">Latest</p>
+          <h2>Version 2.3.0</h2>
+          <p>Discover every trait's roster at a glance and chase two powerful new Poison breakpoints.</p>
+        </div>
+        <div class="release-grid">
+          <article class="release-panel">
+            <div class="section-heading">
+              <span class="marker release"></span>
+              <h3>Highlights</h3>
+            </div>
+            <ul class="commit-list highlight-list">
+              <li v-for="highlight in version230Highlights" :key="highlight">
+                <span>{{ highlight }}</span>
+              </li>
+            </ul>
+          </article>
+          <article class="balance-panel">
+            <div class="section-heading">
+              <span class="marker balance"></span>
+              <h3>Balance Changes</h3>
+            </div>
+            <div class="balance-block">
+              <div class="balance-title">
+                <span class="tag buff">Buff</span>
+                <h4>Poison</h4>
+              </div>
+              <p>
+                Breakpoints:
+                <span class="old-value">1 / 2 / 3 / 4</span>
+                <span class="change-arrow">&nbsp;=>&nbsp;</span>
+                <strong class="value buff">1 / 2 / 3 / 4 / 5 / 6</strong>.
+              </p>
+              <p>
+                Damage per tick:
+                <span class="old-value">5% / 10% / 18% / 30% ATK</span>
+                <span class="change-arrow">&nbsp;=>&nbsp;</span>
+                <strong class="value buff">5% / 10% / 18% / 30% / 45% / 60% ATK</strong>.
+              </p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="release-section">
+        <div class="release-header">
+          <p class="eyebrow">Previous</p>
           <h2>Version 2.2.0</h2>
           <p>More reliable ability casting, fairer crowd control, and clearer crowded combat.</p>
         </div>

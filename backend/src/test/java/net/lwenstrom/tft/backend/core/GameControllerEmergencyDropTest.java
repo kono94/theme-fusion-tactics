@@ -36,7 +36,8 @@ class GameControllerEmergencyDropTest {
         channel.subscribe(sentMessages::add);
         var messagingTemplate = new SimpMessagingTemplate(channel);
         var gameEngine = new GameEngine(dataLoader, registry, clock, randomProvider);
-        var controller = new GameController(messagingTemplate, gameEngine, dataLoader, registry);
+        var controller =
+                new GameController(messagingTemplate, gameEngine, new TraitCatalogService(dataLoader), registry);
 
         controller.createRoom(new GameController.RoomRequest("emergency-room", "Winner"), "winner-session");
         controller.joinRoom(new GameController.RoomRequest("emergency-room", "Loser"), "loser-session");

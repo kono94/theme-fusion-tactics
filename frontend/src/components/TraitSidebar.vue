@@ -1,142 +1,211 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { getTraitGlyph, TRAIT_DATA, normalizeTraitId, type TraitDefinition, type TraitEffect } from '../data/traitData'
-import type { GameUnit } from '../types'
+import {
+    getTraitGlyph,
+    normalizeTraitId,
+    TRAIT_DATA,
+    type TraitDefinition,
+    type TraitEffect,
+    type TraitRosterUnit,
+} from '../data/traitData'
+import type { GameMode, GameUnit } from '../types'
+import { getRarityColor } from '../utils/colorUtils'
+import { getUnitIconPath } from '../utils/iconUtils'
+import UnitTooltip from './UnitTooltip.vue'
 
 const props = defineProps<{
-  units: GameUnit[]
+    units: GameUnit[]
+    gameMode: GameMode
 }>()
 
 const hoveredTraitId = ref<string | null>(null)
+const activeUnitTooltip = ref<{
+    unit: GameUnit | TraitRosterUnit
+    rect: DOMRect
+    placement: 'top' | 'bottom'
+} | null>(null)
 
-// Computed property to calculate trait states
 const processedTraits = computed(() => {
-    if (!props.units) return [];
-    
-    const uniqueUnits = new Set<string>();
-    const traitsCount: Record<string, number> = {};
+    const uniqueLinesByTrait: Record<string, Set<string>> = {}
 
-    props.units.forEach((u: GameUnit) => {
-        // Guard against incomplete unit data
-        if (!u.name) return;
-        
-        // Backend trait counts use lineId so evolved forms still count as one line.
-        const unitKey = u.lineId || u.definitionId || u.name;
-        if (!uniqueUnits.has(unitKey)) {
-            uniqueUnits.add(unitKey);
-            
-            if (u.traits && Array.isArray(u.traits)) {
-                u.traits.forEach((tName: string) => {
-                    const tId = normalizeTraitId(tName);
-                    traitsCount[tId] = (traitsCount[tId] || 0) + 1;
-                });
+    props.units.forEach((unit) => {
+        if (!unit.name) return
+
+        const unitKey = unit.lineId || unit.definitionId || unit.name
+        unit.traits?.forEach((traitName) => {
+            const traitId = normalizeTraitId(traitName)
+            uniqueLinesByTrait[traitId] ??= new Set<string>()
+            uniqueLinesByTrait[traitId].add(unitKey)
+        })
+    })
+
+    const list = Object.entries(uniqueLinesByTrait)
+        .map(([id, unitLines]) => {
+            const def = TRAIT_DATA[id]
+            if (!def) return null
+
+            const count = unitLines.size
+            const activeEffect = getActiveEffect(def, count)
+            return {
+                id,
+                def,
+                count,
+                activeEffect,
+                nextBreakpoint: getNextBreakpoint(def, count),
+                style: activeEffect?.style || 'inactive',
             }
-        }
-    });
+        })
+        .filter((item): item is NonNullable<typeof item> => item !== null)
 
-    // Convert to rich objects
-    const list = Object.entries(traitsCount).map(([id, count]) => {
-        const def = TRAIT_DATA[id];
-        if (!def) return null;
-
-        const activeEffect = getActiveEffect(def, count);
-        const nextBreakpoint = getNextBreakpoint(def, count);
-        
-        let style = 'inactive';
-        if (activeEffect) {
-            style = activeEffect.style;
-        }
-        
-        return {
-            id,
-            def,
-            count,
-            activeEffect,
-            nextBreakpoint, // Can be null if maxed
-            style
-        };
-    }).filter((item): item is NonNullable<typeof item> => item !== null);
-    
-    // Sort: High tier > Low tier, then Count desc
     list.sort((a, b) => {
-        const score = (s: string) => {
-             switch(s) {
-                case 'prismatic': return 5;
-                case 'gold': return 4;
-                case 'silver': return 3;
-                case 'bronze': return 2;
-                default: return 1;
-            }
+        const styleScore: Record<string, number> = {
+            inactive: 1,
+            bronze: 2,
+            silver: 3,
+            gold: 4,
+            prismatic: 5,
         }
-        const sA = score(a.style);
-        const sB = score(b.style);
-        if (sA !== sB) return sB - sA;
-        return b.count - a.count;
-    });
-    
-    return list;
+        const styleDifference = styleScore[b.style] - styleScore[a.style]
+        return styleDifference || b.count - a.count
+    })
+
+    return list
 })
 
 function getActiveEffect(trait: TraitDefinition, count: number): TraitEffect | null {
-    let active: TraitEffect | null = null;
-    // trait.effects is assumed sorted/ordered by minUnits ASC
-    for (const effect of trait.effects) {
-        if (count >= effect.minUnits) {
-            active = effect;
-        } else {
-            // Once we fail a check (and if sorted), we could stop, 
-            // but let's just checking all to find the max valid one.
-        }
-    }
-    return active;
+    return trait.effects.reduce<TraitEffect | null>(
+        (active, effect) => (count >= effect.minUnits ? effect : active),
+        null,
+    )
 }
 
 function getNextBreakpoint(trait: TraitDefinition, count: number): number | null {
-    for (const effect of trait.effects) {
-        if (effect.minUnits > count) {
-            return effect.minUnits;
-        }
+    return trait.effects.find((effect) => effect.minUnits > count)?.minUnits ?? null
+}
+
+function lineIdentity(unit: GameUnit | TraitRosterUnit): string {
+    return unit.lineId || unit.definitionId || unit.name
+}
+
+function activeBoardUnit(traitId: string, rosterUnit: TraitRosterUnit): GameUnit | null {
+    return props.units.find((unit) =>
+        lineIdentity(unit) === rosterUnit.lineId
+        && unit.traits.some((trait) => normalizeTraitId(trait) === traitId),
+    ) ?? null
+}
+
+function displayUnit(traitId: string, rosterUnit: TraitRosterUnit): GameUnit | TraitRosterUnit {
+    return activeBoardUnit(traitId, rosterUnit) ?? rosterUnit
+}
+
+function isActiveUnit(traitId: string, rosterUnit: TraitRosterUnit): boolean {
+    return activeBoardUnit(traitId, rosterUnit) !== null
+}
+
+function showUnitTooltip(event: MouseEvent | FocusEvent, unit: GameUnit | TraitRosterUnit) {
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect()
+    activeUnitTooltip.value = {
+        unit,
+        rect,
+        placement: rect.top > window.innerHeight / 2 ? 'top' : 'bottom',
     }
-    return null;
+}
+
+function hideUnitTooltip() {
+    activeUnitTooltip.value = null
+}
+
+function hideTraitTooltip() {
+    hoveredTraitId.value = null
+    hideUnitTooltip()
 }
 </script>
 
 <template>
   <div class="trait-sidebar">
-      <div v-for="item in processedTraits" :key="item.id" 
-           class="trait-item"
-           :class="item.style"
-           @mouseenter="hoveredTraitId = item.id"
-           @mouseleave="hoveredTraitId = null">
-           
-           <div class="trait-icon" :style="{ backgroundColor: item.def.iconColor || '#94a3b8' }">
-               {{ getTraitGlyph(item.def) }}
-           </div>
-           
-           <div class="trait-info">
-               <div class="trait-name">{{ item.def.name }}</div>
-               <div class="trait-count">
-                   {{ item.count }} / {{ item.nextBreakpoint || item.activeEffect?.minUnits || 'Max' }}
-               </div>
-           </div>
+      <div
+          v-for="item in processedTraits"
+          :key="item.id"
+          class="trait-item"
+          :class="item.style"
+          @mouseenter="hoveredTraitId = item.id"
+          @mouseleave="hideTraitTooltip"
+      >
+          <div class="trait-icon" :style="{ backgroundColor: item.def.iconColor || '#94a3b8' }">
+              {{ getTraitGlyph(item.def) }}
+          </div>
 
-           <!-- Helper Tooltip -->
-           <transition name="fade">
-               <div v-if="hoveredTraitId === item.id" class="trait-tooltip">
-                   <div class="tt-header">{{ item.def.name }}</div>
-                   <div class="tt-desc">{{ item.def.description }}</div>
-                   <div class="tt-effects">
-                       <div v-for="(effect, i) in item.def.effects" :key="i"
-                            class="tt-effect-row"
-                            :class="{ 'active': item.count >= effect.minUnits }">
-                           <span class="tt-meta">{{ effect.minUnits }}</span>
-                           <span>{{ effect.description }}</span>
-                       </div>
-                   </div>
-               </div>
-           </transition>
+          <div class="trait-info">
+              <div class="trait-name">{{ item.def.name }}</div>
+              <div class="trait-count">
+                  {{ item.count }} / {{ item.nextBreakpoint || item.activeEffect?.minUnits || 'Max' }}
+              </div>
+          </div>
+
+          <transition name="fade">
+              <div v-if="hoveredTraitId === item.id" class="trait-tooltip">
+                  <div class="tt-header">{{ item.def.name }}</div>
+                  <div class="tt-desc">{{ item.def.description }}</div>
+                  <div class="tt-effects">
+                      <div
+                          v-for="effect in item.def.effects"
+                          :key="effect.minUnits"
+                          class="tt-effect-row"
+                          :class="{ active: item.count >= effect.minUnits }"
+                      >
+                          <span class="tt-meta">{{ effect.minUnits }}</span>
+                          <span>{{ effect.description }}</span>
+                      </div>
+                  </div>
+
+                  <div v-if="item.def.units?.length" class="tt-roster" data-test="trait-roster">
+                      <button
+                          v-for="rosterUnit in item.def.units"
+                          :key="rosterUnit.lineId"
+                          type="button"
+                          class="trait-unit"
+                          :class="{ active: isActiveUnit(item.id, rosterUnit) }"
+                          :style="{ '--cost-color': getRarityColor(rosterUnit.cost) }"
+                          :aria-label="`${displayUnit(item.id, rosterUnit).name}, ${rosterUnit.cost} gold`"
+                          @mouseenter="showUnitTooltip($event, displayUnit(item.id, rosterUnit))"
+                          @mouseleave="hideUnitTooltip"
+                          @focus="showUnitTooltip($event, displayUnit(item.id, rosterUnit))"
+                          @blur="hideUnitTooltip"
+                      >
+                          <img
+                              :src="getUnitIconPath(displayUnit(item.id, rosterUnit).definitionId, gameMode)"
+                              :alt="displayUnit(item.id, rosterUnit).name"
+                              draggable="false"
+                          >
+                          <span class="unit-cost">{{ rosterUnit.cost }}</span>
+                      </button>
+                  </div>
+              </div>
+          </transition>
       </div>
   </div>
+
+  <Teleport to="body">
+      <transition name="fade">
+          <div
+              v-if="activeUnitTooltip"
+              class="trait-unit-tooltip"
+              :style="{
+                  left: `${activeUnitTooltip.rect.left}px`,
+                  top: `${activeUnitTooltip.rect.top}px`,
+                  width: `${activeUnitTooltip.rect.width}px`,
+                  height: `${activeUnitTooltip.rect.height}px`,
+              }"
+          >
+              <UnitTooltip
+                  :unit="activeUnitTooltip.unit"
+                  :placement="activeUnitTooltip.placement"
+                  shift="center"
+                  show-cost
+              />
+          </div>
+      </transition>
+  </Teleport>
 </template>
 
 <style scoped>
@@ -144,135 +213,212 @@ function getNextBreakpoint(trait: TraitDefinition, count: number): number | null
     position: absolute;
     left: 20px;
     top: 50%;
-    transform: translateY(-50%);
+    z-index: 100;
     display: flex;
     flex-direction: column;
     gap: 8px;
-    z-index: 100;
-    pointer-events: none; /* Let clicks pass active areas */
+    pointer-events: none;
+    transform: translateY(-50%);
 }
 
 .trait-item {
-    pointer-events: auto; /* Enable hover/click on items */
+    position: relative;
     display: flex;
+    width: 60px;
     align-items: center;
     gap: 8px;
     padding: 8px;
-    background: rgba(15, 23, 42, 0.8);
+    overflow: visible;
     border: 1px solid #334155;
     border-radius: 6px;
-    width: 60px; /* Collapsed view primarily */
-    overflow: visible;
-    transition: width 0.2s, background-color 0.2s;
-    position: relative;
+    background: rgba(15, 23, 42, 0.8);
     cursor: default;
+    pointer-events: auto;
+    transition: width 0.2s, background-color 0.2s;
 }
+
 .trait-item:hover {
-    width: 160px; /* Expand on hover if desired, or just show tooltip */
+    width: 160px;
     background: rgba(15, 23, 42, 0.95);
 }
 
-/* Styles */
-.trait-item.inactive { opacity: 0.6; border-color: #334155; }
+.trait-item.inactive { border-color: #334155; opacity: 0.6; }
 .trait-item.bronze { border-color: #cd7f32; box-shadow: 0 0 5px rgba(205, 127, 50, 0.2); }
 .trait-item.silver { border-color: #c0c0c0; box-shadow: 0 0 5px rgba(192, 192, 192, 0.2); }
 .trait-item.gold { border-color: #ffd700; box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
 .trait-item.prismatic { border-color: #a855f7; box-shadow: 0 0 15px rgba(168, 85, 247, 0.5); }
 
-
 .trait-icon {
+    display: flex;
     width: 32px;
     height: 32px;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
+    flex-shrink: 0;
     align-items: center;
-    font-weight: bold;
+    justify-content: center;
+    border-radius: 50%;
     color: #1e293b;
     font-size: 14px;
-    flex-shrink: 0;
+    font-weight: bold;
 }
 
 .trait-info {
     display: flex;
     flex-direction: column;
+    opacity: 0;
     white-space: nowrap;
-    opacity: 0; /* Hidden by default if collapsed */
     transition: opacity 0.2s;
 }
-.trait-item:hover .trait-info {
-    opacity: 1;
-}
+
+.trait-item:hover .trait-info { opacity: 1; }
 
 .trait-name {
+    color: white;
     font-size: 12px;
     font-weight: bold;
-    color: white;
-}
-.trait-count {
-    font-size: 10px;
-    color: #94a3b8;
 }
 
-/* Tooltip */
+.trait-count {
+    color: #94a3b8;
+    font-size: 10px;
+}
+
 .trait-tooltip {
     position: absolute;
+    top: 50%;
     left: 100%;
-    top: 0;
-    margin-left: 10px;
-    background: #1e293b;
-    border: 1px solid #475569;
-    padding: 12px;
-    border-radius: 8px;
-    width: 200px;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
     z-index: 200;
+    width: 264px;
+    max-height: calc(100vh - 24px);
+    margin-left: 10px;
+    padding: 12px;
+    overflow-y: auto;
+    border: 1px solid #475569;
+    border-radius: 8px;
+    background: #1e293b;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    transform: translateY(-50%);
 }
+
+.trait-tooltip::before {
+    position: absolute;
+    top: 0;
+    right: 100%;
+    width: 10px;
+    height: 100%;
+    content: '';
+}
+
 .tt-header {
-    font-weight: bold;
-    color: #eab308;
     margin-bottom: 4px;
+    color: #eab308;
+    font-weight: bold;
 }
+
 .tt-desc {
-    font-size: 12px;
-    color: #cbd5e1;
     margin-bottom: 8px;
+    color: #cbd5e1;
+    font-size: 12px;
     font-style: italic;
 }
+
 .tt-effects {
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
+
 .tt-effect-row {
     display: flex;
     gap: 8px;
-    font-size: 11px;
     color: #64748b;
+    font-size: 11px;
 }
+
 .tt-effect-row.active {
     color: white;
     font-weight: bold;
 }
+
 .tt-meta {
-    background: #334155;
+    min-width: 20px;
     padding: 1px 6px;
     border-radius: 4px;
-    min-width: 20px;
+    background: #334155;
     text-align: center;
 }
+
 .tt-effect-row.active .tt-meta {
     background: #eab308;
     color: black;
 }
 
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.2s ease;
+.tt-roster {
+    display: grid;
+    grid-template-columns: repeat(5, 40px);
+    gap: 6px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #475569;
 }
 
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
+.trait-unit {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    overflow: hidden;
+    border: 2px solid var(--cost-color);
+    border-radius: 5px;
+    background: #0f172a;
+    cursor: help;
+    filter: grayscale(1);
+    opacity: 0.38;
+    transition: filter 0.15s, opacity 0.15s, transform 0.15s;
 }
+
+.trait-unit.active {
+    filter: none;
+    opacity: 1;
+}
+
+.trait-unit:hover,
+.trait-unit:focus-visible {
+    z-index: 1;
+    outline: 2px solid white;
+    outline-offset: 1px;
+    transform: scale(1.08);
+}
+
+.trait-unit img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.unit-cost {
+    position: absolute;
+    right: 1px;
+    bottom: 1px;
+    min-width: 14px;
+    padding: 0 2px;
+    border-radius: 3px;
+    background: rgba(2, 6, 23, 0.9);
+    color: var(--cost-color);
+    font-size: 9px;
+    font-weight: 900;
+    line-height: 13px;
+    text-align: center;
+}
+
+.trait-unit-tooltip {
+    position: fixed;
+    z-index: 100000;
+    pointer-events: none;
+}
+
+.fade-enter-active,
+.fade-leave-active { transition: opacity 0.2s ease; }
+
+.fade-enter-from,
+.fade-leave-to { opacity: 0; }
 </style>

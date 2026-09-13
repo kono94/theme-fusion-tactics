@@ -35,7 +35,7 @@ class GameControllerSessionGuardTest {
         var messagingTemplate = mock(SimpMessagingTemplate.class);
 
         gameEngine = new GameEngine(dataLoader, registry, clock, randomProvider);
-        controller = new GameController(messagingTemplate, gameEngine, dataLoader, registry);
+        controller = new GameController(messagingTemplate, gameEngine, new TraitCatalogService(dataLoader), registry);
     }
 
     @Test

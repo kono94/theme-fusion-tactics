@@ -195,7 +195,7 @@ Augment choices are included in each player's `GameState` snapshot as `augmentCh
 |----------|--------|-------------|
 | `/api/config` | GET | Default game mode and available lobby modes |
 | `/api/mode` | GET | Default game mode |
-| `/api/traits?mode={mode}` | GET | Trait definitions for the selected mode |
+| `/api/traits?mode={mode}` | GET | Trait definitions and cost-ordered unit rosters for the selected mode |
 | `/api/admin/auth/login` | POST | Exchange the configured admin password for an eight-hour bearer token |
 | `/api/admin/auth/logout` | POST | Revoke the current bearer token |
 | `/api/admin/analytics/summary` | GET | Protected aggregate gameplay analytics |

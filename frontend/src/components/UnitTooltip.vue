@@ -12,7 +12,8 @@ type TooltipValue = number | string | (number | string)[] | null | undefined
 const props = defineProps<{
     unit: TooltipUnit,
     placement?: 'top' | 'bottom',
-    shift?: 'left' | 'more-left' | 'center'
+    shift?: 'left' | 'more-left' | 'center',
+    showCost?: boolean
 }>()
 
 const getBaseValue = (val: TooltipValue): number | string | undefined => {
@@ -75,8 +76,11 @@ const rarityColor = computed(() => {
   <div class="unit-tooltip" :class="[placement || 'top', shift ? `shift-${shift}` : '']">
       <div class="header">
           <span class="name" :style="{ color: rarityColor }">{{ unit.name }}</span>
-          <span class="stars">
-              <span v-for="n in starLevel" :key="n">⭐</span>
+          <span class="header-meta">
+              <span v-if="showCost" class="unit-cost">{{ unit.cost || 1 }}g</span>
+              <span class="stars">
+                  <span v-for="n in starLevel" :key="n">⭐</span>
+              </span>
           </span>
       </div>
       <div class="role-section">
@@ -189,6 +193,21 @@ const rarityColor = computed(() => {
 
 .stars {
     font-size: 0.8em;
+}
+
+.header-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.unit-cost {
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    padding: 1px 5px;
+    color: #facc15;
+    font-size: 0.7em;
+    font-weight: 800;
 }
 
 .role-section {

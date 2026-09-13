@@ -1,6 +1,6 @@
 # Backend Context
 
-> Last verified: 2026-07-31
+> Last verified: 2026-09-13
 >
 > Scope: the current Java backend, transport contracts, mode data, analytics, and test/build workflow.
 >
@@ -215,7 +215,9 @@ bench, board, shop, lootOrbs, augmentChoices, selectedAugments, isGhost, isBot, 
 round results. It records each real participant once when combat resolves and ignores donor-ghost contributions.
 
 There is no `activeTraits` field in the wire contract. Trait effects are applied by `TraitManager`; trait display metadata
-comes from `/api/traits` and the board is used to derive display counts.
+comes from `/api/traits` and the board is used to derive display counts. Each trait response also includes a cost-ordered
+`units` roster with one entry per purchasable line, resolved to the earliest star-level form that has that trait. This
+keeps evolution-only membership, icons, and tooltip data backend-derived without expanding `GameState`.
 
 `CombatEvent` has exactly six fields: `timestamp`, `type`, `sourceId`, `targetId`, `value`, and `skillName`. Current types
 are `DAMAGE`, `SKILL`, `DEATH`, `HEAL`, and `SHIELD`. The decisive combat tick retains its final events.
@@ -268,7 +270,7 @@ Public endpoints:
 
 - `GET /api/config`
 - `GET /api/mode`
-- `GET /api/traits?mode={mode}`
+- `GET /api/traits?mode={mode}` returns trait metadata plus the resolved unit roster for each trait
 
 Admin endpoints:
 
