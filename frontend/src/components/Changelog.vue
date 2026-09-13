@@ -5,7 +5,7 @@ defineOptions({
 
 defineEmits(['back'])
 
-const versionNextHighlights = [
+const version240Highlights = [
   'Build deeper Pokemon type teams with new trait breakpoints that reward every additional matching unit.',
   'Invite links now join you immediately when your player name is remembered. New visitors only choose a name and continue.',
   'More Pokemon now fight from range, and damage abilities always reach their unit’s auto-attack distance.',
@@ -102,7 +102,7 @@ const version160Commits = [
       <section class="release-section">
         <div class="release-header">
           <p class="eyebrow">Latest</p>
-          <h2>Version X.X.X</h2>
+          <h2>Version 2.4.0</h2>
           <p>Chase deeper Pokemon type synergies with smoother power growth and new capstones.</p>
         </div>
         <div class="release-grid">
@@ -112,7 +112,7 @@ const version160Commits = [
               <h3>Highlights</h3>
             </div>
             <ul class="commit-list highlight-list">
-              <li v-for="highlight in versionNextHighlights" :key="highlight">
+              <li v-for="highlight in version240Highlights" :key="highlight">
                 <span>{{ highlight }}</span>
               </li>
             </ul>
