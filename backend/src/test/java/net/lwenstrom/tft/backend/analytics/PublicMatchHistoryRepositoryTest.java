@@ -118,6 +118,25 @@ class PublicMatchHistoryRepositoryTest {
         assertThat(response.matches().get(2).finalComposition()).isNull();
     }
 
+    @Test
+    void treatsSemanticallyInvalidBoardEntriesAsUnavailable() {
+        insertMatch(
+                "invalid-unit",
+                "POKEMON",
+                2_000,
+                14,
+                3,
+                "[{\"definitionId\":\"mewtwo\",\"lineId\":\"mewtwo\",\"starLevel\":-1,\"itemIds\":[]}]",
+                "COMPLETED",
+                "COMPLETED",
+                null);
+
+        var response = repository.latest();
+
+        assertThat(response.matches()).hasSize(1);
+        assertThat(response.matches().getFirst().finalComposition()).isNull();
+    }
+
     private void insertMatch(
             String matchId,
             String mode,

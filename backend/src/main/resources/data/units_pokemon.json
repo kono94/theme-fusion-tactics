@@ -442,7 +442,7 @@
           "type": "SHIELD",
           "pattern": "SINGLE",
           "values": [148, 280, 510],
-          "range": [1, 2, 2]
+          "range": [1, 1, 1]
         }
       },
       {

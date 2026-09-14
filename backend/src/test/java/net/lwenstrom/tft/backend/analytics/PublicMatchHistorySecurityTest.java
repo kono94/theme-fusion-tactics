@@ -1,5 +1,6 @@
 package net.lwenstrom.tft.backend.analytics;
 
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -24,11 +25,18 @@ class PublicMatchHistorySecurityTest {
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(applicationContext).build();
+        mockMvc = MockMvcBuilders.webAppContextSetup(applicationContext)
+                .apply(springSecurity())
+                .build();
     }
 
     @Test
     void permitsUnauthenticatedHistoryReads() throws Exception {
         mockMvc.perform(get("/api/match-history")).andExpect(status().isOk());
+    }
+
+    @Test
+    void stillProtectsAdminAnalytics() throws Exception {
+        mockMvc.perform(get("/api/admin/analytics/summary")).andExpect(status().isUnauthorized());
     }
 }

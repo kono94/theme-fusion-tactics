@@ -103,6 +103,23 @@ const version160Commits = [
       <section class="release-section">
         <div class="release-header">
           <p class="eyebrow">Latest</p>
+          <h2>Version 2.4.1</h2>
+          <p>Bugfixed.</p>
+        </div>
+        <div class="release-grid">
+          <article class="release-panel">
+            <div class="section-heading">
+              <span class="marker release"></span>
+              <h3>Highlights</h3>
+            </div>
+            <p>Bugfixed.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="release-section">
+        <div class="release-header">
+          <p class="eyebrow">Previous</p>
           <h2>Version 2.4.0</h2>
           <p>Chase deeper Pokemon type synergies with smoother power growth and new capstones.</p>
         </div>
@@ -124,44 +141,52 @@ const version160Commits = [
               <h3>Balance Changes</h3>
             </div>
             <div class="balance-block">
-              <div class="balance-title"><span class="tag buff">Rework</span><h4>Normal</h4></div>
+              <div class="balance-title"><span class="tag mixed">Rework</span><h4>Normal</h4></div>
               <p>Breakpoints: <span class="old-value">1 / 2 / 3 / 4</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 2 / 3 / 4 / 5 / 6 / 7 / 8</strong>.</p>
-              <p>ATK: <span class="old-value">2% / 7% / 14% / 22%</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">2% / 7% / 14% / 19% / 23% / 28% / 34% / 40%</strong>.</p>
+              <p>ATK at 4 units: <span class="old-value">22%</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value nerf">19%</strong>.</p>
+              <p>New ATK capstones at 5 / 6 / 7 / 8 units: <strong class="value buff">23% / 28% / 34% / 40%</strong>.</p>
             </div>
             <div class="balance-block">
-              <div class="balance-title"><span class="tag buff">Rework</span><h4>Flying</h4></div>
+              <div class="balance-title"><span class="tag mixed">Rework</span><h4>Flying</h4></div>
               <p>Breakpoints: <span class="old-value">1 / 2 / 3 / 4</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 2 / 3 / 4 / 5 / 6 / 7 / 8</strong>.</p>
-              <p>Low-health AS: <span class="old-value">3% / 10% / 20% / 30%</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">3% / 10% / 20% / 26% / 31% / 37% / 43% / 50%</strong>.</p>
+              <p>Low-health AS at 4 units: <span class="old-value">30%</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value nerf">26%</strong>.</p>
+              <p>New low-health AS capstones at 5 / 6 / 7 / 8 units: <strong class="value buff">31% / 37% / 43% / 50%</strong>.</p>
             </div>
             <div class="balance-block">
-              <div class="balance-title"><span class="tag buff">Rework</span><h4>Water</h4></div>
+              <div class="balance-title"><span class="tag mixed">Rework</span><h4>Water</h4></div>
               <p>Breakpoints: <span class="old-value">1 / 2 / 3 / 4</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 2 / 3 / 4 / 5 / 6 / 7 / 8</strong>.</p>
-              <p>Mana gain: <span class="old-value">15% / 40% / 65% / 90%</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">15% / 40% / 65% / 78% / 92% / 103% / 114% / 125%</strong>.</p>
+              <p>Mana gain at 4 units: <span class="old-value">90%</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value nerf">78%</strong>.</p>
+              <p>New mana-gain capstones at 5 / 6 / 7 / 8 units: <strong class="value buff">92% / 103% / 114% / 125%</strong>.</p>
             </div>
             <div class="balance-block">
-              <div class="balance-title"><span class="tag buff">Rework</span><h4>Poison</h4></div>
+              <div class="balance-title"><span class="tag mixed">Rework</span><h4>Poison</h4></div>
               <p>Breakpoints: <span class="old-value">1 / 2 / 3 / 4 / 5 / 6</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 2 / 3 / 4 / 5 / 6 / 7 / 8</strong>.</p>
-              <p>Damage per tick: <span class="old-value">5% / 10% / 18% / 30% / 45% / 60% ATK</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">5% / 10% / 18% / 28% / 40% / 52% / 61% / 68% ATK</strong>.</p>
+              <p>Damage per tick at 4 / 5 / 6 units: <span class="old-value">30% / 45% / 60% ATK</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value nerf">28% / 40% / 52% ATK</strong>.</p>
+              <p>New damage capstones at 7 / 8 units: <strong class="value buff">61% / 68% ATK</strong>.</p>
             </div>
             <div class="balance-block">
-              <div class="balance-title"><span class="tag buff">Rework</span><h4>Psychic</h4></div>
+              <div class="balance-title"><span class="tag mixed">Rework</span><h4>Psychic</h4></div>
               <p>Breakpoints: <span class="old-value">1 / 2 / 3 / 4</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 2 / 3 / 4 / 5 / 6</strong>.</p>
-              <p>Starting mana: <span class="old-value">4% / 14% / 24% / 35%</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">4% / 14% / 24% / 30% / 36% / 42%</strong>.</p>
+              <p>Starting mana at 4 units: <span class="old-value">35%</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value nerf">30%</strong>.</p>
+              <p>New starting-mana capstones at 5 / 6 units: <strong class="value buff">36% / 42%</strong>.</p>
             </div>
             <div class="balance-block">
-              <div class="balance-title"><span class="tag buff">Rework</span><h4>Fire</h4></div>
+              <div class="balance-title"><span class="tag mixed">Rework</span><h4>Fire</h4></div>
               <p>Breakpoints: <span class="old-value">1 / 2 / 3 / 4</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 2 / 3 / 4 / 5</strong>.</p>
-              <p>Ability damage: <span class="old-value">4% / 14% / 22% / 32%</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">4% / 14% / 22% / 28% / 34%</strong>.</p>
+              <p>Ability damage at 4 units: <span class="old-value">32%</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value nerf">28%</strong>.</p>
+              <p>New ability-damage capstone at 5 units: <strong class="value buff">34%</strong>.</p>
             </div>
             <div class="balance-block">
-              <div class="balance-title"><span class="tag buff">Rework</span><h4>Fighting</h4></div>
+              <div class="balance-title"><span class="tag mixed">Rework</span><h4>Fighting</h4></div>
               <p>Breakpoints: <span class="old-value">1 / 2 / 3 / 4</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 2 / 3 / 4 / 5</strong>.</p>
-              <p>ATK: <span class="old-value">5% / 15% / 25% / 38%</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">5% / 15% / 25% / 33% / 40%</strong>.</p>
+              <p>ATK at 4 units: <span class="old-value">38%</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value nerf">33%</strong>.</p>
+              <p>New ATK capstone at 5 units: <strong class="value buff">40%</strong>.</p>
             </div>
             <div class="balance-block">
-              <div class="balance-title"><span class="tag buff">Rework</span><h4>Ice</h4></div>
+              <div class="balance-title"><span class="tag mixed">Rework</span><h4>Ice</h4></div>
               <p>Breakpoints: <span class="old-value">1 / 2 / 3 / 4</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 2 / 3 / 4 / 5</strong>.</p>
-              <p>DEF: <span class="old-value">5 / 14 / 25 / 40</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">5 / 14 / 25 / 34 / 44</strong>.</p>
+              <p>DEF at 4 units: <span class="old-value">40</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value nerf">34</strong>.</p>
+              <p>New DEF capstone at 5 units: <strong class="value buff">44</strong>.</p>
             </div>
             <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Bulbasaur</h4></div><p>Attack range: <span class="old-value">1 / 1 / 1</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">2 / 2 / 2</strong>.</p></div>
             <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Charmander</h4></div><p>Attack range: <span class="old-value">1 / 1 / 1</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">2 / 2 / 2</strong>.</p></div>
@@ -173,7 +198,6 @@ const version160Commits = [
             <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Mewtwo</h4></div><p>Attack range: <span class="old-value">1 / 1 / 1</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">4 / 4 / 4</strong>.</p></div>
             <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Ivysaur</h4></div><p>Razor Leaf range: <span class="old-value">1 / 1 / 2</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 2 / 2</strong>.</p></div>
             <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Charmeleon</h4></div><p>Fire Fang range: <span class="old-value">1 / 1 / 1</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 2 / 2</strong>.</p></div>
-            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Kakuna</h4></div><p>Iron Defense range: <span class="old-value">1 / 1 / 1</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 2 / 2</strong>.</p></div>
             <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Poliwrath</h4></div><p>Dynamic Punch range: <span class="old-value">1 / 1 / 1</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 3 / 3</strong>.</p></div>
             <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Raichu</h4></div><p>Thunder range: <span class="old-value">2 / 2 / 3</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">2 / 3 / 3</strong>.</p></div>
             <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Pidgey</h4></div><p>Gust range: <span class="old-value">3 / 3 / 4</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">4 / 3 / 4</strong>.</p></div>

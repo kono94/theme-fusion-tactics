@@ -126,7 +126,6 @@ onMounted(async () => {
             subscribeToRoomResults()
             const activeRoom = loadActiveRoomSession()
             if (activeRoom) {
-                if (pendingInviteRoomId.value) consumeInviteRoute()
                 gameState.value = null
                 currentRoomId.value = activeRoom.roomId
                 pendingJoinRoomId.value = activeRoom.roomId
@@ -307,6 +306,9 @@ const subscribeToRoomResults = () => {
                 return
             }
 
+            if (pendingRoomRequestKind.value === 'restore' && pendingInviteRoomId.value) {
+                consumeInviteRoute()
+            }
             currentPlayerId.value = result.playerId
             setActiveRoomPlayerId(result.roomId, result.playerId)
             pendingJoinRoomId.value = null
@@ -332,6 +334,9 @@ const clearRoomSubscriptions = () => {
 }
 
 const rejectPendingJoin = (message: string) => {
+    const inviteAfterFailedRestore = pendingRoomRequestKind.value === 'restore'
+        ? pendingInviteRoomId.value
+        : null
     clearRestoredRoomTimeout()
     clearRoomSubscriptions()
     clearActiveRoomSession()
@@ -347,6 +352,16 @@ const rejectPendingJoin = (message: string) => {
     currentPlayerId.value = null
     lobbyError.value = message
     applyThemeMeta(defaultMode.value)
+
+    if (
+        inviteAfterFailedRestore
+        && client.value
+        && isConnected.value
+        && playerName.value.trim().length > 0
+        && playerName.value.trim().length <= PLAYER_NAME_MAX_LENGTH
+    ) {
+        handleJoin(inviteAfterFailedRestore)
+    }
 }
 
 const clearRestoredRoomTimeout = () => {

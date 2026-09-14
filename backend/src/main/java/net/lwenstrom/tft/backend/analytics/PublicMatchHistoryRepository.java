@@ -51,11 +51,22 @@ public class PublicMatchHistoryRepository {
                 return null;
             }
             var units = new ArrayList<FinalBoardUnit>();
-            node.forEach(unit -> units.add(new FinalBoardUnit(
-                    unit.path("definitionId").asText(),
-                    unit.path("lineId").asText(),
-                    unit.path("starLevel").asInt(),
-                    itemIds(unit))));
+            for (var unit : node) {
+                var definitionId = textValue(unit, "definitionId");
+                var lineId = textValue(unit, "lineId");
+                var starLevelNode = unit.get("starLevel");
+                var itemIds = itemIds(unit);
+                if (definitionId == null
+                        || lineId == null
+                        || starLevelNode == null
+                        || !starLevelNode.isIntegralNumber()
+                        || starLevelNode.asInt() < 1
+                        || starLevelNode.asInt() > 3
+                        || itemIds == null) {
+                    return null;
+                }
+                units.add(new FinalBoardUnit(definitionId, lineId, starLevelNode.asInt(), itemIds));
+            }
             return units;
         } catch (JacksonException | IllegalArgumentException exception) {
             return null;
@@ -63,12 +74,26 @@ public class PublicMatchHistoryRepository {
     }
 
     private List<String> itemIds(JsonNode unit) {
-        var itemIds = new ArrayList<String>();
         var items = unit.get("itemIds");
-        if (items != null && items.isArray()) {
-            items.forEach(item -> itemIds.add(item.asText()));
+        if (items == null) {
+            return List.of();
+        }
+        if (!items.isArray()) {
+            return null;
+        }
+        var itemIds = new ArrayList<String>();
+        for (var item : items) {
+            if (!item.isTextual() || item.asText().isBlank()) {
+                return null;
+            }
+            itemIds.add(item.asText());
         }
         return itemIds;
+    }
+
+    private String textValue(JsonNode node, String fieldName) {
+        var value = node.get(fieldName);
+        return value != null && value.isTextual() && !value.asText().isBlank() ? value.asText() : null;
     }
 
     private String canonicalMode(String mode) {

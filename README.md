@@ -248,7 +248,7 @@ mvn -Dtest=RoleBalanceSimulationTest -Dsimulation.role-report=true -Dsimulation.
 ```
 
 Reports are written to `backend/target/simulation-reports`. Every style also writes unit and trait rankings for board
-sizes 2–7. The role report keeps Damage-only boards viable at size 3, requires a balanced advantage from size 4, and
+sizes 2–8. The role report keeps Damage-only boards viable at size 3, requires a balanced advantage from size 4, and
 raises the minimum balanced win-rate target to 65% for sizes 6–7.
 
 ### Build for Production

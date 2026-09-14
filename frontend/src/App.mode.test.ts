@@ -425,6 +425,48 @@ describe('App game-mode bootstrap', () => {
         wrapper.unmount()
     })
 
+    it('joins a fresh invite after a stale room session cannot be restored', async () => {
+        window.location.hash = '#/join/FRESH'
+        localStorage.setItem('tactics.playerName', 'Robin')
+        sessionStorage.setItem('tactics.activeRoom', JSON.stringify({
+            roomId: 'STALE',
+            playerName: 'Robin',
+            reconnectToken: 'stale-token',
+        }))
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+            ok: true,
+            json: async () => ({ defaultGameMode: 'onepiece', availableModes: ['onepiece', 'pokemon'] }),
+        }))
+        const wrapper = mount(App)
+        await vi.waitFor(() => expect(stomp.onConnect).toBeDefined())
+
+        stomp.onConnect?.()
+        await vi.waitFor(() => expect(
+            stomp.publish.mock.calls.filter(([published]) => published.destination === '/app/join'),
+        ).toHaveLength(1))
+
+        const resultSubscription = stomp.subscriptions.find(({ destination }) => destination === '/user/queue/room-result')
+        resultSubscription?.callback({
+            body: JSON.stringify({
+                accepted: false,
+                roomId: 'STALE',
+                playerId: null,
+                code: 'ROOM_NOT_FOUND',
+                message: 'That room does not exist.',
+            }),
+        })
+
+        await vi.waitFor(() => {
+            const joinRequests = stomp.publish.mock.calls
+                .filter(([published]) => published.destination === '/app/join')
+                .map(([published]) => JSON.parse(published.body))
+            expect(joinRequests).toHaveLength(2)
+            expect(joinRequests[1]).toMatchObject({ roomId: 'FRESH', playerName: 'Robin' })
+        })
+        expect(window.location.hash).toBe('')
+        wrapper.unmount()
+    })
+
     it('retries a generated code collision', async () => {
         roomInvite.generateRoomCode
             .mockReturnValueOnce('COLLIDE')

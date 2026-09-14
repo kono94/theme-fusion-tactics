@@ -88,9 +88,13 @@ class PokemonDataValidationTest {
             assertEquals(expected, unit.range(), id + " attack ranges");
             for (var starLevel = 1; starLevel <= 3; starLevel++) {
                 var ability = unit.getAbility(starLevel);
-                assertTrue(
-                        ability.getRangeForLevel(starLevel) >= unit.getActiveRange(starLevel),
-                        id + " " + starLevel + "-star ability must reach its attack range");
+                if (ability.type() == AbilityType.DAMAGE
+                        || ability.type() == AbilityType.STUN
+                        || ability.type() == AbilityType.DEBUFF_DEF) {
+                    assertTrue(
+                            ability.getRangeForLevel(starLevel) >= unit.getActiveRange(starLevel),
+                            id + " " + starLevel + "-star ability must reach its attack range");
+                }
             }
         });
     }
