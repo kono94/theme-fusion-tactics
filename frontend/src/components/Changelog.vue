@@ -104,7 +104,7 @@ const version160Commits = [
         <div class="release-header">
           <p class="eyebrow">Latest</p>
           <h2>Version 2.4.1</h2>
-          <p>Bugfixed.</p>
+          <p>Fixed several bugs found during a review of the 2.4.0 release.</p>
         </div>
         <div class="release-grid">
           <article class="release-panel">
@@ -112,7 +112,9 @@ const version160Commits = [
               <span class="marker release"></span>
               <h3>Highlights</h3>
             </div>
-            <p>Bugfixed.</p>
+            <p>
+              Fixed issues affecting invite links, public match history, and Pokemon ability ranges.
+            </p>
           </article>
         </div>
       </section>
@@ -2537,6 +2539,7 @@ const version160Commits = [
 }
 
 .release-section {
+  width: 100%;
   max-width: 1180px;
   margin: 0 auto;
 }
