@@ -103,6 +103,26 @@ const version160Commits = [
       <section class="release-section">
         <div class="release-header">
           <p class="eyebrow">Latest</p>
+          <h2>Version X.X.X</h2>
+          <p>Improved trait browsing for teams with many active synergies.</p>
+        </div>
+        <div class="release-grid">
+          <article class="release-panel">
+            <div class="section-heading">
+              <span class="marker release"></span>
+              <h3>Highlights</h3>
+            </div>
+            <p>
+              Trait icons now flow into extra columns when space is tight, and their roster panels
+              stay visible between the top and bottom game bars.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="release-section">
+        <div class="release-header">
+          <p class="eyebrow">Previous</p>
           <h2>Version 2.4.1</h2>
           <p>Fixed several bugs found during a review of the 2.4.0 release.</p>
         </div>
