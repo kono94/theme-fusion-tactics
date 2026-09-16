@@ -13,6 +13,16 @@ export interface ActiveRoomSession {
 
 const randomId = () => crypto.randomUUID()
 
+const parseActiveRoomSession = (raw: string | null): ActiveRoomSession | null => {
+    if (!raw) return null
+    try {
+        const value = JSON.parse(raw) as ActiveRoomSession
+        return value.roomId && value.playerName && value.reconnectToken ? value : null
+    } catch {
+        return null
+    }
+}
+
 export const getAnalyticsClientId = () => {
     const existing = localStorage.getItem(ANALYTICS_ID_KEY)
     if (existing) return existing
@@ -38,26 +48,31 @@ export const savePlayerName = (playerName: string) => {
 
 export const createActiveRoomSession = (roomId: string, playerName: string): ActiveRoomSession => {
     const session = { roomId, playerName, reconnectToken: randomId() }
-    sessionStorage.setItem(ACTIVE_ROOM_KEY, JSON.stringify(session))
+    localStorage.setItem(ACTIVE_ROOM_KEY, JSON.stringify(session))
+    sessionStorage.removeItem(ACTIVE_ROOM_KEY)
     return session
 }
 
 export const loadActiveRoomSession = (): ActiveRoomSession | null => {
-    const raw = sessionStorage.getItem(ACTIVE_ROOM_KEY)
-    if (!raw) return null
-    try {
-        const value = JSON.parse(raw) as ActiveRoomSession
-        return value.roomId && value.playerName && value.reconnectToken ? value : null
-    } catch {
-        sessionStorage.removeItem(ACTIVE_ROOM_KEY)
-        return null
+    const storedSession = parseActiveRoomSession(localStorage.getItem(ACTIVE_ROOM_KEY))
+    if (storedSession) return storedSession
+
+    localStorage.removeItem(ACTIVE_ROOM_KEY)
+    const legacySession = parseActiveRoomSession(sessionStorage.getItem(ACTIVE_ROOM_KEY))
+    sessionStorage.removeItem(ACTIVE_ROOM_KEY)
+    if (legacySession) {
+        localStorage.setItem(ACTIVE_ROOM_KEY, JSON.stringify(legacySession))
     }
+    return legacySession
 }
 
 export const setActiveRoomPlayerId = (roomId: string, playerId: string) => {
     const session = loadActiveRoomSession()
     if (!session || session.roomId !== roomId) return
-    sessionStorage.setItem(ACTIVE_ROOM_KEY, JSON.stringify({ ...session, playerId }))
+    localStorage.setItem(ACTIVE_ROOM_KEY, JSON.stringify({ ...session, playerId }))
 }
 
-export const clearActiveRoomSession = () => sessionStorage.removeItem(ACTIVE_ROOM_KEY)
+export const clearActiveRoomSession = () => {
+    localStorage.removeItem(ACTIVE_ROOM_KEY)
+    sessionStorage.removeItem(ACTIVE_ROOM_KEY)
+}

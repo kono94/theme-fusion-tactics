@@ -56,6 +56,7 @@ For detailed architectural information, refer to the context documents:
 - **Player board spectating** — Click alive players in the right panel to view their board and combat from their perspective
 - **Shareable room invites** — New rooms receive a short generated code and a direct invite link, so friends do not need to enter the room code
 - **Remembered player names** — Choose a display name before creating or joining; remembered names join invite links automatically, while new visitors enter a name and continue
+- **Browser reconnect recovery** — Reopen the game in another tab in the same browser to reclaim an active-match player
 - **Public solo match history** — Browse the latest completed human-versus-seven-bot matches and their final boards
 - **Keyboard shortcuts** — Enter joins a typed room code, `R` rerolls, and `S` sells the hovered owned unit
 - **Bench reordering** — Swap and rearrange units during planning

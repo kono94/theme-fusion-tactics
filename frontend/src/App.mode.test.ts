@@ -95,7 +95,7 @@ describe('App game-mode bootstrap', () => {
             }),
         }))
 
-        sessionStorage.setItem('tactics.activeRoom', JSON.stringify({
+        localStorage.setItem('tactics.activeRoom', JSON.stringify({
             roomId: 'mode-room',
             playerName: 'ModeTester',
             reconnectToken: 'token',
@@ -126,7 +126,7 @@ describe('App game-mode bootstrap', () => {
             return onepieceResponse
         }))
 
-        sessionStorage.setItem('tactics.activeRoom', JSON.stringify({
+        localStorage.setItem('tactics.activeRoom', JSON.stringify({
             roomId: 'mode-room',
             playerName: 'ModeTester',
             reconnectToken: 'token',
@@ -163,7 +163,7 @@ describe('App game-mode bootstrap', () => {
         })
         vi.stubGlobal('fetch', fetchMock)
 
-        sessionStorage.setItem('tactics.activeRoom', JSON.stringify({
+        localStorage.setItem('tactics.activeRoom', JSON.stringify({
             roomId: 'mode-room',
             playerName: 'ModeTester',
             reconnectToken: 'token',
@@ -185,7 +185,7 @@ describe('App game-mode bootstrap', () => {
         ))
         expect(wrapper.find('.lobby').exists()).toBe(true)
         expect(fetchMock.mock.calls.some(([request]) => String(request).includes('mode=retired-mode'))).toBe(false)
-        expect(sessionStorage.getItem('tactics.activeRoom')).toBeNull()
+        expect(localStorage.getItem('tactics.activeRoom')).toBeNull()
         wrapper.unmount()
     })
 
@@ -197,7 +197,7 @@ describe('App game-mode bootstrap', () => {
                 availableModes: ['onepiece', 'pokemon'],
             }),
         }))
-        sessionStorage.setItem('tactics.activeRoom', JSON.stringify({
+        localStorage.setItem('tactics.activeRoom', JSON.stringify({
             roomId: 'mode-room',
             playerName: 'DuplicateName',
             reconnectToken: 'token',
@@ -219,7 +219,7 @@ describe('App game-mode bootstrap', () => {
         })
 
         await vi.waitFor(() => {
-            const session = JSON.parse(sessionStorage.getItem('tactics.activeRoom') || '{}')
+            const session = JSON.parse(localStorage.getItem('tactics.activeRoom') || '{}')
             expect(session.playerId).toBe('server-player-id')
         })
         wrapper.unmount()
@@ -249,7 +249,7 @@ describe('App game-mode bootstrap', () => {
         expect(JSON.parse(publishedRequest.body).roomId).toBe('ABC234')
         expect(JSON.parse(publishedRequest.body).playerName).toBe('Luffy')
         expect(localStorage.getItem('tactics.playerName')).toBe('Luffy')
-        expect(JSON.parse(sessionStorage.getItem('tactics.activeRoom') || '{}').roomId).toBe('ABC234')
+        expect(JSON.parse(localStorage.getItem('tactics.activeRoom') || '{}').roomId).toBe('ABC234')
         wrapper.unmount()
     })
 
@@ -387,7 +387,7 @@ describe('App game-mode bootstrap', () => {
 
         await vi.waitFor(() => expect(wrapper.find('.lobby-error').text()).toContain('That room does not exist.'))
         expect(wrapper.find('[data-test="room-id-input"]').exists()).toBe(true)
-        expect(sessionStorage.getItem('tactics.activeRoom')).toBeNull()
+        expect(localStorage.getItem('tactics.activeRoom')).toBeNull()
         wrapper.unmount()
     })
 
@@ -428,7 +428,7 @@ describe('App game-mode bootstrap', () => {
     it('joins a fresh invite after a stale room session cannot be restored', async () => {
         window.location.hash = '#/join/FRESH'
         localStorage.setItem('tactics.playerName', 'Robin')
-        sessionStorage.setItem('tactics.activeRoom', JSON.stringify({
+        localStorage.setItem('tactics.activeRoom', JSON.stringify({
             roomId: 'STALE',
             playerName: 'Robin',
             reconnectToken: 'stale-token',

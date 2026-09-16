@@ -32,7 +32,7 @@ describe('admin route bootstrap', () => {
 
     it('returns to the lobby when a restored room no longer exists', async () => {
         window.location.hash = ''
-        sessionStorage.setItem(
+        localStorage.setItem(
             'tactics.activeRoom',
             JSON.stringify({ roomId: 'gone-room', playerName: 'Player_1', reconnectToken: 'token' }),
         )
@@ -52,7 +52,7 @@ describe('admin route bootstrap', () => {
         await wrapper.vm.$nextTick()
 
         expect(wrapper.text()).toContain('Your previous game is no longer available.')
-        expect(sessionStorage.getItem('tactics.activeRoom')).toBeNull()
+        expect(localStorage.getItem('tactics.activeRoom')).toBeNull()
         wrapper.unmount()
         vi.useRealTimers()
     })

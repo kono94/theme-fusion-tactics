@@ -104,7 +104,7 @@ const version160Commits = [
         <div class="release-header">
           <p class="eyebrow">Latest</p>
           <h2>Version X.X.X</h2>
-          <p>Improved trait browsing for teams with many active synergies.</p>
+          <p>Improved trait browsing, reconnect recovery, and the home-page layout.</p>
         </div>
         <div class="release-grid">
           <article class="release-panel">
@@ -112,10 +112,23 @@ const version160Commits = [
               <span class="marker release"></span>
               <h3>Highlights</h3>
             </div>
-            <p>
-              Trait icons now flow into extra columns when space is tight, and their roster panels
-              stay visible between the top and bottom game bars.
-            </p>
+            <ul class="commit-list highlight-list">
+              <li>
+                <span>
+                  Trait icons now flow into extra columns when space is tight, and their roster
+                  panels stay visible between the top and bottom game bars.
+                </span>
+              </li>
+              <li>
+                <span>
+                  Close the game tab and reopen the site in another tab in the same browser to
+                  reclaim your active-match player automatically.
+                </span>
+              </li>
+              <li>
+                <span>The home page now gets to the player and room controls more directly.</span>
+              </li>
+            </ul>
           </article>
         </div>
       </section>

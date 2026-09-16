@@ -98,16 +98,17 @@ The client reconnect delay is five seconds. On connection:
 - `App.vue` subscribes to `/user/queue/room-result` before publishing create/join.
 - Create/join trims the room ID once and uses that canonical value for subscriptions, payloads, acknowledgement
   correlation, timeout tracking, and the reconnect session.
-- New create/join requests store a random reconnect token in `sessionStorage` for the active tab.
+- New create/join requests store a random reconnect token in `localStorage` for the current browser.
 - Successful acknowledgement stores the returned `playerId` in the same session object.
 - A rejected request returns immediately to the lobby with the backend message.
 - A five-second acknowledgement timeout handles unavailable servers or stale restored sessions.
 - A restored active-match player presents the reconnect token; the backend rebinds the new STOMP session.
 - `leave` preserves the active-match player for reconnect grace; `abandon` permanently gives up the match.
 
-`localStorage` contains the anonymous analytics client ID and the player's preferred display name. Room/reconnect
-identity, including the name used when that room was joined, uses `sessionStorage`, so it remains tab-scoped and stable
-for reconnects. Invite routes show a focused room invitation; a valid remembered name joins automatically after the
+`localStorage` contains the anonymous analytics client ID, the player's preferred display name, and the active-room
+reconnect identity. Closing the game tab and opening the site in another tab in the same browser therefore restores the
+active match. Only the newest session remains authorized for that player. Existing tab-scoped sessions are migrated on
+first load. Invite routes show a focused room invitation; a valid remembered name joins automatically after the
 WebSocket connects, while new visitors confirm their name before joining.
 
 ## 6. STOMP contracts

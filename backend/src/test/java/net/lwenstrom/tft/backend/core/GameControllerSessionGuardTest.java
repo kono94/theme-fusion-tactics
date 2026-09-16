@@ -298,6 +298,32 @@ class GameControllerSessionGuardTest {
     }
 
     @Test
+    void joinRoom_ReconnectFromAnotherTabRevokesOldSession() {
+        controller.createRoom(
+                new GameController.RoomRequest("tab-reconnect-room", "Host", "browser-id", "reconnect-secret"),
+                "old-session");
+        var room = gameEngine.getRoom("tab-reconnect-room");
+        var host = findPlayer(room, "Host");
+        controller.startRoom(new GameController.RoomRequest(room.getId(), "Host"), "old-session");
+
+        controller.joinRoom(
+                new GameController.RoomRequest(room.getId(), "Host", "browser-id", "reconnect-secret"), "new-session");
+        var goldBeforeActions = host.getGold();
+
+        controller.handleAction(
+                room.getId(),
+                new GameAction(ActionType.EXP, host.getId(), null, null, null, null, null, null),
+                "old-session");
+        assertEquals(goldBeforeActions, host.getGold());
+
+        controller.handleAction(
+                room.getId(),
+                new GameAction(ActionType.EXP, host.getId(), null, null, null, null, null, null),
+                "new-session");
+        assertEquals(goldBeforeActions - GameConstants.XP_BUY_COST, host.getGold());
+    }
+
+    @Test
     void joinRoom_IsIdempotentForSameSessionInSameRoom() {
         var room = createRoomWithHost();
 
