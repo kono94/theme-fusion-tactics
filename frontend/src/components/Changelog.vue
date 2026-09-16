@@ -103,7 +103,7 @@ const version160Commits = [
       <section class="release-section">
         <div class="release-header">
           <p class="eyebrow">Latest</p>
-          <h2>Version X.X.X</h2>
+          <h2>Version 2.4.2</h2>
           <p>Improved trait browsing, reconnect recovery, and the home-page layout.</p>
         </div>
         <div class="release-grid">
