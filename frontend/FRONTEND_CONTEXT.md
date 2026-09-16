@@ -108,8 +108,9 @@ The client reconnect delay is five seconds. On connection:
 `localStorage` contains the anonymous analytics client ID, the player's preferred display name, and the active-room
 reconnect identity. Closing the game tab and opening the site in another tab in the same browser therefore restores the
 active match. Only the newest session remains authorized for that player. Existing tab-scoped sessions are migrated on
-first load. Invite routes show a focused room invitation; a valid remembered name joins automatically after the
-WebSocket connects, while new visitors confirm their name before joining.
+first load. A successful takeover writes a browser storage signal so the previous tab immediately shows a blocking
+control-moved overlay; reloading that tab reclaims control. Invite routes show a focused room invitation; a valid
+remembered name joins automatically after the WebSocket connects, while new visitors confirm their name before joining.
 
 ## 6. STOMP contracts
 

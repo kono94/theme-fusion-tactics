@@ -225,6 +225,47 @@ describe('App game-mode bootstrap', () => {
         wrapper.unmount()
     })
 
+    it('blocks an old tab after another tab takes control of its player', async () => {
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+            ok: true,
+            json: async () => ({
+                defaultGameMode: 'onepiece',
+                availableModes: ['onepiece', 'pokemon'],
+            }),
+        }))
+        localStorage.setItem('tactics.activeRoom', JSON.stringify({
+            roomId: 'mode-room',
+            playerName: 'DuplicateName',
+            reconnectToken: 'token',
+        }))
+        const wrapper = mount(App)
+        await vi.waitFor(() => expect(stomp.onConnect).toBeDefined())
+
+        stomp.onConnect?.()
+        await vi.waitFor(() => expect(stomp.subscriptions).toHaveLength(3))
+        const resultSubscription = stomp.subscriptions.find(({ destination }) => destination === '/user/queue/room-result')
+        resultSubscription?.callback({
+            body: JSON.stringify({
+                accepted: true,
+                roomId: 'mode-room',
+                playerId: 'server-player-id',
+                code: null,
+                message: null,
+            }),
+        })
+        await vi.waitFor(() => expect(localStorage.getItem('tactics.activeRoomControl')).not.toBeNull())
+
+        window.dispatchEvent(new StorageEvent('storage', {
+            key: 'tactics.activeRoomControl',
+            newValue: JSON.stringify({ roomId: 'mode-room', tabId: 'new-tab' }),
+        }))
+        await wrapper.vm.$nextTick()
+
+        expect(wrapper.get('.control-lost-overlay').text()).toContain('Game opened in another tab')
+        expect(wrapper.get('.control-lost-overlay').text()).toContain('The other tab now controls this player.')
+        wrapper.unmount()
+    })
+
     it('creates a room with a generated code', async () => {
         vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
             ok: true,

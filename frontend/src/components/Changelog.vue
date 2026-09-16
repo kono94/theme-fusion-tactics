@@ -122,7 +122,8 @@ const version160Commits = [
               <li>
                 <span>
                   Close the game tab and reopen the site in another tab in the same browser to
-                  reclaim your active-match player automatically.
+                  reclaim your active-match player automatically. If both tabs remain open, the
+                  previous tab clearly shows which tab now has control.
                 </span>
               </li>
               <li>

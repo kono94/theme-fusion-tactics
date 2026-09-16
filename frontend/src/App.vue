@@ -43,6 +43,8 @@ import { generateRoomCode, isInviteRoute, parseInviteRoomId } from './utils/room
 
 type PendingRoomRequestKind = 'create' | 'join' | 'restore'
 
+const ACTIVE_ROOM_CONTROL_KEY = 'tactics.activeRoomControl'
+
 const isConnected = ref(false)
 const gameState = ref<GameState | null>(null)
 const client = ref<Client | null>(null)
@@ -65,6 +67,8 @@ const pendingJoinRoomId = ref<string | null>(null)
 const pendingRoomRequestKind = ref<PendingRoomRequestKind | null>(null)
 const pendingInviteRoomId = ref<string | null>(null)
 const lobbyError = ref('')
+const hasLostRoomControl = ref(false)
+const controllerTabId = crypto.randomUUID()
 let traitRequestGeneration = 0
 let restoredRoomTimeout: number | null = null
 let generatedCreateAttempts = 0
@@ -82,6 +86,7 @@ onMounted(async () => {
     updateStandaloneRoute()
     window.addEventListener('hashchange', updateStandaloneRoute)
     if (isUltimateGallery.value || isAdminAnalytics.value || isMatchHistory.value) return
+    window.addEventListener('storage', handleActiveRoomControlChange)
 
     applyThemeMeta(defaultMode.value)
     try {
@@ -168,6 +173,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
     window.removeEventListener('hashchange', updateStandaloneRoute)
+    window.removeEventListener('storage', handleActiveRoomControlChange)
     clearRestoredRoomTimeout()
     clearEmergencyDropPresentation()
     roomResultSubscription.value?.unsubscribe()
@@ -247,7 +253,9 @@ const subscribeToRoom = (roomId: string) => {
         try {
             gameState.value = parseGameStateMessage(message.body)
             if (gameState.value.phase === 'END_CELEBRATION' || gameState.value.phase === 'END') {
+                releaseActiveRoomControl()
                 clearActiveRoomSession()
+                hasLostRoomControl.value = false
             }
             
             // Check Game Mode and Update Title
@@ -311,6 +319,7 @@ const subscribeToRoomResults = () => {
             }
             currentPlayerId.value = result.playerId
             setActiveRoomPlayerId(result.roomId, result.playerId)
+            claimActiveRoomControl(result.roomId)
             pendingJoinRoomId.value = null
             pendingRoomRequestKind.value = null
             generatedCreateAttempts = 0
@@ -320,6 +329,36 @@ const subscribeToRoomResults = () => {
             rejectPendingJoin('The server returned an invalid room response.')
         }
     }) ?? null
+}
+
+const claimActiveRoomControl = (roomId: string) => {
+    hasLostRoomControl.value = false
+    localStorage.setItem(ACTIVE_ROOM_CONTROL_KEY, JSON.stringify({ roomId, tabId: controllerTabId }))
+}
+
+const releaseActiveRoomControl = () => {
+    try {
+        const currentControl = JSON.parse(localStorage.getItem(ACTIVE_ROOM_CONTROL_KEY) || '{}') as {
+            tabId?: string
+        }
+        if (currentControl.tabId === controllerTabId) {
+            localStorage.removeItem(ACTIVE_ROOM_CONTROL_KEY)
+        }
+    } catch {
+        localStorage.removeItem(ACTIVE_ROOM_CONTROL_KEY)
+    }
+}
+
+function handleActiveRoomControlChange(event: StorageEvent) {
+    if (event.key !== ACTIVE_ROOM_CONTROL_KEY || !event.newValue || currentView.value !== 'game') return
+    try {
+        const control = JSON.parse(event.newValue) as { roomId?: string; tabId?: string }
+        if (control.roomId === currentRoomId.value && control.tabId && control.tabId !== controllerTabId) {
+            hasLostRoomControl.value = true
+        }
+    } catch {
+        // Ignore malformed cross-tab messages.
+    }
 }
 
 const clearRoomSubscriptions = () => {
@@ -581,6 +620,7 @@ const handleModeChange = (mode: GameMode) => {
 }
 
 const resetToLobby = () => {
+    releaseActiveRoomControl()
     clearRoomSubscriptions()
     clearRestoredRoomTimeout()
     clearActiveRoomSession()
@@ -590,6 +630,7 @@ const resetToLobby = () => {
     gameState.value = null
     currentRoomId.value = ''
     activeTraitMode.value = null
+    hasLostRoomControl.value = false
     traitRequestGeneration += 1
     viewedPlayerId.value = null
     pendingJoinRoomId.value = null
@@ -732,6 +773,13 @@ const applyThemeMeta = (mode: GameMode) => {
   <MatchHistory v-if="isMatchHistory" @back="handleMatchHistoryBack" />
   <AdminAnalytics v-else-if="isAdminAnalytics" />
   <div v-else :class="['app-container', themeClass]">
+    <div v-if="hasLostRoomControl" class="control-lost-overlay" role="alert" aria-live="assertive">
+      <div class="control-lost-message">
+        <h1>Game opened in another tab</h1>
+        <p>The other tab now controls this player.</p>
+        <p>Reload this tab if you want to take control here instead.</p>
+      </div>
+    </div>
     <button v-if="showVersion && currentView === 'lobby'"
             class="changelog-dock"
             type="button"
@@ -873,6 +921,39 @@ body {
     justify-content: center;
     align-items: center;
     font-size: 2em;
+}
+
+.control-lost-overlay {
+  position: fixed;
+  z-index: 1000000;
+  display: grid;
+  place-items: center;
+  inset: 0;
+  padding: 24px;
+  background: rgba(55, 65, 81, 0.98);
+  color: #f8fafc;
+  text-align: center;
+}
+
+.control-lost-message {
+  width: min(520px, 100%);
+  padding: 36px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 14px;
+  background: rgba(31, 41, 55, 0.88);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+
+.control-lost-message h1 {
+  margin: 0 0 18px;
+  font-size: clamp(1.7rem, 4vw, 2.5rem);
+}
+
+.control-lost-message p {
+  margin: 8px 0 0;
+  color: #d1d5db;
+  font-size: 1.05rem;
+  line-height: 1.5;
 }
 
 .outcome-enter-active {
