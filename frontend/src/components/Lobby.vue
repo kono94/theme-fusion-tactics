@@ -48,8 +48,8 @@ watch(
   <div :class="['lobby', props.themeClass]">
     <div class="title">
         <h1>{{ props.title }}</h1>
-        <p class="subtitle">
-          {{ props.inviteRoomId ? `You've been invited to room ${props.inviteRoomId}` : 'Create or join a tactics room' }}
+        <p v-if="props.inviteRoomId" class="subtitle">
+          You've been invited to room {{ props.inviteRoomId }}
         </p>
     </div>
     <div v-if="props.error" class="lobby-error">{{ props.error }}</div>

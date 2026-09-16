@@ -14,7 +14,7 @@ describe('Lobby mode theme', () => {
 
         expect(wrapper.find('.lobby').classes()).toContain('theme-pokemon')
         expect(wrapper.find('img').exists()).toBe(false)
-        expect(wrapper.find('.subtitle').text()).toBe('Create or join a tactics room')
+        expect(wrapper.find('.subtitle').exists()).toBe(false)
         expect(wrapper.findAll('input')).toHaveLength(2)
 
         await wrapper.find('.card button').trigger('click')
