@@ -12,11 +12,14 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final String[] allowedOriginPatterns;
+    private final ClientUserAgentHandshakeInterceptor clientUserAgentHandshakeInterceptor;
 
     public WebSocketConfig(
             @Value("${app.websocket.allowed-origin-patterns:http://localhost:*,http://127.0.0.1:*}")
-                    String[] allowedOriginPatterns) {
+                    String[] allowedOriginPatterns,
+            ClientUserAgentHandshakeInterceptor clientUserAgentHandshakeInterceptor) {
         this.allowedOriginPatterns = allowedOriginPatterns;
+        this.clientUserAgentHandshakeInterceptor = clientUserAgentHandshakeInterceptor;
     }
 
     @Override
@@ -27,6 +30,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/tft-websocket").setAllowedOriginPatterns(allowedOriginPatterns);
+        registry.addEndpoint("/tft-websocket")
+                .addInterceptors(clientUserAgentHandshakeInterceptor)
+                .setAllowedOriginPatterns(allowedOriginPatterns);
     }
 }

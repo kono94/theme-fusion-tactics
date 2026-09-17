@@ -17,12 +17,14 @@ import net.lwenstrom.tft.backend.core.model.GameMode;
 import net.lwenstrom.tft.backend.core.model.RoomEvent;
 import net.lwenstrom.tft.backend.core.model.RoomEventType;
 import net.lwenstrom.tft.backend.core.model.TraitCatalogEntry;
+import net.lwenstrom.tft.backend.core.observability.ClientUserAgent;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -30,6 +32,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.socket.messaging.SessionConnectEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 @RestController
@@ -229,7 +232,17 @@ public class GameController {
     }
 
     @EventListener
+    public void handleSessionConnect(SessionConnectEvent event) {
+        var accessor = SimpMessageHeaderAccessor.wrap(event.getMessage());
+        var attributes = accessor.getSessionAttributes();
+        var value = attributes == null ? null : attributes.get(ClientUserAgent.SESSION_ATTRIBUTE);
+        var client = value instanceof ClientUserAgent clientUserAgent ? clientUserAgent : ClientUserAgent.UNKNOWN;
+        gameEngine.clientConnected(accessor.getSessionId(), client);
+    }
+
+    @EventListener
     public void handleSessionDisconnect(SessionDisconnectEvent event) {
+        gameEngine.clientDisconnected(event.getSessionId());
         disconnectSession(event.getSessionId());
     }
 
@@ -261,19 +274,31 @@ public class GameController {
     public void handleAction(
             @DestinationVariable String id, @Payload GameAction action, @Header("simpSessionId") String sessionId) {
         var room = gameEngine.getRoom(id);
-        if (room == null) return;
+        if (room == null) {
+            gameEngine.recordAction(null, action == null ? null : action.type(), "rejected", "room_missing");
+            return;
+        }
+
+        if (action == null || action.type() == null) {
+            gameEngine.recordAction(room.getGameMode(), null, "rejected", "invalid_payload");
+            log.warn("Rejected malformed action payload.");
+            return;
+        }
 
         var sessionPlayer = resolveSessionPlayer(id, sessionId);
-        if (sessionPlayer == null || action == null || !sessionPlayer.playerId().equals(action.playerId())) {
+        if (sessionPlayer == null || !sessionPlayer.playerId().equals(action.playerId())) {
+            gameEngine.recordAction(room.getGameMode(), action.type(), "rejected", "unauthorized");
             log.warn("Rejected action for unbound or mismatched player.");
             return;
         }
 
         if (!room.applyAction(sessionPlayer.playerId(), action)) {
+            gameEngine.recordAction(room.getGameMode(), action.type(), "rejected", "invalid_action");
             log.warn("Rejected invalid action {} for player {}.", action.type(), sessionPlayer.playerId());
             return;
         }
 
+        gameEngine.recordAction(room.getGameMode(), action.type(), "accepted", "none");
         broadcastRoomState(room);
     }
 

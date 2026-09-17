@@ -1,0 +1,38 @@
+apiVersion: 1
+
+deleteDatasources:
+  - name: Mimir
+    orgId: 1
+  - name: Loki
+    orgId: 1
+  - name: Gameplay Analytics
+    orgId: 1
+
+datasources:
+  - name: Mimir
+    uid: mimir
+    type: prometheus
+    access: proxy
+    url: http://mimir:9009/prometheus
+    isDefault: true
+    editable: false
+    jsonData:
+      httpMethod: POST
+      prometheusType: Mimir
+      prometheusVersion: 3.2.1
+      timeInterval: 15s
+  - name: Loki
+    uid: loki
+    type: loki
+    access: proxy
+    url: http://loki:3100
+    editable: false
+    jsonData:
+      derivedFields: []
+  - name: Gameplay Analytics
+    uid: gameplay-analytics
+    type: frser-sqlite-datasource
+    access: proxy
+    editable: false
+    jsonData:
+      path: /var/lib/tft-analytics/analytics.db

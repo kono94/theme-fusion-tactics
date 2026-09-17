@@ -1,0 +1,151 @@
+extensions:
+  file_storage:
+    directory: /var/lib/otelcol/storage
+    create_directory: true
+  health_check:
+    endpoint: 0.0.0.0:13133
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+  host_metrics:
+    collection_interval: 15s
+    root_path: /hostfs
+    scrapers:
+      cpu:
+        metrics:
+          system.cpu.utilization:
+            enabled: true
+      disk: {}
+      filesystem:
+        exclude_fs_types:
+          fs_types:
+            - autofs
+            - binfmt_misc
+            - bpf
+            - cgroup
+            - cgroup2
+            - configfs
+            - debugfs
+            - devpts
+            - devtmpfs
+            - fusectl
+            - hugetlbfs
+            - iso9660
+            - mqueue
+            - nsfs
+            - overlay
+            - proc
+            - procfs
+            - pstore
+            - rpc_pipefs
+            - securityfs
+            - selinuxfs
+            - squashfs
+            - sysfs
+            - tracefs
+          match_type: strict
+        exclude_mount_points:
+          mount_points:
+            - ^/(dev|proc|run/credentials/.+|sys|var/lib/docker/.+)($|/)
+          match_type: regexp
+        metrics:
+          system.filesystem.utilization:
+            enabled: true
+      load: {}
+      memory:
+        metrics:
+          system.memory.utilization:
+            enabled: true
+      network: {}
+      paging: {}
+      system: {}
+
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: observability
+          scrape_interval: 15s
+          static_configs:
+            - targets: [127.0.0.1:8888]
+              labels:
+                instance: otel-collector
+            - targets: [mimir:9009]
+              labels:
+                instance: mimir
+            - targets: [loki:3100]
+              labels:
+                instance: loki
+        - job_name: grafana
+          scrape_interval: 15s
+          metrics_path: /grafana/metrics
+          static_configs:
+            - targets: [grafana:3000]
+              labels:
+                instance: grafana
+
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 256
+    spike_limit_mib: 64
+  resource/infrastructure:
+    attributes:
+      - key: service.name
+        value: tft-infrastructure
+        action: upsert
+      - key: deployment.environment.name
+        value: ${env:SPRING_PROFILES_ACTIVE}
+        action: upsert
+  batch:
+    timeout: 5s
+    send_batch_size: 1024
+
+exporters:
+  otlp_http/mimir:
+    endpoint: http://mimir:9009/otlp
+    retry_on_failure:
+      enabled: true
+    sending_queue:
+      enabled: true
+      queue_size: 2000
+      storage: file_storage
+  otlp_http/loki:
+    endpoint: http://loki:3100/otlp
+    retry_on_failure:
+      enabled: true
+    sending_queue:
+      enabled: true
+      queue_size: 2000
+      storage: file_storage
+
+service:
+  extensions: [file_storage, health_check]
+  telemetry:
+    metrics:
+      readers:
+        - pull:
+            exporter:
+              prometheus:
+                host: 0.0.0.0
+                port: 8888
+                without_type_suffix: true
+                without_units: true
+  pipelines:
+    metrics/application:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [otlp_http/mimir]
+    metrics/infrastructure:
+      receivers: [host_metrics, prometheus]
+      processors: [memory_limiter, resource/infrastructure, batch]
+      exporters: [otlp_http/mimir]
+    logs/application:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [otlp_http/loki]

@@ -123,6 +123,9 @@ For detailed architectural information, refer to the context documents:
 | Docker & Docker Compose | Containerization |
 | Nginx | Reverse proxy |
 | SQLite | Production gameplay analytics |
+| OpenTelemetry | Java agent, custom game metrics, application logs, and host metrics |
+| Mimir & Loki | 30-day metric and 7-day log storage |
+| Grafana | Provisioned operational and gameplay-analytics dashboards at `/grafana/` |
 
 ---
 
@@ -154,6 +157,16 @@ Frontend runs on `http://localhost:5173` with WebSocket proxy to backend
 ```bash
 docker compose --profile dev up --build
 ```
+
+The Compose stack also starts the OpenTelemetry Collector, Mimir, Loki, and Grafana. Open
+`http://localhost/grafana/` and sign in with `admin` / `admin` for local development; set the required Grafana secrets
+from `.env.example` for production. The application exports metrics and logs through native OTLP. Tracing is explicitly
+disabled. Host metrics use the Collector's native `hostmetrics` receiver, while Prometheus-format scraping is limited to
+the observability services' existing `/metrics` endpoints. The dashboard also reports active WebSocket clients and
+connection rates by bounded browser, operating-system, and device families; raw user-agent strings are never exported.
+Grafana also provisions `TFT Gameplay Analytics` and a linked per-run drill-down over the existing anonymous SQLite
+analytics store. The official Grafana image installs the pinned SQLite datasource plugin on first startup; no custom
+Grafana image is built.
 
 ---
 
@@ -208,9 +221,10 @@ Augment choices are included in each player's `GameState` snapshot as `augmentCh
 | `/api/admin/analytics/runs/{runId}` | GET | Protected round-level detail for one player run |
 
 The public match history is available at `/#/match-history`; it uses REST only and never opens the game WebSocket. The
-production analytics dashboard is available at `/#/admin/analytics`. Match state remains backend-authoritative and in
-memory; only anonymous analytics snapshots are written to SQLite. See the deployment guide for password and storage
-configuration.
+legacy application analytics view remains available at `/#/admin/analytics`, while its aggregates, filters, unit
+presence report, run list, and run details are also provisioned in Grafana. Match state remains backend-authoritative
+and in memory; only anonymous analytics snapshots are written to SQLite. See the deployment guide for password and
+storage configuration.
 
 ---
 

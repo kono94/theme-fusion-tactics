@@ -24,6 +24,12 @@ if [ ! -f "deployment/nginx/prod.conf" ]; then
     exit 1
 fi
 
+for required_key in GRAFANA_ROOT_URL GRAFANA_ADMIN_PASSWORD GRAFANA_SECRET_KEY; do
+    if ! grep -Eq "^${required_key}=.+" .env; then
+        echo "❌ ${required_key} is missing from .env. Add the 2.4.5 observability secrets before deploying."
+        exit 1
+    fi
+done
 
 # Get git version info
 GIT_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "dev")

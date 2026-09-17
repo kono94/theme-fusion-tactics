@@ -35,6 +35,7 @@ import net.lwenstrom.tft.backend.core.model.LootType;
 import net.lwenstrom.tft.backend.core.model.MatchStats.RoundOutcome;
 import net.lwenstrom.tft.backend.core.model.PlanningPauseReason;
 import net.lwenstrom.tft.backend.core.model.UnitCombatStats;
+import net.lwenstrom.tft.backend.core.observability.GameTelemetry;
 import net.lwenstrom.tft.backend.core.random.RandomProvider;
 import net.lwenstrom.tft.backend.core.time.Clock;
 
@@ -67,6 +68,7 @@ public class GameRoom {
     private final CombatSystem combatSystem;
     private final BotController botController;
     private final GameplayAnalyticsRecorder analyticsRecorder;
+    private final GameTelemetry telemetry;
     private boolean matchCompletedRecorded;
     private AugmentManager augmentManager;
     private final List<GameState.CombatEvent> lastTickEvents = new ArrayList<>();
@@ -103,7 +105,15 @@ public class GameRoom {
             Clock clock,
             RandomProvider randomProvider,
             GameMode gameMode) {
-        this(id, dataLoader, gameModeRegistry, clock, randomProvider, gameMode, GameplayAnalyticsRecorder.NO_OP);
+        this(
+                id,
+                dataLoader,
+                gameModeRegistry,
+                clock,
+                randomProvider,
+                gameMode,
+                GameplayAnalyticsRecorder.NO_OP,
+                GameTelemetry.NO_OP);
     }
 
     public GameRoom(
@@ -114,6 +124,18 @@ public class GameRoom {
             RandomProvider randomProvider,
             GameMode gameMode,
             GameplayAnalyticsRecorder analyticsRecorder) {
+        this(id, dataLoader, gameModeRegistry, clock, randomProvider, gameMode, analyticsRecorder, GameTelemetry.NO_OP);
+    }
+
+    public GameRoom(
+            String id,
+            DataLoader dataLoader,
+            GameModeRegistry gameModeRegistry,
+            Clock clock,
+            RandomProvider randomProvider,
+            GameMode gameMode,
+            GameplayAnalyticsRecorder analyticsRecorder,
+            GameTelemetry telemetry) {
         this.id = id;
         this.dataLoader = dataLoader;
         this.gameModeRegistry = gameModeRegistry;
@@ -122,6 +144,7 @@ public class GameRoom {
         this.botController = new BotController(dataLoader, randomProvider);
         this.gameMode = gameMode;
         this.analyticsRecorder = analyticsRecorder;
+        this.telemetry = telemetry;
 
         this.traitManager = new TraitManager();
         gameModeRegistry.getProvider(this.gameMode).registerTraitEffects(this.traitManager);
@@ -211,6 +234,7 @@ public class GameRoom {
         var player = new Player(
                 name, gameMode, dataLoader, randomProvider, analyticsClientId, hashReconnectToken(reconnectToken));
         players.put(player.getId(), player);
+        telemetry.playerConnectionEvent(gameMode, "joined");
 
         if (hostId == null) {
             hostId = player.getId();
@@ -241,6 +265,7 @@ public class GameRoom {
 
         recordAnalytics(() ->
                 analyticsRecorder.matchStarted(analyticsMatchKey, gameMode, clock.currentTimeMillis(), humanPlayers()));
+        telemetry.matchStarted(gameMode);
         startPhase(GamePhase.PLANNING);
     }
 
@@ -269,15 +294,20 @@ public class GameRoom {
         if (reconnectTokenHash == null || phase == GamePhase.LOBBY || phase == GamePhase.END) {
             return Optional.empty();
         }
-        return players.values().stream()
-                .filter(player -> !player.isBot() && !player.isGhost())
-                .filter(player -> constantTimeEquals(player.getReconnectTokenHash(), reconnectTokenHash))
+        var rejoiningPlayer = players.values().stream()
+                .filter(candidate -> !candidate.isBot() && !candidate.isGhost())
+                .filter(candidate -> constantTimeEquals(candidate.getReconnectTokenHash(), reconnectTokenHash))
                 .findFirst()
-                .map(player -> {
-                    abandonIfGraceExpired(player, clock.currentTimeMillis());
-                    player.setDisconnectedAt(null);
-                    return player;
-                });
+                .orElse(null);
+        if (rejoiningPlayer == null) {
+            return Optional.empty();
+        }
+        abandonIfGraceExpired(rejoiningPlayer, clock.currentTimeMillis());
+        rejoiningPlayer.setDisconnectedAt(null);
+        if (!rejoiningPlayer.isAbandoned()) {
+            telemetry.playerConnectionEvent(gameMode, "reconnected");
+        }
+        return Optional.of(rejoiningPlayer);
     }
 
     public synchronized void disconnectPlayer(String playerId) {
@@ -286,11 +316,13 @@ public class GameRoom {
             return;
         }
         if (phase == GamePhase.LOBBY) {
+            telemetry.playerConnectionEvent(gameMode, "disconnected");
             removePlayer(playerId);
             return;
         }
         if (phase != GamePhase.END && player.getDisconnectedAt() == null) {
             player.setDisconnectedAt(clock.currentTimeMillis());
+            telemetry.playerConnectionEvent(gameMode, "disconnected");
         }
     }
 
@@ -317,6 +349,7 @@ public class GameRoom {
         player.setReconnectTokenHash(null);
         if (!player.isAbandoned()) {
             player.setAbandoned(true);
+            telemetry.playerConnectionEvent(gameMode, "abandoned");
             recordAnalytics(() ->
                     analyticsRecorder.playerAbandoned(analyticsMatchKey, player.getId(), clock.currentTimeMillis()));
         }
@@ -596,6 +629,7 @@ public class GameRoom {
 
         if (newPhase == GamePhase.END_CELEBRATION && !matchCompletedRecorded) {
             matchCompletedRecorded = true;
+            telemetry.matchCompleted(gameMode);
             recordAnalytics(() -> analyticsRecorder.matchCompleted(
                     analyticsMatchKey, round, clock.currentTimeMillis(), humanPlayers()));
         }
@@ -1151,7 +1185,24 @@ public class GameRoom {
             return;
         }
         player.setAbandoned(true);
+        telemetry.playerConnectionEvent(gameMode, "abandoned");
         recordAnalytics(() -> analyticsRecorder.playerAbandoned(analyticsMatchKey, player.getId(), now));
+    }
+
+    public synchronized GameTelemetry.RoomSnapshot telemetrySnapshot() {
+        var humans = players.values().stream()
+                .filter(player -> !player.isBot() && !player.isGhost())
+                .toList();
+        var connectedHumans = humans.stream()
+                .filter(player -> !player.isAbandoned() && player.getDisconnectedAt() == null)
+                .count();
+        var reconnectGraceHumans = humans.stream()
+                .filter(player -> !player.isAbandoned() && player.getDisconnectedAt() != null)
+                .count();
+        var abandonedHumans = humans.stream().filter(Player::isAbandoned).count();
+        var bots = players.values().stream().filter(Player::isBot).count();
+        return new GameTelemetry.RoomSnapshot(
+                gameMode, phase, connectedHumans, reconnectGraceHumans, abandonedHumans, bots);
     }
 
     private List<Player> humanPlayers() {

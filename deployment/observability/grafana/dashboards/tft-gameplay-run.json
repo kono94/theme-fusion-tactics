@@ -1,0 +1,94 @@
+{
+  "annotations": { "list": [] },
+  "editable": false,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [
+    { "asDropdown": false, "icon": "arrow-left", "includeVars": false, "keepTime": true, "tags": [], "targetBlank": false, "title": "Back to gameplay analytics", "type": "link", "url": "/grafana/d/tft-gameplay-analytics/tft-gameplay-analytics" }
+  ],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "gameplay-analytics" },
+      "fieldConfig": { "defaults": { "custom": { "align": "auto", "cellOptions": { "type": "auto" }, "inspect": false }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] } }, "overrides": [{ "matcher": { "id": "byName", "options": "Started" }, "properties": [{ "id": "unit", "value": "dateTimeAsIso" }] }, { "matcher": { "id": "byName", "options": "Abandoned at" }, "properties": [{ "id": "unit", "value": "dateTimeAsIso" }] }, { "matcher": { "id": "byName", "options": "Placement finalized" }, "properties": [{ "id": "unit", "value": "dateTimeAsIso" }] }] },
+      "gridPos": { "h": 7, "w": 24, "x": 0, "y": 0 },
+      "id": 1,
+      "options": { "cellHeight": "sm", "footer": { "countRows": false, "fields": "", "reducer": ["sum"], "show": false }, "showHeader": true },
+      "targets": [{ "datasource": { "type": "frser-sqlite-datasource", "uid": "gameplay-analytics" }, "queryText": "SELECT r.id AS \"Run ID\", r.started_at AS Started, LOWER(REPLACE(m.mode, '_', '')) AS Mode, COALESCE(NULLIF(m.backend_version, ''), 'unknown') AS Version, COALESCE(NULLIF(m.backend_commit, ''), 'unknown') AS \"Commit\", COALESCE(r.analytics_client_id, 'unknown') AS \"Anonymous player\", r.status AS Status, r.final_placement AS Placement, r.final_health AS \"Final health\", r.final_round AS \"Final round\", r.abandoned_at AS \"Abandoned at\", r.placement_finalized_at AS \"Placement finalized\", SUM(CASE WHEN pr.outcome = 'WIN' THEN 1 ELSE 0 END) AS Wins, SUM(CASE WHEN pr.outcome = 'LOSS' THEN 1 ELSE 0 END) AS Losses, SUM(CASE WHEN pr.outcome = 'DRAW' THEN 1 ELSE 0 END) AS Draws FROM analytics_player_run r JOIN analytics_match m ON m.id = r.match_id LEFT JOIN analytics_player_round pr ON pr.run_id = r.id WHERE r.id = ${run_id:singlequote} GROUP BY r.id", "queryType": "table", "rawQueryText": "SELECT r.id AS \"Run ID\", r.started_at AS Started, LOWER(REPLACE(m.mode, '_', '')) AS Mode, COALESCE(NULLIF(m.backend_version, ''), 'unknown') AS Version, COALESCE(NULLIF(m.backend_commit, ''), 'unknown') AS \"Commit\", COALESCE(r.analytics_client_id, 'unknown') AS \"Anonymous player\", r.status AS Status, r.final_placement AS Placement, r.final_health AS \"Final health\", r.final_round AS \"Final round\", r.abandoned_at AS \"Abandoned at\", r.placement_finalized_at AS \"Placement finalized\", SUM(CASE WHEN pr.outcome = 'WIN' THEN 1 ELSE 0 END) AS Wins, SUM(CASE WHEN pr.outcome = 'LOSS' THEN 1 ELSE 0 END) AS Losses, SUM(CASE WHEN pr.outcome = 'DRAW' THEN 1 ELSE 0 END) AS Draws FROM analytics_player_run r JOIN analytics_match m ON m.id = r.match_id LEFT JOIN analytics_player_round pr ON pr.run_id = r.id WHERE r.id = ${run_id:singlequote} GROUP BY r.id", "refId": "A", "timeColumns": [] }],
+      "title": "Run summary",
+      "type": "table"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "gameplay-analytics" },
+      "fieldConfig": { "defaults": { "custom": { "align": "auto", "cellOptions": { "type": "auto" }, "inspect": false }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] } }, "overrides": [] },
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 7 },
+      "id": 2,
+      "options": { "cellHeight": "sm", "footer": { "countRows": false, "fields": "", "reducer": ["sum"], "show": false }, "showHeader": true },
+      "targets": [{ "datasource": { "type": "frser-sqlite-datasource", "uid": "gameplay-analytics" }, "queryText": "SELECT CAST(unit.key AS INTEGER) + 1 AS Slot, json_extract(unit.value, '$.definitionId') AS Unit, json_extract(unit.value, '$.lineId') AS \"Line ID\", json_extract(unit.value, '$.starLevel') AS Stars, COALESCE((SELECT GROUP_CONCAT(item.value, ', ') FROM json_each(json_extract(unit.value, '$.itemIds')) AS item), '—') AS Items FROM analytics_player_run r JOIN json_each(r.final_board_json) AS unit WHERE r.id = ${run_id:singlequote} ORDER BY CAST(unit.key AS INTEGER)", "queryType": "table", "rawQueryText": "SELECT CAST(unit.key AS INTEGER) + 1 AS Slot, json_extract(unit.value, '$.definitionId') AS Unit, json_extract(unit.value, '$.lineId') AS \"Line ID\", json_extract(unit.value, '$.starLevel') AS Stars, COALESCE((SELECT GROUP_CONCAT(item.value, ', ') FROM json_each(json_extract(unit.value, '$.itemIds')) AS item), '—') AS Items FROM analytics_player_run r JOIN json_each(r.final_board_json) AS unit WHERE r.id = ${run_id:singlequote} ORDER BY CAST(unit.key AS INTEGER)", "refId": "A", "timeColumns": [] }],
+      "title": "Final deployed board",
+      "type": "table"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "gameplay-analytics" },
+      "fieldConfig": { "defaults": { "custom": { "align": "auto", "cellOptions": { "type": "auto" }, "inspect": false }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] } }, "overrides": [{ "matcher": { "id": "byName", "options": "Captured" }, "properties": [{ "id": "unit", "value": "dateTimeAsIso" }] }, { "matcher": { "id": "byName", "options": "Resolved" }, "properties": [{ "id": "unit", "value": "dateTimeAsIso" }] }] },
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 7 },
+      "id": 3,
+      "options": { "cellHeight": "sm", "footer": { "countRows": false, "fields": "", "reducer": ["sum"], "show": false }, "showHeader": true },
+      "targets": [{ "datasource": { "type": "frser-sqlite-datasource", "uid": "gameplay-analytics" }, "queryText": "SELECT round_number AS Round, COALESCE(opponent_type, 'UNKNOWN') AS Opponent, COALESCE(outcome, 'UNRESOLVED') AS Outcome, pre_health AS \"Health before\", post_health AS \"Health after\", gold AS Gold, player_level AS Level, xp AS XP, captured_at AS Captured, resolved_at AS Resolved FROM analytics_player_round WHERE run_id = ${run_id:singlequote} ORDER BY round_number", "queryType": "table", "rawQueryText": "SELECT round_number AS Round, COALESCE(opponent_type, 'UNKNOWN') AS Opponent, COALESCE(outcome, 'UNRESOLVED') AS Outcome, pre_health AS \"Health before\", post_health AS \"Health after\", gold AS Gold, player_level AS Level, xp AS XP, captured_at AS Captured, resolved_at AS Resolved FROM analytics_player_round WHERE run_id = ${run_id:singlequote} ORDER BY round_number", "refId": "A", "timeColumns": [] }],
+      "title": "Round snapshots",
+      "type": "table"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "gameplay-analytics" },
+      "fieldConfig": { "defaults": { "custom": { "align": "auto", "cellOptions": { "type": "auto" }, "inspect": false }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] } }, "overrides": [] },
+      "gridPos": { "h": 12, "w": 12, "x": 0, "y": 16 },
+      "id": 4,
+      "options": { "cellHeight": "sm", "footer": { "countRows": false, "fields": "", "reducer": ["sum"], "show": false }, "showHeader": true },
+      "targets": [{ "datasource": { "type": "frser-sqlite-datasource", "uid": "gameplay-analytics" }, "queryText": "SELECT pr.round_number AS Round, CAST(unit.key AS INTEGER) + 1 AS Slot, json_extract(unit.value, '$.definitionId') AS Unit, json_extract(unit.value, '$.lineId') AS \"Line ID\", json_extract(unit.value, '$.starLevel') AS Stars, COALESCE((SELECT GROUP_CONCAT(item.value, ', ') FROM json_each(json_extract(unit.value, '$.itemIds')) AS item), '—') AS Items FROM analytics_player_round pr JOIN json_each(pr.board_json) AS unit WHERE pr.run_id = ${run_id:singlequote} ORDER BY pr.round_number, CAST(unit.key AS INTEGER)", "queryType": "table", "rawQueryText": "SELECT pr.round_number AS Round, CAST(unit.key AS INTEGER) + 1 AS Slot, json_extract(unit.value, '$.definitionId') AS Unit, json_extract(unit.value, '$.lineId') AS \"Line ID\", json_extract(unit.value, '$.starLevel') AS Stars, COALESCE((SELECT GROUP_CONCAT(item.value, ', ') FROM json_each(json_extract(unit.value, '$.itemIds')) AS item), '—') AS Items FROM analytics_player_round pr JOIN json_each(pr.board_json) AS unit WHERE pr.run_id = ${run_id:singlequote} ORDER BY pr.round_number, CAST(unit.key AS INTEGER)", "refId": "A", "timeColumns": [] }],
+      "title": "Board by round",
+      "type": "table"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "gameplay-analytics" },
+      "fieldConfig": { "defaults": { "custom": { "align": "auto", "cellOptions": { "type": "auto" }, "inspect": false }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] } }, "overrides": [] },
+      "gridPos": { "h": 12, "w": 12, "x": 12, "y": 16 },
+      "id": 5,
+      "options": { "cellHeight": "sm", "footer": { "countRows": false, "fields": "", "reducer": ["sum"], "show": false }, "showHeader": true },
+      "targets": [{ "datasource": { "type": "frser-sqlite-datasource", "uid": "gameplay-analytics" }, "queryText": "SELECT pr.round_number AS Round, json_extract(augment.value, '$.id') AS Augment, json_extract(augment.value, '$.tier') AS Tier FROM analytics_player_round pr JOIN json_each(pr.augments_json) AS augment WHERE pr.run_id = ${run_id:singlequote} ORDER BY pr.round_number, CAST(augment.key AS INTEGER)", "queryType": "table", "rawQueryText": "SELECT pr.round_number AS Round, json_extract(augment.value, '$.id') AS Augment, json_extract(augment.value, '$.tier') AS Tier FROM analytics_player_round pr JOIN json_each(pr.augments_json) AS augment WHERE pr.run_id = ${run_id:singlequote} ORDER BY pr.round_number, CAST(augment.key AS INTEGER)", "refId": "A", "timeColumns": [] }],
+      "title": "Augments by round",
+      "type": "table"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "gameplay-analytics" },
+      "fieldConfig": { "defaults": { "custom": { "align": "auto", "cellOptions": { "type": "auto" }, "inspect": false }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }, "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 12, "w": 14, "x": 0, "y": 28 },
+      "id": 6,
+      "options": { "cellHeight": "sm", "footer": { "countRows": false, "fields": "", "reducer": ["sum"], "show": false }, "showHeader": true, "sortBy": [{ "desc": false, "displayName": "Round" }] },
+      "targets": [{ "datasource": { "type": "frser-sqlite-datasource", "uid": "gameplay-analytics" }, "queryText": "SELECT round_number AS Round, unit_name AS Unit, definition_id AS Definition, star_level AS Stars, damage_dealt AS \"Damage dealt\", damage_taken AS \"Damage taken\", healing_done AS Healing, shielding_done AS Shielding FROM analytics_unit_combat_stat WHERE run_id = ${run_id:singlequote} ORDER BY round_number, damage_dealt DESC, unit_name", "queryType": "table", "rawQueryText": "SELECT round_number AS Round, unit_name AS Unit, definition_id AS Definition, star_level AS Stars, damage_dealt AS \"Damage dealt\", damage_taken AS \"Damage taken\", healing_done AS Healing, shielding_done AS Shielding FROM analytics_unit_combat_stat WHERE run_id = ${run_id:singlequote} ORDER BY round_number, damage_dealt DESC, unit_name", "refId": "A", "timeColumns": [] }],
+      "title": "Unit combat stats by round",
+      "type": "table"
+    },
+    {
+      "datasource": { "type": "frser-sqlite-datasource", "uid": "gameplay-analytics" },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "fillOpacity": 70, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineWidth": 1, "stacking": { "group": "A", "mode": "none" } }, "mappings": [], "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 12, "w": 10, "x": 14, "y": 28 },
+      "id": 7,
+      "options": { "barRadius": 0, "barWidth": 0.8, "fullHighlight": false, "groupWidth": 0.7, "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true }, "orientation": "horizontal", "showValue": "auto", "stacking": "none", "tooltip": { "hideZeros": false, "mode": "multi", "sort": "desc" }, "xField": "Unit" },
+      "targets": [{ "datasource": { "type": "frser-sqlite-datasource", "uid": "gameplay-analytics" }, "queryText": "SELECT unit_name AS Unit, SUM(damage_dealt) AS \"Damage dealt\", SUM(damage_taken) AS \"Damage taken\", SUM(healing_done) AS Healing, SUM(shielding_done) AS Shielding FROM analytics_unit_combat_stat WHERE run_id = ${run_id:singlequote} GROUP BY definition_id, unit_name ORDER BY SUM(damage_dealt) DESC", "queryType": "table", "rawQueryText": "SELECT unit_name AS Unit, SUM(damage_dealt) AS \"Damage dealt\", SUM(damage_taken) AS \"Damage taken\", SUM(healing_done) AS Healing, SUM(shielding_done) AS Shielding FROM analytics_unit_combat_stat WHERE run_id = ${run_id:singlequote} GROUP BY definition_id, unit_name ORDER BY SUM(damage_dealt) DESC", "refId": "A", "timeColumns": [] }],
+      "title": "Combat totals by unit",
+      "type": "barchart"
+    }
+  ],
+  "refresh": false,
+  "schemaVersion": 41,
+  "tags": ["tft", "analytics", "gameplay", "run-detail"],
+  "templating": { "list": [{ "current": { "text": "Select a run from TFT Gameplay Analytics", "value": "" }, "hide": 0, "label": "Run ID", "name": "run_id", "options": [], "query": "", "skipUrlSync": false, "type": "textbox" }] },
+  "time": { "from": "now-30d", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "TFT Gameplay Run",
+  "uid": "tft-gameplay-run",
+  "version": 1,
+  "weekStart": ""
+}

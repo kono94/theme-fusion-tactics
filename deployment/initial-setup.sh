@@ -37,7 +37,7 @@ fi
 # -----------------------------------------------------------------------------
 # Step 1: Domain
 # -----------------------------------------------------------------------------
-echo "Step 1/3: Domain"
+echo "Step 1/4: Domain"
 echo "─────────────────────────────────────────"
 read -p "Enter your domain (e.g., tft.example.com): " DOMAIN
 
@@ -50,7 +50,7 @@ fi
 # Step 2: Email for SSL
 # -----------------------------------------------------------------------------
 echo ""
-echo "Step 2/3: SSL Certificate"
+echo "Step 2/4: SSL Certificate"
 echo "─────────────────────────────────────────"
 read -p "Email for Let's Encrypt notices (optional): " EMAIL
 
@@ -63,7 +63,7 @@ fi
 # Step 3: Analytics admin password
 # -----------------------------------------------------------------------------
 echo ""
-echo "Step 3/3: Analytics Admin"
+echo "Step 3/4: Analytics Admin"
 echo "─────────────────────────────────────────"
 read -r -s -p "Admin password (6+ letters, digits, dots, underscores, or hyphens): " ANALYTICS_ADMIN_PASSWORD
 echo ""
@@ -72,16 +72,31 @@ if [[ ! "$ANALYTICS_ADMIN_PASSWORD" =~ ^[A-Za-z0-9._-]{6,}$ ]]; then
     exit 1
 fi
 
+# -----------------------------------------------------------------------------
+# Step 4: Grafana admin password
+# -----------------------------------------------------------------------------
+echo ""
+echo "Step 4/4: Grafana Admin"
+echo "─────────────────────────────────────────"
+read -r -s -p "Grafana password (12+ letters, digits, dots, underscores, or hyphens): " GRAFANA_ADMIN_PASSWORD
+echo ""
+if [[ ! "$GRAFANA_ADMIN_PASSWORD" =~ ^[A-Za-z0-9._-]{12,}$ ]]; then
+    echo "❌ Use at least 12 letters, digits, dots, underscores, or hyphens."
+    exit 1
+fi
+GRAFANA_SECRET_KEY=$(openssl rand -hex 32)
+
 mkdir -p /var/lib/tft/analytics
-chmod 0700 /var/lib/tft/analytics
+chown 472:0 /var/lib/tft/analytics
+chmod 2770 /var/lib/tft/analytics
 
 # -----------------------------------------------------------------------------
 # Create .env
 # -----------------------------------------------------------------------------
 echo ""
 echo "Creating .env..."
-printf "DOMAIN=%s\nSPRING_PROFILES_ACTIVE=prod\nWEBSOCKET_ALLOWED_ORIGIN_PATTERNS=https://%s\nANALYTICS_ADMIN_PASSWORD=%s\n" \
-    "$DOMAIN" "$DOMAIN" "$ANALYTICS_ADMIN_PASSWORD" > .env
+printf "DOMAIN=%s\nSPRING_PROFILES_ACTIVE=prod\nWEBSOCKET_ALLOWED_ORIGIN_PATTERNS=https://%s\nANALYTICS_ADMIN_PASSWORD=%s\nGRAFANA_ROOT_URL=https://%s/grafana/\nGRAFANA_ADMIN_PASSWORD=%s\nGRAFANA_SECRET_KEY=%s\n" \
+    "$DOMAIN" "$DOMAIN" "$ANALYTICS_ADMIN_PASSWORD" "$DOMAIN" "$GRAFANA_ADMIN_PASSWORD" "$GRAFANA_SECRET_KEY" > .env
 chown root:docker .env
 chmod 0640 .env
 echo "✓ .env created"
@@ -152,5 +167,6 @@ echo ""
 echo "Or push a git tag to trigger GitOps deployment!"
 echo ""
 echo "Your app will be at: https://$DOMAIN"
-echo "Admin analytics: https://$DOMAIN/#/admin/analytics"
+echo "Legacy admin analytics: https://$DOMAIN/#/admin/analytics"
+echo "Grafana operations and gameplay analytics: https://$DOMAIN/grafana/"
 echo ""

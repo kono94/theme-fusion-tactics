@@ -5,6 +5,13 @@ defineOptions({
 
 defineEmits(['back'])
 
+const version250Highlights = [
+  'Server administrators now have one Grafana workspace for live game activity, application health, host resources, and searchable logs.',
+  'Gameplay analytics are available in Grafana with mode, build, placement, completion, abandonment, and anonymous-player filters.',
+  'Open any recorded player run in Grafana to review its round snapshots, final board, augments, and per-unit combat totals.',
+  'Active client metrics show bounded browser, operating-system, and device families without storing raw user-agent strings.',
+]
+
 const version240Highlights = [
   'Build deeper Pokemon type teams with new trait breakpoints that reward every additional matching unit.',
   'Invite links now join you immediately when your player name is remembered. New visitors only choose a name and continue.',
@@ -103,6 +110,27 @@ const version160Commits = [
       <section class="release-section">
         <div class="release-header">
           <p class="eyebrow">Latest</p>
+          <h2>Version 2.5.0</h2>
+          <p>Monitor live game health and explore gameplay analytics from one secured workspace.</p>
+        </div>
+        <div class="release-grid">
+          <article class="release-panel">
+            <div class="section-heading">
+              <span class="marker release"></span>
+              <h3>Highlights</h3>
+            </div>
+            <ul class="commit-list highlight-list">
+              <li v-for="highlight in version250Highlights" :key="highlight">
+                <span>{{ highlight }}</span>
+              </li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="release-section">
+        <div class="release-header">
+          <p class="eyebrow">Previous</p>
           <h2>Version 2.4.2</h2>
           <p>Improved trait browsing, reconnect recovery, and the home-page layout.</p>
         </div>

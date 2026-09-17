@@ -1,8 +1,8 @@
 # Backend Context
 
-> Last verified: 2026-09-13
+> Last verified: 2026-09-16
 >
-> Scope: the current Java backend, transport contracts, mode data, analytics, and test/build workflow.
+> Scope: the current Java backend, transport contracts, mode data, analytics, observability, and test/build workflow.
 >
 > Coding conventions live in the repository `AGENTS.md`. This document records current architecture and contracts, not
 > historical implementation notes; verify the referenced code when changing a boundary.
@@ -24,6 +24,7 @@ Live `GameState` is held in memory. SQLite stores anonymous gameplay analytics, 
 | JSON | Jackson 3 `JsonMapper` |
 | Storage | SQLite + Flyway for analytics |
 | Build | Maven; Spotless 3.9 formats Java and the POM |
+| Observability | OpenTelemetry API with Java-agent runtime instrumentation; no Micrometer or Actuator |
 | Tests | JUnit 5, Mockito as an explicit Java agent, JaCoCo report during `verify` |
 
 Useful commands:
@@ -54,7 +55,8 @@ BackendApplication
 ├── core/combat                     generic targeting, movement, ability, affinity logic
 ├── core/model                      command, state, event, and data records
 ├── game/{mode}                     mode providers and trait registration
-└── analytics                       async recorder, public history, protected REST API, bearer sessions
+├── analytics                       async recorder, public history, protected REST API, bearer sessions
+└── core/observability              bounded game metrics and synchronized room snapshots
 ```
 
 Core code does not import a franchise package. `GameModeProvider` supplies resource paths, trait registration, optional
@@ -79,6 +81,10 @@ a per-room actor/executor is the natural successor.
 
 Analytics writes are isolated from match authority. `SqliteGameplayAnalyticsRecorder` uses one bounded executor backed by
 a named virtual-thread factory; failures are logged and do not change match outcomes.
+
+Observability is also best-effort. Core code depends only on `GameTelemetry`; direct constructors use its no-op
+implementation, while Spring provides `OpenTelemetryGameTelemetry`. Instruments are created through
+`GlobalOpenTelemetry`, so ordinary test and local launches remain safe without the Java agent.
 
 ## 5. Room lifecycle
 
@@ -309,7 +315,40 @@ against 5–8, and uses low-sample frequency ordering until both groups reach 20
 The summary response also returns all distinct build cohorts and anonymous player IDs in the requested date range,
 independently of active mode/version/commit filters, so the dashboard can keep complete filter selections available.
 
-## 11. Test strategy
+Grafana reads the same SQLite database through the pinned `frser-sqlite-datasource` plugin. The provisioned `Gameplay
+Analytics` datasource is non-editable and the plugin opens SQLite in query-only mode. The dashboards reproduce the
+summary, cohort, unit-presence, and player-run views and add a linked run drill-down for round boards, augments, and
+per-unit combat statistics. Grafana is a trusted-admin surface: its users can inspect the anonymous analytics tables
+directly, so anonymous access and self-service signup remain disabled.
+
+## 11. Observability
+
+The production container mounts the OpenTelemetry Java agent from a one-shot initialization container and sets
+`JAVA_TOOL_OPTIONS`. It exports metrics and Logback events over OTLP/HTTP to the OpenTelemetry Collector every 15
+seconds. Traces are disabled with both `OTEL_TRACES_EXPORTER=none` and `OTEL_TRACES_SAMPLER=always_off`; metric
+exemplars are also disabled. The Java agent supplies JVM and HTTP server metrics without Spring Boot Actuator.
+
+Custom instruments are theme-agnostic:
+
+- `tft.game.rooms.active` and `tft.game.players.active` are observable gauges derived from synchronized room snapshots;
+- `tft.game.rooms.created`, `tft.game.matches.started`, and `tft.game.matches.completed` are lifecycle counters;
+- `tft.game.player.connection.events` covers joins, reconnects, disconnects, and abandonment;
+- `tft.game.clients.active` and `tft.game.client.connections` classify WebSocket clients by bounded browser, operating
+  system, and device families;
+- `tft.game.actions.processed` records bounded action type, outcome, mode, and rejection reason attributes;
+- `tft.game.loop.duration` records the scheduled engine loop duration in seconds.
+
+Gauge callbacks emit zeroes for known mode, phase, player type, connection-state, and client-family combinations. The
+WebSocket handshake classifies each `User-Agent` immediately; neither the raw header nor browser versions are retained.
+Instruments must never attach room IDs, player IDs, session IDs, display names, exception messages, or other unbounded
+values. Export failures must never prevent startup or change a game action result.
+
+The Collector sends application and native host metrics to Mimir over OTLP and application logs to Loki over OTLP.
+Its native host receiver reads the Linux host's CPU, memory, load, filesystems, disks, and network through read-only
+mounts. A Prometheus receiver is used only to ingest the Collector, Mimir, Loki, and Grafana `/metrics` endpoints into
+the same OpenTelemetry pipeline. There is no tracing pipeline or trace backend.
+
+## 12. Test strategy
 
 `BotProgressionSimulationTest` writes seeded 25-round progression reports for both modes under
 `target/simulation-reports/economy-bots-*.csv`, including gold, level, stars, action counts, and results against a fixed
@@ -337,18 +376,20 @@ mvn -Dtest=RoleBalanceSimulationTest \
   -Dsimulation.runs=100000 test
 ```
 
-## 12. Operational boundaries
+## 13. Operational boundaries
 
 - Match state is not durable across backend restarts or horizontal replicas.
 - State sync is a full-snapshot broadcast every scheduled tick, not a delta protocol.
 - The per-room lock favors correctness and simplicity over maximum throughput.
 - Balance simulations are intentionally not part of the normal fast suite.
 - Analytics is best-effort and non-authoritative; a saturated/stopping writer can reject records without affecting play.
+- Telemetry is best-effort and single-host; Mimir, Loki, Grafana, and the Collector are not configured for HA.
+- Docker Desktop host panels describe its Linux VM rather than the underlying macOS host.
 
 These are explicit architecture boundaries, not undocumented behavior. Revisit them before horizontal scaling or large
 room-count targets.
 
-## 13. Backend change checklist
+## 14. Backend change checklist
 
 When changing backend behavior:
 

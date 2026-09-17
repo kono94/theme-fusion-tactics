@@ -12,7 +12,8 @@ Simple GitOps deployment to Hetzner VPS.
 | `docker compose --profile prod up -d` | Production (HTTPS) |
 | `git tag 1.0.0 && git push origin 1.0.0` | Trigger GitOps deploy |
 
-The analytics dashboard is available at `https://<your-domain>/#/admin/analytics` after production setup.
+Operational telemetry and gameplay analytics are available together at `https://<your-domain>/grafana/`. The legacy
+application analytics view remains available at `https://<your-domain>/#/admin/analytics`.
 
 ---
 
@@ -21,8 +22,9 @@ The analytics dashboard is available at `https://<your-domain>/#/admin/analytics
 ```
 deployment/
 ├── cloud-init.yaml       # Paste into Hetzner when creating VPS
-├── initial-setup.sh               # Run once after first SSH
+├── initial-setup.sh       # Run once after first SSH
 ├── deploy.sh             # Called by GitOps on each deploy
+├── observability/         # Collector, Mimir, Loki, and Grafana configuration
 └── nginx/
     ├── dev.conf          # Local development (HTTP)
     ├── prod.conf.template # Production template (HTTPS)
@@ -83,16 +85,17 @@ ssh -p 2222 deployer@<SERVER_IP> -i ~/.ssh/id_tft_admin
 bash /opt/tft/deployment/initial-setup.sh
 ```
 
-The wizard requires an admin dashboard password of at least 6 letters, digits, dots, underscores, or hyphens and
-creates the persistent SQLite data directory at `/var/lib/tft/analytics`.
+The wizard requires the gameplay analytics password plus a separate Grafana admin password, generates a random Grafana
+secret key, and creates the persistent SQLite data directory at `/var/lib/tft/analytics`.
 
 ### Upgrade an existing server
 
-Servers initialized before analytics was added need a one-time configuration update before the next deployment:
+Servers initialized before analytics was added need the persistent directory:
 
 ```bash
 sudo mkdir -p /var/lib/tft/analytics
-sudo chmod 0700 /var/lib/tft/analytics
+sudo chown 472:0 /var/lib/tft/analytics
+sudo chmod 2770 /var/lib/tft/analytics
 ```
 
 Add the password to `/opt/tft/.env`:
@@ -101,6 +104,54 @@ Add the password to `/opt/tft/.env`:
 SPRING_PROFILES_ACTIVE=prod
 ANALYTICS_ADMIN_PASSWORD=choose-a-strong-password
 ```
+
+Servers initialized before 2.4.5 must also add these required values before deployment; `deploy.sh` intentionally fails
+preflight when any is absent:
+
+```dotenv
+GRAFANA_ROOT_URL=https://tft.yourdomain.com/grafana/
+GRAFANA_ADMIN_PASSWORD=choose-a-different-strong-password
+GRAFANA_SECRET_KEY=<output-of-openssl-rand-hex-32>
+```
+
+Generate the secret with `openssl rand -hex 32`. Do not reuse the gameplay analytics password. Mimir, Loki, Grafana,
+and the Collector persist their state in Docker named volumes created automatically by Compose.
+
+## Observability Architecture
+
+```text
+Java agent ──OTLP metrics──┐
+Java agent ──OTLP logs─────┼─> OpenTelemetry Collector ──OTLP──> Mimir / Loki
+native hostmetrics─────────┤
+stack /metrics scrapes─────┘
+                                            Grafana ──> Mimir / Loki
+SQLite gameplay analytics ─────────────────────┘
+```
+
+- The application uses native OpenTelemetry metrics, automatic JVM/HTTP metrics, and automatic Logback export. It does
+  not use Micrometer, Actuator, or Logstash. WebSocket connections are counted by bounded browser, operating-system,
+  and device families without exporting raw user-agent strings or browser versions.
+- Host CPU, memory, load, root filesystem bytes/inodes, disk I/O, paging, and network metrics come from the Collector's
+  native `hostmetrics` receiver. `/`, `/proc`, and `/sys` are visible through a read-only host mount; neither privileged
+  mode nor the Docker socket is used.
+- Prometheus is not a transport or backend in this stack. The Collector only uses its Prometheus receiver to read the
+  `/metrics` endpoints already exposed by the Collector, Mimir, Loki, and Grafana, then sends those metrics to Mimir as
+  OTLP alongside native host metrics.
+- Metrics are retained for 30 days and logs for 7 days. This is a single-replica, single-tenant deployment intended for
+  one Linux Docker host. On Docker Desktop, host panels describe Docker's Linux VM.
+- Tracing is explicitly disabled. There is no traces pipeline, Tempo service, or trace datasource.
+- Grafana uses the pinned `frser-sqlite-datasource` plugin to query the existing gameplay analytics database. The
+  datasource is non-editable and SQLite query-only mode blocks mutations. Its host directory remains writable by
+  Grafana because a live SQLite WAL reader must be able to manage the `-shm` sidecar file. The set-group-ID directory
+  and the backend's group-writable umask keep newly created database, WAL, and shared-memory files accessible to both
+  containers.
+
+All observability ports remain internal to the Compose network. Nginx is the only public entry point and proxies Grafana
+under `/grafana/`, including WebSocket upgrades.
+
+The deployment uses the official, digest-pinned Grafana image. On the first startup for a new `grafana-data` volume,
+Grafana downloads the pinned SQLite plugin before provisioning datasources. That startup therefore needs registry/plugin
+network access once; the installed plugin then persists in the named volume. A custom image is intentionally avoided.
 
 ---
 
@@ -116,7 +167,7 @@ git push origin 1.0.0
 
 ## Troubleshooting
 
-### Access the analytics dashboard
+### Access the legacy application analytics dashboard
 
 Open `https://<your-domain>/#/admin/analytics` and enter the password stored as
 `ANALYTICS_ADMIN_PASSWORD` in `/opt/tft/.env`. Successful login creates an eight-hour bearer session in that browser
@@ -127,6 +178,39 @@ To change the password, edit `/opt/tft/.env` and recreate the backend container:
 ```bash
 docker compose --profile prod up -d --force-recreate backend
 ```
+
+### Access Grafana
+
+Open `https://<your-domain>/grafana/` and sign in as `admin` with `GRAFANA_ADMIN_PASSWORD`. Anonymous access and user
+signup are disabled. The repository provisions read-only Mimir and Loki datasources, a non-editable query-only SQLite
+datasource, and three dashboards:
+
+- `TFT Overview` for application, JVM, host, collector, storage, logs, and active-client telemetry;
+- `TFT Gameplay Analytics` for the existing gameplay summary, build/mode/player filters, distributions, final-composition
+  unit presence, and player runs;
+- `TFT Gameplay Run` for linked per-run round snapshots, boards, augments, and unit combat statistics.
+
+Dashboard edits made in the UI are intentionally not persisted over repository provisioning. Selecting a run ID in the
+gameplay dashboard opens its drill-down. The SQLite mount is writable only to support WAL shared-memory bookkeeping;
+the plugin enforces query-only access. Treat Grafana accounts as trusted analytics administrators.
+
+To rotate the Grafana password or secret key, update `/opt/tft/.env` and recreate Grafana. Changing the secret key logs
+out existing sessions:
+
+```bash
+docker compose --profile prod up -d --force-recreate grafana
+```
+
+### Check telemetry health
+
+```bash
+docker compose ps
+docker compose logs --tail=100 otel-collector mimir loki grafana
+```
+
+The dashboard should show application metrics after the backend's first 15-second export. Host and stack metrics do not
+depend on application traffic. If application data is absent, confirm the backend starts with
+`-javaagent:/otel/opentelemetry-javaagent.jar` and that the one-shot `otel-javaagent` service exited successfully.
 
 ### GitHub deploy fails with `insufficient permission for adding an object`
 
