@@ -110,6 +110,11 @@ public class GameEngine {
         telemetry.actionProcessed(gameMode, actionType, outcome, reason);
     }
 
+    public void recordAction(
+            GameMode gameMode, ActionType actionType, String outcome, String reason, double durationSeconds) {
+        telemetry.actionProcessed(gameMode, actionType, outcome, reason, durationSeconds);
+    }
+
     public void clientConnected(String connectionId, ClientUserAgent client) {
         telemetry.clientConnected(connectionId, client);
     }

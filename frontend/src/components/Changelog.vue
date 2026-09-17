@@ -5,6 +5,12 @@ defineOptions({
 
 defineEmits(['back'])
 
+const version252Highlights = [
+  'Live matches now stay connected more reliably on slow or temporarily congested connections by skipping stale room updates in favor of the newest state.',
+  'Grafana gameplay analytics now load correctly when mode, build, placement, completion, or player filters are set to “All”.',
+  'The operational dashboard now highlights game-action latency and WebSocket traffic, with clearer low-volume activity, service health, JVM memory, and root-disk usage panels.',
+]
+
 const version250Highlights = [
   'Server administrators now have one Grafana workspace for live game activity, application health, host resources, and searchable logs.',
   'Gameplay analytics are available in Grafana with mode, build, placement, completion, abandonment, and anonymous-player filters.',
@@ -110,6 +116,27 @@ const version160Commits = [
       <section class="release-section">
         <div class="release-header">
           <p class="eyebrow">Latest</p>
+          <h2>Version 2.5.2</h2>
+          <p>More reliable live state delivery and repaired, game-focused monitoring.</p>
+        </div>
+        <div class="release-grid">
+          <article class="release-panel">
+            <div class="section-heading">
+              <span class="marker release"></span>
+              <h3>Highlights</h3>
+            </div>
+            <ul class="commit-list highlight-list">
+              <li v-for="highlight in version252Highlights" :key="highlight">
+                <span>{{ highlight }}</span>
+              </li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="release-section">
+        <div class="release-header">
+          <p class="eyebrow">Previous</p>
           <h2>Version 2.5.0</h2>
           <p>Monitor live game health and explore gameplay analytics from one secured workspace.</p>
         </div>

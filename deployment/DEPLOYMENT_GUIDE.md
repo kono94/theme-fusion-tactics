@@ -130,7 +130,8 @@ SQLite gameplay analytics ──────────────────
 
 - The application uses native OpenTelemetry metrics, automatic JVM/HTTP metrics, and automatic Logback export. It does
   not use Micrometer, Actuator, or Logstash. WebSocket connections are counted by bounded browser, operating-system,
-  and device families without exporting raw user-agent strings or browser versions.
+  and device families without exporting raw user-agent strings or browser versions. Custom transport metrics report
+  STOMP message outcomes and sizes, explicit backpressure events, and server-side game-action processing latency.
 - Host CPU, memory, load, root filesystem bytes/inodes, disk I/O, paging, and network metrics come from the Collector's
   native `hostmetrics` receiver. `/`, `/proc`, and `/sys` are visible through a read-only host mount; neither privileged
   mode nor the Docker socket is used.
@@ -193,6 +194,18 @@ datasource, and three dashboards:
 Dashboard edits made in the UI are intentionally not persisted over repository provisioning. Selecting a run ID in the
 gameplay dashboard opens its drill-down. The SQLite mount is writable only to support WAL shared-memory bookkeeping;
 the plugin enforces query-only access. Treat Grafana accounts as trusted analytics administrators.
+
+The overview is tuned for this deployment's low traffic volume: action, connection, rejection, lifecycle, and
+WebSocket panels use per-minute or rolling-window values instead of mostly-zero per-second rates. `Game action latency`
+measures server-side STOMP validation, room mutation, and broadcast enqueueing; it is not browser round-trip latency.
+HTTP latency remains useful for the REST pages and the WebSocket handshake, but gaps are normal while gameplay traffic
+flows over STOMP. The JVM chart intentionally shows heap only; non-heap memory is used by class metadata, JIT-compiled
+code, and other runtime structures and is not directly comparable with the heap limit. Root filesystem capacity and
+inode usage are both shown as percentages.
+
+`Observability targets healthy` reports successful metric scrapes, not merely running Compose containers. If it is below
+four, use the adjacent target-status table to identify whether the Collector, Mimir, Loki, or Grafana endpoint is not
+being scraped successfully.
 
 To rotate the Grafana password or secret key, update `/opt/tft/.env` and recreate Grafana. Changing the secret key logs
 out existing sessions:

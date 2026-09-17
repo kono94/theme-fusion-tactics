@@ -59,49 +59,54 @@
     },
     {
       "datasource": { "type": "prometheus", "uid": "mimir" },
-      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }, "unit": "short" }, "overrides": [] },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "orange", "value": 1 }, { "color": "green", "value": 4 }] }, "unit": "short" }, "overrides": [] },
       "gridPos": { "h": 4, "w": 4, "x": 20, "y": 0 },
       "id": 6,
       "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "showPercentChange": false, "textMode": "auto", "wideLayout": true },
+      "description": "Health of the four internal scrape targets (Collector, Mimir, Loki, and Grafana). The Grafana target uses its configured /grafana/metrics sub-path.",
       "targets": [{ "expr": "sum(up{instance=~\"otel-collector|mimir|loki|grafana\"})", "refId": "A" }],
-      "title": "Stack services up / 4",
+      "title": "Observability targets healthy (of 4)",
       "type": "stat"
     },
     {
       "datasource": { "type": "prometheus", "uid": "mimir" },
-      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 12, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }, "unit": "ops" }, "overrides": [] },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "actions/min", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 12, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }, "unit": "short" }, "overrides": [] },
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
       "id": 7,
       "options": { "legend": { "calcs": ["lastNotNull"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
       "targets": [
-        { "expr": "sum by (action_type, action_outcome) (rate(tft_game_actions_processed[$__rate_interval]))", "legendFormat": "{{action_type}} · {{action_outcome}}", "refId": "A" }
+        { "expr": "sum by (action_type, action_outcome) (rate(tft_game_actions_processed[5m])) * 60", "legendFormat": "{{action_type}} · {{action_outcome}}", "refId": "A" }
       ],
-      "title": "Actions per second",
+      "title": "Player actions per minute",
       "type": "timeseries"
     },
     {
       "datasource": { "type": "prometheus", "uid": "mimir" },
-      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 12, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }, "unit": "ops" }, "overrides": [] },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "events / trailing hour", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 12, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }, "unit": "short" }, "overrides": [] },
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
       "id": 8,
       "options": { "legend": { "calcs": ["lastNotNull"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
       "targets": [
-        { "expr": "sum by (connection_event) (rate(tft_game_player_connection_events[$__rate_interval]))", "legendFormat": "{{connection_event}}", "refId": "A" },
-        { "expr": "sum(rate(tft_game_rooms_created[$__rate_interval]))", "legendFormat": "rooms created", "refId": "B" },
-        { "expr": "sum(rate(tft_game_matches_started[$__rate_interval]))", "legendFormat": "matches started", "refId": "C" },
-        { "expr": "sum(rate(tft_game_matches_completed[$__rate_interval]))", "legendFormat": "matches completed", "refId": "D" }
+        { "expr": "sum by (connection_event) (increase(tft_game_player_connection_events[1h]))", "legendFormat": "player · {{connection_event}}", "refId": "A" },
+        { "expr": "sum(increase(tft_game_rooms_created[1h])) or vector(0)", "legendFormat": "rooms created", "refId": "B" },
+        { "expr": "sum(increase(tft_game_matches_started[1h])) or vector(0)", "legendFormat": "matches started", "refId": "C" },
+        { "expr": "sum(increase(tft_game_matches_completed[1h])) or vector(0)", "legendFormat": "matches completed", "refId": "D" }
       ],
-      "title": "Lifecycle events per second",
+      "title": "Lifecycle events (rolling 1h)",
       "type": "timeseries"
     },
     {
       "datasource": { "type": "prometheus", "uid": "mimir" },
-      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }, "unit": "s" }, "overrides": [] },
+      "description": "Measures the scheduled engine work across all active rooms. Queries use a 5-minute window so sparse exports do not create false gaps; p95 is histogram-bucket interpolation, so compare it with the mean. Telemetry now exports explicit 1ms–10s buckets; if a flat value near 4.75s persists after redeploy, verify that the backend is not still exporting the old default 0–5s bucket.",
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "seconds", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }, "unit": "s" }, "overrides": [] },
       "gridPos": { "h": 8, "w": 8, "x": 0, "y": 12 },
       "id": 9,
       "options": { "legend": { "calcs": ["lastNotNull"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
-      "targets": [{ "expr": "histogram_quantile(0.95, sum by (le) (rate(tft_game_loop_duration_bucket[$__rate_interval])))", "legendFormat": "p95", "refId": "A" }],
-      "title": "Game loop p95",
+      "targets": [
+        { "expr": "histogram_quantile(0.95, sum by (le) (rate(tft_game_loop_duration_bucket[5m])))", "legendFormat": "p95", "refId": "A" },
+        { "expr": "sum(rate(tft_game_loop_duration_sum[5m])) / sum(rate(tft_game_loop_duration_count[5m]))", "legendFormat": "mean", "refId": "B" }
+      ],
+      "title": "Game loop duration (p95 / mean)",
       "type": "timeseries"
     },
     {
@@ -110,31 +115,37 @@
       "gridPos": { "h": 8, "w": 8, "x": 8, "y": 12 },
       "id": 10,
       "options": { "legend": { "calcs": ["lastNotNull"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "description": "Route-level volume provides the denominator for the latency panel. The 5-minute window keeps low-volume endpoints from appearing as noisy one-sample spikes.",
       "targets": [
-        { "expr": "sum(rate(http_server_request_duration_count[$__rate_interval]))", "legendFormat": "requests", "refId": "A" },
-        { "expr": "sum(rate(http_server_request_duration_count{http_response_status_code=~\"5..\"}[$__rate_interval]))", "legendFormat": "5xx", "refId": "B" }
+        { "expr": "sum by (http_route) (rate(http_server_request_duration_count[5m]))", "legendFormat": "{{http_route}} · requests/s", "refId": "A" },
+        { "expr": "sum by (http_route) (rate(http_server_request_duration_count{http_response_status_code=~\"5..\"}[5m]))", "legendFormat": "{{http_route}} · 5xx/s", "refId": "B" }
       ],
-      "title": "HTTP request and error rate",
+      "title": "HTTP volume and errors by route (5m rate)",
       "type": "timeseries"
     },
     {
       "datasource": { "type": "prometheus", "uid": "mimir" },
-      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }, "unit": "s" }, "overrides": [] },
+      "description": "Route-level latency avoids an aggregate p95 being dominated by a single low-volume endpoint. Lines are present only when that route has observations in the trailing 5 minutes; widen the dashboard time range for sparse routes.",
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "seconds", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }, "unit": "s" }, "overrides": [] },
       "gridPos": { "h": 8, "w": 8, "x": 16, "y": 12 },
       "id": 11,
       "options": { "legend": { "calcs": ["lastNotNull"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
-      "targets": [{ "expr": "histogram_quantile(0.95, sum by (le) (rate(http_server_request_duration_bucket[$__rate_interval])))", "legendFormat": "p95", "refId": "A" }],
-      "title": "HTTP latency p95",
+      "targets": [
+        { "expr": "histogram_quantile(0.95, sum by (http_route, le) (rate(http_server_request_duration_bucket[5m])))", "legendFormat": "{{http_route}} · p95", "refId": "A" },
+        { "expr": "histogram_quantile(0.50, sum by (http_route, le) (rate(http_server_request_duration_bucket[5m])))", "legendFormat": "{{http_route}} · p50", "refId": "B" }
+      ],
+      "title": "HTTP latency by route (p95 / p50)",
       "type": "timeseries"
     },
     {
       "datasource": { "type": "prometheus", "uid": "mimir" },
-      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 12, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }, "unit": "bytes" }, "overrides": [] },
+      "description": "Heap only. Non-heap/native memory is intentionally excluded because it is not comparable to the heap limit and makes this chart misleading.",
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "bytes", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 12, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }, "unit": "bytes" }, "overrides": [] },
       "gridPos": { "h": 8, "w": 8, "x": 0, "y": 20 },
       "id": 12,
       "options": { "legend": { "calcs": ["lastNotNull"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
-      "targets": [{ "expr": "sum by (jvm_memory_type) (jvm_memory_used)", "legendFormat": "{{jvm_memory_type}}", "refId": "A" }],
-      "title": "JVM memory used",
+      "targets": [{ "expr": "sum(jvm_memory_used{jvm_memory_type=\"heap\"})", "legendFormat": "heap used", "refId": "A" }],
+      "title": "JVM heap used",
       "type": "timeseries"
     },
     {
@@ -189,15 +200,16 @@
     },
     {
       "datasource": { "type": "prometheus", "uid": "mimir" },
-      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }, "unit": "bytes" }, "overrides": [{ "matcher": { "id": "byName", "options": "inodes used" }, "properties": [{ "id": "unit", "value": "percentunit" }] }] },
+      "description": "Root filesystem utilization. Both series are percentages so the panel does not mix bytes with ratios.",
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "percent", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }, "unit": "percent" }, "overrides": [] },
       "gridPos": { "h": 8, "w": 8, "x": 16, "y": 28 },
       "id": 17,
       "options": { "legend": { "calcs": ["lastNotNull"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
       "targets": [
-        { "expr": "system_filesystem_usage{mountpoint=\"/\",state=\"used\"}", "legendFormat": "bytes used", "refId": "A" },
-        { "expr": "system_filesystem_inodes_usage{mountpoint=\"/\",state=\"used\"} / sum without (state) (system_filesystem_inodes_usage{mountpoint=\"/\"})", "legendFormat": "inodes used", "refId": "B" }
+        { "expr": "max(system_filesystem_utilization{mountpoint=\"/\"}) * 100", "legendFormat": "disk used", "refId": "A" },
+        { "expr": "100 * system_filesystem_inodes_usage{mountpoint=\"/\",state=\"used\"} / sum without (state) (system_filesystem_inodes_usage{mountpoint=\"/\"})", "legendFormat": "inodes used", "refId": "B" }
       ],
-      "title": "Root disk usage",
+      "title": "Root filesystem used (%)",
       "type": "timeseries"
     },
     {
@@ -261,12 +273,12 @@
     },
     {
       "datasource": { "type": "prometheus", "uid": "mimir" },
-      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "bars", "fillOpacity": 25, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "normal" }, "thresholdsStyle": { "mode": "off" } }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }, "unit": "ops" }, "overrides": [] },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "rejected actions/min", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "bars", "fillOpacity": 25, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "normal" }, "thresholdsStyle": { "mode": "off" } }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }, "unit": "short" }, "overrides": [] },
       "gridPos": { "h": 5, "w": 8, "x": 0, "y": 51 },
       "id": 23,
       "options": { "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
-      "targets": [{ "expr": "sum by (rejection_reason) (rate(tft_game_actions_processed{action_outcome=\"rejected\"}[$__rate_interval]))", "legendFormat": "{{rejection_reason}}", "refId": "A" }],
-      "title": "Rejected actions by reason",
+      "targets": [{ "expr": "sum by (rejection_reason) (rate(tft_game_actions_processed{action_outcome=\"rejected\"}[5m])) * 60", "legendFormat": "{{rejection_reason}}", "refId": "A" }],
+      "title": "Rejected actions by reason (per minute)",
       "type": "timeseries"
     },
     {
@@ -291,12 +303,70 @@
     },
     {
       "datasource": { "type": "prometheus", "uid": "mimir" },
-      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "bars", "fillOpacity": 25, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "normal" }, "thresholdsStyle": { "mode": "off" } }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }, "unit": "ops" }, "overrides": [] },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "connections/min", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "bars", "fillOpacity": 25, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "normal" }, "thresholdsStyle": { "mode": "off" } }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }, "unit": "short" }, "overrides": [] },
       "gridPos": { "h": 8, "w": 8, "x": 16, "y": 56 },
       "id": 26,
       "options": { "legend": { "calcs": ["mean"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
-      "targets": [{ "expr": "sum by (browser_family) (rate(tft_game_client_connections[$__rate_interval]))", "legendFormat": "{{browser_family}}", "refId": "A" }],
-      "title": "Client connection rate",
+      "targets": [{ "expr": "sum by (browser_family) (rate(tft_game_client_connections[5m])) * 60", "legendFormat": "{{browser_family}}", "refId": "A" }],
+      "title": "Client connections per minute",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "mimir" },
+      "description": "Per-target view of the same four health checks used by the summary stat. A zero identifies a failed scrape; a missing row means that target has not produced an up sample.",
+      "fieldConfig": { "defaults": { "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }, "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 64 },
+      "id": 27,
+      "options": { "cellHeight": "sm", "footer": { "countRows": false, "fields": "", "reducer": ["sum"], "show": false }, "showHeader": true },
+      "targets": [{ "expr": "up{instance=~\"otel-collector|mimir|loki|grafana\"}", "format": "table", "instant": true, "legendFormat": "{{instance}}", "refId": "A" }],
+      "title": "Observability target status",
+      "type": "table"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "mimir" },
+      "description": "Inbound game-action processing time, including validation and room mutation. The 5-minute window smooths sparse traffic; p50 is included to distinguish bucket artifacts from a broad slowdown.",
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "seconds", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 12, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }, "unit": "s" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 64 },
+      "id": 28,
+      "options": { "legend": { "calcs": ["lastNotNull"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        { "expr": "histogram_quantile(0.95, sum by (action_type, action_outcome, le) (rate(tft_game_actions_processing_duration_bucket[5m])))", "legendFormat": "{{action_type}} · {{action_outcome}} · p95", "refId": "A" },
+        { "expr": "histogram_quantile(0.50, sum by (action_type, action_outcome, le) (rate(tft_game_actions_processing_duration_bucket[5m])))", "legendFormat": "{{action_type}} · {{action_outcome}} · p50", "refId": "B" }
+      ],
+      "title": "Game action latency (p95 / p50)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "mimir" },
+      "description": "Terminal STOMP/WebSocket transport outcomes by bounded message class. Inbound messages are recorded as received; outbound messages are recorded as sent, send_error, send_timeout, or dropped, so this panel is suitable for transport volume and failure rates. Values are averaged over 5 minutes and shown per minute so low-volume events remain readable.",
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "messages/min", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "bars", "fillOpacity": 25, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "normal" }, "thresholdsStyle": { "mode": "off" } }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }, "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 64 },
+      "id": 29,
+      "options": { "legend": { "calcs": ["lastNotNull"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [{ "expr": "sum by (message_direction, message_type, message_outcome) (rate(tft_game_websocket_messages[5m])) * 60", "legendFormat": "{{message_direction}} · {{message_type}} · {{message_outcome}}", "refId": "A" }],
+      "title": "STOMP/WebSocket transport outcomes per minute",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "mimir" },
+      "description": "P95 payload size by direction, bounded STOMP message class, and terminal transport outcome. Backpressure/coalescing events are tracked separately; a high outbound state payload value can indicate client backpressure risk even when the connection remains open.",
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "bytes", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }, "unit": "bytes" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 72 },
+      "id": 30,
+      "options": { "legend": { "calcs": ["lastNotNull"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [{ "expr": "histogram_quantile(0.95, sum by (message_direction, message_type, message_outcome, le) (rate(tft_game_websocket_message_size_bucket[5m])))", "legendFormat": "{{message_direction}} · {{message_type}} · {{message_outcome}} · p95", "refId": "A" }],
+      "title": "STOMP/WebSocket payload size by transport outcome (p95)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "mimir" },
+      "description": "Rolling five-minute rate of explicit WebSocket backpressure events. Coalesced state updates are expected under load; snapshot drops, critical overflows, and session closures require investigation.",
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "events/min", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "bars", "fillOpacity": 25, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "normal" }, "thresholdsStyle": { "mode": "off" } }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }, "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 72 },
+      "id": 31,
+      "options": { "legend": { "calcs": ["lastNotNull"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [{ "expr": "sum by (message_type, backpressure_event) (rate(tft_game_websocket_backpressure[5m])) * 60", "legendFormat": "{{message_type}} · {{backpressure_event}}", "refId": "A" }],
+      "title": "WebSocket backpressure events per minute",
       "type": "timeseries"
     }
   ],
@@ -309,6 +379,6 @@
   "timezone": "browser",
   "title": "TFT Overview",
   "uid": "tft-overview",
-  "version": 2,
+  "version": 3,
   "weekStart": ""
 }

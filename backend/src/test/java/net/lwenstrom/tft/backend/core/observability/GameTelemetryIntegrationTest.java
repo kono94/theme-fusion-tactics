@@ -119,6 +119,8 @@ class GameTelemetryIntegrationTest {
                         new ActionRecord(GameMode.ONEPIECE, ActionType.EXP, "rejected", "unauthorized"),
                         new ActionRecord(null, ActionType.EXP, "rejected", "room_missing")),
                 telemetry.actions);
+        assertEquals(4, telemetry.actionDurations.size());
+        assertTrue(telemetry.actionDurations.stream().allMatch(duration -> duration >= 0));
     }
 
     @Test
@@ -144,6 +146,7 @@ class GameTelemetryIntegrationTest {
         private final List<ClientConnection> connectedClients = new ArrayList<>();
         private final List<String> disconnectedClients = new ArrayList<>();
         private final List<ActionRecord> actions = new ArrayList<>();
+        private final List<Double> actionDurations = new ArrayList<>();
         private int roomsCreated;
         private int matchesStarted;
         private int matchesCompleted;
@@ -176,6 +179,13 @@ class GameTelemetryIntegrationTest {
         @Override
         public void actionProcessed(GameMode gameMode, ActionType actionType, String outcome, String reason) {
             actions.add(new ActionRecord(gameMode, actionType, outcome, reason));
+        }
+
+        @Override
+        public void actionProcessed(
+                GameMode gameMode, ActionType actionType, String outcome, String reason, double durationSeconds) {
+            actionProcessed(gameMode, actionType, outcome, reason);
+            actionDurations.add(durationSeconds);
         }
 
         @Override

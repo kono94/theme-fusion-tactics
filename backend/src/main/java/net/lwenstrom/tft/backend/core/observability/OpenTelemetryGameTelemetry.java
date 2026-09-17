@@ -5,6 +5,7 @@ import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.LongCounter;
+import io.opentelemetry.api.metrics.LongHistogram;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.metrics.ObservableLongGauge;
 import java.util.List;
@@ -34,6 +35,14 @@ public class OpenTelemetryGameTelemetry implements GameTelemetry {
     private static final AttributeKey<String> BROWSER_FAMILY = AttributeKey.stringKey("browser.family");
     private static final AttributeKey<String> OS_FAMILY = AttributeKey.stringKey("os.family");
     private static final AttributeKey<String> DEVICE_TYPE = AttributeKey.stringKey("device.type");
+    private static final AttributeKey<String> MESSAGE_DIRECTION = AttributeKey.stringKey("message.direction");
+    private static final AttributeKey<String> MESSAGE_TYPE = AttributeKey.stringKey("message.type");
+    private static final AttributeKey<String> MESSAGE_OUTCOME = AttributeKey.stringKey("message.outcome");
+    private static final AttributeKey<String> BACKPRESSURE_EVENT = AttributeKey.stringKey("backpressure.event");
+    private static final List<Double> DURATION_BUCKETS_SECONDS =
+            List.of(0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.0, 5.0, 10.0);
+    private static final List<Long> MESSAGE_SIZE_BUCKETS_BYTES =
+            List.of(64L, 256L, 1_024L, 4_096L, 16_384L, 65_536L, 131_072L, 262_144L, 524_288L, 1_048_576L);
 
     private final AtomicReference<Supplier<List<RoomSnapshot>>> roomSnapshots = new AtomicReference<>(List::of);
     private final Map<String, ClientUserAgent> activeClientConnections = new ConcurrentHashMap<>();
@@ -45,6 +54,10 @@ public class OpenTelemetryGameTelemetry implements GameTelemetry {
     private final LongCounter actionsProcessed;
     private final LongCounter clientConnections;
     private final DoubleHistogram gameLoopDuration;
+    private final DoubleHistogram actionProcessingDuration;
+    private final LongCounter websocketMessages;
+    private final LongHistogram websocketMessageSize;
+    private final LongCounter websocketBackpressure;
 
     @SuppressWarnings("unused")
     private final ObservableLongGauge activeRooms;
@@ -87,6 +100,26 @@ public class OpenTelemetryGameTelemetry implements GameTelemetry {
         gameLoopDuration = meter.histogramBuilder("tft.game.loop.duration")
                 .setDescription("Duration of one scheduled game loop")
                 .setUnit("s")
+                .setExplicitBucketBoundariesAdvice(DURATION_BUCKETS_SECONDS)
+                .build();
+        actionProcessingDuration = meter.histogramBuilder("tft.game.actions.processing.duration")
+                .setDescription("Duration of inbound game action validation and processing")
+                .setUnit("s")
+                .setExplicitBucketBoundariesAdvice(DURATION_BUCKETS_SECONDS)
+                .build();
+        websocketMessages = meter.counterBuilder("tft.game.websocket.messages")
+                .setDescription("Number of bounded WebSocket/STOMP messages by direction and outcome")
+                .setUnit("{message}")
+                .build();
+        websocketMessageSize = meter.histogramBuilder("tft.game.websocket.message.size")
+                .ofLongs()
+                .setDescription("Payload size of bounded WebSocket/STOMP messages")
+                .setUnit("By")
+                .setExplicitBucketBoundariesAdvice(MESSAGE_SIZE_BUCKETS_BYTES)
+                .build();
+        websocketBackpressure = meter.counterBuilder("tft.game.websocket.backpressure")
+                .setDescription("Number of bounded WebSocket backpressure events")
+                .setUnit("{event}")
                 .build();
 
         activeRooms = meter.gaugeBuilder("tft.game.rooms.active")
@@ -133,7 +166,7 @@ public class OpenTelemetryGameTelemetry implements GameTelemetry {
                 Attributes.builder()
                         .put(GAME_MODE, modeValue(gameMode))
                         .put(PLAYER_TYPE, "human")
-                        .put(CONNECTION_EVENT, event)
+                        .put(CONNECTION_EVENT, connectionEventValue(event))
                         .build());
     }
 
@@ -148,14 +181,41 @@ public class OpenTelemetryGameTelemetry implements GameTelemetry {
                                 actionType == null
                                         ? "unknown"
                                         : actionType.name().toLowerCase(Locale.ROOT))
-                        .put(ACTION_OUTCOME, outcome)
-                        .put(REJECTION_REASON, reason)
+                        .put(ACTION_OUTCOME, actionOutcomeValue(outcome))
+                        .put(REJECTION_REASON, actionReasonValue(reason))
                         .build());
+    }
+
+    @Override
+    public void actionProcessingDuration(
+            GameMode gameMode, ActionType actionType, String outcome, String reason, double durationSeconds) {
+        actionProcessingDuration.record(
+                Math.max(0, durationSeconds), actionAttributes(gameMode, actionType, outcome, reason));
     }
 
     @Override
     public void gameLoopDuration(double durationSeconds) {
         gameLoopDuration.record(durationSeconds);
+    }
+
+    @Override
+    public void websocketMessage(String direction, String messageType, String outcome, long payloadBytes) {
+        var attributes = Attributes.builder()
+                .put(MESSAGE_DIRECTION, messageDirectionValue(direction))
+                .put(MESSAGE_TYPE, messageTypeValue(messageType))
+                .put(MESSAGE_OUTCOME, messageOutcomeValue(outcome))
+                .build();
+        websocketMessages.add(1, attributes);
+        websocketMessageSize.record(Math.max(0, payloadBytes), attributes);
+    }
+
+    @Override
+    public void websocketBackpressure(String messageType, String event) {
+        var attributes = Attributes.builder()
+                .put(MESSAGE_TYPE, messageTypeValue(messageType))
+                .put(BACKPRESSURE_EVENT, backpressureEventValue(event))
+                .build();
+        websocketBackpressure.add(1, attributes);
     }
 
     @Override
@@ -237,6 +297,17 @@ public class OpenTelemetryGameTelemetry implements GameTelemetry {
         return Attributes.of(GAME_MODE, modeValue(gameMode));
     }
 
+    private Attributes actionAttributes(GameMode gameMode, ActionType actionType, String outcome, String reason) {
+        return Attributes.builder()
+                .put(GAME_MODE, modeValue(gameMode))
+                .put(
+                        ACTION_TYPE,
+                        actionType == null ? "unknown" : actionType.name().toLowerCase(Locale.ROOT))
+                .put(ACTION_OUTCOME, actionOutcomeValue(outcome))
+                .put(REJECTION_REASON, actionReasonValue(reason))
+                .build();
+    }
+
     private Attributes clientAttributes(ClientKey client) {
         return Attributes.of(
                 BROWSER_FAMILY, client.browserFamily(), OS_FAMILY, client.osFamily(), DEVICE_TYPE, client.deviceType());
@@ -248,6 +319,67 @@ public class OpenTelemetryGameTelemetry implements GameTelemetry {
 
     private String phaseValue(GamePhase phase) {
         return phase.name().toLowerCase(Locale.ROOT);
+    }
+
+    private String connectionEventValue(String event) {
+        return switch (event == null ? "" : event) {
+            case "joined", "reconnected", "disconnected", "abandoned" -> event;
+            default -> "unknown";
+        };
+    }
+
+    private String actionOutcomeValue(String outcome) {
+        return switch (outcome == null ? "" : outcome) {
+            case "accepted", "rejected" -> outcome;
+            default -> "unknown";
+        };
+    }
+
+    private String actionReasonValue(String reason) {
+        return switch (reason == null ? "" : reason) {
+            case "none", "room_missing", "invalid_payload", "unauthorized", "invalid_action" -> reason;
+            default -> "unknown";
+        };
+    }
+
+    private String messageDirectionValue(String direction) {
+        return switch (direction == null ? "" : direction) {
+            case "inbound", "outbound" -> direction;
+            default -> "unknown";
+        };
+    }
+
+    private String messageTypeValue(String messageType) {
+        return switch (messageType == null ? "" : messageType) {
+            case "connect",
+                    "subscribe",
+                    "send",
+                    "action",
+                    "room_mode",
+                    "room_lifecycle",
+                    "disconnect",
+                    "ack",
+                    "state",
+                    "event",
+                    "room_result",
+                    "message",
+                    "other" -> messageType;
+            default -> "other";
+        };
+    }
+
+    private String messageOutcomeValue(String outcome) {
+        return switch (outcome == null ? "" : outcome) {
+            case "received", "sent", "dropped", "send_timeout", "send_error" -> outcome;
+            default -> "unknown";
+        };
+    }
+
+    private String backpressureEventValue(String event) {
+        return switch (event == null ? "" : event) {
+            case "snapshot_coalesced", "snapshot_dropped", "critical_overflow", "session_closed" -> event;
+            default -> "unknown";
+        };
     }
 
     private record RoomKey(GameMode gameMode, GamePhase phase) {}

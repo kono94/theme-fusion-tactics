@@ -24,6 +24,10 @@ class OpenTelemetryGameTelemetryTest {
     private static final AttributeKey<String> BROWSER_FAMILY = AttributeKey.stringKey("browser.family");
     private static final AttributeKey<String> OS_FAMILY = AttributeKey.stringKey("os.family");
     private static final AttributeKey<String> DEVICE_TYPE = AttributeKey.stringKey("device.type");
+    private static final AttributeKey<String> MESSAGE_DIRECTION = AttributeKey.stringKey("message.direction");
+    private static final AttributeKey<String> MESSAGE_TYPE = AttributeKey.stringKey("message.type");
+    private static final AttributeKey<String> MESSAGE_OUTCOME = AttributeKey.stringKey("message.outcome");
+    private static final AttributeKey<String> BACKPRESSURE_EVENT = AttributeKey.stringKey("backpressure.event");
 
     @Test
     void recordsCountersActionsAndLoopDurationWithBoundedAttributes() {
@@ -96,6 +100,57 @@ class OpenTelemetryGameTelemetryTest {
                     .anyMatch(point -> point.getValue() == 0
                             && "pokemon".equals(point.getAttributes().get(GAME_MODE))
                             && "bot".equals(point.getAttributes().get(PLAYER_TYPE))));
+        }
+    }
+
+    @Test
+    void recordsActionLatencyAndWebSocketMessageSizeWithBoundedAttributes() {
+        var reader = InMemoryMetricReader.create();
+        try (var provider =
+                SdkMeterProvider.builder().registerMetricReader(reader).build()) {
+            var telemetry = new OpenTelemetryGameTelemetry(provider.get("test"));
+
+            telemetry.actionProcessed(GameMode.POKEMON, ActionType.MOVE, "accepted", "none", 0.012);
+            telemetry.websocketMessage("outbound", "state", "sent", 512);
+            telemetry.websocketBackpressure("state", "snapshot_coalesced");
+            telemetry.websocketMessage("unbounded-direction", "unbounded-type", "unbounded-outcome", Long.MAX_VALUE);
+
+            var actionPoint = metric(reader, "tft.game.actions.processing.duration")
+                    .getHistogramData()
+                    .getPoints()
+                    .iterator()
+                    .next();
+            assertEquals(1, actionPoint.getCount());
+            assertEquals("pokemon", actionPoint.getAttributes().get(GAME_MODE));
+            assertEquals("move", actionPoint.getAttributes().get(ACTION_TYPE));
+            assertEquals("accepted", actionPoint.getAttributes().get(ACTION_OUTCOME));
+            assertEquals("none", actionPoint.getAttributes().get(REJECTION_REASON));
+            assertTrue(actionPoint.getBoundaries().contains(0.001));
+            assertTrue(actionPoint.getBoundaries().contains(10.0));
+
+            var messagePoint = metric(reader, "tft.game.websocket.messages").getLongSumData().getPoints().stream()
+                    .filter(point -> "state".equals(point.getAttributes().get(MESSAGE_TYPE)))
+                    .findFirst()
+                    .orElseThrow();
+            assertEquals("outbound", messagePoint.getAttributes().get(MESSAGE_DIRECTION));
+            assertEquals("sent", messagePoint.getAttributes().get(MESSAGE_OUTCOME));
+            assertEquals(1, messagePoint.getValue());
+            var sizePoint = metric(reader, "tft.game.websocket.message.size").getHistogramData().getPoints().stream()
+                    .filter(point -> point.getAttributes().get(MESSAGE_OUTCOME).equals("sent"))
+                    .findFirst()
+                    .orElseThrow();
+            assertEquals(1, sizePoint.getCount());
+            assertEquals(512, sizePoint.getSum());
+            assertTrue(sizePoint.getBoundaries().contains(524_288.0));
+            assertTrue(metric(reader, "tft.game.websocket.messages").getLongSumData().getPoints().stream()
+                    .anyMatch(point -> "other".equals(point.getAttributes().get(MESSAGE_TYPE))));
+            var backpressurePoint = metric(reader, "tft.game.websocket.backpressure")
+                    .getLongSumData()
+                    .getPoints()
+                    .iterator()
+                    .next();
+            assertEquals("state", backpressurePoint.getAttributes().get(MESSAGE_TYPE));
+            assertEquals("snapshot_coalesced", backpressurePoint.getAttributes().get(BACKPRESSURE_EVENT));
         }
     }
 

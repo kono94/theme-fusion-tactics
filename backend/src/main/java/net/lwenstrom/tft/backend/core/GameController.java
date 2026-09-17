@@ -273,33 +273,43 @@ public class GameController {
     @MessageMapping("/room/{id}/action")
     public void handleAction(
             @DestinationVariable String id, @Payload GameAction action, @Header("simpSessionId") String sessionId) {
+        var startedAt = System.nanoTime();
         var room = gameEngine.getRoom(id);
-        if (room == null) {
-            gameEngine.recordAction(null, action == null ? null : action.type(), "rejected", "room_missing");
-            return;
-        }
+        var gameMode = room == null ? null : room.getGameMode();
+        var actionType = action == null ? null : action.type();
+        var outcome = "rejected";
+        var reason = "room_missing";
+        try {
+            if (room == null) {
+                return;
+            }
 
-        if (action == null || action.type() == null) {
-            gameEngine.recordAction(room.getGameMode(), null, "rejected", "invalid_payload");
-            log.warn("Rejected malformed action payload.");
-            return;
-        }
+            if (action == null || action.type() == null) {
+                reason = "invalid_payload";
+                log.warn("Rejected malformed action payload.");
+                return;
+            }
 
-        var sessionPlayer = resolveSessionPlayer(id, sessionId);
-        if (sessionPlayer == null || !sessionPlayer.playerId().equals(action.playerId())) {
-            gameEngine.recordAction(room.getGameMode(), action.type(), "rejected", "unauthorized");
-            log.warn("Rejected action for unbound or mismatched player.");
-            return;
-        }
+            var sessionPlayer = resolveSessionPlayer(id, sessionId);
+            if (sessionPlayer == null || !sessionPlayer.playerId().equals(action.playerId())) {
+                reason = "unauthorized";
+                log.warn("Rejected action for unbound or mismatched player.");
+                return;
+            }
 
-        if (!room.applyAction(sessionPlayer.playerId(), action)) {
-            gameEngine.recordAction(room.getGameMode(), action.type(), "rejected", "invalid_action");
-            log.warn("Rejected invalid action {} for player {}.", action.type(), sessionPlayer.playerId());
-            return;
-        }
+            if (!room.applyAction(sessionPlayer.playerId(), action)) {
+                reason = "invalid_action";
+                log.warn("Rejected invalid action {} for player {}.", action.type(), sessionPlayer.playerId());
+                return;
+            }
 
-        gameEngine.recordAction(room.getGameMode(), action.type(), "accepted", "none");
-        broadcastRoomState(room);
+            outcome = "accepted";
+            reason = "none";
+            broadcastRoomState(room);
+        } finally {
+            gameEngine.recordAction(
+                    gameMode, actionType, outcome, reason, (System.nanoTime() - startedAt) / 1_000_000_000.0);
+        }
     }
 
     @MessageMapping("/room/{id}/mode")

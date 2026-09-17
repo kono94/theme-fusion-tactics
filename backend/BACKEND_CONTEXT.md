@@ -182,6 +182,14 @@ Rejections use `accepted=false`, a stable code (`INVALID_REQUEST`, `ROOM_EXISTS`
 `GameAction.playerId` must equal the player bound to the sender's STOMP session. Null actions, null action types, missing
 required fields, dead players, and spoofed IDs are rejected.
 
+The endpoint applies bounded transport backpressure. Full room snapshots are produced every 100 ms, so a client that
+cannot drain the socket can otherwise accumulate Spring's per-session outbound queue until the default 512 KiB limit
+closes the `StandardWebSocketSession` (for example, `574224 > 524288`). The configured WebSocket handler decorator keeps
+one latest pending room snapshot per connection and drops stale snapshots before they accumulate. Control, room-result,
+and event frames are retained; if those non-coalescible frames alone exceed the 512 KiB bound, the unreliable session is
+closed instead of growing memory without limit. Snapshot coalescing is safe because each snapshot is authoritative and
+supersedes earlier snapshots. Message drops and send failures are counted by bounded telemetry attributes.
+
 - `BUY`, `REROLL`, `EXP`, `MOVE`, `SELL`, `LOCK`, and `COLLECT_ORB` are planning-only.
 - `SELECT_AUGMENT` is planning-only and requires `augmentId`.
 - `READY_FOR_COMBAT` succeeds only for the eligible solo-training human.
@@ -336,7 +344,21 @@ Custom instruments are theme-agnostic:
 - `tft.game.clients.active` and `tft.game.client.connections` classify WebSocket clients by bounded browser, operating
   system, and device families;
 - `tft.game.actions.processed` records bounded action type, outcome, mode, and rejection reason attributes;
-- `tft.game.loop.duration` records the scheduled engine loop duration in seconds.
+- `tft.game.actions.processing.duration` records the end-to-end inbound action handler duration with the same bounded
+  attributes;
+- `tft.game.loop.duration` records the scheduled engine loop duration in seconds;
+- `tft.game.websocket.messages` counts terminal inbound and outbound WebSocket/STOMP frame outcomes by bounded
+  direction, message type, and outcome (`received`, `sent`, `dropped`, `send_timeout`, or `send_error`);
+- `tft.game.websocket.backpressure` counts stale snapshot coalescing, snapshot drops, critical-frame overflow, and
+  unreliable-session closes;
+- `tft.game.websocket.message.size` records WebSocket/STOMP payload bytes with those same bounded attributes.
+
+Action and loop histograms use explicit second-based boundaries (`1 ms` through `10 s`) so Prometheus/Grafana
+`histogram_quantile` queries do not interpolate p95 values from an overly broad default bucket (the old default could
+surface a misleading `4.75 s` value). A representative p95 query is
+`histogram_quantile(0.95, sum by (le) (rate(tft_game_actions_processing_duration_bucket[5m])))`; use the same form with
+`tft_game_loop_duration_bucket` for loop p95. Metric names may be normalized with underscores by the OTLP-to-Prometheus
+exporter.
 
 Gauge callbacks emit zeroes for known mode, phase, player type, connection-state, and client-family combinations. The
 WebSocket handshake classifies each `User-Agent` immediately; neither the raw header nor browser versions are retained.

@@ -22,7 +22,20 @@ public interface GameTelemetry {
 
     default void actionProcessed(GameMode gameMode, ActionType actionType, String outcome, String reason) {}
 
+    default void actionProcessed(
+            GameMode gameMode, ActionType actionType, String outcome, String reason, double durationSeconds) {
+        actionProcessed(gameMode, actionType, outcome, reason);
+        actionProcessingDuration(gameMode, actionType, outcome, reason, durationSeconds);
+    }
+
+    default void actionProcessingDuration(
+            GameMode gameMode, ActionType actionType, String outcome, String reason, double durationSeconds) {}
+
     default void gameLoopDuration(double durationSeconds) {}
+
+    default void websocketMessage(String direction, String messageType, String outcome, long payloadBytes) {}
+
+    default void websocketBackpressure(String messageType, String event) {}
 
     default void clientConnected(String connectionId, ClientUserAgent client) {}
 
