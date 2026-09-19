@@ -79,6 +79,8 @@ services:
     image: grafana/mimir:3.2.1@sha256:92838f113ba54230014e79bc812e57ca90bb9ebc06e665f59e4f700098c2dd04
     container_name: tft-mimir
     command: ["-config.file=/etc/mimir/config.yaml"]
+    labels:
+      net.lwenstrom.tft.mimir-config-sha256: ${MIMIR_CONFIG_SHA256:-development}
     volumes:
       - ./deployment/observability/mimir/config.yaml:/etc/mimir/config.yaml:ro
       - mimir-data:/data

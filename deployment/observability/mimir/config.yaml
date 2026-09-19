@@ -29,6 +29,9 @@ ingester:
 limits:
   compactor_blocks_retention_period: 720h
 
+query_scheduler:
+  max_outstanding_requests_per_tenant: 512
+
 ruler_storage:
   backend: filesystem
   filesystem:

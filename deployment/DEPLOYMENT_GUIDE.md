@@ -205,6 +205,39 @@ flows over STOMP. The JVM chart intentionally shows heap only; non-heap memory i
 code, and other runtime structures and is not directly comparable with the heap limit. Root filesystem capacity and
 inode usage are both shown as percentages.
 
+The VPS refresh failure is Mimir rejecting overlapping dashboard queries with HTTP 429 after the single tenant reaches
+the query scheduler's outstanding-request limit. The configured limit of 512 accommodates a complete overview refresh
+plus short manual-refresh bursts, while the 30-second dashboard refresh reduces overlap. This is targeted queue
+protection for dashboard bursts, not a general Mimir health fix; ring heartbeat and auto-forget settings remain at their
+defaults.
+
+Production deploys hash `deployment/observability/mimir/config.yaml` and place the digest in the Mimir service label.
+Compose therefore recreates Mimir when that configuration changes without restarting it on unrelated deploys. For a
+manual local rollout, recreate it explicitly:
+
+```bash
+docker compose up -d --force-recreate mimir
+```
+
+Validate the repository configuration with the pinned binary before deploying:
+
+```bash
+docker run --rm \
+  -v "$PWD/deployment/observability/mimir/config.yaml:/etc/mimir/config.yaml:ro" \
+  grafana/mimir:3.2.1@sha256:92838f113ba54230014e79bc812e57ca90bb9ebc06e665f59e4f700098c2dd04 \
+  -config.file=/etc/mimir/config.yaml -modules
+```
+
+After deployment, confirm the running process loaded the effective value:
+
+```bash
+docker compose exec -T grafana curl -fsS http://mimir:9009/config \
+  | grep -A 1 '^query_scheduler:'
+```
+
+The output must show `max_outstanding_requests_per_tenant: 512`. Repeated Grafana refreshes should then complete
+without Mimir query-scheduler 429 responses.
+
 `Observability targets healthy` reports successful metric scrapes, not merely running Compose containers. If it is below
 four, use the adjacent target-status table to identify whether the Collector, Mimir, Loki, or Grafana endpoint is not
 being scraped successfully.

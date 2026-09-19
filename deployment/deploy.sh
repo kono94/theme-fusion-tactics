@@ -35,9 +35,11 @@ done
 GIT_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "dev")
 GIT_COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 BUILD_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+MIMIR_CONFIG_SHA256=$(sha256sum deployment/observability/mimir/config.yaml | cut -d ' ' -f 1)
 export APP_GIT_TAG="$GIT_TAG"
 export APP_GIT_COMMIT="$GIT_COMMIT"
 export APP_BUILD_TIME="$BUILD_TIME"
+export MIMIR_CONFIG_SHA256
 export SPRING_PROFILES_ACTIVE=prod
 
 # Deploy with prod profile
