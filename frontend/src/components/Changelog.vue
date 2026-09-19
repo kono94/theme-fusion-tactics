@@ -6,7 +6,7 @@ defineOptions({
 defineEmits(['back'])
 
 const nextVersionHighlights = [
-  'Returning to a match after switching tabs is responsive again: hidden tabs pause high-frequency board updates and immediately catch up from the newest state when reopened.',
+  'Improved the gameplay dashboard with clearer run filtering and more responsive live monitoring.',
 ]
 
 const version252Highlights = [
@@ -120,8 +120,8 @@ const version160Commits = [
       <section class="release-section">
         <div class="release-header">
           <p class="eyebrow">Latest</p>
-          <h2>Version X.X.X</h2>
-          <p>Faster recovery when returning to an active match.</p>
+          <h2>Version 2.5.3</h2>
+          <p>Improved the gameplay dashboard and live game monitoring.</p>
         </div>
         <div class="release-grid">
           <article class="release-panel">
