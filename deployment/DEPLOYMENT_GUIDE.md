@@ -196,8 +196,10 @@ gameplay dashboard opens its drill-down. The SQLite mount is writable only to su
 the plugin enforces query-only access. Treat Grafana accounts as trusted analytics administrators.
 
 The overview is tuned for this deployment's low traffic volume: action, connection, rejection, lifecycle, and
-WebSocket panels use per-minute or rolling-window values instead of mostly-zero per-second rates. `Game action latency`
-measures server-side STOMP validation, room mutation, and broadcast enqueueing; it is not browser round-trip latency.
+WebSocket panels use per-minute or rolling-window values instead of mostly-zero per-second rates. `Action latency:
+server vs browser` compares server-side STOMP validation and room mutation with the browser's monotonic publish-to-
+acknowledgement round trip. A browser-only spike points to tab scheduling, network, or transport delay rather than game
+logic.
 HTTP latency remains useful for the REST pages and the WebSocket handshake, but gaps are normal while gameplay traffic
 flows over STOMP. The JVM chart intentionally shows heap only; non-heap memory is used by class metadata, JIT-compiled
 code, and other runtime structures and is not directly comparable with the heap limit. Root filesystem capacity and

@@ -31,6 +31,9 @@ public interface GameTelemetry {
     default void actionProcessingDuration(
             GameMode gameMode, ActionType actionType, String outcome, String reason, double durationSeconds) {}
 
+    default void clientActionAcknowledgementRoundTrip(
+            GameMode gameMode, ActionType actionType, String outcome, double durationSeconds) {}
+
     default void gameLoopDuration(double durationSeconds) {}
 
     default void websocketMessage(String direction, String messageType, String outcome, long payloadBytes) {}

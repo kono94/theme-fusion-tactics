@@ -124,6 +124,36 @@ class GameTelemetryIntegrationTest {
     }
 
     @Test
+    void recordsOnlyBoundedActionAcknowledgementTelemetryFromBoundSessions() {
+        controller.createRoom(new GameController.RoomRequest("ack-room", "Host"), "host-session");
+
+        controller.recordClientActionAcknowledgement(
+                new GameController.ClientActionAcknowledgementTelemetry(ActionType.REROLL, "accepted", 240.0),
+                "host-session");
+        controller.recordClientActionAcknowledgement(
+                new GameController.ClientActionAcknowledgementTelemetry(ActionType.REROLL, "rejected", 60_000.0),
+                "host-session");
+        controller.recordClientActionAcknowledgement(
+                new GameController.ClientActionAcknowledgementTelemetry(ActionType.REROLL, "accepted", 60_001.0),
+                "host-session");
+        controller.recordClientActionAcknowledgement(
+                new GameController.ClientActionAcknowledgementTelemetry(ActionType.REROLL, "spoofed", 100.0),
+                "host-session");
+        controller.recordClientActionAcknowledgement(
+                new GameController.ClientActionAcknowledgementTelemetry(ActionType.REROLL, "accepted", Double.NaN),
+                "host-session");
+        controller.recordClientActionAcknowledgement(
+                new GameController.ClientActionAcknowledgementTelemetry(ActionType.REROLL, "accepted", 100.0),
+                "unknown-session");
+
+        assertEquals(
+                List.of(
+                        new ClientActionAcknowledgementRecord(GameMode.ONEPIECE, ActionType.REROLL, "accepted", 0.240),
+                        new ClientActionAcknowledgementRecord(GameMode.ONEPIECE, ActionType.REROLL, "rejected", 60.0)),
+                telemetry.clientActionAcknowledgements);
+    }
+
+    @Test
     void recordsClassifiedWebSocketClientsAcrossSessionEvents() {
         var client = new ClientUserAgent("firefox", "linux", "desktop");
         var accessor = SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT);
@@ -147,6 +177,7 @@ class GameTelemetryIntegrationTest {
         private final List<String> disconnectedClients = new ArrayList<>();
         private final List<ActionRecord> actions = new ArrayList<>();
         private final List<Double> actionDurations = new ArrayList<>();
+        private final List<ClientActionAcknowledgementRecord> clientActionAcknowledgements = new ArrayList<>();
         private int roomsCreated;
         private int matchesStarted;
         private int matchesCompleted;
@@ -189,6 +220,13 @@ class GameTelemetryIntegrationTest {
         }
 
         @Override
+        public void clientActionAcknowledgementRoundTrip(
+                GameMode gameMode, ActionType actionType, String outcome, double durationSeconds) {
+            clientActionAcknowledgements.add(
+                    new ClientActionAcknowledgementRecord(gameMode, actionType, outcome, durationSeconds));
+        }
+
+        @Override
         public void gameLoopDuration(double durationSeconds) {
             loopDurations.add(durationSeconds);
         }
@@ -205,6 +243,9 @@ class GameTelemetryIntegrationTest {
     }
 
     private record ActionRecord(GameMode gameMode, ActionType actionType, String outcome, String reason) {}
+
+    private record ClientActionAcknowledgementRecord(
+            GameMode gameMode, ActionType actionType, String outcome, double durationSeconds) {}
 
     private record ClientConnection(String connectionId, ClientUserAgent client) {}
 }

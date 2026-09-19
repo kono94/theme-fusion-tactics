@@ -57,6 +57,31 @@ class GameControllerSessionGuardTest {
     }
 
     @Test
+    void handleAction_ReturnsCorrelatedAcceptedAndRejectedResults() {
+        var room = createRoomWithHost();
+        var host = findPlayer(room, "Host");
+        controller.startRoom(new GameController.RoomRequest(room.getId(), "Host"), "host-session");
+
+        var accepted = controller.handleAction(
+                room.getId(),
+                new GameAction(ActionType.EXP, host.getId(), null, null, null, null, null, null, "accepted-action"),
+                "host-session");
+        var rejected = controller.handleAction(
+                room.getId(),
+                new GameAction(ActionType.EXP, "spoofed-player", null, null, null, null, null, null, "rejected-action"),
+                "host-session");
+
+        assertEquals(new GameController.ActionResult("accepted-action", ActionType.EXP, "accepted", "none"), accepted);
+        assertEquals(
+                new GameController.ActionResult("rejected-action", ActionType.EXP, "rejected", "unauthorized"),
+                rejected);
+        assertNull(controller.handleAction(
+                room.getId(),
+                new GameAction(ActionType.EXP, host.getId(), null, null, null, null, null, null),
+                "host-session"));
+    }
+
+    @Test
     void handleAction_RejectsMismatchedPlayerId() {
         var room = createRoomWithHost();
         controller.joinRoom(new GameController.RoomRequest(room.getId(), "Guest"), "guest-session");

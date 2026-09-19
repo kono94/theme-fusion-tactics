@@ -289,12 +289,20 @@ export interface GameState {
 export interface GameAction {
   type: ActionType
   playerId: string
+  clientActionId?: string
   unitId?: string // For MOVE, SELL
   targetX?: number // MOVE: board column or target bench slot (0-8)
   targetY?: number // MOVE: board row (0-2); -1 means targetX is a bench slot
   shopIndex?: number // For BUY (0-4)
   orbId?: string // For COLLECT_ORB
   augmentId?: string // For SELECT_AUGMENT
+}
+
+export interface ActionResult {
+  clientActionId: string
+  actionType: ActionType | null
+  outcome: 'accepted' | 'rejected'
+  reason: string
 }
 
 export interface RoomRequestResult {

@@ -217,11 +217,13 @@ class BackpressureWebSocketHandlerDecoratorTest {
                 .orElseThrow()
                 .getArgument(0);
         session.sendMessage(new TextMessage("MESSAGE\ndestination:/topic/room/abc/event\n\n{}\u0000"));
+        session.sendMessage(new TextMessage("MESSAGE\ndestination:/user/queue/action-result\n\n{}\u0000"));
 
         assertTrue(telemetry.messages.contains("inbound:action:received"));
         assertTrue(telemetry.messages.contains("inbound:unsubscribe:received"));
-        awaitPayloadCount(telemetry.outboundMessages, 1);
+        awaitPayloadCount(telemetry.outboundMessages, 2);
         assertTrue(telemetry.messages.contains("outbound:event:sent"));
+        assertTrue(telemetry.messages.contains("outbound:action_result:sent"));
         decorator.afterConnectionClosed(rawSession, CloseStatus.NORMAL);
     }
 

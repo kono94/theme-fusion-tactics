@@ -167,7 +167,9 @@ connection rates by bounded browser, operating-system, and device families; raw 
 It also reports STOMP transport outcomes, payload sizes, backpressure, and server-side action latency. Slow clients keep
 only the newest pending authoritative room snapshot so stale high-frequency state does not overflow Spring's per-session
 WebSocket buffer. Hidden browser tabs unsubscribe from high-frequency snapshots and resubscribe on foreground, avoiding
-a browser-side backlog while low-volume game events remain subscribed.
+a browser-side backlog while low-volume game events remain subscribed. Browser-observed action-acknowledgement round
+trips are charted beside server action processing so transport or tab-scheduling delays can be distinguished from
+backend work.
 Grafana also provisions `TFT Gameplay Analytics` and a linked per-run drill-down over the existing anonymous SQLite
 analytics store. The official Grafana image installs the pinned SQLite datasource plugin on first startup; no custom
 Grafana image is built.

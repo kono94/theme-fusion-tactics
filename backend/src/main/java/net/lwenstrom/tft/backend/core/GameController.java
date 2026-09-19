@@ -11,6 +11,7 @@ import net.lwenstrom.tft.backend.core.engine.CombatSystem;
 import net.lwenstrom.tft.backend.core.engine.GameEngine;
 import net.lwenstrom.tft.backend.core.engine.GameRoom;
 import net.lwenstrom.tft.backend.core.engine.Player;
+import net.lwenstrom.tft.backend.core.model.ActionType;
 import net.lwenstrom.tft.backend.core.model.EmergencyDropPayload;
 import net.lwenstrom.tft.backend.core.model.GameAction;
 import net.lwenstrom.tft.backend.core.model.GameMode;
@@ -42,6 +43,8 @@ public class GameController {
 
     private static final int MAX_ROOM_ID_LENGTH = 32;
     private static final int MAX_PLAYER_NAME_LENGTH = 32;
+    private static final int MAX_CLIENT_ACTION_ID_LENGTH = 64;
+    private static final double MAX_CLIENT_ACTION_ACKNOWLEDGEMENT_ROUND_TRIP_MILLIS = 60_000;
 
     private final SimpMessagingTemplate messagingTemplate;
     private final GameEngine gameEngine;
@@ -271,7 +274,8 @@ public class GameController {
     }
 
     @MessageMapping("/room/{id}/action")
-    public void handleAction(
+    @SendToUser(destinations = "/queue/action-result", broadcast = false)
+    public ActionResult handleAction(
             @DestinationVariable String id, @Payload GameAction action, @Header("simpSessionId") String sessionId) {
         var startedAt = System.nanoTime();
         var room = gameEngine.getRoom(id);
@@ -281,34 +285,58 @@ public class GameController {
         var reason = "room_missing";
         try {
             if (room == null) {
-                return;
+                return actionResult(action, actionType, outcome, reason);
             }
 
             if (action == null || action.type() == null) {
                 reason = "invalid_payload";
                 log.warn("Rejected malformed action payload.");
-                return;
+                return actionResult(action, actionType, outcome, reason);
             }
 
             var sessionPlayer = resolveSessionPlayer(id, sessionId);
             if (sessionPlayer == null || !sessionPlayer.playerId().equals(action.playerId())) {
                 reason = "unauthorized";
                 log.warn("Rejected action for unbound or mismatched player.");
-                return;
+                return actionResult(action, actionType, outcome, reason);
             }
 
             if (!room.applyAction(sessionPlayer.playerId(), action)) {
                 reason = "invalid_action";
                 log.warn("Rejected invalid action {} for player {}.", action.type(), sessionPlayer.playerId());
-                return;
+                return actionResult(action, actionType, outcome, reason);
             }
 
             outcome = "accepted";
             reason = "none";
             broadcastRoomState(room);
+            return actionResult(action, actionType, outcome, reason);
         } finally {
             gameEngine.recordAction(
                     gameMode, actionType, outcome, reason, (System.nanoTime() - startedAt) / 1_000_000_000.0);
+        }
+    }
+
+    @MessageMapping("/telemetry/action-ack")
+    public void recordClientActionAcknowledgement(
+            @Payload ClientActionAcknowledgementTelemetry telemetry, @Header("simpSessionId") String sessionId) {
+        if (telemetry == null
+                || telemetry.actionType() == null
+                || !isActionOutcome(telemetry.outcome())
+                || telemetry.roundTripMs() == null
+                || !Double.isFinite(telemetry.roundTripMs())
+                || telemetry.roundTripMs() < 0
+                || telemetry.roundTripMs() > MAX_CLIENT_ACTION_ACKNOWLEDGEMENT_ROUND_TRIP_MILLIS) {
+            return;
+        }
+
+        var sessionPlayer = sessionPlayers.get(sessionId);
+        if (sessionPlayer == null) return;
+
+        var room = gameEngine.getRoom(sessionPlayer.roomId());
+        if (room != null) {
+            gameEngine.recordClientActionAcknowledgementRoundTrip(
+                    room.getGameMode(), telemetry.actionType(), telemetry.outcome(), telemetry.roundTripMs() / 1_000.0);
         }
     }
 
@@ -358,6 +386,20 @@ public class GameController {
         return Optional.empty();
     }
 
+    private ActionResult actionResult(GameAction action, ActionType actionType, String outcome, String reason) {
+        if (action == null
+                || action.clientActionId() == null
+                || action.clientActionId().isBlank()
+                || action.clientActionId().length() > MAX_CLIENT_ACTION_ID_LENGTH) {
+            return null;
+        }
+        return new ActionResult(action.clientActionId(), actionType, outcome, reason);
+    }
+
+    private boolean isActionOutcome(String outcome) {
+        return "accepted".equals(outcome) || "rejected".equals(outcome);
+    }
+
     private void bindSession(String roomId, String playerId, String sessionId) {
         sessionPlayers
                 .entrySet()
@@ -393,6 +435,10 @@ public class GameController {
     }
 
     public record ModeChangeRequest(String playerName, GameMode gameMode) {}
+
+    public record ActionResult(String clientActionId, ActionType actionType, String outcome, String reason) {}
+
+    public record ClientActionAcknowledgementTelemetry(ActionType actionType, String outcome, Double roundTripMs) {}
 
     public record RoomRequestResult(boolean accepted, String roomId, String playerId, String code, String message) {
         private static RoomRequestResult accepted(String roomId, String playerId) {

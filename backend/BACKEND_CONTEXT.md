@@ -157,6 +157,7 @@ range, and ability at higher stars while preserving the line used for upgrades.
 | `/app/room/{id}/add-bot` | none | Session-bound host adds one lobby bot |
 | `/app/room/{id}/mode` | `ModeChangeRequest` | Session-bound host changes lobby mode |
 | `/app/room/{id}/action` | `GameAction` | Applies one validated session-bound command |
+| `/app/telemetry/action-ack` | `ClientActionAcknowledgementTelemetry` | Records a bounded browser-observed action-acknowledgement round trip for the bound session |
 
 `RoomRequest` contains `roomId`, `playerName`, optional `analyticsClientId`, and optional `reconnectToken`. Room IDs accept
 1-32 ASCII letters, numbers, underscores, or hyphens. Leading and trailing whitespace is removed before validation, and
@@ -346,6 +347,8 @@ Custom instruments are theme-agnostic:
 - `tft.game.actions.processed` records bounded action type, outcome, mode, and rejection reason attributes;
 - `tft.game.actions.processing.duration` records the end-to-end inbound action handler duration with the same bounded
   attributes;
+- `tft.game.actions.client.ack.round_trip.duration` records the browser's monotonic action-publish to explicit
+  acknowledgement round trip by bounded mode, action type, and outcome;
 - `tft.game.loop.duration` records the scheduled engine loop duration in seconds;
 - `tft.game.websocket.messages` counts terminal inbound and outbound WebSocket/STOMP frame outcomes by bounded
   direction, message type, and outcome (`received`, `sent`, `dropped`, `send_timeout`, or `send_error`);
@@ -359,6 +362,12 @@ surface a misleading `4.75 s` value). A representative p95 query is
 `histogram_quantile(0.95, sum by (le) (rate(tft_game_actions_processing_duration_bucket[5m])))`; use the same form with
 `tft_game_loop_duration_bucket` for loop p95. Metric names may be normalized with underscores by the OTLP-to-Prometheus
 exporter.
+
+`GameAction.clientActionId` is an optional correlation identifier for compatibility with older clients. When supplied,
+the action handler returns `ActionResult(clientActionId, actionType, outcome, reason)` on the sending session's private
+`/user/queue/action-result` subscription. The browser reports the acknowledgement round trip without forwarding the
+correlation, player, room, or session identifier. Client acknowledgement telemetry is accepted only from a STOMP
+session already bound to a room and only for finite durations from zero through 60 seconds.
 
 Gauge callbacks emit zeroes for known mode, phase, player type, connection-state, and client-family combinations. The
 WebSocket handshake classifies each `User-Agent` immediately; neither the raw header nor browser versions are retained.

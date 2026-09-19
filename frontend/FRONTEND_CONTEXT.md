@@ -106,6 +106,9 @@ The client reconnect delay is five seconds. On connection:
 - When the document becomes hidden, the client unsubscribes only from the 100 ms room-state stream. It keeps the
   low-volume event subscription, then resubscribes to room state as soon as the document becomes visible; the next
   authoritative snapshot replaces the stale local state instead of forcing the browser to drain hidden-tab snapshots.
+- Game actions carry a generated `clientActionId`. The client correlates `/user/queue/action-result` messages, bounds
+  pending timers to 128 for at most 60 seconds, and reports only action type, outcome, and monotonic round-trip duration
+  through `/app/telemetry/action-ack`.
 - `leave` preserves the active-match player for reconnect grace; `abandon` permanently gives up the match.
 
 `localStorage` contains the anonymous analytics client ID, the player's preferred display name, and the active-room

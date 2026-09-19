@@ -324,16 +324,18 @@
     },
     {
       "datasource": { "type": "prometheus", "uid": "mimir" },
-      "description": "Inbound game-action processing time, including validation and room mutation. The 5-minute window smooths sparse traffic; p50 is included to distinguish bucket artifacts from a broad slowdown.",
+      "description": "Compares server-side action handling with the browser-observed explicit acknowledgement round trip. A high browser round trip with low server processing time points to browser scheduling, network, or transport delay rather than game logic. Acknowledgement timing uses the browser monotonic clock and carries no player, room, session, or correlation identifiers.",
       "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "seconds", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 12, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }, "unit": "s" }, "overrides": [] },
       "gridPos": { "h": 8, "w": 8, "x": 8, "y": 64 },
       "id": 28,
       "options": { "legend": { "calcs": ["lastNotNull"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
       "targets": [
-        { "expr": "histogram_quantile(0.95, sum by (action_type, action_outcome, le) (rate(tft_game_actions_processing_duration_bucket[5m])))", "legendFormat": "{{action_type}} · {{action_outcome}} · p95", "refId": "A" },
-        { "expr": "histogram_quantile(0.50, sum by (action_type, action_outcome, le) (rate(tft_game_actions_processing_duration_bucket[5m])))", "legendFormat": "{{action_type}} · {{action_outcome}} · p50", "refId": "B" }
+        { "expr": "histogram_quantile(0.95, sum by (action_type, action_outcome, le) (rate(tft_game_actions_processing_duration_bucket[5m])))", "legendFormat": "server · {{action_type}} · {{action_outcome}} · p95", "refId": "A" },
+        { "expr": "histogram_quantile(0.50, sum by (action_type, action_outcome, le) (rate(tft_game_actions_processing_duration_bucket[5m])))", "legendFormat": "server · {{action_type}} · {{action_outcome}} · p50", "refId": "B" },
+        { "expr": "histogram_quantile(0.95, sum by (action_type, action_outcome, le) (rate(tft_game_actions_client_ack_round_trip_duration_bucket[5m])))", "legendFormat": "browser ack · {{action_type}} · {{action_outcome}} · p95", "refId": "C" },
+        { "expr": "histogram_quantile(0.50, sum by (action_type, action_outcome, le) (rate(tft_game_actions_client_ack_round_trip_duration_bucket[5m])))", "legendFormat": "browser ack · {{action_type}} · {{action_outcome}} · p50", "refId": "D" }
       ],
-      "title": "Game action latency (p95 / p50)",
+      "title": "Action latency: server vs browser (p95 / p50)",
       "type": "timeseries"
     },
     {
@@ -379,6 +381,6 @@
   "timezone": "browser",
   "title": "TFT Overview",
   "uid": "tft-overview",
-  "version": 3,
+  "version": 4,
   "weekStart": ""
 }

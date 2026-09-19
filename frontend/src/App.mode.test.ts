@@ -8,6 +8,7 @@ const stomp = vi.hoisted(() => ({
     deactivate: vi.fn(),
     publish: vi.fn(),
     onConnect: undefined as (() => void) | undefined,
+    onDisconnect: undefined as (() => void) | undefined,
     subscriptions: [] as Array<{
         destination: string
         callback: (message: { body: string }) => void
@@ -20,8 +21,9 @@ const roomInvite = vi.hoisted(() => ({
 }))
 
 vi.mock('@stomp/stompjs', () => ({
-    Client: vi.fn(function MockClient(options: { onConnect?: () => void }) {
+    Client: vi.fn(function MockClient(options: { onConnect?: () => void; onDisconnect?: () => void }) {
         stomp.onConnect = options.onConnect
+        stomp.onDisconnect = options.onDisconnect
         return {
             activate: stomp.activate,
             deactivate: stomp.deactivate,
@@ -36,7 +38,7 @@ vi.mock('@stomp/stompjs', () => ({
 }))
 
 vi.mock('./components/GameInterface.vue', () => ({
-    default: { template: '<div data-test="game-interface" />' },
+    default: { name: 'GameInterface', emits: ['action'], template: '<div data-test="game-interface" />' },
 }))
 
 vi.mock('./utils/roomInvite', async (importOriginal) => {
@@ -81,6 +83,7 @@ describe('App game-mode bootstrap', () => {
         stomp.deactivate.mockClear()
         stomp.publish.mockClear()
         stomp.onConnect = undefined
+        stomp.onDisconnect = undefined
         stomp.subscriptions.length = 0
         roomInvite.generateRoomCode.mockReset()
         roomInvite.generateRoomCode.mockReturnValue('ABC234')
@@ -106,7 +109,7 @@ describe('App game-mode bootstrap', () => {
         const wrapper = mount(App)
         await vi.waitFor(() => expect(stomp.onConnect).toBeDefined())
         stomp.onConnect?.()
-        await vi.waitFor(() => expect(stomp.subscriptions).toHaveLength(3))
+        await vi.waitFor(() => expect(stomp.subscriptions).toHaveLength(4))
 
         const initialStateSubscription = stomp.subscriptions.find(
             ({ destination }) => destination === '/topic/room/mode-room',
@@ -123,6 +126,150 @@ describe('App game-mode bootstrap', () => {
         await vi.waitFor(() => expect(
             stomp.subscriptions.filter(({ destination }) => destination === '/topic/room/mode-room'),
         ).toHaveLength(2))
+        wrapper.unmount()
+    })
+
+    it('correlates action acknowledgements and reports identifier-free round-trip telemetry', async () => {
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+            ok: true,
+            json: async () => ({ defaultGameMode: 'onepiece', availableModes: ['onepiece', 'pokemon'] }),
+        }))
+        localStorage.setItem('tactics.activeRoom', JSON.stringify({
+            roomId: 'mode-room',
+            playerName: 'Nami',
+            reconnectToken: 'token',
+        }))
+        vi.spyOn(crypto, 'randomUUID').mockReturnValue('11111111-1111-4111-8111-111111111111')
+        const performanceNow = vi.spyOn(performance, 'now').mockReturnValue(100)
+
+        const wrapper = mount(App)
+        await vi.waitFor(() => expect(stomp.onConnect).toBeDefined())
+        stomp.onConnect?.()
+        await vi.waitFor(() => expect(stomp.subscriptions).toHaveLength(4))
+
+        const stateSubscription = stomp.subscriptions.find(
+            ({ destination }) => destination === '/topic/room/mode-room',
+        )
+        stateSubscription?.callback({ body: JSON.stringify({ ...roomState('onepiece'), phase: 'PLANNING' }) })
+        await vi.waitFor(() => expect(wrapper.find('[data-test="game-interface"]').exists()).toBe(true))
+
+        wrapper.findComponent({ name: 'GameInterface' }).vm.$emit('action', {
+            type: 'REROLL',
+            playerId: 'server-player-id',
+        })
+
+        const actionMessage = stomp.publish.mock.calls.find(
+            ([message]) => message.destination === '/app/room/mode-room/action',
+        )?.[0]
+        const actionBody = JSON.parse(actionMessage.body)
+        expect(actionBody.clientActionId).toBe('11111111-1111-4111-8111-111111111111')
+        expect(actionMessage).not.toHaveProperty('headers.receipt')
+
+        const actionResultSubscription = stomp.subscriptions.find(
+            ({ destination }) => destination === '/user/queue/action-result',
+        )
+        performanceNow.mockReturnValue(350)
+        actionResultSubscription?.callback({
+            body: JSON.stringify({
+                clientActionId: actionBody.clientActionId,
+                actionType: 'REROLL',
+                outcome: 'accepted',
+                reason: 'none',
+            }),
+        })
+
+        const telemetryMessage = stomp.publish.mock.calls.find(
+            ([message]) => message.destination === '/app/telemetry/action-ack',
+        )?.[0]
+        expect(JSON.parse(telemetryMessage.body)).toEqual({
+            actionType: 'REROLL',
+            outcome: 'accepted',
+            roundTripMs: 250,
+        })
+        expect(JSON.parse(telemetryMessage.body)).not.toHaveProperty('clientActionId')
+        expect(JSON.parse(telemetryMessage.body)).not.toHaveProperty('playerId')
+        wrapper.unmount()
+    })
+
+    it('drops unknown, timed-out, late, and disconnected action acknowledgements', async () => {
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+            ok: true,
+            json: async () => ({ defaultGameMode: 'onepiece', availableModes: ['onepiece', 'pokemon'] }),
+        }))
+        localStorage.setItem('tactics.activeRoom', JSON.stringify({
+            roomId: 'mode-room',
+            playerName: 'Nami',
+            reconnectToken: 'token',
+        }))
+        const timeoutCallbacks: Array<() => void> = []
+        vi.spyOn(window, 'setTimeout').mockImplementation(((callback: TimerHandler, delay?: number) => {
+            if (delay === 60_000 && typeof callback === 'function') {
+                timeoutCallbacks.push(() => callback())
+            }
+            return timeoutCallbacks.length
+        }) as typeof window.setTimeout)
+
+        const wrapper = mount(App)
+        await vi.waitFor(() => expect(stomp.onConnect).toBeDefined())
+        stomp.onConnect?.()
+        await vi.waitFor(() => expect(stomp.subscriptions).toHaveLength(4))
+        const stateSubscription = stomp.subscriptions.find(
+            ({ destination }) => destination === '/topic/room/mode-room',
+        )
+        stateSubscription?.callback({ body: JSON.stringify({ ...roomState('onepiece'), phase: 'PLANNING' }) })
+        await vi.waitFor(() => expect(wrapper.find('[data-test="game-interface"]').exists()).toBe(true))
+
+        const actionResultSubscription = stomp.subscriptions.find(
+            ({ destination }) => destination === '/user/queue/action-result',
+        )
+        actionResultSubscription?.callback({
+            body: JSON.stringify({
+                clientActionId: 'unknown',
+                actionType: 'REROLL',
+                outcome: 'accepted',
+                reason: 'none',
+            }),
+        })
+        wrapper.findComponent({ name: 'GameInterface' }).vm.$emit('action', {
+            type: 'REROLL',
+            playerId: 'server-player-id',
+        })
+        const actionBody = JSON.parse(stomp.publish.mock.calls.find(
+            ([message]) => message.destination === '/app/room/mode-room/action',
+        )?.[0].body)
+
+        timeoutCallbacks.at(-1)?.()
+        actionResultSubscription?.callback({
+            body: JSON.stringify({
+                clientActionId: actionBody.clientActionId,
+                actionType: 'REROLL',
+                outcome: 'accepted',
+                reason: 'none',
+            }),
+        })
+        expect(stomp.publish.mock.calls.some(
+            ([message]) => message.destination === '/app/telemetry/action-ack',
+        )).toBe(false)
+
+        wrapper.findComponent({ name: 'GameInterface' }).vm.$emit('action', {
+            type: 'LOCK',
+            playerId: 'server-player-id',
+        })
+        const lockAction = JSON.parse(stomp.publish.mock.calls.filter(
+            ([message]) => message.destination === '/app/room/mode-room/action',
+        ).at(-1)?.[0].body)
+        stomp.onDisconnect?.()
+        actionResultSubscription?.callback({
+            body: JSON.stringify({
+                clientActionId: lockAction.clientActionId,
+                actionType: 'LOCK',
+                outcome: 'accepted',
+                reason: 'none',
+            }),
+        })
+        expect(stomp.publish.mock.calls.some(
+            ([message]) => message.destination === '/app/telemetry/action-ack',
+        )).toBe(false)
         wrapper.unmount()
     })
 
@@ -174,7 +321,7 @@ describe('App game-mode bootstrap', () => {
         const wrapper = mount(App)
         await vi.waitFor(() => expect(stomp.onConnect).toBeDefined())
         stomp.onConnect?.()
-        await vi.waitFor(() => expect(stomp.subscriptions).toHaveLength(3))
+        await vi.waitFor(() => expect(stomp.subscriptions).toHaveLength(4))
 
         const stateSubscription = stomp.subscriptions.find(({ destination }) => destination.endsWith('/mode-room'))
         expect(stateSubscription).toBeDefined()
@@ -211,7 +358,7 @@ describe('App game-mode bootstrap', () => {
         const wrapper = mount(App)
         await vi.waitFor(() => expect(stomp.onConnect).toBeDefined())
         stomp.onConnect?.()
-        await vi.waitFor(() => expect(stomp.subscriptions).toHaveLength(3))
+        await vi.waitFor(() => expect(stomp.subscriptions).toHaveLength(4))
 
         const stateSubscription = stomp.subscriptions.find(({ destination }) => destination.endsWith('/mode-room'))
         expect(stateSubscription).toBeDefined()
@@ -246,7 +393,7 @@ describe('App game-mode bootstrap', () => {
         await vi.waitFor(() => expect(stomp.onConnect).toBeDefined())
 
         stomp.onConnect?.()
-        await vi.waitFor(() => expect(stomp.subscriptions).toHaveLength(3))
+        await vi.waitFor(() => expect(stomp.subscriptions).toHaveLength(4))
         const resultSubscription = stomp.subscriptions.find(({ destination }) => destination === '/user/queue/room-result')
         resultSubscription?.callback({
             body: JSON.stringify({
@@ -282,7 +429,7 @@ describe('App game-mode bootstrap', () => {
         await vi.waitFor(() => expect(stomp.onConnect).toBeDefined())
 
         stomp.onConnect?.()
-        await vi.waitFor(() => expect(stomp.subscriptions).toHaveLength(3))
+        await vi.waitFor(() => expect(stomp.subscriptions).toHaveLength(4))
         const resultSubscription = stomp.subscriptions.find(({ destination }) => destination === '/user/queue/room-result')
         resultSubscription?.callback({
             body: JSON.stringify({

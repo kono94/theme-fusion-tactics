@@ -115,6 +115,11 @@ public class GameEngine {
         telemetry.actionProcessed(gameMode, actionType, outcome, reason, durationSeconds);
     }
 
+    public void recordClientActionAcknowledgementRoundTrip(
+            GameMode gameMode, ActionType actionType, String outcome, double durationSeconds) {
+        telemetry.clientActionAcknowledgementRoundTrip(gameMode, actionType, outcome, durationSeconds);
+    }
+
     public void clientConnected(String connectionId, ClientUserAgent client) {
         telemetry.clientConnected(connectionId, client);
     }

@@ -21,6 +21,8 @@ import {
     sortGameModes,
 } from './data/gameModeMetadata'
 import type {
+    ActionResult,
+    ActionType,
     CombatResultPayload,
     EmergencyDropPayload,
     GameAction,
@@ -43,7 +45,15 @@ import { generateRoomCode, isInviteRoute, parseInviteRoomId } from './utils/room
 
 type PendingRoomRequestKind = 'create' | 'join' | 'restore'
 
+interface PendingActionAcknowledgement {
+    actionType: ActionType
+    startedAt: number
+    timeoutId: number
+}
+
 const ACTIVE_ROOM_CONTROL_KEY = 'tactics.activeRoomControl'
+const MAX_PENDING_ACTION_ACKNOWLEDGEMENTS = 128
+const ACTION_ACKNOWLEDGEMENT_TIMEOUT_MS = 60_000
 
 const isConnected = ref(false)
 const gameState = ref<GameState | null>(null)
@@ -57,6 +67,7 @@ const activeTraitMode = ref<GameMode | null>(null)
 const roomSubscription = ref<StompSubscription | null>(null)
 const eventSubscription = ref<StompSubscription | null>(null)
 const roomResultSubscription = ref<StompSubscription | null>(null)
+const actionResultSubscription = ref<StompSubscription | null>(null)
 const isUltimateGallery = ref(false)
 const isAdminAnalytics = ref(false)
 const isMatchHistory = ref(false)
@@ -72,6 +83,7 @@ const controllerTabId = crypto.randomUUID()
 let traitRequestGeneration = 0
 let restoredRoomTimeout: number | null = null
 let generatedCreateAttempts = 0
+const pendingActionAcknowledgements = new Map<string, PendingActionAcknowledgement>()
 
 const activeVisualMode = computed<GameMode>(() => gameState.value?.gameMode ?? defaultMode.value)
 const gameTitle = 'Theme Fusion Tactics'
@@ -130,6 +142,7 @@ onMounted(async () => {
             isConnected.value = true
             console.log("Connected to WebSocket")
             subscribeToRoomResults()
+            subscribeToActionResults()
             const activeRoom = loadActiveRoomSession()
             if (activeRoom) {
                 gameState.value = null
@@ -158,7 +171,12 @@ onMounted(async () => {
         },
         onDisconnect: () => {
             isConnected.value = false
+            clearPendingActionAcknowledgements()
             console.log("Disconnected")
+        },
+        onWebSocketClose: () => {
+            isConnected.value = false
+            clearPendingActionAcknowledgements()
         },
         onStompError: (frame) => {
             lobbyError.value = frame.headers.message || 'The server rejected the WebSocket request.'
@@ -179,6 +197,8 @@ onUnmounted(() => {
     clearRestoredRoomTimeout()
     clearEmergencyDropPresentation()
     roomResultSubscription.value?.unsubscribe()
+    actionResultSubscription.value?.unsubscribe()
+    clearPendingActionAcknowledgements()
     if (outcomeTimer !== null) window.clearTimeout(outcomeTimer)
     client.value?.deactivate()
 })
@@ -351,6 +371,77 @@ const subscribeToRoomResults = () => {
             rejectPendingJoin('The server returned an invalid room response.')
         }
     }) ?? null
+}
+
+const subscribeToActionResults = () => {
+    actionResultSubscription.value?.unsubscribe()
+    actionResultSubscription.value = client.value?.subscribe('/user/queue/action-result', (message) => {
+        try {
+            const result = JSON.parse(message.body) as Partial<ActionResult>
+            if (typeof result.clientActionId !== 'string') return
+
+            const pending = pendingActionAcknowledgements.get(result.clientActionId)
+            if (!pending) return
+
+            window.clearTimeout(pending.timeoutId)
+            pendingActionAcknowledgements.delete(result.clientActionId)
+            if (
+                result.actionType !== pending.actionType
+                || (result.outcome !== 'accepted' && result.outcome !== 'rejected')
+            ) {
+                return
+            }
+
+            const roundTripMs = performance.now() - pending.startedAt
+            if (
+                !isConnected.value
+                || !client.value
+                || !Number.isFinite(roundTripMs)
+                || roundTripMs < 0
+                || roundTripMs > ACTION_ACKNOWLEDGEMENT_TIMEOUT_MS
+            ) {
+                return
+            }
+
+            client.value?.publish({
+                destination: '/app/telemetry/action-ack',
+                body: JSON.stringify({
+                    actionType: pending.actionType,
+                    outcome: result.outcome,
+                    roundTripMs,
+                }),
+            })
+        } catch (error) {
+            console.error('Failed to parse action result', error)
+        }
+    }) ?? null
+}
+
+const clearPendingActionAcknowledgements = () => {
+    pendingActionAcknowledgements.forEach(({ timeoutId }) => window.clearTimeout(timeoutId))
+    pendingActionAcknowledgements.clear()
+}
+
+const registerPendingActionAcknowledgement = (actionType: ActionType) => {
+    if (pendingActionAcknowledgements.size >= MAX_PENDING_ACTION_ACKNOWLEDGEMENTS) {
+        const oldestClientActionId = pendingActionAcknowledgements.keys().next().value
+        if (oldestClientActionId) {
+            const oldest = pendingActionAcknowledgements.get(oldestClientActionId)
+            if (oldest) window.clearTimeout(oldest.timeoutId)
+            pendingActionAcknowledgements.delete(oldestClientActionId)
+        }
+    }
+
+    const clientActionId = crypto.randomUUID()
+    const timeoutId = window.setTimeout(() => {
+        pendingActionAcknowledgements.delete(clientActionId)
+    }, ACTION_ACKNOWLEDGEMENT_TIMEOUT_MS)
+    pendingActionAcknowledgements.set(clientActionId, {
+        actionType,
+        startedAt: performance.now(),
+        timeoutId,
+    })
+    return clientActionId
 }
 
 const claimActiveRoomControl = (roomId: string) => {
@@ -593,10 +684,14 @@ const handlePlayerNameChange = (updatedPlayerName: string) => {
 const handleGameAction = (action: GameAction) => {
     if (!client.value || !isConnected.value) return
 
-    console.log("Publishing Action:", action)
+    const actionWithCorrelation = {
+        ...action,
+        clientActionId: registerPendingActionAcknowledgement(action.type),
+    }
+    console.log("Publishing Action:", actionWithCorrelation)
     client.value.publish({
         destination: `/app/room/${currentRoomId.value}/action`,
-        body: JSON.stringify(action)
+        body: JSON.stringify(actionWithCorrelation)
     })
 }
 

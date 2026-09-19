@@ -41,6 +41,8 @@ public class OpenTelemetryGameTelemetry implements GameTelemetry {
     private static final AttributeKey<String> BACKPRESSURE_EVENT = AttributeKey.stringKey("backpressure.event");
     private static final List<Double> DURATION_BUCKETS_SECONDS =
             List.of(0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.0, 5.0, 10.0);
+    private static final List<Double> CLIENT_ROUND_TRIP_DURATION_BUCKETS_SECONDS =
+            List.of(0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.0, 5.0, 10.0, 30.0, 60.0);
     private static final List<Long> MESSAGE_SIZE_BUCKETS_BYTES =
             List.of(64L, 256L, 1_024L, 4_096L, 16_384L, 65_536L, 131_072L, 262_144L, 524_288L, 1_048_576L);
 
@@ -55,6 +57,7 @@ public class OpenTelemetryGameTelemetry implements GameTelemetry {
     private final LongCounter clientConnections;
     private final DoubleHistogram gameLoopDuration;
     private final DoubleHistogram actionProcessingDuration;
+    private final DoubleHistogram clientActionAcknowledgementRoundTrip;
     private final LongCounter websocketMessages;
     private final LongHistogram websocketMessageSize;
     private final LongCounter websocketBackpressure;
@@ -106,6 +109,11 @@ public class OpenTelemetryGameTelemetry implements GameTelemetry {
                 .setDescription("Duration of inbound game action validation and processing")
                 .setUnit("s")
                 .setExplicitBucketBoundariesAdvice(DURATION_BUCKETS_SECONDS)
+                .build();
+        clientActionAcknowledgementRoundTrip = meter.histogramBuilder("tft.game.actions.client.ack.round_trip.duration")
+                .setDescription("Browser-observed action acknowledgement round trip")
+                .setUnit("s")
+                .setExplicitBucketBoundariesAdvice(CLIENT_ROUND_TRIP_DURATION_BUCKETS_SECONDS)
                 .build();
         websocketMessages = meter.counterBuilder("tft.game.websocket.messages")
                 .setDescription("Number of bounded WebSocket/STOMP messages by direction and outcome")
@@ -191,6 +199,20 @@ public class OpenTelemetryGameTelemetry implements GameTelemetry {
             GameMode gameMode, ActionType actionType, String outcome, String reason, double durationSeconds) {
         actionProcessingDuration.record(
                 Math.max(0, durationSeconds), actionAttributes(gameMode, actionType, outcome, reason));
+    }
+
+    @Override
+    public void clientActionAcknowledgementRoundTrip(
+            GameMode gameMode, ActionType actionType, String outcome, double durationSeconds) {
+        clientActionAcknowledgementRoundTrip.record(
+                Math.max(0, durationSeconds),
+                Attributes.of(
+                        GAME_MODE,
+                        modeValue(gameMode),
+                        ACTION_TYPE,
+                        actionType == null ? "unknown" : actionType.name().toLowerCase(Locale.ROOT),
+                        ACTION_OUTCOME,
+                        actionOutcomeValue(outcome)));
     }
 
     @Override
@@ -363,6 +385,7 @@ public class OpenTelemetryGameTelemetry implements GameTelemetry {
                     "state",
                     "event",
                     "room_result",
+                    "action_result",
                     "message",
                     "other" -> messageType;
             default -> "other";

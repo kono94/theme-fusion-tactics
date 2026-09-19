@@ -111,7 +111,9 @@ class OpenTelemetryGameTelemetryTest {
             var telemetry = new OpenTelemetryGameTelemetry(provider.get("test"));
 
             telemetry.actionProcessed(GameMode.POKEMON, ActionType.MOVE, "accepted", "none", 0.012);
+            telemetry.clientActionAcknowledgementRoundTrip(GameMode.POKEMON, ActionType.MOVE, "rejected", 30.0);
             telemetry.websocketMessage("outbound", "state", "sent", 512);
+            telemetry.websocketMessage("outbound", "action_result", "sent", 128);
             telemetry.websocketBackpressure("state", "snapshot_coalesced");
             telemetry.websocketMessage("unbounded-direction", "unbounded-type", "unbounded-outcome", Long.MAX_VALUE);
 
@@ -127,6 +129,19 @@ class OpenTelemetryGameTelemetryTest {
             assertEquals("none", actionPoint.getAttributes().get(REJECTION_REASON));
             assertTrue(actionPoint.getBoundaries().contains(0.001));
             assertTrue(actionPoint.getBoundaries().contains(10.0));
+
+            var clientActionPoint = metric(reader, "tft.game.actions.client.ack.round_trip.duration")
+                    .getHistogramData()
+                    .getPoints()
+                    .iterator()
+                    .next();
+            assertEquals(1, clientActionPoint.getCount());
+            assertEquals(30.0, clientActionPoint.getSum());
+            assertEquals("pokemon", clientActionPoint.getAttributes().get(GAME_MODE));
+            assertEquals("move", clientActionPoint.getAttributes().get(ACTION_TYPE));
+            assertEquals("rejected", clientActionPoint.getAttributes().get(ACTION_OUTCOME));
+            assertTrue(clientActionPoint.getBoundaries().contains(30.0));
+            assertTrue(clientActionPoint.getBoundaries().contains(60.0));
 
             var messagePoint = metric(reader, "tft.game.websocket.messages").getLongSumData().getPoints().stream()
                     .filter(point -> "state".equals(point.getAttributes().get(MESSAGE_TYPE)))
@@ -144,6 +159,9 @@ class OpenTelemetryGameTelemetryTest {
             assertTrue(sizePoint.getBoundaries().contains(524_288.0));
             assertTrue(metric(reader, "tft.game.websocket.messages").getLongSumData().getPoints().stream()
                     .anyMatch(point -> "other".equals(point.getAttributes().get(MESSAGE_TYPE))));
+            assertTrue(metric(reader, "tft.game.websocket.messages").getLongSumData().getPoints().stream()
+                    .anyMatch(point ->
+                            "action_result".equals(point.getAttributes().get(MESSAGE_TYPE))));
             var backpressurePoint = metric(reader, "tft.game.websocket.backpressure")
                     .getLongSumData()
                     .getPoints()
