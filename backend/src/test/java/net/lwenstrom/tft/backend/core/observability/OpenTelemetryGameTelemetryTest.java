@@ -151,7 +151,8 @@ class OpenTelemetryGameTelemetryTest {
             assertEquals("sent", messagePoint.getAttributes().get(MESSAGE_OUTCOME));
             assertEquals(1, messagePoint.getValue());
             var sizePoint = metric(reader, "tft.game.websocket.message.size").getHistogramData().getPoints().stream()
-                    .filter(point -> point.getAttributes().get(MESSAGE_OUTCOME).equals("sent"))
+                    .filter(point -> "state".equals(point.getAttributes().get(MESSAGE_TYPE))
+                            && "sent".equals(point.getAttributes().get(MESSAGE_OUTCOME)))
                     .findFirst()
                     .orElseThrow();
             assertEquals(1, sizePoint.getCount());
