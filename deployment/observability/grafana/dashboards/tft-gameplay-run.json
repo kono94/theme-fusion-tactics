@@ -83,7 +83,7 @@
   "refresh": false,
   "schemaVersion": 41,
   "tags": ["tft", "analytics", "gameplay", "run-detail"],
-  "templating": { "list": [{ "current": { "text": "Select a run from TFT Gameplay Analytics", "value": "" }, "hide": 0, "label": "Run ID", "name": "run_id", "options": [], "query": "", "skipUrlSync": false, "type": "textbox" }] },
+  "templating": { "list": [{ "current": { "text": "Select a run", "value": "" }, "datasource": { "type": "frser-sqlite-datasource", "uid": "gameplay-analytics" }, "definition": "SELECT r.id AS __value, r.id AS __text FROM analytics_player_run r JOIN analytics_match m ON m.id = r.match_id ORDER BY r.started_at DESC, r.id DESC LIMIT 500", "hide": 0, "includeAll": false, "label": "Run ID", "name": "run_id", "options": [], "query": "SELECT r.id AS __value, r.id AS __text FROM analytics_player_run r JOIN analytics_match m ON m.id = r.match_id ORDER BY r.started_at DESC, r.id DESC LIMIT 500", "refresh": 2, "regex": "", "skipUrlSync": false, "type": "query" }] },
   "time": { "from": "now-30d", "to": "now" },
   "timepicker": {},
   "timezone": "browser",
