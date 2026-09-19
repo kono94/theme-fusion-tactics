@@ -87,6 +87,7 @@ onMounted(async () => {
     window.addEventListener('hashchange', updateStandaloneRoute)
     if (isUltimateGallery.value || isAdminAnalytics.value || isMatchHistory.value) return
     window.addEventListener('storage', handleActiveRoomControlChange)
+    document.addEventListener('visibilitychange', handleDocumentVisibilityChange)
 
     applyThemeMeta(defaultMode.value)
     try {
@@ -174,6 +175,7 @@ onMounted(async () => {
 onUnmounted(() => {
     window.removeEventListener('hashchange', updateStandaloneRoute)
     window.removeEventListener('storage', handleActiveRoomControlChange)
+    document.removeEventListener('visibilitychange', handleDocumentVisibilityChange)
     clearRestoredRoomTimeout()
     clearEmergencyDropPresentation()
     roomResultSubscription.value?.unsubscribe()
@@ -235,20 +237,10 @@ const parseGameStateMessage = (body: string): GameState => {
 }
 
 
-const subscribeToRoom = (roomId: string) => {
-    if (!client.value || !isConnected.value) return
-    
-    // Unsubscribe from previous if exists
-    if (roomSubscription.value) {
-        roomSubscription.value.unsubscribe()
-        roomSubscription.value = null
-    }
-    if (eventSubscription.value) {
-        eventSubscription.value.unsubscribe()
-        eventSubscription.value = null
-    }
-    
-    // Subscribe to state updates
+const subscribeToRoomState = (roomId: string) => {
+    if (!client.value || !isConnected.value || document.visibilityState === 'hidden') return
+
+    roomSubscription.value?.unsubscribe()
     roomSubscription.value = client.value.subscribe(`/topic/room/${roomId}`, (message) => {
         try {
             gameState.value = parseGameStateMessage(message.body)
@@ -278,8 +270,18 @@ const subscribeToRoom = (roomId: string) => {
             }
         }
     })
+}
 
-    // Subscribe to events
+const subscribeToRoom = (roomId: string) => {
+    if (!client.value || !isConnected.value) return
+
+    roomSubscription.value?.unsubscribe()
+    roomSubscription.value = null
+    eventSubscription.value?.unsubscribe()
+    eventSubscription.value = null
+
+    subscribeToRoomState(roomId)
+
     eventSubscription.value = client.value.subscribe(`/topic/room/${roomId}/event`, (message) => {
         try {
             const event = JSON.parse(message.body) as RoomGameEvent
@@ -293,6 +295,26 @@ const subscribeToRoom = (roomId: string) => {
             console.error("Failed to parse event", e)
         }
     })
+}
+
+function handleDocumentVisibilityChange() {
+    if (document.visibilityState === 'hidden') {
+        roomSubscription.value?.unsubscribe()
+        roomSubscription.value = null
+        return
+    }
+
+    if (
+        !isAdminAnalytics.value
+        && !isMatchHistory.value
+        && !isUltimateGallery.value
+        && currentView.value === 'game'
+        && currentRoomId.value
+        && isConnected.value
+        && !roomSubscription.value
+    ) {
+        subscribeToRoomState(currentRoomId.value)
+    }
 }
 
 const subscribeToRoomResults = () => {
@@ -570,7 +592,7 @@ const handlePlayerNameChange = (updatedPlayerName: string) => {
 
 const handleGameAction = (action: GameAction) => {
     if (!client.value || !isConnected.value) return
-    
+
     console.log("Publishing Action:", action)
     client.value.publish({
         destination: `/app/room/${currentRoomId.value}/action`,

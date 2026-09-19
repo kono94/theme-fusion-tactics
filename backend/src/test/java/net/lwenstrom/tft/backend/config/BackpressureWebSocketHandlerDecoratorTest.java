@@ -211,6 +211,7 @@ class BackpressureWebSocketHandlerDecoratorTest {
         decorator.afterConnectionEstablished(rawSession);
 
         decorator.handleMessage(rawSession, new TextMessage("SEND\ndestination:/app/room/abc/action\n\n{}\u0000"));
+        decorator.handleMessage(rawSession, new TextMessage("UNSUBSCRIBE\nid:room-state\n\n\u0000"));
         var session = (WebSocketSession) org.mockito.Mockito.mockingDetails(handler).getInvocations().stream()
                 .findFirst()
                 .orElseThrow()
@@ -218,6 +219,7 @@ class BackpressureWebSocketHandlerDecoratorTest {
         session.sendMessage(new TextMessage("MESSAGE\ndestination:/topic/room/abc/event\n\n{}\u0000"));
 
         assertTrue(telemetry.messages.contains("inbound:action:received"));
+        assertTrue(telemetry.messages.contains("inbound:unsubscribe:received"));
         awaitPayloadCount(telemetry.outboundMessages, 1);
         assertTrue(telemetry.messages.contains("outbound:event:sent"));
         decorator.afterConnectionClosed(rawSession, CloseStatus.NORMAL);

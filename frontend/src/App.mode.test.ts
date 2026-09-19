@@ -8,7 +8,11 @@ const stomp = vi.hoisted(() => ({
     deactivate: vi.fn(),
     publish: vi.fn(),
     onConnect: undefined as (() => void) | undefined,
-    subscriptions: [] as Array<{ destination: string; callback: (message: { body: string }) => void }>,
+    subscriptions: [] as Array<{
+        destination: string
+        callback: (message: { body: string }) => void
+        unsubscribe: ReturnType<typeof vi.fn>
+    }>,
 }))
 
 const roomInvite = vi.hoisted(() => ({
@@ -23,8 +27,9 @@ vi.mock('@stomp/stompjs', () => ({
             deactivate: stomp.deactivate,
             publish: stomp.publish,
             subscribe: vi.fn((destination: string, callback: (message: { body: string }) => void) => {
-                stomp.subscriptions.push({ destination, callback })
-                return { unsubscribe: vi.fn() }
+                const subscription = { destination, callback, unsubscribe: vi.fn() }
+                stomp.subscriptions.push(subscription)
+                return subscription
             }),
         }
     }),
@@ -84,6 +89,41 @@ describe('App game-mode bootstrap', () => {
         Object.keys(TRAIT_DATA).forEach((key) => delete TRAIT_DATA[key])
         document.head.innerHTML = '<link rel="icon" href="/favicon.svg"><link rel="icon" href="/duplicate.svg">'
         window.location.hash = ''
+    })
+
+    it('pauses room snapshots while hidden and resubscribes immediately when visible', async () => {
+        let visibilityState: DocumentVisibilityState = 'visible'
+        vi.spyOn(document, 'visibilityState', 'get').mockImplementation(() => visibilityState)
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+            ok: true,
+            json: async () => ({ defaultGameMode: 'onepiece', availableModes: ['onepiece', 'pokemon'] }),
+        }))
+        localStorage.setItem('tactics.activeRoom', JSON.stringify({
+            roomId: 'mode-room',
+            playerName: 'Nami',
+            reconnectToken: 'token',
+        }))
+        const wrapper = mount(App)
+        await vi.waitFor(() => expect(stomp.onConnect).toBeDefined())
+        stomp.onConnect?.()
+        await vi.waitFor(() => expect(stomp.subscriptions).toHaveLength(3))
+
+        const initialStateSubscription = stomp.subscriptions.find(
+            ({ destination }) => destination === '/topic/room/mode-room',
+        )
+        visibilityState = 'hidden'
+        document.dispatchEvent(new Event('visibilitychange'))
+
+        expect(initialStateSubscription?.unsubscribe).toHaveBeenCalledOnce()
+        expect(stomp.subscriptions.filter(({ destination }) => destination.endsWith('/event'))).toHaveLength(1)
+
+        visibilityState = 'visible'
+        document.dispatchEvent(new Event('visibilitychange'))
+
+        await vi.waitFor(() => expect(
+            stomp.subscriptions.filter(({ destination }) => destination === '/topic/room/mode-room'),
+        ).toHaveLength(2))
+        wrapper.unmount()
     })
 
     it('ignores unsupported configured modes and applies the supported default metadata', async () => {

@@ -5,6 +5,10 @@ defineOptions({
 
 defineEmits(['back'])
 
+const nextVersionHighlights = [
+  'Returning to a match after switching tabs is responsive again: hidden tabs pause high-frequency board updates and immediately catch up from the newest state when reopened.',
+]
+
 const version252Highlights = [
   'Live matches now stay connected more reliably on slow or temporarily congested connections by skipping stale room updates in favor of the newest state.',
   'Grafana gameplay analytics now load correctly when mode, build, placement, completion, or player filters are set to “All”.',
@@ -116,6 +120,27 @@ const version160Commits = [
       <section class="release-section">
         <div class="release-header">
           <p class="eyebrow">Latest</p>
+          <h2>Version X.X.X</h2>
+          <p>Faster recovery when returning to an active match.</p>
+        </div>
+        <div class="release-grid">
+          <article class="release-panel">
+            <div class="section-heading">
+              <span class="marker release"></span>
+              <h3>Highlights</h3>
+            </div>
+            <ul class="commit-list highlight-list">
+              <li v-for="highlight in nextVersionHighlights" :key="highlight">
+                <span>{{ highlight }}</span>
+              </li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="release-section">
+        <div class="release-header">
+          <p class="eyebrow">Previous</p>
           <h2>Version 2.5.2</h2>
           <p>More reliable live state delivery and repaired, game-focused monitoring.</p>
         </div>

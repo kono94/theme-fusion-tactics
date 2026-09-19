@@ -103,6 +103,9 @@ The client reconnect delay is five seconds. On connection:
 - A rejected request returns immediately to the lobby with the backend message.
 - A five-second acknowledgement timeout handles unavailable servers or stale restored sessions.
 - A restored active-match player presents the reconnect token; the backend rebinds the new STOMP session.
+- When the document becomes hidden, the client unsubscribes only from the 100 ms room-state stream. It keeps the
+  low-volume event subscription, then resubscribes to room state as soon as the document becomes visible; the next
+  authoritative snapshot replaces the stale local state instead of forcing the browser to drain hidden-tab snapshots.
 - `leave` preserves the active-match player for reconnect grace; `abandon` permanently gives up the match.
 
 `localStorage` contains the anonymous analytics client ID, the player's preferred display name, and the active-room

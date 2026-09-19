@@ -353,6 +353,7 @@ public class OpenTelemetryGameTelemetry implements GameTelemetry {
         return switch (messageType == null ? "" : messageType) {
             case "connect",
                     "subscribe",
+                    "unsubscribe",
                     "send",
                     "action",
                     "room_mode",

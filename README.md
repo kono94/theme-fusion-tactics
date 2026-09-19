@@ -166,7 +166,8 @@ the observability services' existing `/metrics` endpoints. The dashboard also re
 connection rates by bounded browser, operating-system, and device families; raw user-agent strings are never exported.
 It also reports STOMP transport outcomes, payload sizes, backpressure, and server-side action latency. Slow clients keep
 only the newest pending authoritative room snapshot so stale high-frequency state does not overflow Spring's per-session
-WebSocket buffer.
+WebSocket buffer. Hidden browser tabs unsubscribe from high-frequency snapshots and resubscribe on foreground, avoiding
+a browser-side backlog while low-volume game events remain subscribed.
 Grafana also provisions `TFT Gameplay Analytics` and a linked per-run drill-down over the existing anonymous SQLite
 analytics store. The official Grafana image installs the pinned SQLite datasource plugin on first startup; no custom
 Grafana image is built.
