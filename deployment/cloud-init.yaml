@@ -18,6 +18,7 @@ packages:
   - gnupg
   - lsb-release
   - git
+  - gettext-base
   - ufw
   - fail2ban
 

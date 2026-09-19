@@ -238,6 +238,12 @@ docker compose exec -T grafana curl -fsS http://mimir:9009/config \
 The output must show `max_outstanding_requests_per_tenant: 512`. Repeated Grafana refreshes should then complete
 without Mimir query-scheduler 429 responses.
 
+Each production deploy also regenerates `deployment/nginx/prod.conf` from its tracked template and `DOMAIN`, hashes the
+rendered file, and places that digest in the production Nginx service label. Compose recreates Nginx when the rendered
+configuration changes. After Compose finishes, the deploy always validates the live configuration with `nginx -t` and
+reloads Nginx. The reload is harmless after a recreation and also picks up renewed certificate files when the container
+was retained.
+
 `Observability targets healthy` reports successful metric scrapes, not merely running Compose containers. If it is below
 four, use the adjacent target-status table to identify whether the Collector, Mimir, Loki, or Grafana endpoint is not
 being scraped successfully.
