@@ -115,6 +115,7 @@ For detailed architectural information, refer to the context documents:
 | TypeScript | 6.0 | Type-safe JavaScript |
 | Vite | 8.2 | Build tool & dev server |
 | @stomp/stompjs | 7.3 | WebSocket client |
+| Vitest | 5.0 | Unit and component tests |
 | Vanilla CSS | — | Scoped component styling |
 
 ### Infrastructure
@@ -206,6 +207,7 @@ To add a new theme, implement `GameModeProvider` and add corresponding JSON data
 | `/app/room/{id}/add-bot` | Client → Server | Host adds a lobby bot |
 | `/app/room/{id}/mode` | Client → Server | Host changes the room game mode during lobby |
 | `/app/room/{id}/action` | Client → Server | Player action (BUY, MOVE, REROLL, EXP, SELL, LOCK, COLLECT_ORB, READY_FOR_COMBAT, SELECT_AUGMENT) |
+| `/app/telemetry/action-ack` | Client → Server | Browser-observed action-acknowledgement latency for the bound session |
 | `/topic/room/{id}` | Server → Client | Game state broadcast (100ms) |
 | `/topic/room/{id}/event` | Server → Client | Typed combat-result and emergency-drop events |
 | `/user/queue/room-result` | Server → Client | Private create/join acknowledgement with player id or rejection code |
@@ -225,6 +227,7 @@ Augment choices are included in each player's `GameState` snapshot as `augmentCh
 | `/api/admin/analytics/summary` | GET | Protected aggregate gameplay analytics |
 | `/api/admin/analytics/runs` | GET | Protected, paginated player runs |
 | `/api/admin/analytics/runs/{runId}` | GET | Protected round-level detail for one player run |
+| `/api/admin/analytics/unit-presence` | GET | Protected unit presence by final placement for completed runs |
 
 The public match history is available at `/#/match-history`; it uses REST only and never opens the game WebSocket. The
 legacy application analytics view remains available at `/#/admin/analytics`, while its aggregates, filters, unit
@@ -289,4 +292,4 @@ This project is for educational purposes.
 
 ---
 
-*Last updated: 2026-07-31*
+*Last updated: 2026-09-24*

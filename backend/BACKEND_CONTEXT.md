@@ -191,7 +191,9 @@ and event frames are retained; if those non-coalescible frames alone exceed the 
 closed instead of growing memory without limit. Snapshot coalescing is safe because each snapshot is authoritative and
 supersedes earlier snapshots. Message drops and send failures are counted by bounded telemetry attributes.
 
-- `BUY`, `REROLL`, `EXP`, `MOVE`, `SELL`, `LOCK`, and `COLLECT_ORB` are planning-only.
+- `BUY`, `REROLL`, `EXP`, and `LOCK` are allowed in planning and combat.
+- During combat, `MOVE` is allowed only for bench-to-bench reordering (`targetY=-1`) and `SELL` only for bench units.
+- `COLLECT_ORB` is planning-only.
 - `SELECT_AUGMENT` is planning-only and requires `augmentId`.
 - `READY_FOR_COMBAT` succeeds only for the eligible solo-training human.
 - The backend remains authoritative even if the UI incorrectly enables a control.
