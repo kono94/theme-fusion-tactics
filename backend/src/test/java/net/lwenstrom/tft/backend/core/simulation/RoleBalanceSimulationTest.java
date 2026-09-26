@@ -74,12 +74,18 @@ class RoleBalanceSimulationTest {
                 summaries
                         .computeIfAbsent(new SummaryKey(mode, boardSize), ignored -> new Summary())
                         .record(balancedWins, damageWins, draws);
-                matchup.balancedUnits().forEach(unit -> unitSummaries
-                        .computeIfAbsent(
-                                new UnitSummaryKey(
-                                        mode, unit.lineId(), unit.name(), unit.cost(), unit.starLevel(), unit.role()),
-                                ignored -> new Summary())
-                        .record(balancedWins, damageWins, draws));
+                matchup.balancedUnits()
+                        .forEach(unit -> unitSummaries
+                                .computeIfAbsent(
+                                        new UnitSummaryKey(
+                                                mode,
+                                                unit.lineId(),
+                                                unit.name(),
+                                                unit.cost(),
+                                                unit.starLevel(),
+                                                unit.role()),
+                                        ignored -> new Summary())
+                                .record(balancedWins, damageWins, draws));
             });
         }
 

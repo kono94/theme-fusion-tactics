@@ -15,7 +15,8 @@ class AdminAnalyticsControllerTest {
     void rejectsPlacementsOutsideTheEightPlayerRange() {
         assertThatThrownBy(() -> controller.runs(null, null, null, null, null, 9, null, null, null, null, 50))
                 .isInstanceOfSatisfying(
-                        ResponseStatusException.class, exception -> org.assertj.core.api.Assertions.assertThat(
+                        ResponseStatusException.class,
+                        exception -> org.assertj.core.api.Assertions.assertThat(
                                         exception.getStatusCode().value())
                                 .isEqualTo(400));
     }

@@ -18,8 +18,8 @@
         <java.version>25</java.version>
         <maven.compiler.source>25</maven.compiler.source>
         <maven.compiler.target>25</maven.compiler.target>
-        <opentelemetry.version>1.65.0</opentelemetry.version>
-        <spotless-maven-plugin.version>3.10.2</spotless-maven-plugin.version>
+        <opentelemetry.version>1.66.0</opentelemetry.version>
+        <spotless-maven-plugin.version>3.10.3</spotless-maven-plugin.version>
     </properties>
     <dependencies>
         <dependency>

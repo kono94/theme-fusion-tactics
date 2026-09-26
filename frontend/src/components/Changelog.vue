@@ -7,6 +7,7 @@ defineEmits(['back'])
 
 const nextVersionHighlights = [
   'Improved the gameplay dashboard with clearer run filtering and more responsive live monitoring.',
+  'The game client, server, and monitoring services now run on the latest maintenance releases for up-to-date stability and security fixes.',
 ]
 
 const version252Highlights = [

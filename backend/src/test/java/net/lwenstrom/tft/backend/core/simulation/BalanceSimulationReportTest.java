@@ -223,9 +223,10 @@ class BalanceSimulationReportTest {
             }
 
             if (selected.size() < boardSize) {
-                allowedCosts(boardSize).forEach(cost -> unitsByCost.getOrDefault(cost, List.of()).stream()
-                        .filter(unit -> !selected.containsKey(unit.lineId()))
-                        .forEach(unit -> selected.putIfAbsent(unit.lineId(), unit)));
+                allowedCosts(boardSize)
+                        .forEach(cost -> unitsByCost.getOrDefault(cost, List.of()).stream()
+                                .filter(unit -> !selected.containsKey(unit.lineId()))
+                                .forEach(unit -> selected.putIfAbsent(unit.lineId(), unit)));
             }
         }
 
@@ -517,17 +518,20 @@ class BalanceSimulationReportTest {
             builder.append("| Rank | Unit | Cost | Appearances | Avg Win % |\n");
             builder.append("|---:|---|---:|---:|---:|\n");
             var rank = new int[] {1};
-            rows.stream().filter(row -> row.starLevel() == starLevel).limit(60).forEach(row -> builder.append("| ")
-                    .append(rank[0]++)
-                    .append(" | ")
-                    .append(row.unitName())
-                    .append(" | ")
-                    .append(row.cost())
-                    .append(" | ")
-                    .append(row.appearances())
-                    .append(" | ")
-                    .append(percent(row.winRate()))
-                    .append(" |\n"));
+            rows.stream()
+                    .filter(row -> row.starLevel() == starLevel)
+                    .limit(60)
+                    .forEach(row -> builder.append("| ")
+                            .append(rank[0]++)
+                            .append(" | ")
+                            .append(row.unitName())
+                            .append(" | ")
+                            .append(row.cost())
+                            .append(" | ")
+                            .append(row.appearances())
+                            .append(" | ")
+                            .append(percent(row.winRate()))
+                            .append(" |\n"));
         }
     }
 
@@ -536,15 +540,17 @@ class BalanceSimulationReportTest {
         builder.append("| Rank | Key | Appearances | Avg Win % |\n");
         builder.append("|---:|---|---:|---:|\n");
         var rank = new int[] {1};
-        rows.stream().limit(limit).forEach(row -> builder.append("| ")
-                .append(rank[0]++)
-                .append(" | ")
-                .append(row.key())
-                .append(" | ")
-                .append(row.appearances())
-                .append(" | ")
-                .append(percent(row.winRate()))
-                .append(" |\n"));
+        rows.stream()
+                .limit(limit)
+                .forEach(row -> builder.append("| ")
+                        .append(rank[0]++)
+                        .append(" | ")
+                        .append(row.key())
+                        .append(" | ")
+                        .append(row.appearances())
+                        .append(" | ")
+                        .append(percent(row.winRate()))
+                        .append(" |\n"));
     }
 
     private void appendCostProfileSection(StringBuilder builder, SimulationStyle style) {

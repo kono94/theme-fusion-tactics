@@ -4,7 +4,7 @@
 
 services:
   observability-init:
-    image: nginx:alpine@sha256:72ba65eb42c10344912a84ff42408db7d34f2feb642204570ab8fc5ffd29f1d3
+    image: nginx:alpine@sha256:df221db836e1754089190208cee7eeda94f233197056426eda74a43ab1abeac2
     container_name: tft-observability-init
     command:
       - sh
@@ -20,7 +20,7 @@ services:
       - /var/lib/tft/analytics:/analytics
 
   otel-javaagent:
-    image: otel/autoinstrumentation-java:2.31.0@sha256:13dc3ab07f7c77dad3dea30d8a154a09f041205f4e6d16dc28429874c32815bc
+    image: otel/autoinstrumentation-java:2.31.1@sha256:342ad4c72909bb92b7cd6fa09d5fdd50f41879b5657329e729baeacb46d9a02e
     container_name: tft-otel-javaagent
     command: ["cp", "/javaagent.jar", "/otel/opentelemetry-javaagent.jar"]
     volumes:
@@ -89,7 +89,7 @@ services:
     restart: unless-stopped
 
   loki:
-    image: grafana/loki:3.7.6@sha256:efd47c67f9bac88ca29bcf8cb997d9ab29d1848bd0aff579282295542a745952
+    image: grafana/loki:3.7.8@sha256:1107dd5274e0ada47e42472b7a7e71f3b2a2fe878878108f3e2f9e51528f0193
     container_name: tft-loki
     command: ["-config.file=/etc/loki/config.yaml"]
     volumes:
@@ -129,7 +129,7 @@ services:
     restart: unless-stopped
 
   grafana:
-    image: grafana/grafana:13.2.1@sha256:f772d434e8fab0049deb2b1b30abd43342bcfca1537614aa8d36080232cf4283
+    image: grafana/grafana:13.2.2@sha256:ac461fb352abc50da10a51c7d02462e9c05488f11f53f14b3ad79a8145f638a0
     container_name: tft-grafana
     environment:
       - GF_SERVER_DOMAIN=${DOMAIN:-localhost}
@@ -165,7 +165,7 @@ services:
 
   # Development nginx (HTTP only) - default when no profile specified
   nginx:
-    image: nginx:alpine@sha256:72ba65eb42c10344912a84ff42408db7d34f2feb642204570ab8fc5ffd29f1d3
+    image: nginx:alpine@sha256:df221db836e1754089190208cee7eeda94f233197056426eda74a43ab1abeac2
     container_name: tft-nginx
     ports:
       - "80:80"
@@ -180,7 +180,7 @@ services:
 
   # Production nginx (HTTPS)
   nginx-prod:
-    image: nginx:alpine@sha256:72ba65eb42c10344912a84ff42408db7d34f2feb642204570ab8fc5ffd29f1d3
+    image: nginx:alpine@sha256:df221db836e1754089190208cee7eeda94f233197056426eda74a43ab1abeac2
     container_name: tft-nginx
     labels:
       net.lwenstrom.tft.nginx-config-sha256: ${NGINX_CONFIG_SHA256:-development}

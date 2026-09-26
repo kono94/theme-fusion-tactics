@@ -163,10 +163,13 @@ public class CombatSimulator {
 
     private void recordUnitStats(
             Map<String, MutableUnitStats> unitStats, Map<String, CombatSystem.DamageEntry> damageLog) {
-        damageLog.values().forEach(entry -> unitStats
-                .computeIfAbsent(
-                        entry.definitionId(), ignored -> new MutableUnitStats(entry.definitionId(), entry.unitName()))
-                .add(entry));
+        damageLog
+                .values()
+                .forEach(entry -> unitStats
+                        .computeIfAbsent(
+                                entry.definitionId(),
+                                ignored -> new MutableUnitStats(entry.definitionId(), entry.unitName()))
+                        .add(entry));
     }
 
     private Map<String, UnitCombatStats> toStats(Map<String, MutableUnitStats> mutableStats) {
