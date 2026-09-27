@@ -10,9 +10,6 @@ const version300Highlights = [
   'During planning, drag an item onto a board or bench unit, or tap the item and then tap the unit. Drag equipped items straight from one unit to another, or drop one back on the Items panel to unequip it. The player list and combat report now share one panel on the right with Players and Combat report tabs, and your Items stay visible right below it.',
   'Every One Piece and Pokemon item now has a distinct pixel-art icon that matches the character portraits.',
   'Unit details now show the combat stats they will start with, including equipped items, active board traits, and augments. Equipped items also appear in both battle views and final team summaries.',
-]
-
-const version253Highlights = [
   'New Settings button: open it from the lobby corner or next to the room code during a match. Your choices are remembered on this device.',
   'Turn on “3D battle view” in Settings to watch combat in a 3D arena. Drag to rotate the camera, scroll to zoom, and double-click to reset. Planning stays on the classic board, and you can switch views at any time, even mid-fight.',
   'One Piece battles take place on story stages (Foosha Village, Baratie, Sabaody Archipelago, Marineford, and Wano Country). Pokemon battles take place in a Battle Stadium or a Rock Gym. Everyone in a room sees the same stage.',
@@ -21,8 +18,11 @@ const version253Highlights = [
   'Hits, knockouts, stuns, heals, shields, and team buffs are easier to read at a glance in 3D.',
   'Big 3D fights stay easy to watch: the camera only zooms in for occasional big moments, and there are no screen flashes.',
   'If your device can’t show 3D, combat automatically switches back to the classic view.',
-  'Improved the gameplay dashboard with clearer run filtering and more responsive live monitoring.',
   'The game client, server, and monitoring services now run on the latest maintenance releases for up-to-date stability and security fixes.',
+]
+
+const version253Highlights = [
+  'Improved the gameplay dashboard with clearer run filtering and more responsive live monitoring.',
 ]
 
 const version252Highlights = [
@@ -137,7 +137,7 @@ const version160Commits = [
         <div class="release-header">
           <p class="eyebrow">Latest</p>
           <h2>Version 3.0.0</h2>
-          <p>Items arrive: find stat items in loot and move them freely to shape your team, with a cleaner side panel for players, combat reports, and your inventory.</p>
+          <p>Items arrive, and battles can now play out in 3D: find stat items in loot to shape your team, and watch combat on themed stages with a signature move for every unit.</p>
         </div>
         <div class="release-grid">
           <article class="release-panel">
