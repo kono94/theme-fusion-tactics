@@ -7,9 +7,12 @@ defineEmits(['back'])
 
 const nextVersionHighlights = [
   'New Settings button: open it from the lobby corner or next to the room code during a match. Your choices are remembered on this device.',
-  'Preview: turn on “3D battle view” in Settings to watch combat in a 3D arena. Drag to rotate the camera, scroll to zoom, and double-click to reset. Planning stays on the classic board, and you can switch views at any time, even mid-fight.',
+  'Turn on “3D battle view” in Settings to watch combat in a 3D arena. Drag to rotate the camera, scroll to zoom, and double-click to reset. Planning stays on the classic board, and you can switch views at any time, even mid-fight.',
   'One Piece battles take place on story stages (Foosha Village, Baratie, Sabaody Archipelago, Marineford, and Wano Country). Pokemon battles take place in a Battle Stadium or a Rock Gym. Everyone in a room sees the same stage.',
-  'In 3D, Luffy, Zoro, Sanji, Ace, Whitebeard, Kizaru, Akainu, and Mihawk have signature ultimates, and Fire, Electric, Water, Psychic, Dragon, and Ghost Pokemon have their own elemental ultimates. More characters will follow.',
+  'In 3D, every One Piece character has its own auto-attack and signature ultimate from the anime, from Luffy’s Gum Gum Pistol to Whitebeard’s Quake Punch and Kaido’s Thunder Bagua.',
+  'Every Pokemon move has its own 3D animation, and evolving changes the move you see: Charmander’s Ember grows into Charizard’s Flamethrower, and Dratini’s Dragon Breath into Dragonite’s Hyper Beam.',
+  'Hits, knockouts, stuns, heals, shields, and team buffs are easier to read at a glance in 3D.',
+  'Big 3D fights stay easy to watch: the camera only zooms in for occasional big moments, and there are no screen flashes.',
   'If your device can’t show 3D, combat automatically switches back to the classic view.',
   'Improved the gameplay dashboard with clearer run filtering and more responsive live monitoring.',
   'The game client, server, and monitoring services now run on the latest maintenance releases for up-to-date stability and security fixes.',

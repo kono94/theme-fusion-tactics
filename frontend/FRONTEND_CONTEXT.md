@@ -55,7 +55,7 @@ src/
 │       ├── OutcomeOverlay.vue      short win/loss/draw overlay
 │       └── UltimateGallery.vue     development-only animation gallery
 ├── animations/                     shared animation render policy and gallery registry
-├── combat3d/                       lazy-loaded Three.js combat view (preview), arenas, choreographies
+├── combat3d/                       lazy-loaded Three.js combat view, arenas, choreographies
 ├── data/                           mode metadata, shop odds, trait cache, gallery rosters
 ├── services/analyticsClient.ts     admin REST client/token handling
 ├── services/matchHistoryClient.ts  public latest-match REST client
@@ -269,7 +269,7 @@ users. `CombatEffectsCanvas.vue` is the live layered renderer.
 Family configuration controls geometry, duration, projectile and ring counts, trail width, glyphs, and accents rather
 than serving as gallery-only metadata.
 
-### 3D battle view (preview)
+### 3D battle view
 
 Client settings live in `utils/clientSettings.ts` (`tactics.settings` in `localStorage`). `App.vue` owns the state and
 passes it to `GameInterface`, which computes the effective view and falls back to Classic for the rest of the session
@@ -281,15 +281,26 @@ after a `combat-view-fallback`. Planning always stays on the 2D board.
   `utils/combatView.ts`, and never replays events that were already present when it mounted.
 - `battleScene.ts` owns the renderer, portrait billboards (`unitView.ts`), effect budget (`effects.ts`, using
   `renderPolicy`), camera shake/punch, and screen flashes. It respects `prefersReducedMotion()`.
-- `choreography/registry.ts` resolves ultimates by `definitionId` (`signatures.ts`), then Pokemon `effectStyle`
-  (`elements.ts`), then an `effectStyle` family fallback. Auto-attacks resolve by `AttackType`. Colors and shake come
-  from `data/animationConfig.ts`. New signatures are small compositions of `choreography/primitives.ts`.
+- `choreography/registry.ts` resolves ultimates and auto-attacks signature-first: `definitionId:Ability Name` (for
+  Pokemon forms that change moves by star level), then `definitionId`. Signatures live in per-roster sets under
+  `choreography/ultimates/` and `choreography/attacks/` (aggregated by each folder's `index.ts`). Reusable effects
+  live in `choreography/primitives.ts`; shared utilities, point/target lookups, and common props and effects live in
+  `choreography/kit/shared.ts`. The other `kit/<set>.ts` files hold only character-specific props, so check both
+  shared modules before adding a helper and move a helper to `kit/shared.ts` once a second set needs it.
+- Units without a signature fall back to ability-type families (heal, shield, stun, buff, debuff), then Pokemon
+  `effectStyle` (`elements.ts`), then `genericUltimate`; auto-attacks fall back to `attacks/generic.ts` by
+  `AttackType`. Colors and shake come from `data/animationConfig.ts`. Every effect must own its geometry and material
+  because `EffectSystem` disposes them when it ends.
+- `choreography/`, `CombatEffectsCanvas.vue`, and `UltimateGallery.vue` are listed in the root `.ignore` so repo-wide
+  searches skip them; search them explicitly by path for animation work (see `AGENTS.md` section 8).
+- `combat3d/registry.test.ts` requires a signature ultimate and auto-attack for every One Piece unit and a signature
+  ultimate for every Pokemon form/move. Adding a unit or move to the backend data means adding its choreography.
 - `arenas/` holds procedural stages that use no downloaded assets. Mode metadata lists arena ids per mode, and
   `utils/arenaSelection.ts` picks one from `roomId`. In development `?arena=<id>` forces a stage.
 
 The `#/ultimate-gallery/{mode}` route is development-only. `UltimateGallery.vue` and some gallery roster files are
 excluded from `tsconfig.build.json`; do not document the gallery as a production feature. Its 2D/3D switch previews
-any unit's attack or ultimate in the 3D view with a selectable arena.
+any unit's attack or ultimate in the 3D view with a selectable arena and extra bystanders for area effects.
 
 ## 11. Admin analytics
 

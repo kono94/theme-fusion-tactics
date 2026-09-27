@@ -9,8 +9,24 @@ import type { AbilityDefinition, CombatEvent, RenderedUnit } from '../../types'
 import type { NormalizedCombatVisualEvent } from '../../types/combatEffects'
 import { getUnitIconPath } from '../../utils/iconUtils'
 import { getGameModeMetadata } from '../../data/gameModeMetadata'
+import onePieceUnits from '../../../../backend/src/main/resources/data/units_onepiece.json'
+import pokemonUnits from '../../../../backend/src/main/resources/data/units_pokemon.json'
 
 const CombatView3d = defineAsyncComponent(() => import('../../combat3d/CombatView3d.vue'))
+
+interface RawRangeUnit {
+    id: string
+    range: number[]
+    forms?: { definitionId: string }[]
+}
+
+// Real attack ranges, so the 3D lab shows melee units next to their target and ranged units casting from afar.
+const UNIT_RANGES = new Map<string, number>(
+    [...onePieceUnits, ...pokemonUnits].flatMap((unit: RawRangeUnit) => [
+        [unit.id, unit.range[0]] as const,
+        ...(unit.forms ?? []).map((form) => [form.definitionId, unit.range[0]] as const)
+    ])
+)
 
 const GRID_COLS = 9
 const GRID_ROWS = 6
@@ -55,6 +71,23 @@ const renderedUnits = computed(() => selectedTargetIsAlly.value
     ? [sourceUnit.value, allyUnit.value]
     : [sourceUnit.value, enemyUnit.value]
 )
+
+// The 3D lab adds bystanders so area, chain, and team-wide ultimates have more than one unit to hit.
+const renderedUnits3d = computed(() => {
+    const dummyIds = galleryMode.value === 'pokemon' ? ['geodude', 'rattata', 'squirtle'] : ['gifter_v1', 'chess_soldiers_v1', 'koby_v1']
+    const source = sourceUnit.value
+    const target = targetUnit.value
+    const melee = source.range <= 1 && target.ownerId !== source.ownerId
+    return [
+        source,
+        melee ? { ...target, x: source.x + 1, y: source.y - 1, visualX: source.x + 1, visualY: source.y - 1 } : target,
+        createRenderedUnit(createDummyUnit('Bystander', dummyIds[0], 1), 'gallery-extra-enemy-1', 5, 0, 'ENEMY', false),
+        createRenderedUnit(createDummyUnit('Bystander', dummyIds[1], 1), 'gallery-extra-enemy-2', 7, 2, 'ENEMY', false),
+        ...(selectedTargetIsAlly.value
+            ? [createRenderedUnit(createDummyUnit('Training Target', galleryMode.value === 'pokemon' ? 'snorlax' : 'kaido_v1', 3), 'gallery-target', 6, 1, 'ENEMY', false)]
+            : [createRenderedUnit(createDummyUnit('Ally Preview', dummyIds[2], 1), 'gallery-extra-ally', 3, 5, 'PLAYER', true)])
+    ]
+})
 
 const filteredRoster = computed(() => roster.value)
 
@@ -112,7 +145,7 @@ function createRenderedUnit(unit: UltimateGalleryUnit, instanceId: string, x: nu
         abilityPower: 100,
         defense: 30,
         attackSpeed: 0.8,
-        range: 1,
+        range: UNIT_RANGES.get(unit.id) ?? 1,
         traits: unit.traits ?? [],
         items: [],
         x,
@@ -301,7 +334,7 @@ onUnmounted(() => {
         >
           <CombatView3d
             :key="view3dKey"
-            :units="renderedUnits"
+            :units="renderedUnits3d"
             :events="combatEvents3d"
             :arena-id="selectedArena"
             @fallback="renderView = '2d'"

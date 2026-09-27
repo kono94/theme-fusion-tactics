@@ -24,7 +24,7 @@ Delivered from the previous roadmap:
 | 2 | Item system | Strong, meaningful unit customization from loot orbs |
 | 3 | Mobile support | Full matches playable on tablets and landscape phones |
 | 4 | Bot improvements | Bots use Match Rules and items credibly and position better |
-| Side track | 3D combat view | Combat watched in 3D with portrait billboards in every mode (spike done, direction chosen) |
+| Side track | 3D combat view | Combat watched in 3D with portrait billboards in every mode (shipped; polish ongoing) |
 
 Each initiative ships separately and is playtested before the next one grows its scope.
 
@@ -167,23 +167,25 @@ Rules:
   device in local storage.
 - Both views render the same backend `GameState`. Neither view contains game logic, and a wire-contract change must
   work in both.
-- 2D is the default while the 3D view is marked as beta. Making 3D the default is a separate decision after
-  playtests.
+- 2D stays the default. Making 3D the default is a separate decision after playtests.
 - 3D falls back to 2D automatically when WebGL is unavailable or the context is lost. Reduced-motion settings apply
   in both views.
 - Switching views mid-combat must work without desync, because both views are driven by the same state stream.
 
-### Preview shipped (2026-09-27)
+### Shipped (2026-09-27)
 
-- A Settings button (lobby dock and match top bar) has a "3D battle view — Preview" toggle, remembered per device.
-  Combat renders in `frontend/src/combat3d/`, which is lazy-loaded. Planning stays 2D, and WebGL failure falls back to
+- A Settings button (lobby dock and match top bar) has a "3D battle view" toggle, remembered per device. Combat
+  renders in `frontend/src/combat3d/`, which is lazy-loaded. Planning stays 2D, and WebGL failure falls back to
   Classic.
 - Arenas rotate per room from a mode pool. One Piece uses story stages (Foosha Village, Baratie, Sabaody,
   Marineford, Wano). Pokemon uses Battle Stadium and Rock Gym.
-- Signature 3D ultimates exist for Luffy, Zoro, Sanji, Ace, Whitebeard, Kizaru, Akainu, and Mihawk, plus the
-  Fire/Electric/Water/Psychic/Dragon/Ghost Pokemon element styles. Everything else uses family fallbacks.
-- Still open: the remaining One Piece signatures, per-unit Pokemon polish, a quick view toggle inside the match UI,
-  hover tooltips in 3D, label collisions, a mobile performance budget, and more stages per mode.
+- Every One Piece unit has a signature auto-attack and ultimate. Every Pokemon form and move has a signature
+  ultimate, and forms that change moves by star level get one per move. Units without a signature use ability-type,
+  element, and generic fallbacks.
+- Big fights stay readable: camera zooms and shakes are throttled battle-wide, there are no screen flashes, and
+  ranged units cast from their own tile.
+- Still open: a quick view toggle inside the match UI, hover tooltips in 3D, label collisions, a mobile performance
+  budget, more stages per mode, and a visual polish pass over the rest of the roster.
 
 ### Next steps (not scheduled; after the main initiatives or when there is room)
 

@@ -3,14 +3,14 @@ import { describe, expect, it } from 'vitest'
 import SettingsPanel from './SettingsPanel.vue'
 
 describe('SettingsPanel', () => {
-  it('opens the panel and marks the 3D view as a preview', async () => {
+  it('opens the panel with the 3D view off by default', async () => {
     const wrapper = mount(SettingsPanel, { props: { settings: { combatView: 'classic' } } })
 
     expect(wrapper.find('.settings-panel').exists()).toBe(false)
     await wrapper.find('.settings-trigger').trigger('click')
 
     expect(wrapper.find('.settings-panel').text()).toContain('3D battle view')
-    expect(wrapper.find('.preview-badge').text()).toBe('Preview')
+    expect(wrapper.find('.preview-badge').exists()).toBe(false)
     expect((wrapper.find('input.switch').element as HTMLInputElement).checked).toBe(false)
   })
 

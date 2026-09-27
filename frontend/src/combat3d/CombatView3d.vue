@@ -70,7 +70,6 @@ onBeforeUnmount(() => {
     <div ref="host" class="scene-host"></div>
     <div ref="overlay" class="overlay"></div>
     <div class="arena-chip">
-      <span class="preview-badge">3D Preview</span>
       <span class="arena-name">{{ arenaLabel }}</span>
     </div>
   </div>
@@ -119,24 +118,6 @@ onBeforeUnmount(() => {
   color: #e2e8f0;
   font-size: 0.7rem;
   pointer-events: none;
-}
-
-.preview-badge {
-  padding: 1px 6px;
-  border-radius: 999px;
-  background: #f59e0b;
-  color: #1c1917;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  font-size: 0.6rem;
-}
-
-.overlay :deep(.screen-flash) {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  mix-blend-mode: screen;
 }
 
 .overlay :deep(.unit-label) {

@@ -98,3 +98,9 @@
 - Treat patch, minor, pin, digest, and lockfile updates as routine non-major maintenance; use the `upgrade-minor` skill (`$upgrade-minor` in Codex, `/upgrade-minor` in Claude Code) for that workflow.
 - Handle exactly one major dependency or tightly coupled toolchain family at a time; use the `upgrade-major` skill (`$upgrade-major` in Codex, `/upgrade-major` in Claude Code) for that workflow.
 - Never use `--force` or `--legacy-peer-deps` to hide incompatibilities. Use the normal Maven `~/.m2` cache and request the required permission if it is not writable in the sandbox. If npm registry access is denied, retry with the required network approval. Consult authoritative release notes, update the changelog for completed upgrades, and validate before review. The skills contain the detailed package-manager and validation steps.
+
+## 8. Animation Code Isolation
+- Combat animation code is large and only relevant for animation work. Keep it out of your context unless the task is about combat animations or effects.
+- The 3D animation package is `frontend/src/combat3d/choreography/`: per-unit ultimates and auto-attacks, set kits, shared kit, primitives, and fallbacks. Put all new 3D animation code there. The rest of the app only uses its public API (`registry.ts` play functions, `FxContext` types, and `attacks/generic.ts` `abilityTick`).
+- The 2D effects renderer `frontend/src/components/game/CombatEffectsCanvas.vue` and the dev-only `UltimateGallery.vue` are animation-only too.
+- The root `.ignore` hides these paths from repo-wide ripgrep searches (Claude Code Grep/Glob, Codex, `rg`). Do not remove them from `.ignore`, and do not read, open, or search them for unrelated tasks. For animation work, search them explicitly by path, e.g. `rg <pattern> frontend/src/combat3d/choreography`, and start from the 3D section of `frontend/FRONTEND_CONTEXT.md`.

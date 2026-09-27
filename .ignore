@@ -1,0 +1,6 @@
+# Keeps animation-only code out of repo-wide ripgrep searches (Claude Code Grep/Glob, Codex, rg).
+# It is large and only relevant for animation work; search it explicitly by path when you need it.
+# Git, builds, tests, linters, and formatters are not affected by this file.
+frontend/src/combat3d/choreography/
+frontend/src/components/game/CombatEffectsCanvas.vue
+frontend/src/components/game/UltimateGallery.vue

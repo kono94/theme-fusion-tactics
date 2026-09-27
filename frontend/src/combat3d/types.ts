@@ -23,6 +23,8 @@ export interface CombatUnit3d {
   stunned: boolean
   portraitUrl: string
   abilityType: string | null
+  abilityName: string | null
+  abilityPattern: string | null
   attack: AttackAnimationConfig
   ability: AbilityAnimationConfig
 }

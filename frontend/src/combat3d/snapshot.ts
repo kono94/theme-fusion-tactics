@@ -21,6 +21,8 @@ export function toCombatUnit3d(unit: RenderedUnit): CombatUnit3d {
     stunned: (unit.stunSecondsRemaining ?? 0) > 0,
     portraitUrl: unit.image,
     abilityType: unit.ability?.type ?? null,
+    abilityName: unit.ability?.name ?? null,
+    abilityPattern: unit.ability?.pattern ?? null,
     attack: resolveAttackConfig(unit),
     ability: resolveAbilityConfig(unit),
   }

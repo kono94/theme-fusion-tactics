@@ -3,7 +3,16 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { getAnimationRenderPolicy } from '../animations/renderPolicy'
 import { getArena, type ArenaHandle } from './arenas'
 import { playAttack, playHeal, playShield, playUltimate } from './choreography/registry'
-import { burst, at, type FloatKind, type FxContext } from './choreography/primitives'
+import { abilityTick } from './choreography/attacks/generic'
+import {
+  at,
+  burst,
+  ground,
+  shake,
+  shockwave,
+  type FloatKind,
+  type FxContext,
+} from './choreography/primitives'
 import { CameraRig, EffectSystem, disposeObject } from './effects'
 import type { CombatEvent3d, CombatUnit3d } from './types'
 import { UnitView, disposePortraitTextures, portraitTexture } from './unitView'
@@ -33,7 +42,6 @@ export class BattleScene {
   private readonly arena: ArenaHandle
   private readonly resizeObserver: ResizeObserver
   private readonly startedAt = performance.now()
-  private readonly flashLayer: HTMLDivElement
   private readonly tmp = new THREE.Vector3()
   private frameHandle = 0
   private disposed = false
@@ -70,10 +78,6 @@ export class BattleScene {
 
     this.scene.add(this.arenaRoot)
     this.arena = getArena(options.arenaId).build(this.scene, this.arenaRoot)
-
-    this.flashLayer = document.createElement('div')
-    this.flashLayer.className = 'screen-flash'
-    overlay.appendChild(this.flashLayer)
 
     this.resizeObserver = new ResizeObserver(() => this.resize())
     this.resizeObserver.observe(host)
@@ -141,7 +145,9 @@ export class BattleScene {
   private fitDefaultCamera(): void {
     // Keep the whole 9x6 arena in frame on narrow viewports by pulling the camera back.
     const distanceScale = Math.max(1, 1.5 / Math.max(this.camera.aspect, 0.1))
-    this.camera.position.copy(DEFAULT_TARGET).addScaledVector(DEFAULT_CAMERA.clone().sub(DEFAULT_TARGET), distanceScale)
+    this.camera.position
+      .copy(DEFAULT_TARGET)
+      .addScaledVector(DEFAULT_CAMERA.clone().sub(DEFAULT_TARGET), distanceScale)
     this.controls.update()
   }
 
@@ -171,8 +177,11 @@ export class BattleScene {
       particleScale: policy.particleScale,
       reducedMotion: this.options.reducedMotion,
       floatText: (view, text, kind, delayMs) => this.floatText(view, text, kind, delayMs),
-      flash: (color, delayMs, durationMs) => this.flash(color, delayMs, durationMs),
+      // Screen flashes strobe in big fights, so the 3D view deliberately ignores them.
+      flash: () => undefined,
       enemiesOf: (view) => living().filter((other) => other.unit.ownerId !== view.unit.ownerId),
+      alliesOf: (view) =>
+        living().filter((other) => other !== view && other.unit.ownerId === view.unit.ownerId),
     }
   }
 
@@ -205,13 +214,13 @@ export class BattleScene {
         }
         if (event.value === 0) return
         if (event.skillName) {
-          burst(ctx, at(target), { color: source.accent, count: 8, priority: 'standard' })
-          target.onHit(ctx.now)
-          this.floatText(target, `${event.value}`, 'skill')
+          const tick = abilityTick(ctx, source, target)
+          target.onHit(ctx.now + tick, source.root.position)
+          this.floatText(target, `${event.value}`, 'skill', tick)
           return
         }
         const impact = playAttack(ctx, source, target)
-        target.onHit(ctx.now + impact)
+        target.onHit(ctx.now + impact, source.root.position)
         this.floatText(target, `${event.value}`, 'damage', impact)
         return
       }
@@ -228,7 +237,7 @@ export class BattleScene {
         if (isHeal) {
           this.floatText(skillTarget, `+${Math.abs(event.value)}`, 'heal', impact)
         } else if (event.value > 0 && skillTarget !== source) {
-          skillTarget.onHit(ctx.now + impact)
+          skillTarget.onHit(ctx.now + impact, source.root.position)
           this.floatText(skillTarget, `${event.value}`, 'skill', impact)
         }
         return
@@ -247,11 +256,35 @@ export class BattleScene {
       }
       case 'DEATH': {
         const victim = target ?? source
-        burst(ctx, at(victim), { color: '#ffffff', count: 26, speed: 2, priority: 'standard' })
+        this.playKnockout(ctx, victim)
         victim.die(ctx.now)
         return
       }
     }
+  }
+
+  // KO beat: white pop, spark burst, a team-colored soul rising and a ground ring.
+  private playKnockout(ctx: FxContext, victim: UnitView): void {
+    const team = victim.color.getStyle()
+    burst(ctx, at(victim), {
+      color: '#ffffff',
+      count: 20,
+      speed: 2.2,
+      gravity: 2,
+      priority: 'standard',
+    })
+    burst(ctx, at(victim, 0.4), {
+      color: team,
+      count: 14,
+      delay: 120,
+      duration: 900,
+      speed: 0.9,
+      spread: 'up',
+      gravity: -0.6,
+      priority: 'standard',
+    })
+    shockwave(ctx, ground(victim), { color: team, delay: 60, radius: 1.1, duration: 500 })
+    shake(ctx, 1.5, 0, 180)
   }
 
   private floatText(view: UnitView, text: string, kind: FloatKind, delayMs = 0): void {
@@ -265,16 +298,6 @@ export class BattleScene {
     element.style.top = `${screen.y}px`
     element.addEventListener('animationend', () => element.remove())
     this.overlay.appendChild(element)
-  }
-
-  private flash(color: string, delayMs: number, durationMs = 180): void {
-    if (this.options.reducedMotion) return
-    const flash = this.flashLayer
-    window.setTimeout(() => {
-      if (this.disposed) return
-      flash.style.background = color
-      flash.animate([{ opacity: 0.55 }, { opacity: 0 }], { duration: durationMs, easing: 'ease-out' })
-    }, delayMs)
   }
 
   private loop = (timestamp: number): void => {
@@ -293,6 +316,7 @@ export class BattleScene {
       }
     }
     this.arena.update(this.now)
+    this.rig.crowded = this.aliveCount() >= CROWDED_UNITS
     this.controls.update()
     this.rig.base.copy(this.camera.position)
     this.rig.target.copy(this.controls.target)

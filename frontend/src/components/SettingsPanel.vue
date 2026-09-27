@@ -67,13 +67,11 @@ onBeforeUnmount(() => {
       <h2>Settings</h2>
       <label class="setting-row">
         <span class="setting-text">
-          <span class="setting-title">
-            3D battle view
-            <span class="preview-badge">Preview</span>
-          </span>
+          <span class="setting-title">3D battle view</span>
           <span class="setting-hint">
-            Watch combat in a 3D arena themed to the game mode. Planning stays on the classic board.
-            This view is still changing and falls back to Classic if your device can't show 3D.
+            Watch combat in a 3D arena themed to the game mode, with signature attacks and ultimates for
+            every character. Planning stays on the classic board, and combat falls back to Classic if your
+            device can't show 3D.
           </span>
           <span v-if="combat3dUnavailable" class="setting-warning">
             3D isn't available on this device right now, so combat is shown in Classic.
@@ -182,16 +180,6 @@ h2 {
   font-size: 0.85rem;
 }
 
-.preview-badge {
-  padding: 1px 6px;
-  border-radius: 999px;
-  background: #f59e0b;
-  color: #1c1917;
-  font-size: 0.6rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
 
 .setting-hint {
   color: #94a3b8;
