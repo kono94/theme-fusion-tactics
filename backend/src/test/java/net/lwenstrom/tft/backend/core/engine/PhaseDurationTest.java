@@ -79,6 +79,11 @@ public class PhaseDurationTest {
             public List<AugmentDefinition> getAugments(GameMode mode) {
                 return TestHelpers.createDefaultAugments();
             }
+
+            @Override
+            public List<net.lwenstrom.tft.backend.core.model.ItemDefinition> getItems(GameMode mode) {
+                return List.of();
+            }
         };
 
         testClock = createTestClock();

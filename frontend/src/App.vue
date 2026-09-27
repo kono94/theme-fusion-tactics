@@ -8,7 +8,6 @@ import Changelog from './components/Changelog.vue'
 import WaitingRoom from './components/WaitingRoom.vue'
 import GameInterface from './components/GameInterface.vue'
 import OutcomeOverlay from './components/game/OutcomeOverlay.vue'
-import DamageReport from './components/game/DamageReport.vue'
 import VersionDisplay from './components/VersionDisplay.vue'
 import AdminAnalytics from './components/admin/AdminAnalytics.vue'
 import MatchHistory from './components/MatchHistory.vue'
@@ -75,7 +74,6 @@ const isAdminAnalytics = ref(false)
 const isMatchHistory = ref(false)
 const ultimateGalleryMode = ref<GameMode>('onepiece')
 const UltimateGallery = shallowRef<Component | null>(null)
-const viewedPlayerId = ref<string | null>(null)
 const pendingJoinRoomId = ref<string | null>(null)
 const pendingRoomRequestKind = ref<PendingRoomRequestKind | null>(null)
 const pendingInviteRoomId = ref<string | null>(null)
@@ -221,27 +219,6 @@ let emergencyDropClearTimer: number | null = null
 
 const myPlayerId = computed(() => {
     return currentPlayerId.value ?? undefined
-});
-
-const opponentId = computed(() => {
-    if (!gameState.value || !damageReportPlayerId.value) return undefined;
-    return gameState.value.matchups[damageReportPlayerId.value];
-});
-
-const opponentName = computed(() => {
-    if (!gameState.value || !opponentId.value) return undefined;
-    return gameState.value.players[opponentId.value]?.name || 'Opponent';
-});
-
-const damageReportPlayerId = computed(() => {
-    return viewedPlayerId.value || myPlayerId.value;
-});
-
-const damageReportPlayerName = computed(() => {
-    if (!gameState.value || !damageReportPlayerId.value || damageReportPlayerId.value === myPlayerId.value) {
-        return 'YOU';
-    }
-    return gameState.value.players[damageReportPlayerId.value]?.name || 'Viewed';
 });
 
 const showVersion = computed(() => {
@@ -508,7 +485,6 @@ const rejectPendingJoin = (message: string) => {
     currentRoomId.value = ''
     activeTraitMode.value = null
     traitRequestGeneration += 1
-    viewedPlayerId.value = null
     currentPlayerId.value = null
     lobbyError.value = message
     applyThemeMeta(defaultMode.value)
@@ -757,7 +733,6 @@ const resetToLobby = () => {
     activeTraitMode.value = null
     hasLostRoomControl.value = false
     traitRequestGeneration += 1
-    viewedPlayerId.value = null
     pendingJoinRoomId.value = null
     pendingRoomRequestKind.value = null
     pendingInviteRoomId.value = null
@@ -967,19 +942,11 @@ const applyThemeMeta = (mode: GameMode) => {
 	                                    :settings="clientSettings"
 	                                    @update-settings="updateClientSettings"
 	                                    @action="handleGameAction"
-	                                    @view-player="(playerId) => viewedPlayerId = playerId"
 	                                    @exit-game="leaveCurrentGame"
 	                                    @abandon-game="abandonCurrentGame" />
 	                     <Transition name="outcome">
 	                        <OutcomeOverlay v-if="encounterResult" :type="encounterResult" />
 	                     </Transition>
-	                     <DamageReport v-if="gameState.damageLog"
-	                                   :damage-log="gameState.damageLog"
-	                                   :my-player-id="damageReportPlayerId"
-	                                   :my-player-name="damageReportPlayerName"
-	                                   :opponent-id="opponentId"
-	                                   :opponent-name="opponentName"
-	                                   :game-mode="gameState.gameMode" />
 	                 </template>
              </template>
              <div v-else class="loading-screen">

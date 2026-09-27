@@ -1,0 +1,80 @@
+[
+  {
+    "id": "pokemon_coat",
+    "name": "Vital Charm",
+    "description": "+40% max HP",
+    "icon": "/assets/items/pokemon/charm.png",
+    "statBonuses": {
+      "MAX_HEALTH_PERCENT": 40
+    }
+  },
+  {
+    "id": "pokemon_axe",
+    "name": "Power Band",
+    "description": "+40% ATK",
+    "icon": "/assets/items/pokemon/band.png",
+    "statBonuses": {
+      "ATTACK_DAMAGE_PERCENT": 40
+    }
+  },
+  {
+    "id": "pokemon_armor",
+    "name": "Guard Plate",
+    "description": "+50 DEF",
+    "icon": "/assets/items/pokemon/plate.png",
+    "statBonuses": {
+      "DEFENSE_FLAT": 50
+    }
+  },
+  {
+    "id": "pokemon_boots",
+    "name": "Swift Scarf",
+    "description": "+35% attack speed",
+    "icon": "/assets/items/pokemon/scarf.png",
+    "statBonuses": {
+      "ATTACK_SPEED_PERCENT": 35
+    }
+  },
+  {
+    "id": "pokemon_crest",
+    "name": "Mystic Lens",
+    "description": "+40% ability damage",
+    "icon": "/assets/items/pokemon/lens.png",
+    "statBonuses": {
+      "ABILITY_DAMAGE_PERCENT": 40
+    }
+  },
+  {
+    "id": "pokemon_kit",
+    "name": "Sturdy Harness",
+    "description": "+15% max HP, +12 DEF, +15% attack speed",
+    "icon": "/assets/items/pokemon/harness.png",
+    "statBonuses": {
+      "MAX_HEALTH_PERCENT": 15,
+      "DEFENSE_FLAT": 12,
+      "ATTACK_SPEED_PERCENT": 15
+    }
+  },
+  {
+    "id": "pokemon_flag",
+    "name": "Battle Ribbon",
+    "description": "+15% max HP, +15% ATK, +12% attack speed",
+    "icon": "/assets/items/pokemon/ribbon.png",
+    "statBonuses": {
+      "MAX_HEALTH_PERCENT": 15,
+      "ATTACK_DAMAGE_PERCENT": 15,
+      "ATTACK_SPEED_PERCENT": 12
+    }
+  },
+  {
+    "id": "pokemon_log",
+    "name": "Focus Charm",
+    "description": "+15% max HP, +10 DEF, +20% ability damage",
+    "icon": "/assets/items/pokemon/focus.png",
+    "statBonuses": {
+      "MAX_HEALTH_PERCENT": 15,
+      "DEFENSE_FLAT": 10,
+      "ABILITY_DAMAGE_PERCENT": 20
+    }
+  }
+]

@@ -1,6 +1,7 @@
 package net.lwenstrom.tft.backend.core;
 
 import jakarta.annotation.PostConstruct;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -12,6 +13,7 @@ import net.lwenstrom.tft.backend.core.combat.ElementalAffinityLoader;
 import net.lwenstrom.tft.backend.core.engine.UnitDefinition;
 import net.lwenstrom.tft.backend.core.model.AugmentDefinition;
 import net.lwenstrom.tft.backend.core.model.GameMode;
+import net.lwenstrom.tft.backend.core.model.ItemDefinition;
 import net.lwenstrom.tft.backend.core.model.TraitMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,7 +44,8 @@ public class DataLoader {
     private record ModeData(
             Map<String, UnitDefinition> unitRegistry,
             List<TraitMetadata> traitMetadata,
-            List<AugmentDefinition> augments) {}
+            List<AugmentDefinition> augments,
+            List<ItemDefinition> items) {}
 
     private final Map<GameMode, ModeData> modeDataCache = new ConcurrentHashMap<>();
 
@@ -63,10 +66,11 @@ public class DataLoader {
         var units = loadUnits(provider.getUnitsPath());
         var traits = loadTraits(provider.getTraitsPath());
         var augments = loadAugments(provider.getAugmentsPath());
-        if (units.isEmpty() || traits.isEmpty() || augments.isEmpty()) {
+        var items = loadItems(provider.getItemsPath());
+        if (units.isEmpty() || traits.isEmpty() || augments.isEmpty() || items.isEmpty()) {
             throw new IllegalStateException("Incomplete data for game mode: " + mode);
         }
-        return new ModeData(units, traits, augments);
+        return new ModeData(units, traits, augments, items);
     }
 
     public ElementalAffinityConfig getAffinityConfig(GameMode mode) {
@@ -134,6 +138,36 @@ public class DataLoader {
         }
     }
 
+    private List<ItemDefinition> loadItems(String path) {
+        try (var inputStream = getClass().getResourceAsStream(path)) {
+            if (inputStream == null) {
+                throw new IllegalStateException("Could not find items at " + path);
+            }
+            List<ItemDefinition> items = jsonMapper.readValue(inputStream, new TypeReference<>() {});
+            var ids = new HashSet<String>();
+            for (var item : items) {
+                if (!isValidItem(item) || !ids.add(item.id())) {
+                    throw new IllegalStateException("Invalid item definition " + item.id() + " in " + path);
+                }
+            }
+            return List.copyOf(items);
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to load item data: " + path, e);
+        }
+    }
+
+    private static boolean isValidItem(ItemDefinition item) {
+        return item.id() != null
+                && !item.id().isBlank()
+                && item.name() != null
+                && !item.name().isBlank()
+                && item.icon() != null
+                && !item.icon().isBlank()
+                && item.statBonuses() != null
+                && !item.statBonuses().isEmpty()
+                && item.statBonuses().values().stream().allMatch(value -> value != null && value > 0);
+    }
+
     public UnitDefinition getUnitDefinition(GameMode mode, String id) {
         return getModeData(mode).unitRegistry().get(id);
     }
@@ -160,5 +194,13 @@ public class DataLoader {
 
     public List<AugmentDefinition> getAugments(GameMode mode) {
         return getModeData(mode).augments();
+    }
+
+    public List<ItemDefinition> getItems(GameMode mode) {
+        return getModeData(mode).items();
+    }
+
+    public Optional<ItemDefinition> getItem(GameMode mode, String id) {
+        return getItems(mode).stream().filter(item -> item.id().equals(id)).findFirst();
     }
 }

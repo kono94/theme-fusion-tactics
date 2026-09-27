@@ -221,7 +221,7 @@ public class CombatSystem {
             for (var unit : player.getBoardUnits()) {
                 unit.savePlanningPosition();
             }
-            traitManager.applyTraits(player.getBoardUnits());
+            applyStartingBonuses(player.getBoardUnits());
         }
 
         if (orderedPlayers.size() > 1) {
@@ -249,6 +249,11 @@ public class CombatSystem {
                 unit.setPosition(unit.getX(), newY);
             }
         }
+    }
+
+    public void applyStartingBonuses(List<GameUnit> units) {
+        units.forEach(ItemStatApplier::apply);
+        traitManager.applyTraits(units);
     }
 
     public void endCombat(java.util.Collection<Player> players) {

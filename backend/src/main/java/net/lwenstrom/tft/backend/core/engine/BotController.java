@@ -8,7 +8,9 @@ import java.util.Map;
 import java.util.stream.Stream;
 import net.lwenstrom.tft.backend.core.DataLoader;
 import net.lwenstrom.tft.backend.core.GameConstants;
+import net.lwenstrom.tft.backend.core.model.GameItem;
 import net.lwenstrom.tft.backend.core.model.GameUnit;
+import net.lwenstrom.tft.backend.core.model.ItemStat;
 import net.lwenstrom.tft.backend.core.model.UnitRole;
 import net.lwenstrom.tft.backend.core.random.RandomProvider;
 
@@ -80,7 +82,30 @@ public final class BotController {
         }
         arrangeBoard(player, evaluator);
         positionBoard(player);
+        equipItems(player);
         return actions;
+    }
+
+    private void equipItems(Player player) {
+        for (var item : List.copyOf(player.getInventory())) {
+            var target = player.getBoardUnits().stream()
+                    .filter(unit -> unit.getItems().size() < player.getItemSlotsPerUnit())
+                    .max(Comparator.comparingInt((GameUnit unit) -> itemFit(item, unit))
+                            .thenComparingInt(GameUnit::getStarLevel)
+                            .thenComparingInt(GameUnit::getCost))
+                    .orElse(null);
+            if (target != null) player.moveItem(item.getInstanceId(), target.getId());
+        }
+    }
+
+    private int itemFit(GameItem item, GameUnit unit) {
+        var bonuses = item.getStatBonuses();
+        var offensive = bonuses.getOrDefault(ItemStat.ATTACK_DAMAGE_PERCENT, 0)
+                + bonuses.getOrDefault(ItemStat.ATTACK_SPEED_PERCENT, 0)
+                + bonuses.getOrDefault(ItemStat.ABILITY_DAMAGE_PERCENT, 0);
+        var defensive =
+                bonuses.getOrDefault(ItemStat.MAX_HEALTH_PERCENT, 0) + bonuses.getOrDefault(ItemStat.DEFENSE_FLAT, 0);
+        return unit.getRole() == UnitRole.TANK ? defensive * 2 + offensive : offensive * 2 + defensive;
     }
 
     private int buyXpTowardNextLevel(Player player, int reserve, int actions) {

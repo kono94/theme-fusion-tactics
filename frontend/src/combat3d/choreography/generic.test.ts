@@ -91,6 +91,7 @@ function makeUnit(id: string, options: Options = {}): CombatUnit3d {
     abilityType: options.abilityType ?? 'DAMAGE',
     abilityName: null,
     abilityPattern: null,
+    items: [],
     attack: { type: options.attackType ?? 'punch', color: '#ef4444', secondaryColor: '#fde047' },
     ability: { color: '#22c55e', secondaryColor: '#bbf7d0', effectStyle: options.effectStyle },
   }

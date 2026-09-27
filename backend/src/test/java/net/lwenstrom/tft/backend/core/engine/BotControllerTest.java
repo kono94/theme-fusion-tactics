@@ -6,9 +6,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 import net.lwenstrom.tft.backend.core.GameConstants;
 import net.lwenstrom.tft.backend.core.model.GameMode;
+import net.lwenstrom.tft.backend.core.model.ItemDefinition;
+import net.lwenstrom.tft.backend.core.model.ItemInstance;
+import net.lwenstrom.tft.backend.core.model.ItemStat;
 import net.lwenstrom.tft.backend.test.TestHelpers;
 import org.junit.jupiter.api.Test;
 
@@ -25,6 +29,20 @@ class BotControllerTest {
         player.setBot(true);
         player.setGold(gold);
         return player;
+    }
+
+    @Test
+    void equipsAvailableItemOnOwnedBoardUnit() {
+        var bot = bot(0);
+        bot.addUnitToBoard(unit, 0, 0);
+        var item = ItemInstance.from(new ItemDefinition(
+                "axe", "Axe", "+40% ATK", "/items/axe.svg", Map.of(ItemStat.ATTACK_DAMAGE_PERCENT, 40)));
+        bot.getInventory().add(item);
+
+        controller.plan(bot, 1, augments);
+
+        assertTrue(bot.getInventory().isEmpty());
+        assertEquals(item, bot.getBoardUnits().getFirst().getItems().getFirst());
     }
 
     @Test

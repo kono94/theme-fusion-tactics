@@ -15,6 +15,10 @@ public interface GameModeProvider {
         return "/data/augments_" + getMode().getValue() + ".json";
     }
 
+    default String getItemsPath() {
+        return "/data/items_" + getMode().getValue() + ".json";
+    }
+
     default Optional<String> getAffinitiesPath() {
         return Optional.empty();
     }

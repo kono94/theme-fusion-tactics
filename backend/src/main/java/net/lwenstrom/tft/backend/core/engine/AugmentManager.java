@@ -71,7 +71,11 @@ public class AugmentManager {
     }
 
     public void applyCombatEffects(Collection<Player> players) {
-        players.forEach(player -> player.getSelectedAugments().forEach(augment -> applyCombatEffect(player, augment)));
+        players.forEach(player -> applyCombatEffects(player.getBoardUnits(), player.getSelectedAugments()));
+    }
+
+    public void applyCombatEffects(List<GameUnit> units, List<SelectedAugment> augments) {
+        augments.forEach(augment -> applyCombatEffect(units, augment));
     }
 
     private AugmentOffer toOffer(AugmentDefinition definition, AugmentTier tier) {
@@ -110,58 +114,50 @@ public class AugmentManager {
         }
     }
 
-    private void applyCombatEffect(Player player, SelectedAugment augment) {
+    private void applyCombatEffect(List<GameUnit> units, SelectedAugment augment) {
         switch (augment.effectType()) {
-            case TEAM_ATTACK_SPEED_PER_RANGED_UNIT -> applyRangedAttackSpeed(player, augment.value());
+            case TEAM_ATTACK_SPEED_PER_RANGED_UNIT -> applyRangedAttackSpeed(units, augment.value());
             case TEAM_DAMAGE_REDUCTION ->
-                player.getBoardUnits()
-                        .forEach(unit ->
-                                unit.setDamageReduction(Math.min(40, unit.getDamageReduction() + augment.value())));
-            case TEAM_ATTACK_DAMAGE_ON_KILL ->
-                player.getBoardUnits().forEach(unit -> unit.setTeamAttackDamageOnKill(augment.value()));
+                units.forEach(
+                        unit -> unit.setDamageReduction(Math.min(40, unit.getDamageReduction() + augment.value())));
+            case TEAM_ATTACK_DAMAGE_ON_KILL -> units.forEach(unit -> unit.setTeamAttackDamageOnKill(augment.value()));
             case TEAM_MAX_HEALTH ->
-                player.getBoardUnits().forEach(unit -> {
+                units.forEach(unit -> {
                     unit.setMaxHealth(unit.getMaxHealth() + augment.value());
                     unit.setCurrentHealth(unit.getCurrentHealth() + augment.value());
                 });
             case TEAM_ATTACK_DAMAGE ->
-                player.getBoardUnits().forEach(unit -> unit.setAttackDamage(unit.getAttackDamage() + augment.value()));
+                units.forEach(unit -> unit.setAttackDamage(unit.getAttackDamage() + augment.value()));
             case TEAM_ABILITY_POWER ->
-                player.getBoardUnits()
-                        .forEach(unit -> unit.setAbilityDamageMultiplier(
-                                unit.getAbilityDamageMultiplier() * (1.0f + augment.value() / 100.0f)));
-            case TEAM_DEFENSE ->
-                player.getBoardUnits().forEach(unit -> unit.setDefense(unit.getDefense() + augment.value()));
+                units.forEach(unit -> unit.setAbilityDamageMultiplier(
+                        unit.getAbilityDamageMultiplier() * (1.0f + augment.value() / 100.0f)));
+            case TEAM_DEFENSE -> units.forEach(unit -> unit.setDefense(unit.getDefense() + augment.value()));
             case MELEE_LIFESTEAL ->
-                player.getBoardUnits().stream()
+                units.stream()
                         .filter(unit -> unit.getRange() <= 1)
                         .forEach(unit -> unit.setLifesteal(unit.getLifesteal() + augment.value() / 100.0f));
             case RANGED_ATTACK_DAMAGE ->
-                player.getBoardUnits().stream()
+                units.stream()
                         .filter(unit -> unit.getRange() > 1)
                         .forEach(unit -> unit.setAttackDamage(unit.getAttackDamage() + augment.value()));
             case TEAM_MANA_GAIN ->
-                player.getBoardUnits()
-                        .forEach(unit -> unit.setManaGainMultiplier(
-                                unit.getManaGainMultiplier() * (1.0f + augment.value() / 100.0f)));
+                units.forEach(unit ->
+                        unit.setManaGainMultiplier(unit.getManaGainMultiplier() * (1.0f + augment.value() / 100.0f)));
             case TEAM_STARTING_MANA ->
-                player.getBoardUnits()
-                        .forEach(unit -> unit.setMana(Math.min(unit.getMaxMana(), unit.getMana() + augment.value())));
-            case TEAM_STARTING_SHIELD -> player.getBoardUnits().forEach(unit -> unit.addShield(augment.value()));
+                units.forEach(unit -> unit.setMana(Math.min(unit.getMaxMana(), unit.getMana() + augment.value())));
+            case TEAM_STARTING_SHIELD -> units.forEach(unit -> unit.addShield(augment.value()));
             case GOLD, XP, GOLD_PER_EMPTY_BENCH_SLOT -> {}
         }
     }
 
-    private void applyRangedAttackSpeed(Player player, int percentPerRangedUnit) {
-        var rangedUnits = player.getBoardUnits().stream()
-                .filter(unit -> unit.getRange() > 1)
-                .count();
+    private void applyRangedAttackSpeed(List<GameUnit> units, int percentPerRangedUnit) {
+        var rangedUnits = units.stream().filter(unit -> unit.getRange() > 1).count();
         if (rangedUnits == 0) {
             return;
         }
 
         var multiplier = 1.0f + (percentPerRangedUnit * rangedUnits / 100.0f);
-        player.getBoardUnits().forEach(unit -> unit.setAttackSpeed(unit.getAttackSpeed() * multiplier));
+        units.forEach(unit -> unit.setAttackSpeed(unit.getAttackSpeed() * multiplier));
     }
 
     public static void applyTeamAttackDamageOnKill(GameUnit source, List<GameUnit> allUnits) {

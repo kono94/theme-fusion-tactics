@@ -5,7 +5,14 @@ defineOptions({
 
 defineEmits(['back'])
 
-const nextVersionHighlights = [
+const version300Highlights = [
+  'Items now appear in loot on rounds 2, 4, 6, and 10 in both One Piece and Pokemon. Collected items land in the Items panel at the bottom right. Hover or tap any item, in your inventory or on a unit, to see its bonuses. Each unit can equip up to two items.',
+  'During planning, drag an item onto a board or bench unit, or tap the item and then tap the unit. Drag equipped items straight from one unit to another, or drop one back on the Items panel to unequip it. The player list and combat report now share one panel on the right with Players and Combat report tabs, and your Items stay visible right below it.',
+  'Every One Piece and Pokemon item now has a distinct pixel-art icon that matches the character portraits.',
+  'Unit details now show the combat stats they will start with, including equipped items, active board traits, and augments. Equipped items also appear in both battle views and final team summaries.',
+]
+
+const version253Highlights = [
   'New Settings button: open it from the lobby corner or next to the room code during a match. Your choices are remembered on this device.',
   'Turn on “3D battle view” in Settings to watch combat in a 3D arena. Drag to rotate the camera, scroll to zoom, and double-click to reset. Planning stays on the classic board, and you can switch views at any time, even mid-fight.',
   'One Piece battles take place on story stages (Foosha Village, Baratie, Sabaody Archipelago, Marineford, and Wano Country). Pokemon battles take place in a Battle Stadium or a Rock Gym. Everyone in a room sees the same stage.',
@@ -129,6 +136,26 @@ const version160Commits = [
       <section class="release-section">
         <div class="release-header">
           <p class="eyebrow">Latest</p>
+          <h2>Version 3.0.0</h2>
+          <p>Items arrive: find stat items in loot and move them freely to shape your team, with a cleaner side panel for players, combat reports, and your inventory.</p>
+        </div>
+        <div class="release-grid">
+          <article class="release-panel">
+            <div class="section-heading">
+              <span class="marker release"></span>
+              <h3>Highlights</h3>
+            </div>
+            <ul class="commit-list highlight-list">
+              <li v-for="highlight in version300Highlights" :key="highlight">
+                <span>{{ highlight }}</span>
+              </li>
+            </ul>
+          </article>
+        </div>
+      </section>
+      <section class="release-section">
+        <div class="release-header">
+          <p class="eyebrow">Previous</p>
           <h2>Version 2.5.3</h2>
           <p>Improved the gameplay dashboard and live game monitoring.</p>
         </div>
@@ -139,7 +166,7 @@ const version160Commits = [
               <h3>Highlights</h3>
             </div>
             <ul class="commit-list highlight-list">
-              <li v-for="highlight in nextVersionHighlights" :key="highlight">
+              <li v-for="highlight in version253Highlights" :key="highlight">
                 <span>{{ highlight }}</span>
               </li>
             </ul>

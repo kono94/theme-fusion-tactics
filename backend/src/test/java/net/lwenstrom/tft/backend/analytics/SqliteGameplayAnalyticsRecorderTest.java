@@ -7,6 +7,7 @@ import java.util.Map;
 import net.lwenstrom.tft.backend.core.engine.Player;
 import net.lwenstrom.tft.backend.core.model.GameItem;
 import net.lwenstrom.tft.backend.core.model.GameMode;
+import net.lwenstrom.tft.backend.core.model.ItemStat;
 import net.lwenstrom.tft.backend.core.model.UnitCombatStats;
 import net.lwenstrom.tft.backend.test.TestHelpers;
 import org.flywaydb.core.Flyway;
@@ -364,7 +365,7 @@ class SqliteGameplayAnalyticsRecorderTest {
         }
 
         @Override
-        public Map<String, Integer> getStatBonuses() {
+        public Map<ItemStat, Integer> getStatBonuses() {
             return Map.of();
         }
     }

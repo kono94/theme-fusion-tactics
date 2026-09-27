@@ -1,5 +1,5 @@
-import { mount } from '@vue/test-utils'
-import { describe, expect, it } from 'vitest'
+import { flushPromises, mount } from '@vue/test-utils'
+import { describe, expect, it, vi } from 'vitest'
 import FinalCompositionStrip from '../FinalCompositionStrip.vue'
 
 describe('FinalCompositionStrip', () => {
@@ -82,5 +82,26 @@ describe('FinalCompositionStrip', () => {
             'Item 1',
             'Attack Speed',
         ])
+    })
+
+    it('resolves saved definition IDs to mode item names and icons', async () => {
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+            ok: true,
+            json: async () => [{
+                id: 'pokemon_charm', name: 'Vital Charm', description: '+40% max HP',
+                icon: '/assets/items/pokemon/charm.png', statBonuses: { MAX_HEALTH_PERCENT: 40 },
+            }],
+        }))
+        const board = mount(FinalCompositionStrip, {
+            props: {
+                mode: 'pokemon',
+                composition: [{ definitionId: 'spearow', lineId: 'spearow', starLevel: 1, itemIds: ['pokemon_charm'] }],
+            },
+        })
+        await flushPromises()
+
+        expect(board.get('.item-badge').text()).toBe('Vital Charm')
+        expect(board.get('.item-badge img').attributes('src')).toBe('/assets/items/pokemon/charm.png')
+        vi.unstubAllGlobals()
     })
 })

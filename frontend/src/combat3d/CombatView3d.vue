@@ -137,6 +137,8 @@ onBeforeUnmount(() => {
   color: #f8fafc;
   text-shadow: 0 1px 3px rgb(0 0 0 / 90%);
 }
+.overlay :deep(.unit-items) { display: flex; justify-content: center; gap: 2px; margin-top: 3px; pointer-events: none; }
+.overlay :deep(.unit-items img) { width: 17px; height: 17px; border: 1px solid #fbbf24; border-radius: 3px; background: #0f172a; }
 
 .overlay :deep(.bar) {
   position: relative;

@@ -22,6 +22,8 @@ function player(overrides: Partial<PlayerState> = {}): PlayerState {
     board: [],
     shop: [],
     lootOrbs: [],
+        inventory: [],
+        statPreviews: {},
     augmentChoices: [],
     selectedAugments: [],
     isGhost: false,

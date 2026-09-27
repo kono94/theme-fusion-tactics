@@ -1,6 +1,6 @@
 # Frontend Context
 
-> Last verified: 2026-09-13
+> Last verified: 2026-09-27
 >
 > Scope: the current Vue application, backend contracts, animation pipeline, analytics UI, and test/build workflow.
 >
@@ -172,6 +172,7 @@ interface GameState {
   planningTimerPaused: boolean
   planningReadyPlayerId: string | null
   planningPauseReason: 'AUGMENT_SELECTION' | 'SOLO_READY' | null
+  itemSlotsPerUnit: number
 }
 ```
 
@@ -179,7 +180,7 @@ The backend currently emits `SOLO_READY` or null; `AUGMENT_SELECTION` remains in
 offers do not pause the timer. Unanswered offers are auto-selected when combat begins.
 
 `PlayerState` contains player/economy fields, `bench`, `board`, `shop`, `lootOrbs`, `augmentChoices`,
-`selectedAugments`, `isGhost`, `isBot`, nullable `botPersonality`, and `matchStats`. The player list presents the
+`selectedAugments`, `inventory`, per-unit `statPreviews`, `isGhost`, `isBot`, nullable `botPersonality`, and `matchStats`. The player list presents the
 server-assigned bot personality. The end screen uses `matchStats` for aggregate and per-unit damage dealt, damage taken,
 healing, shielding, and the round-by-round result strip. Rankings are selectable so any player's full-run summary can
 be inspected. There is no `activeTraits` wire field. Trait display is derived from board units plus
@@ -195,6 +196,9 @@ extending the backend record.
 For `MOVE`, `targetX` is a board column from `0-8`. When `targetY` is `-1`, the same `targetX` instead identifies the
 target bench slot from `0-8`; otherwise `targetY` is a planning-board row from `0-2`. The 9×3 planning board is projected
 onto one half of the 9×6 combat canvas.
+`MOVE_ITEM` sends `itemInstanceId` and an optional `targetUnitId`; null returns the item to inventory. Item copies have
+unique instance IDs and mode-specific definition IDs. `/api/items?mode=...` provides names, descriptions, icons, and
+bonus metadata for analytics; owned copies in snapshots include their display data. The backend decides equip legality.
 
 ## 8. Component responsibilities
 
@@ -210,11 +214,13 @@ onto one half of the 9×6 combat canvas.
 ### `GameInterface.vue`
 
 - Resolves the authoritative local player through `state.players[currentPlayerId]`.
-- Owns shop, bench, drag/drop, sell, XP, reroll, lock, augment, ready, and spectating presentation.
+- Owns shop, bench, drag/drop, item selection, the right-hand players/combat-report card and inventory, sell, XP, reroll, lock, augment, ready, and spectating presentation.
 - Handles `R` to reroll and hover + `S` to sell without firing from text inputs, overlays, or invalid action phases.
-- Keeps shop controls and bench-only drag/sell interactions available during combat while board movement and orb
+- Keeps shop controls and bench-only drag/sell interactions available during combat while board movement, item moves, and orb
   collection remain planning-only.
 - Emits `GameAction` objects upward to `App.vue`.
+- Resolves hovered units from the latest snapshot. Planning board tooltips use backend projected item/trait/augment
+  stats, bench tooltips use item-only stats, and combat tooltips show live stats.
 - Uses `utils/economy.ts` for refund previews. Refund copies are 1/3/6 at stars 1/2/3, matching the backend's
   two-copy second upgrade.
 - Shows the end screen as soon as `END_CELEBRATION` arrives, including for an already eliminated player, with selectable
@@ -231,6 +237,7 @@ the safety boundary.
 - Rejects invalid authoritative board coordinates and reconciles transient render history after the page returns to the
   foreground so stale unit positions cannot survive a suspended layout.
 - Renders only the acting player's loot orbs and disables interaction while spectating.
+- Displays item rewards and equipped icons on unit tiles; planning units accept item drops.
 - Normalizes backend events into `NormalizedCombatVisualEvent` objects consumed by `CombatEffectsCanvas`.
 - Preserves short-lived previous/dying unit state so final events can animate after a unit leaves the snapshot.
 - When the effective combat view is `3d` and the phase is `COMBAT`, mounts the lazy `combat3d/CombatView3d.vue` over
@@ -241,6 +248,14 @@ the safety boundary.
 `PlayerList` emits a viewed player ID. `GameInterface` treats a different viewed ID as read-only spectating.
 `DamageReport` receives the selected participant and opponent IDs and switches between backend `damage`, `damageTaken`,
 and combined `healing`/`shielding` totals. Damage dealt and taken are actual post-mitigation health and shield removed.
+`GameInterface` renders an always-visible right column: one card that switches between `PlayerList` and `DamageReport`
+(the report follows the viewed player and their matchup), with `ItemInventory` pinned below it for the local player. It
+is a grid of at least six slots, one per item copy, sized by the shared `--item-slot-size` like the badges on units
+(board badges stack on the unit's left edge; combat buff icons sit on the right). Items move by drag/drop or tap-select
+then tap a unit; dropping an equipped item on the inventory card (or tapping an empty slot while it is selected)
+unequips it. `ItemTooltip` is teleported by `GameInterface` for hover, focus, and tap on any item badge; the unit
+tooltip no longer lists items and is nudged back inside the viewport when it would overflow. Item drags defer the
+`isDraggingItem` flip past `dragstart`, because Chrome cancels a drag whose source subtree changes during it.
 
 ## 9. Modes, assets, and styling
 
@@ -251,6 +266,9 @@ Unit portrait paths:
 
 - One Piece: `/assets/units/onepiece/{definitionId}.png`
 - Pokemon: `/assets/units/pokemon/{definitionId}.png`
+
+Pixel-art item PNGs, rendered by `scripts/generate_item_icons.py`, are under `/assets/items/{mode}/{iconName}.png`; backend item definitions provide the
+exact path. The 3D combat view shows equipped icons on its unit labels; item hover details stay in the classic UI.
 
 The public lobby and waiting room use mode themes. In-match components intentionally use shared generic chrome.
 

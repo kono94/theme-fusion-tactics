@@ -1,9 +1,5 @@
 <template>
   <div class="player-list">
-    <h3 class="lobby-title">
-      Lobby
-    </h3>
-    
     <div class="list-container custom-scrollbar">
       <div
         v-for="player in sortedPlayers"
@@ -25,21 +21,20 @@
         <div class="avatar-box">
            <span class="level-text">{{ player.level }}</span>
         </div>
-        
+      
         <!-- Info -->
         <div class="info-col">
            <div class="name-row">
               <span class="player-name" :title="player.name">
                 {{ player.name }} {{ player.isGhost ? '(Ghost)' : '' }}
               </span>
+              <span v-if="player.isBot && player.botPersonality" class="bot-personality">
+                {{ botPersonalityLabel(player.botPersonality) }}
+              </span>
               <span class="health-text" :class="getHealthColor(player.health)">
                 {{ player.health }}
               </span>
            </div>
-           <span v-if="player.isBot && player.botPersonality" class="bot-personality">
-             {{ botPersonalityLabel(player.botPersonality) }}
-           </span>
-           
            <!-- HP Bar -->
            <div class="hp-bar-bg">
               <div 
@@ -130,36 +125,15 @@ function getHealthBarClass(health: number) {
 
 <style scoped>
 .player-list {
-    position: absolute;
-    right: 20px;
-    top: 10px;
-    width: 250px;
-    max-height: calc(100% - 20px); /* Constrain to parent height minus padding */
-    background: rgba(15, 23, 42, 0.9);
-    border: 1px solid #334155;
-    border-radius: 8px;
-    padding: 12px;
-    z-index: 40;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    padding: 8px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    font-family: var(--app-font-family);
-    pointer-events: auto;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    box-sizing: border-box;
 }
 
-.lobby-title {
-    font-size: 14px;
-    font-weight: bold;
-    color: #f59e0b; /* amber-500 */
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    border-bottom: 1px solid #334155;
-    padding-bottom: 6px;
-    margin: 0;
-    cursor: default;
-    user-select: none;
-}
 
 .list-container {
     display: flex;
@@ -173,8 +147,9 @@ function getHealthBarClass(health: number) {
 .player-item {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 8px;
+    gap: 8px;
+    padding: 6px 8px;
+    border: 1px solid transparent;
     border-radius: 6px;
     background: rgba(30, 41, 59, 0.4);
     transition: all 0.2s;
@@ -207,8 +182,8 @@ function getHealthBarClass(health: number) {
 }
 
 .avatar-box {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     border-radius: 4px;
     background: #334155;
     display: flex;
@@ -228,14 +203,14 @@ function getHealthBarClass(health: number) {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 5px;
     min-width: 0;
 }
 
 .name-row {
     display: flex;
-    justify-content: space-between;
-    align-items: baseline;
+    align-items: center;
+    gap: 6px;
 }
 
 .player-name {
@@ -245,11 +220,11 @@ function getHealthBarClass(health: number) {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 100px;
+    min-width: 0;
 }
 
 .bot-personality {
-    align-self: flex-start;
+    flex-shrink: 0;
     padding: 1px 5px;
     border: 1px solid rgba(56, 189, 248, 0.35);
     border-radius: 999px;
@@ -262,6 +237,7 @@ function getHealthBarClass(health: number) {
 }
 
 .health-text {
+    margin-left: auto;
     font-size: 12px;
     font-weight: bold;
 }

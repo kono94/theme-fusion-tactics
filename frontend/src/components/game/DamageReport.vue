@@ -1,119 +1,95 @@
 <template>
-  <div class="damage-report-wrapper" :class="{ 'is-collapsed': isCollapsed }">
-    <!-- Toggle Button (Tab) -->
-    <button @click="isCollapsed = !isCollapsed" class="toggle-btn">
-      <div class="tab-label">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="w-4 h-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
+  <div class="report-panel">
+    <div class="header">
+      <div class="metric-tabs-container">
+        <button
+          class="metric-tab-btn"
+          :class="{ active: selectedMetric === 'damage' }"
+          @click="selectedMetric = 'damage'"
         >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-          />
-        </svg>
-        <span>COMBAT REPORT</span>
+          Dealt
+        </button>
+        <button
+          class="metric-tab-btn"
+          :class="{ active: selectedMetric === 'damageTaken' }"
+          @click="selectedMetric = 'damageTaken'"
+        >
+          Taken
+        </button>
+        <button
+          class="metric-tab-btn"
+          :class="{ active: selectedMetric === 'support' }"
+          @click="selectedMetric = 'support'"
+        >
+          Heal & Shield
+        </button>
       </div>
-    </button>
-
-    <!-- Main Panel -->
-    <div class="report-panel">
-      <div class="header">
-        <div class="metric-tabs-container">
-          <button
-            class="metric-tab-btn"
-            :class="{ active: selectedMetric === 'damage' }"
-            @click="selectedMetric = 'damage'"
-          >
-            Dealt
-          </button>
-          <button
-            class="metric-tab-btn"
-            :class="{ active: selectedMetric === 'damageTaken' }"
-            @click="selectedMetric = 'damageTaken'"
-          >
-            Taken
-          </button>
-          <button
-            class="metric-tab-btn"
-            :class="{ active: selectedMetric === 'support' }"
-            @click="selectedMetric = 'support'"
-          >
-            Heal & Shield
-          </button>
-        </div>
-        <div class="tabs-container">
-          <button
-            class="tab-btn"
-            :class="{ active: selectedTab === 'me' }"
-            @click="selectedTab = 'me'"
-          >
-            {{ primaryTabLabel }}
-          </button>
-          <button
-            class="tab-btn"
-            :class="{ active: selectedTab === 'opponent' }"
-            @click="selectedTab = 'opponent'"
-          >
-            {{ opponentTabLabel }}
-          </button>
-        </div>
+      <div class="tabs-container">
+        <button
+          class="tab-btn"
+          :class="{ active: selectedTab === 'me' }"
+          @click="selectedTab = 'me'"
+        >
+          {{ primaryTabLabel }}
+        </button>
+        <button
+          class="tab-btn"
+          :class="{ active: selectedTab === 'opponent' }"
+          @click="selectedTab = 'opponent'"
+        >
+          {{ opponentTabLabel }}
+        </button>
       </div>
+    </div>
 
-      <div class="content custom-scrollbar">
-        <div v-if="sortedEntries.length > 0" class="entries-list">
-          <div v-for="entry in sortedEntries" :key="entry.unitId" class="entry-row">
-            <div class="unit-icon">
-              <img :src="entry.image" class="unit-img" />
+    <div class="content custom-scrollbar">
+      <div v-if="sortedEntries.length > 0" class="entries-list">
+        <div v-for="entry in sortedEntries" :key="entry.unitId" class="entry-row">
+          <div class="unit-icon">
+            <img :src="entry.image" class="unit-img" />
+          </div>
+          <div class="unit-details">
+            <div class="name-dmg-row">
+              <span class="unit-name">{{ entry.unitName }}</span>
+              <span v-if="selectedMetric !== 'support'" class="dmg-val">
+                {{ entry.value.toLocaleString() }}
+              </span>
+              <span v-else class="support-values">
+                <span class="support-total">{{ entry.totalSupport.toLocaleString() }}</span>
+                <span class="support-breakdown">
+                  <span class="heal-val">{{ entry.healing.toLocaleString() }}</span>
+                  <span class="shield-val">{{ entry.shielding.toLocaleString() }}</span>
+                </span>
+              </span>
             </div>
-            <div class="unit-details">
-              <div class="name-dmg-row">
-                <span class="unit-name">{{ entry.unitName }}</span>
-                <span v-if="selectedMetric !== 'support'" class="dmg-val">
-                  {{ entry.value.toLocaleString() }}
-                </span>
-                <span v-else class="support-values">
-                  <span class="support-total">{{ entry.totalSupport.toLocaleString() }}</span>
-                  <span class="support-breakdown">
-                    <span class="heal-val">{{ entry.healing.toLocaleString() }}</span>
-                    <span class="shield-val">{{ entry.shielding.toLocaleString() }}</span>
-                  </span>
-                </span>
-              </div>
-              <div class="dmg-bar-container">
+            <div class="dmg-bar-container">
+              <div
+                v-if="selectedMetric !== 'support'"
+                class="dmg-bar"
+                :style="{ width: `${(entry.value / maxValue) * 100}%` }"
+              ></div>
+              <div
+                v-else
+                class="support-bar"
+                :style="{ width: `${(entry.value / maxValue) * 100}%` }"
+              >
                 <div
-                  v-if="selectedMetric !== 'support'"
-                  class="dmg-bar"
-                  :style="{ width: `${(entry.value / maxValue) * 100}%` }"
+                  v-if="entry.healing > 0"
+                  class="healing-bar"
+                  :style="{ width: `${entry.healingShare}%` }"
                 ></div>
                 <div
-                  v-else
-                  class="support-bar"
-                  :style="{ width: `${(entry.value / maxValue) * 100}%` }"
-                >
-                  <div
-                    v-if="entry.healing > 0"
-                    class="healing-bar"
-                    :style="{ width: `${entry.healingShare}%` }"
-                  ></div>
-                  <div
-                    v-if="entry.shielding > 0"
-                    class="shielding-bar"
-                    :style="{ width: `${entry.shieldingShare}%` }"
-                  ></div>
-                </div>
+                  v-if="entry.shielding > 0"
+                  class="shielding-bar"
+                  :style="{ width: `${entry.shieldingShare}%` }"
+                ></div>
               </div>
             </div>
           </div>
         </div>
-        <div v-else class="empty-state">
-          <p>{{ emptyStateMessage }}</p>
-        </div>
+      </div>
+      <div v-else class="empty-state">
+        <p>{{ emptyStateMessage }}</p>
       </div>
     </div>
   </div>
@@ -133,7 +109,6 @@ const props = defineProps<{
   gameMode?: string
 }>()
 
-const isCollapsed = ref(true)
 const selectedTab = ref<'me' | 'opponent'>('me')
 const selectedMetric = ref<'damage' | 'damageTaken' | 'support'>('damage')
 
@@ -196,60 +171,10 @@ const emptyStateMessage = computed(() =>
 </script>
 
 <style scoped>
-.damage-report-wrapper {
-  position: fixed;
-  top: 100px;
-  right: 0;
-  bottom: 200px;
-  width: 260px;
-  z-index: 1000;
-  display: flex;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.damage-report-wrapper.is-collapsed {
-  transform: translateX(260px);
-}
-
-.toggle-btn {
-  position: absolute;
-  left: -32px;
-  top: 0;
-  width: 32px;
-  height: 140px;
-  background: #1e293b;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-right: none;
-  border-radius: 8px 0 0 8px;
-  color: white;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: -4px 0 15px rgba(0, 0, 0, 0.4);
-}
-
-.tab-label {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
-.tab-label span {
-  writing-mode: vertical-rl;
-  text-transform: uppercase;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  white-space: nowrap;
-}
-
 .report-panel {
   width: 100%;
   height: 100%;
-  background: #0f172a;
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  min-height: 0;
   display: flex;
   flex-direction: column;
 }

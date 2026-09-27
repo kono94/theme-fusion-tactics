@@ -29,6 +29,7 @@ import net.lwenstrom.tft.backend.core.model.GameMode;
 import net.lwenstrom.tft.backend.core.model.GamePhase;
 import net.lwenstrom.tft.backend.core.model.GameState;
 import net.lwenstrom.tft.backend.core.model.GameState.PlayerState;
+import net.lwenstrom.tft.backend.core.model.GameState.UnitStats;
 import net.lwenstrom.tft.backend.core.model.GameUnit;
 import net.lwenstrom.tft.backend.core.model.LootOrb;
 import net.lwenstrom.tft.backend.core.model.LootType;
@@ -57,6 +58,7 @@ public class GameRoom {
     private GamePhase phase = GamePhase.LOBBY;
     private long phaseEndTime;
     private int round = 0;
+    private int itemSlotsPerUnit = GameConstants.DEFAULT_ITEM_SLOTS;
 
     private long currentPhaseDuration;
 
@@ -226,6 +228,14 @@ public class GameRoom {
         return tryAddPlayer(name, null, null);
     }
 
+    public synchronized boolean configureItemSlotsPerUnit(int slots) {
+        if (phase != GamePhase.LOBBY || slots < 1) return false;
+        itemSlotsPerUnit = slots;
+        players.values().forEach(player -> player.setItemSlotsPerUnit(slots));
+        updateGameState(0);
+        return true;
+    }
+
     public synchronized Optional<Player> tryAddPlayer(String name, String analyticsClientId, String reconnectToken) {
         if (!canAcceptPlayers()) {
             return Optional.empty();
@@ -233,6 +243,7 @@ public class GameRoom {
 
         var player = new Player(
                 name, gameMode, dataLoader, randomProvider, analyticsClientId, hashReconnectToken(reconnectToken));
+        player.setItemSlotsPerUnit(itemSlotsPerUnit);
         players.put(player.getId(), player);
         telemetry.playerConnectionEvent(gameMode, "joined");
 
@@ -492,6 +503,7 @@ public class GameRoom {
                         player.collectOrb(action.orbId());
                         yield true;
                     }
+                    case MOVE_ITEM -> player.moveItem(action.itemInstanceId(), action.targetUnitId());
                     case READY_FOR_COMBAT, SELECT_AUGMENT -> false;
                 };
 
@@ -510,7 +522,7 @@ public class GameRoom {
                         && action.targetY() == -1
                         && player.hasBenchUnit(action.unitId());
             case SELL -> action.unitId() != null && player.hasBenchUnit(action.unitId());
-            case COLLECT_ORB, READY_FOR_COMBAT, SELECT_AUGMENT -> false;
+            case COLLECT_ORB, READY_FOR_COMBAT, SELECT_AUGMENT, MOVE_ITEM -> false;
         };
     }
 
@@ -749,7 +761,11 @@ public class GameRoom {
                 getSoloTrainingReadyPlayer().map(Player::getId).orElse(null);
         var displayedTimeLeft = planningTimerPaused ? currentPhaseDuration : Math.max(0, timeLeft);
         Map<String, PlayerState> playerStates = players.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toState()));
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> entry.getValue()
+                                .toState(
+                                        phase == GamePhase.PLANNING ? buildStatPreviews(entry.getValue()) : Map.of())));
 
         for (var combat : activeCombats) {
             for (var p : combat) {
@@ -773,7 +789,25 @@ public class GameRoom {
                 gameMode,
                 planningTimerPaused,
                 planningReadyPlayerId,
-                planningPauseReason);
+                planningPauseReason,
+                itemSlotsPerUnit);
+    }
+
+    private Map<String, UnitStats> buildStatPreviews(Player player) {
+        var previews = new HashMap<String, UnitStats>();
+        var board = player.getBoardUnits();
+        var copies = board.stream().map(GameUnit::cloneUnit).toList();
+        combatSystem.applyStartingBonuses(copies);
+        augmentManager.applyCombatEffects(copies, player.getSelectedAugments());
+        for (var index = 0; index < board.size(); index++) {
+            previews.put(board.get(index).getId(), UnitStats.from(copies.get(index)));
+        }
+        player.getBenchSlots().units().forEach(unit -> {
+            var copy = unit.cloneUnit();
+            ItemStatApplier.apply(copy);
+            previews.put(unit.getId(), UnitStats.from(copy));
+        });
+        return previews;
     }
 
     private boolean isPlanningTimerPaused() {
@@ -835,8 +869,18 @@ public class GameRoom {
         for (var i = 0; i < orbCount; i++) {
             var cell = new OrbCell(
                     randomProvider.nextInt(GameConstants.GRID_COLS), randomProvider.nextInt(GameConstants.PLAYER_ROWS));
-            player.addLootOrb(createLootOrb(player, cell));
+            player.addLootOrb(
+                    i == 0 && GameConstants.ITEM_LOOT_ROUNDS.contains(round)
+                            ? createItemLootOrb(player, cell)
+                            : createLootOrb(player, cell));
         }
+    }
+
+    private LootOrb createItemLootOrb(Player player, OrbCell cell) {
+        var items = dataLoader.getItems(gameMode);
+        if (items.isEmpty()) return createLootOrb(player, cell);
+        var item = items.get(randomProvider.nextInt(items.size()));
+        return new LootOrb(UUID.randomUUID().toString(), cell.x(), cell.y(), LootType.ITEM, item.id(), 1);
     }
 
     private void spawnPendingEmergencyDrops() {

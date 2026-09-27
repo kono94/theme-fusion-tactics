@@ -64,6 +64,8 @@ function player(playerId: string, board: GameUnit[], combatSide: PlayerState['co
         board,
         shop: [],
         lootOrbs: [],
+        inventory: [],
+        statPreviews: {},
         augmentChoices: [],
         selectedAugments: [],
         isGhost: false,
@@ -115,6 +117,7 @@ function state(phase: GameState['phase']): GameState {
         planningTimerPaused: false,
         planningReadyPlayerId: null,
         planningPauseReason: null,
+        itemSlotsPerUnit: 2,
     }
 }
 
@@ -124,6 +127,28 @@ describe('GameCanvas trait highlighting', () => {
             observe() {}
             disconnect() {}
         })
+    })
+
+    it('shows equipped item icons and accepts an item dropped on an owned planning unit', async () => {
+        const game = state('PLANNING')
+        game.players.me.board[0]!.items = [{
+            instanceId: 'owned-item', id: 'onepiece_axe', name: 'Haki Axe', description: '+40% ATK',
+            icon: '/assets/items/onepiece/axe.png', statBonuses: { ATTACK_DAMAGE_PERCENT: 40 },
+        }]
+        const wrapper = mount(GameCanvas, {
+            props: { state: game, actingPlayerId: 'me', viewedPlayerId: 'me', isReadOnly: false },
+            global: { stubs: { CombatEffectsCanvas: true } },
+        })
+
+        expect(wrapper.get('.board-item').attributes('aria-label')).toContain('+40% ATK')
+        await wrapper.get('.board-item').trigger('mouseenter')
+        expect(wrapper.emitted('show-item-tooltip')?.[0]?.[0]).toMatchObject({ item: { instanceId: 'owned-item' } })
+        await wrapper.get('.board-item').trigger('click')
+        expect(wrapper.emitted('item-select')?.[0]?.[0]).toBe('owned-item')
+        const dataTransfer = { getData: (key: string) => key === 'itemInstanceId' ? 'new-item' : '' }
+        await wrapper.findAll('.cell')[27]!.trigger('drop', { dataTransfer })
+        expect(wrapper.emitted('item-drop')?.[0]).toEqual(['new-item', 'fighter'])
+        wrapper.unmount()
     })
 
     it('highlights matching viewed units and dims other viewed units', () => {

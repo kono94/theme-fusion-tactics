@@ -64,6 +64,7 @@ function roomState(gameMode: GameState['gameMode']): GameState {
         planningTimerPaused: false,
         planningReadyPlayerId: null,
         planningPauseReason: null,
+        itemSlotsPerUnit: 2,
     }
 }
 

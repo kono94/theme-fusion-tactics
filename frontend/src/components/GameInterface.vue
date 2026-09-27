@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import GameCanvas from './GameCanvas.vue'
 import UnitTooltip from './UnitTooltip.vue'
 import PhaseAnnouncement from './PhaseAnnouncement.vue'
@@ -8,11 +8,16 @@ import PlayerList from './PlayerList.vue'
 import EndScreen from './EndScreen.vue'
 import AugmentSelectionOverlay from './AugmentSelectionOverlay.vue'
 import SettingsPanel from './SettingsPanel.vue'
+import ItemInventory from './ItemInventory.vue'
+import ItemTooltip from './game/ItemTooltip.vue'
+import DamageReport from './game/DamageReport.vue'
 import type {
   AugmentOffer,
   EmergencyDropPayload,
   GameState,
   GameUnit,
+  GameItem,
+  UnitStats,
   UnitDefinition,
   PlayerState,
 } from '../types'
@@ -33,6 +38,14 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits(['action', 'view-player', 'exit-game', 'abandon-game', 'update-settings'])
+
+const sideTab = ref<'players' | 'combat'>('players')
+const selectedItemId = ref<string | null>(null)
+const isDraggingItem = ref(false)
+let itemDragActive = false
+
+const activeItemTooltip = ref<{ rect: DOMRect; item: GameItem } | null>(null)
+
 
 const combat3dUnavailable = ref(false)
 const showCombat3dFallbackNotice = ref(false)
@@ -67,6 +80,16 @@ const hoveredTraitId = ref<string | null>(null)
 
 const effectiveViewedPlayerId = computed(() => {
   return viewedPlayerId.value || myPlayer.value?.playerId
+})
+
+const damageReportOpponentId = computed(() =>
+  effectiveViewedPlayerId.value ? props.state?.matchups[effectiveViewedPlayerId.value] : undefined,
+)
+
+const damageReportPlayerName = computed(() => {
+  const playerId = effectiveViewedPlayerId.value
+  if (!playerId || playerId === myPlayer.value?.playerId) return 'YOU'
+  return props.state?.players[playerId]?.name || 'Viewed'
 })
 
 const viewedPlayer = computed((): PlayerState | null => {
@@ -107,6 +130,70 @@ const hasPendingAugmentChoices = computed(() => pendingAugmentChoices.value.leng
 const benchUnits = computed((): (GameUnit | null)[] => {
   return myPlayer.value?.bench || []
 })
+
+function findOwnedItem(itemId: string): GameItem | null {
+  if (!myPlayer.value) return null
+  return myPlayer.value.inventory?.find((item) => item.instanceId === itemId)
+    || [...myPlayer.value.board, ...myPlayer.value.bench.filter((unit): unit is GameUnit => !!unit)]
+      .flatMap((unit) => unit.items)
+      .find((item) => item.instanceId === itemId)
+    || null
+}
+
+const selectedItem = computed((): GameItem | null =>
+  selectedItemId.value ? findOwnedItem(selectedItemId.value) : null)
+
+const selectedIsEquipped = computed(() => !!selectedItem.value &&
+  !myPlayer.value?.inventory.some((item) => item.instanceId === selectedItemId.value))
+
+function showItemTooltip(rect: DOMRect, item: GameItem) {
+  if (isDraggingUnit.value || isDraggingItem.value) return
+  activeItemTooltip.value = { rect, item }
+}
+
+function hideItemTooltip() {
+  activeItemTooltip.value = null
+}
+
+watch(selectedItem, (item) => { if (!item) selectedItemId.value = null })
+
+function selectItem(itemId: string, anchor?: HTMLElement) {
+  const item = findOwnedItem(itemId)
+  if (!item) return
+  selectedItemId.value = selectedItemId.value === itemId ? null : itemId
+  handleHideTooltip()
+  if (anchor) showItemTooltip(anchor.getBoundingClientRect(), item)
+}
+
+function moveItem(itemId: string, targetUnitId: string | null) {
+  if (!canManageTeam.value || !myPlayer.value) return
+  emit('action', { type: 'MOVE_ITEM', playerId: myPlayer.value.playerId, itemInstanceId: itemId, targetUnitId })
+  selectedItemId.value = null
+  hideItemTooltip()
+}
+
+function onItemDragStart(event: DragEvent, item: GameItem) {
+  if (!canManageTeam.value || !event.dataTransfer) { event.preventDefault(); return }
+  event.dataTransfer.setData('itemInstanceId', item.instanceId)
+  event.dataTransfer.effectAllowed = 'move'
+  handleHideTooltip()
+  hideItemTooltip()
+  // Chrome cancels a drag whose source subtree changes during dragstart; flipping this
+  // disables pointer events on the unit that holds the dragged badge, so defer it.
+  itemDragActive = true
+  window.setTimeout(() => {
+    isDraggingItem.value = itemDragActive
+  })
+}
+
+function onItemDragEnd() {
+  itemDragActive = false
+  isDraggingItem.value = false
+}
+
+function chooseItemTarget(unitId: string) {
+  if (selectedItemId.value) moveItem(selectedItemId.value, unitId)
+}
 
 const myPlayerBoardUnits = computed((): GameUnit[] => {
   if (!myPlayer.value) return []
@@ -254,6 +341,12 @@ const onBenchDrop = (evt: DragEvent, index: number) => {
   if (!canManageShopAndBench.value) return
   dragOverBenchIndex.value = -1
   if (evt.dataTransfer) {
+    const itemId = evt.dataTransfer.getData('itemInstanceId')
+    const target = benchSlots.value[index]?.unit
+    if (itemId && target && canManageTeam.value) {
+      moveItem(itemId, target.id)
+      return
+    }
     const unitId = evt.dataTransfer.getData('unitId')
     if (unitId) {
       emit('action', {
@@ -310,6 +403,21 @@ const activeTooltip = ref<{
   placement: 'top' | 'bottom'
   shift?: 'left' | 'more-left' | 'center'
 } | null>(null)
+const resolvedTooltipUnit = computed((): GameUnit | UnitDefinition | null => {
+  const original = activeTooltip.value?.unit
+  if (!original) return null
+  if (!('ownerId' in original)) return original
+  for (const player of allPlayers.value) {
+    const latest = [...player.board, ...player.bench].find((unit) => unit?.id === original.id)
+    if (latest) return latest
+  }
+  return original
+})
+const tooltipPreview = computed((): UnitStats | null => {
+  const unit = resolvedTooltipUnit.value
+  if (!unit || !('ownerId' in unit) || props.state?.phase !== 'PLANNING') return null
+  return props.state.players[unit.ownerId]?.statPreviews?.[unit.id] || null
+})
 const hoveredOwnedUnitId = ref<string | null>(null)
 
 function findOwnedUnit(unitId: string): GameUnit | null {
@@ -324,7 +432,7 @@ const handleShowTooltip = (
   placement: 'top' | 'bottom' = 'top',
   shift?: 'left' | 'more-left' | 'center',
 ) => {
-  if (isDraggingUnit.value) return
+  if (isDraggingUnit.value || isDraggingItem.value) return
   hoveredOwnedUnitId.value = findOwnedUnit(unit.id)?.id ?? null
   activeTooltip.value = {
     unit,
@@ -338,6 +446,22 @@ const handleHideTooltip = () => {
   activeTooltip.value = null
   hoveredOwnedUnitId.value = null
 }
+
+const TOOLTIP_VIEWPORT_MARGIN = 8
+const tooltipContainer = ref<HTMLElement | null>(null)
+const tooltipNudgeY = ref(0)
+
+watch(activeTooltip, async () => {
+  tooltipNudgeY.value = 0
+  await nextTick()
+  const card = tooltipContainer.value?.firstElementChild?.getBoundingClientRect()
+  if (!card) return
+  if (card.top < TOOLTIP_VIEWPORT_MARGIN) {
+    tooltipNudgeY.value = TOOLTIP_VIEWPORT_MARGIN - card.top
+  } else if (card.bottom > window.innerHeight - TOOLTIP_VIEWPORT_MARGIN) {
+    tooltipNudgeY.value = window.innerHeight - TOOLTIP_VIEWPORT_MARGIN - card.bottom
+  }
+})
 
 // ========== DRAG AND SELL STATE ==========
 const isDraggingUnit = ref(false)
@@ -360,6 +484,10 @@ function isTextEntryTarget(target: EventTarget | null) {
 }
 
 function handleKeyboardShortcut(event: KeyboardEvent) {
+  if (event.key === 'Escape' && selectedItemId.value) {
+    selectedItemId.value = null
+    return
+  }
   if (
     event.defaultPrevented ||
     event.repeat ||
@@ -681,7 +809,8 @@ watch(
           :acting-player-id="myPlayer?.playerId"
           :viewed-player-id="effectiveViewedPlayerId"
           :is-read-only="isSpectating || !canManageTeam"
-          :is-dragging-prop="isDraggingUnit"
+          :is-dragging-prop="isDraggingUnit || isDraggingItem"
+          :selected-item-id="selectedItemId"
           :highlighted-trait-id="hoveredTraitId"
           :emergency-drop="emergencyDrop || queuedEmergencyDrop"
           :emergency-drop-active="!!emergencyDrop"
@@ -691,17 +820,72 @@ watch(
           @drag-start="onGridDragStart"
           @drag-end="onGridDragEnd"
           @collect-orb="handleCollectOrb"
+          @item-drop="(itemId, unitId) => moveItem(itemId, unitId)"
+          @item-select="selectItem"
+          @item-drag-start="onItemDragStart"
+          @item-drag-end="onItemDragEnd"
+          @show-item-tooltip="(data) => showItemTooltip(data.rect, data.item)"
+          @hide-item-tooltip="hideItemTooltip"
+          @unit-click="chooseItemTarget"
           @update:is-over-grid="(val) => (isOverGrid = val)"
           @show-tooltip="(data) => handleShowTooltip(data.rect, data.unit, data.placement)"
           @hide-tooltip="handleHideTooltip"
         />
-        <PlayerList
-          v-if="state"
-          :players="allPlayers"
-          :my-player-id="myPlayer?.playerId"
-          :selected-player-id="effectiveViewedPlayerId"
-          @select-player="selectViewedPlayer"
-        />
+        <aside v-if="state" class="side-column">
+          <section class="side-card">
+            <div class="side-tabs" role="tablist">
+              <button
+                type="button"
+                role="tab"
+                class="side-tab"
+                :class="{ active: sideTab === 'players' }"
+                :aria-selected="sideTab === 'players'"
+                @click="sideTab = 'players'"
+              >
+                Players
+              </button>
+              <button
+                type="button"
+                role="tab"
+                class="side-tab"
+                :class="{ active: sideTab === 'combat' }"
+                :aria-selected="sideTab === 'combat'"
+                @click="sideTab = 'combat'"
+              >
+                Combat report
+              </button>
+            </div>
+            <PlayerList
+              v-if="sideTab === 'players'"
+              :players="allPlayers"
+              :my-player-id="myPlayer?.playerId"
+              :selected-player-id="effectiveViewedPlayerId"
+              @select-player="selectViewedPlayer"
+            />
+            <DamageReport
+              v-else
+              :damage-log="state.damageLog"
+              :my-player-id="effectiveViewedPlayerId"
+              :my-player-name="damageReportPlayerName"
+              :opponent-id="damageReportOpponentId"
+              :opponent-name="damageReportOpponentId ? state.players[damageReportOpponentId]?.name || 'Opponent' : undefined"
+              :game-mode="state.gameMode"
+            />
+          </section>
+          <ItemInventory
+            v-if="myPlayer && !isSpectating"
+            :items="myPlayer.inventory"
+            :can-manage="canManageTeam"
+            :selected-item-id="selectedItemId"
+            :selected-is-equipped="selectedIsEquipped"
+            @select="selectItem"
+            @drag-item="onItemDragStart"
+            @drag-end="onItemDragEnd"
+            @return-item="(itemId) => moveItem(itemId, null)"
+            @show-item="showItemTooltip"
+            @hide-item="hideItemTooltip"
+          />
+        </aside>
       </div>
 
       <!-- Bottom UI -->
@@ -808,6 +992,7 @@ watch(
                       )
                   "
                   @mouseleave="handleHideTooltip"
+                  @click="chooseItemTarget(slot.unit.id)"
                 >
                   <!-- Cost Top Glow (Outside inner to avoid clipping) -->
                   <div class="cost-top-glow"></div>
@@ -837,6 +1022,17 @@ watch(
                       class="bench-unit-img"
                       draggable="false"
                     />
+                    <div v-if="slot.unit.items?.length" class="bench-items">
+                      <button v-for="item in slot.unit.items" :key="item.instanceId" type="button"
+                        class="equipped-item" :class="{ selected: selectedItemId === item.instanceId }"
+                        :aria-label="`${item.name}: ${item.description}`"
+                        :draggable="canManageTeam" @click.stop="(event) => selectItem(item.instanceId, event.currentTarget as HTMLElement)"
+                        @mouseenter.stop="(event) => showItemTooltip((event.currentTarget as HTMLElement).getBoundingClientRect(), item)"
+                        @mouseleave="hideItemTooltip"
+                        @dragstart.stop="(event) => onItemDragStart(event, item)" @dragend.stop="onItemDragEnd">
+                        <img :src="item.icon" :alt="item.name" draggable="false" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -957,7 +1153,18 @@ watch(
     <Teleport to="body">
       <transition name="fade">
         <div
-          v-if="activeTooltip"
+          v-if="activeItemTooltip"
+          class="item-tooltip-anchor"
+          :style="{
+            left: activeItemTooltip.rect.left + activeItemTooltip.rect.width / 2 + 'px',
+            top: activeItemTooltip.rect.top + 'px',
+          }"
+        >
+          <ItemTooltip :item="activeItemTooltip.item" />
+        </div>
+        <div
+          v-else-if="activeTooltip"
+          ref="tooltipContainer"
           class="global-tooltip-container"
           :style="{
             position: 'fixed',
@@ -965,12 +1172,14 @@ watch(
             top: activeTooltip.rect.top + 'px',
             width: activeTooltip.rect.width + 'px',
             height: activeTooltip.rect.height + 'px',
+            transform: `translateY(${tooltipNudgeY}px)`,
             zIndex: 100000,
             pointerEvents: 'none',
           }"
         >
           <UnitTooltip
-            :unit="activeTooltip.unit"
+            :unit="resolvedTooltipUnit || activeTooltip.unit"
+            :preview="tooltipPreview"
             :placement="activeTooltip.placement"
             :shift="activeTooltip.shift"
           />
@@ -1130,6 +1339,43 @@ watch(
   pointer-events: none;
   z-index: 2; /* Ensures portrait stays above halos/flows */
 }
+.bench-items {
+  position: absolute;
+  z-index: 5;
+  left: 50%;
+  bottom: -6px;
+  display: flex;
+  gap: 2px;
+  transform: translateX(-50%);
+}
+
+.equipped-item {
+  width: var(--item-slot-size);
+  height: var(--item-slot-size);
+  padding: 0;
+  border: 1px solid #fbbf24;
+  border-radius: 4px;
+  background: #0f172a;
+  cursor: pointer;
+}
+
+.equipped-item.selected,
+.equipped-item:hover {
+  outline: 2px solid #fbbf24;
+}
+
+.equipped-item img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.item-tooltip-anchor {
+  position: fixed;
+  z-index: 100000;
+  pointer-events: none;
+  transform: translate(-50%, calc(-100% - 8px));
+}
 
 .main-area {
   position: relative;
@@ -1141,6 +1387,66 @@ watch(
   background: #1a1a1a;
   overflow: visible;
   z-index: 60; /* Under bottom-ui (70) so bottom tooltips can overlap */
+}
+
+.side-column {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  bottom: 10px;
+  width: 250px;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-family: var(--app-font-family);
+  pointer-events: auto;
+}
+
+.side-card {
+  flex: 0 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid #334155;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.side-column > .inventory-card {
+  margin-top: auto;
+}
+
+.side-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 6px 6px 0;
+}
+
+.side-tab {
+  padding: 6px 4px;
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: #64748b;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.side-tab:hover {
+  color: #cbd5e1;
+}
+
+.side-tab.active {
+  color: #f59e0b;
+  border-bottom-color: #f59e0b;
 }
 
 .combat-3d-fallback-notice {
@@ -1397,13 +1703,17 @@ watch(
 
 .bench-slots {
   display: flex;
+  justify-content: center;
   gap: 4px; /* Tightened gap */
+  width: 100%;
+  min-width: 0;
   overflow: visible;
 }
 
 .bench-slot {
-  width: 64px;
-  height: 64px;
+  flex: 0 1 64px;
+  min-width: 0;
+  aspect-ratio: 1;
   background: rgba(30, 41, 59, 0.6);
   border: 1px solid #334155;
   border-radius: 8px;

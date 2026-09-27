@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { GameUnit, UnitDefinition, UnitRole } from '../types'
+import type { GameUnit, UnitDefinition, UnitRole, UnitStats } from '../types'
 import { getTraitData } from '../data/traitData'
 
 type TooltipUnit = Partial<GameUnit & UnitDefinition> & {
@@ -13,7 +13,8 @@ const props = defineProps<{
     unit: TooltipUnit,
     placement?: 'top' | 'bottom',
     shift?: 'left' | 'more-left' | 'center',
-    showCost?: boolean
+    showCost?: boolean,
+    preview?: UnitStats | null
 }>()
 
 const getBaseValue = (val: TooltipValue): number | string | undefined => {
@@ -23,19 +24,24 @@ const getBaseValue = (val: TooltipValue): number | string | undefined => {
 
 const stats = computed(() => {
     if (!props.unit) return {}
-    const maxHp = Number(getBaseValue(props.unit.maxHealth) ?? 100)
+    const value = props.preview || props.unit
+    const maxHp = Number(getBaseValue(value.maxHealth) ?? 100)
     // If currentHealth is missing (shop unit), use maxHealth
-    const curHp = props.unit.currentHealth !== undefined ? props.unit.currentHealth : maxHp;
+    const curHp = value.currentHealth !== undefined ? value.currentHealth : maxHp;
     // Units usually start with 0 mana unless specified
-    const curMana = props.unit.mana !== undefined ? props.unit.mana : 0;
+    const curMana = value.mana !== undefined ? value.mana : 0;
     
     return {
         hp: `${curHp || 0}/${maxHp || 100}`,
-        atk: getBaseValue(props.unit.attackDamage) || 0,
-        defense: getBaseValue(props.unit.defense) || 0,
-        spd: parseFloat(String(getBaseValue(props.unit.attackSpeed) || 0)).toFixed(2),
+        atk: getBaseValue(value.attackDamage) || 0,
+        defense: getBaseValue(value.defense) || 0,
+        spd: parseFloat(String(getBaseValue(value.attackSpeed) || 0)).toFixed(2),
         range: getBaseValue(props.unit.range) || 0,
-        mana: `${curMana || 0}/${getBaseValue(props.unit.maxMana) || 100}`
+        mana: `${curMana || 0}/${getBaseValue(value.maxMana) || 100}`,
+        abilityDamage: Math.round(((props.preview?.abilityDamageMultiplier ?? props.unit.abilityDamageMultiplier ?? 1) - 1) * 100),
+        damageReduction: props.preview?.damageReduction ?? props.unit.damageReduction ?? 0,
+        lifesteal: Math.round((props.preview?.lifesteal ?? props.unit.lifesteal ?? 0) * 100),
+        shield: props.preview?.shield ?? props.unit.shield ?? 0,
     }
 })
 
@@ -87,6 +93,7 @@ const rarityColor = computed(() => {
           <span class="role-badge" :class="`role-${role.toLowerCase()}`">{{ formatRole(role) }}</span>
           <span class="range-badge" :class="`range-${attackStyle.toLowerCase()}`">{{ attackStyle }}</span>
       </div>
+      <div v-if="preview" class="preview-label">{{ unit.y === -1 ? 'Item-adjusted bench stats' : 'Projected combat-start stats' }}</div>
       <div class="stats-grid">
           <div class="stat-row">
               <span class="label">HP:</span>
@@ -112,6 +119,10 @@ const rarityColor = computed(() => {
               <span class="label">Range:</span>
               <span class="value">{{ stats.range }}</span>
           </div>
+          <div v-if="stats.abilityDamage" class="stat-row"><span class="label">Ability dmg:</span><span class="value">+{{ stats.abilityDamage }}%</span></div>
+          <div v-if="stats.damageReduction" class="stat-row"><span class="label">Damage reduction:</span><span class="value">{{ stats.damageReduction }}%</span></div>
+          <div v-if="stats.lifesteal" class="stat-row"><span class="label">Lifesteal:</span><span class="value">{{ stats.lifesteal }}%</span></div>
+          <div v-if="stats.shield" class="stat-row"><span class="label">Starting shield:</span><span class="value">{{ stats.shield }}</span></div>
       </div>
       
       <div class="ability-section" v-if="ability">
@@ -327,4 +338,5 @@ const rarityColor = computed(() => {
     border-radius: 4px;
     font-size: 0.75em;
 }
+.preview-label { color: #93c5fd; font-size: .68em; margin: 4px 0; }
 </style>

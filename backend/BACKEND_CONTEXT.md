@@ -1,6 +1,6 @@
 # Backend Context
 
-> Last verified: 2026-09-16
+> Last verified: 2026-09-27
 >
 > Scope: the current Java backend, transport contracts, mode data, analytics, observability, and test/build workflow.
 >
@@ -97,12 +97,12 @@ LOBBY → PLANNING ⇄ COMBAT → END_CELEBRATION → END
 - A room starts in `LOBBY` with no running timer.
 - Starting fills vacant positions with bots and enters round 1 planning.
 - Planning grants income/interest and XP, refreshes unlocked shops, restores units, upgrades pending copies, spawns
-  scheduled loot, and generates augment offers on rounds 3, 6, and 11.
+  scheduled loot, including an item orb on rounds 2, 4, 6, and 10, and generates augment offers on rounds 3, 6, and 11.
 - Augment offers do not pause normal multiplayer planning. Unanswered offers are selected randomly when combat begins.
 - Solo-human training against bots uses `planningTimerPaused=true`, `planningPauseReason=SOLO_READY`, and
   `READY_FOR_COMBAT`.
-- Combat auto-fills boards, shuffles alive players into pairs, creates a donor ghost for an odd player, applies traits and
-  combat augments, and advances on completion or timeout. Once every human-involved pairing resolves, any remaining
+- Combat auto-fills boards, shuffles alive players into pairs, creates a donor ghost for an odd player, applies items,
+  traits, and combat augments in that order, and advances on completion or timeout. Once every human-involved pairing resolves, any remaining
   bot-only pairings are simulated through the remaining combat window immediately.
 - `END_CELEBRATION` exposes final placement before `END`; ended rooms are removed by the same engine tick that observes
   them.
@@ -112,7 +112,7 @@ paid shop refresh, loot, and augment offers, including round 1. It collects loot
 and uses normal purchase, sale, XP, reroll, upgrade, and movement operations. Lobby bots have no generated army or
 hidden economy/stat grants. Each bot is initialized with an economy, reroll, fast-level, or trait-focused `BotStrategy`.
 Strategies vary reserve, reroll, leveling, and team-scoring policy while sharing the same authoritative player actions.
-All bots favor immediate upgrades and legal board improvements, act at most 40 times per planning pass, and position
+All bots favor immediate upgrades and legal board improvements, equip available items by unit role, act at most 40 times per planning pass, and position
 tanks/melee in front with ranged units behind. The existing human-only emergency drop remains unchanged.
 
 ## 6. Modes and data loading
@@ -121,13 +121,14 @@ tanks/melee in front with ranged units behind. The existing human-only emergency
 One Piece mode. The host can change the room mode only while it is in `LOBBY`; deployment does not select or restrict the
 mode. Focused tests that register only one provider use that available provider as their initial mode.
 
-| Mode | Units | Traits | Augments | Affinities |
-|---|---|---|---|---|
-| One Piece | `units_onepiece.json` | `traits_onepiece.json` | `augments_onepiece.json` | neutral |
-| Pokemon | `units_pokemon.json` | `traits_pokemon.json` | `augments_pokemon.json` | `affinities_pokemon.json` |
+| Mode | Units | Traits | Augments | Items | Affinities |
+|---|---|---|---|---|---|
+| One Piece | `units_onepiece.json` | `traits_onepiece.json` | `augments_onepiece.json` | `items_onepiece.json` | neutral |
+| Pokemon | `units_pokemon.json` | `traits_pokemon.json` | `augments_pokemon.json` | `items_pokemon.json` | `affinities_pokemon.json` |
 
 `DataLoader.loadData()` preloads every registered mode at startup. Missing resources, malformed JSON, duplicate unit IDs,
-or an empty required units/traits/augments dataset fail startup. A provider that declares an affinity file must supply a
+or an empty required units/traits/augments/items dataset fail startup. Item `statBonuses` keys are the `ItemStat` enum, so an
+unknown stat, duplicate item ID, missing icon, or non-positive bonus also fails startup. A provider that declares an affinity file must supply a
 valid one. One Piece intentionally has no affinity file and receives a neutral resolver.
 
 `UnitDefinition.lineId` is the combination identity. Optional `forms` can change definition ID, name, role, traits,
@@ -194,6 +195,7 @@ supersedes earlier snapshots. Message drops and send failures are counted by bou
 - `BUY`, `REROLL`, `EXP`, and `LOCK` are allowed in planning and combat.
 - During combat, `MOVE` is allowed only for bench-to-bench reordering (`targetY=-1`) and `SELL` only for bench units.
 - `COLLECT_ORB` is planning-only.
+- `MOVE_ITEM` is planning-only and requires `itemInstanceId`; omitted `targetUnitId` returns the copy to inventory.
 - `SELECT_AUGMENT` is planning-only and requires `augmentId`.
 - `READY_FOR_COMBAT` succeeds only for the eligible solo-training human.
 - The backend remains authoritative even if the UI incorrectly enables a control.
@@ -216,7 +218,7 @@ For `MOVE`, `targetX` is `0-8`. A `targetY` of `0-2` selects a planning-board ro
 ```text
 roomId, hostId, phase, round, timeRemainingMs, totalPhaseDuration,
 players, matchups, recentEvents, damageLog, gameMode,
-planningTimerPaused, planningReadyPlayerId, planningPauseReason
+planningTimerPaused, planningReadyPlayerId, planningPauseReason, itemSlotsPerUnit
 ```
 
 `hostId` is null before the first player or after the final lobby player leaves. `players` is keyed by player ID.
@@ -225,11 +227,19 @@ planningTimerPaused, planningReadyPlayerId, planningPauseReason
 
 ```text
 playerId, name, health, gold, level, xp, nextLevelXp, place, combatSide,
-bench, board, shop, lootOrbs, augmentChoices, selectedAugments, isGhost, isBot, botPersonality, matchStats
+bench, board, shop, lootOrbs, augmentChoices, selectedAugments, isGhost, isBot, botPersonality, matchStats,
+inventory, statPreviews
 ```
 
 `matchStats` is an in-memory, per-player summary of total damage, healing, and shielding plus win/loss/draw counts and
 round results. It records each real participant once when combat resolves and ignores donor-ghost contributions.
+
+`inventory` holds uniquely identified item copies. Each unit's `items` holds equipped copies; definition IDs are saved
+in final-board analytics. Planning-only `MOVE_ITEM` accepts an item instance ID and optional owned target unit ID. A null
+target returns the item to inventory. The room checks phase and player identity, and `Player` checks ownership and slot
+capacity. Sales return equipment to inventory, and upgrades fill the survivor's slots before returning extra copies.
+The room publishes `statPreviews` by cloning units: board previews apply items, traits, then augments; bench previews
+apply items only. Combat snapshots expose live modified values.
 
 There is no `activeTraits` field in the wire contract. Trait effects are applied by `TraitManager`; trait display metadata
 comes from `/api/traits` and the board is used to derive display counts. Each trait response also includes a cost-ordered

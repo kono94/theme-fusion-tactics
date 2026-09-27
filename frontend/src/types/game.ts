@@ -27,6 +27,7 @@ export type ActionType =
   | 'COLLECT_ORB'
   | 'READY_FOR_COMBAT'
   | 'SELECT_AUGMENT'
+  | 'MOVE_ITEM'
 
 export type CombatSide = 'TOP' | 'BOTTOM'
 
@@ -62,11 +63,36 @@ export interface UnitFormDefinition {
   ability?: AbilityDefinition | null
 }
 
+export type ItemStat =
+  | 'MAX_HEALTH_PERCENT'
+  | 'ATTACK_DAMAGE_PERCENT'
+  | 'DEFENSE_FLAT'
+  | 'ATTACK_SPEED_PERCENT'
+  | 'ABILITY_DAMAGE_PERCENT'
+
 export interface GameItem {
+  instanceId: string
   id: string
   name: string
   description: string
-  statBonuses: Record<string, number>
+  icon: string
+  statBonuses: Partial<Record<ItemStat, number>>
+}
+
+export type ItemDefinition = Omit<GameItem, 'instanceId'>
+
+export interface UnitStats {
+  maxHealth: number
+  currentHealth: number
+  mana: number
+  maxMana: number
+  attackDamage: number
+  defense: number
+  attackSpeed: number
+  abilityDamageMultiplier: number
+  shield: number
+  damageReduction: number
+  lifesteal: number
 }
 
 export interface GameUnit {
@@ -99,6 +125,9 @@ export interface GameUnit {
   stunSecondsRemaining: number
   atkBuff: number // 1.0 = no buff
   spdBuff: number // 1.0 = no buff
+  abilityDamageMultiplier?: number
+  damageReduction?: number
+  lifesteal?: number
 }
 
 export interface UnitDefinition {
@@ -131,7 +160,7 @@ export interface ActiveStatusView {
   description?: string
 }
 
-export type LootType = 'GOLD' | 'UNIT'
+export type LootType = 'GOLD' | 'UNIT' | 'ITEM'
 
 export interface LootOrb {
   id: string
@@ -213,6 +242,8 @@ export interface PlayerState {
   board: GameUnit[]
   shop: UnitDefinition[]
   lootOrbs: LootOrb[]
+  inventory: GameItem[]
+  statPreviews: Record<string, UnitStats>
   augmentChoices: AugmentOffer[]
   selectedAugments: SelectedAugment[]
   isGhost: boolean
@@ -280,6 +311,7 @@ export interface GameState {
   planningTimerPaused: boolean
   planningReadyPlayerId: string | null
   planningPauseReason: PlanningPauseReason
+  itemSlotsPerUnit: number
 }
 
 // ============================================================================
@@ -296,6 +328,8 @@ export interface GameAction {
   shopIndex?: number // For BUY (0-4)
   orbId?: string // For COLLECT_ORB
   augmentId?: string // For SELECT_AUGMENT
+  itemInstanceId?: string // For MOVE_ITEM
+  targetUnitId?: string | null // MOVE_ITEM: null returns an equipped item to inventory
 }
 
 export interface ActionResult {

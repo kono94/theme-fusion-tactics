@@ -60,6 +60,13 @@ public final class TestHelpers {
     }
 
     public static DataLoader createMockDataLoader(List<UnitDefinition> units, List<AugmentDefinition> augments) {
+        return createMockDataLoader(units, augments, List.of());
+    }
+
+    public static DataLoader createMockDataLoader(
+            List<UnitDefinition> units,
+            List<AugmentDefinition> augments,
+            List<net.lwenstrom.tft.backend.core.model.ItemDefinition> items) {
         var registry = createMockRegistry();
         return new DataLoader(
                 registry, tools.jackson.databind.json.JsonMapper.builder().build()) {
@@ -84,6 +91,11 @@ public final class TestHelpers {
             @Override
             public List<AugmentDefinition> getAugments(GameMode mode) {
                 return augments;
+            }
+
+            @Override
+            public List<net.lwenstrom.tft.backend.core.model.ItemDefinition> getItems(GameMode mode) {
+                return items;
             }
 
             @Override

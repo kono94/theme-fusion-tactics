@@ -162,7 +162,7 @@ public abstract class AbstractGameUnit implements GameUnit {
         this.x = other.x;
         this.y = other.y;
         this.dotEffects.addAll(other.dotEffects);
-        // Items are not cloned for now (ghosts don't need them)
+        this.items.addAll(other.items);
 
         // Combat buffs
         this.stunSecondsRemaining = other.stunSecondsRemaining;

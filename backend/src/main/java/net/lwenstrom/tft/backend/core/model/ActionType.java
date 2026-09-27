@@ -9,5 +9,6 @@ public enum ActionType {
     LOCK,
     COLLECT_ORB,
     READY_FOR_COMBAT,
-    SELECT_AUGMENT
+    SELECT_AUGMENT,
+    MOVE_ITEM
 }

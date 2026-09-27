@@ -23,6 +23,7 @@ export function toCombatUnit3d(unit: RenderedUnit): CombatUnit3d {
     abilityType: unit.ability?.type ?? null,
     abilityName: unit.ability?.name ?? null,
     abilityPattern: unit.ability?.pattern ?? null,
+    items: (unit.items || []).map((item) => ({ id: item.id, name: item.name, icon: item.icon })),
     attack: resolveAttackConfig(unit),
     ability: resolveAbilityConfig(unit),
   }

@@ -26,6 +26,8 @@ function gameState(gameMode: GameState['gameMode'] = 'pokemon'): GameState {
                 board: [],
                 shop: [],
                 lootOrbs: [],
+        inventory: [],
+        statPreviews: {},
                 augmentChoices: [],
                 selectedAugments: [],
                 isGhost: false,
@@ -51,6 +53,7 @@ function gameState(gameMode: GameState['gameMode'] = 'pokemon'): GameState {
         planningTimerPaused: false,
         planningReadyPlayerId: null,
         planningPauseReason: null,
+        itemSlotsPerUnit: 2,
     }
 }
 

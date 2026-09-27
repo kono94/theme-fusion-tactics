@@ -39,6 +39,7 @@ For detailed architectural information, refer to the context documents:
 - **Ghost/clone matchmaking** — Odd player count creates AI clones for balanced combat
 - **Player elimination** — Ranked placement system with game-ending logic
 - **Loot orbs** — Gold and unit rewards spawn after combat rounds, with a one-time emergency drop when a surviving human first falls to 20 health or lower
+- **Mode-themed items** — Four scheduled item rewards per match, freely movable during planning between inventory and owned units; each unit holds two by default
 - **Data-loaded elemental combat** — Pokemon auto attacks and damage abilities derive their offensive element from traits using the best-attacker-trait rule and mode-owned affinity data; One Piece remains neutral
 - **Role-based unit identity** — Every form is labeled Damage, Tank, or Support; Pokemon evolutions can change roles
 - **Unified DEF combat stat** — DEF mitigates attacks, abilities, and damage-over-time and can be buffed or shredded
@@ -53,6 +54,7 @@ For detailed architectural information, refer to the context documents:
 - **Shop probability tooltip** — Hover over player level to see current unit cost distribution
 - **Git-based version display** — Build metadata (tag, commit, timestamp) in bottom-left corner
 - **Smart unit tooltips** — Role, melee/ranged, trait-color, and DEF badges with star-level ability highlighting
+- **Projected unit stats** — Planning hover includes equipped items, active board traits, and augments; the always-visible Items panel supports drag/drop (including unit to unit) and tap selection
 - **Player board spectating** — Click alive players in the right panel to view their board and combat from their perspective
 - **Shareable room invites** — New rooms receive a short generated code and a direct invite link, so friends do not need to enter the room code
 - **Remembered player names** — Choose a display name before creating or joining; remembered names join invite links automatically, while new visitors enter a name and continue
@@ -206,13 +208,13 @@ To add a new theme, implement `GameModeProvider` and add corresponding JSON data
 | `/app/start` | Client → Server | Host starts the match |
 | `/app/room/{id}/add-bot` | Client → Server | Host adds a lobby bot |
 | `/app/room/{id}/mode` | Client → Server | Host changes the room game mode during lobby |
-| `/app/room/{id}/action` | Client → Server | Player action (BUY, MOVE, REROLL, EXP, SELL, LOCK, COLLECT_ORB, READY_FOR_COMBAT, SELECT_AUGMENT) |
+| `/app/room/{id}/action` | Client → Server | Player action (BUY, MOVE, MOVE_ITEM, REROLL, EXP, SELL, LOCK, COLLECT_ORB, READY_FOR_COMBAT, SELECT_AUGMENT) |
 | `/app/telemetry/action-ack` | Client → Server | Browser-observed action-acknowledgement latency for the bound session |
 | `/topic/room/{id}` | Server → Client | Game state broadcast (100ms) |
 | `/topic/room/{id}/event` | Server → Client | Typed combat-result and emergency-drop events |
 | `/user/queue/room-result` | Server → Client | Private create/join acknowledgement with player id or rejection code |
 
-Client actions are bound to the STOMP session that joined the room. The backend rejects actions, start requests, and mode changes that attempt to act as a different player id. Shop/economy controls and bench-only selling or reordering remain available during combat, while board mutations and orb collection are planning-only. Create/join failures are returned privately instead of leaving the client waiting.
+Client actions are bound to the STOMP session that joined the room. The backend rejects actions, start requests, and mode changes that attempt to act as a different player id. Shop/economy controls and bench-only selling or reordering remain available during combat, while board mutations, orb collection, and `MOVE_ITEM` are planning-only. `MOVE_ITEM` carries `itemInstanceId` and an optional `targetUnitId`; null returns the owned copy to inventory. Create/join failures are returned privately instead of leaving the client waiting.
 Augment choices are included in each player's `GameState` snapshot as `augmentChoices`; selected augments are exposed as `selectedAugments`.
 
 ### REST Endpoints
@@ -221,6 +223,7 @@ Augment choices are included in each player's `GameState` snapshot as `augmentCh
 | `/api/config` | GET | Default game mode and available lobby modes |
 | `/api/mode` | GET | Default game mode |
 | `/api/traits?mode={mode}` | GET | Trait definitions and cost-ordered unit rosters for the selected mode |
+| `/api/items?mode={mode}` | GET | Item definitions, icons, descriptions, and stat bonuses for the selected mode |
 | `/api/match-history` | GET | Public latest-20 completed solo matches with final placements and compositions |
 | `/api/admin/auth/login` | POST | Exchange the configured admin password for an eight-hour bearer token |
 | `/api/admin/auth/logout` | POST | Revoke the current bearer token |

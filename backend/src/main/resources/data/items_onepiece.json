@@ -1,0 +1,80 @@
+[
+  {
+    "id": "onepiece_coat",
+    "name": "Captain’s Coat",
+    "description": "+40% max HP",
+    "icon": "/assets/items/onepiece/coat.png",
+    "statBonuses": {
+      "MAX_HEALTH_PERCENT": 40
+    }
+  },
+  {
+    "id": "onepiece_axe",
+    "name": "Haki Axe",
+    "description": "+40% ATK",
+    "icon": "/assets/items/onepiece/axe.png",
+    "statBonuses": {
+      "ATTACK_DAMAGE_PERCENT": 40
+    }
+  },
+  {
+    "id": "onepiece_armor",
+    "name": "Armament Armor",
+    "description": "+50 DEF",
+    "icon": "/assets/items/onepiece/armor.png",
+    "statBonuses": {
+      "DEFENSE_FLAT": 50
+    }
+  },
+  {
+    "id": "onepiece_boots",
+    "name": "Soru Boots",
+    "description": "+35% attack speed",
+    "icon": "/assets/items/onepiece/boots.png",
+    "statBonuses": {
+      "ATTACK_SPEED_PERCENT": 35
+    }
+  },
+  {
+    "id": "onepiece_crest",
+    "name": "Conqueror’s Crest",
+    "description": "+40% ability damage",
+    "icon": "/assets/items/onepiece/crest.png",
+    "statBonuses": {
+      "ABILITY_DAMAGE_PERCENT": 40
+    }
+  },
+  {
+    "id": "onepiece_kit",
+    "name": "Shipwright Kit",
+    "description": "+15% max HP, +12 DEF, +15% attack speed",
+    "icon": "/assets/items/onepiece/kit.png",
+    "statBonuses": {
+      "MAX_HEALTH_PERCENT": 15,
+      "DEFENSE_FLAT": 12,
+      "ATTACK_SPEED_PERCENT": 15
+    }
+  },
+  {
+    "id": "onepiece_flag",
+    "name": "Jolly Roger",
+    "description": "+15% max HP, +15% ATK, +12% attack speed",
+    "icon": "/assets/items/onepiece/flag.png",
+    "statBonuses": {
+      "MAX_HEALTH_PERCENT": 15,
+      "ATTACK_DAMAGE_PERCENT": 15,
+      "ATTACK_SPEED_PERCENT": 12
+    }
+  },
+  {
+    "id": "onepiece_log",
+    "name": "Scholar’s Log",
+    "description": "+15% max HP, +10 DEF, +20% ability damage",
+    "icon": "/assets/items/onepiece/log.png",
+    "statBonuses": {
+      "MAX_HEALTH_PERCENT": 15,
+      "DEFENSE_FLAT": 10,
+      "ABILITY_DAMAGE_PERCENT": 20
+    }
+  }
+]

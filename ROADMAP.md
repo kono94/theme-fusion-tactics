@@ -1,7 +1,7 @@
 # TFT Roadmap
 
 Status: approved direction  
-Planning snapshot: 2026-09-26 (after release 2.5.3)  
+Planning snapshot: 2026-09-27 (after release 2.5.3)
 Supersedes: `archive/2026-08-03_NEXT_PRODUCT_INITIATIVES.md`
 
 ## 1. Where we are
@@ -13,7 +13,7 @@ Delivered from the previous roadmap:
 | Final-composition analytics | Done: final-board snapshot per human run, admin dashboard, public solo match history |
 | Lobby invitations | Done: generated room codes, invite links, remembered names. Share sheet, QR, host lock/kick, and rematch links are still open (not scheduled) |
 | Mobile support | Not started: board interaction relies on HTML5 drag-and-drop, which does not work on touch devices |
-| Item system | Placeholder only: `GameItem` interface and an unused `items` list on units; loot orbs drop only `GOLD`/`UNIT` |
+| Item system | Implemented: eight complete stat items per mode, scheduled drops, transferable equipment, previews, and an always-visible inventory panel |
 | Distinct mode identities | Replaced by Match Rules (initiative 1 below) |
 
 ## 2. Priorities
@@ -21,7 +21,7 @@ Delivered from the previous roadmap:
 | Order | Initiative | Player outcome |
 |---|---|---|
 | 1 | Match Rules | Every match can have a distinct flavor chosen by the host |
-| 2 | Item system | Strong, meaningful unit customization from loot orbs |
+| 2 | Item system | Shipped stat-item foundation; triggered effects and Match Rule variants remain later work |
 | 3 | Mobile support | Full matches playable on tablets and landscape phones |
 | 4 | Bot improvements | Bots use Match Rules and items credibly and position better |
 | Side track | 3D combat view | Combat watched in 3D with portrait billboards in every mode (shipped; polish ongoing) |
@@ -82,6 +82,10 @@ Values are placeholders until playtests confirm them.
 
 ## 4. Initiative 2: Item system
 
+The first release is implemented in both modes. It uses eight complete stat items per mode, with profiles ranging from
+one large bonus to three moderate bonuses. One scheduled orb becomes an item orb on rounds 2, 4, 6, and 10. Duplicates
+are independent copies. The default is two slots per unit; the room owns that limit for future Match Rules.
+
 ### Decisions
 
 - **Two strong items per unit by default.** The slot count is a config value, not hardcoded, so a Match Rule
@@ -90,19 +94,17 @@ Values are placeholders until playtests confirm them.
   equipping it should be a real decision.
 - **Fewer drops.** Loot orbs gain an `ITEM` loot type. Roughly 3–5 items per player per game is the starting target,
   to be tuned with analytics.
-- **Mode-themed items on a shared effect vocabulary.** Effects such as stat bonuses, lifesteal, shields on combat
-  start, mana on hit, or on-kill triggers are generic engine mechanics. Each mode supplies its own item list, names,
-  and icons (for example `items_<mode>.json`), like augments do today. One Piece could use Devil Fruit and treasure
-  flavor, and Pokemon could use Held Items.
+- **Mode-themed items on a shared effect vocabulary.** The first set uses max HP, attack, DEF, attack speed, and
+  ability-damage bonuses. Each mode supplies its own names and SVG icons in `items_<mode>.json`. Triggered effects
+  such as lifesteal, shields, mana on hit, and on-kill effects remain later work.
 
-### Rules to lock during design
+### Transfer and inventory rules
 
-- Whether equipped items are fixed until the unit is sold or can be moved during planning. The recommended start is
-  fixed, with items returning to the inventory when the unit is sold.
-- What happens to items when units combine. The recommended start is that the upgraded unit keeps items up to its slot
-  limit and the rest go back to the inventory.
-- Where the item inventory lives in the UI. It must work with the tap interaction from initiative 3.
-- How unwanted or duplicate items are handled without inventory clutter.
+- Items move freely among inventory, bench units, and board units during planning. Combat locks transfers.
+- Sales return equipment to inventory. Combining units keeps the survivor's items first, then fills spare slots from
+  consumed copies and returns overflow to inventory.
+- An always-visible inventory panel below the players/combat-report card shows one slot per item copy. Drag/drop
+  and click/tap selection both equip, transfer between units, and return items.
 
 ### Done when
 

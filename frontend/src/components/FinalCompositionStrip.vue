@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import type { AnalyticsBoardUnit } from '../types/analytics'
-import type { GameMode } from '../types'
+import type { GameMode, ItemDefinition } from '../types'
 import { getUnitIconPath, UNIT_ICON_PLACEHOLDER } from '../utils/iconUtils'
 
 const props = defineProps<{
@@ -12,6 +12,20 @@ const props = defineProps<{
 }>()
 
 const failedImages = ref(new Set<string>())
+const itemCatalog = ref<Record<string, ItemDefinition>>({})
+let itemRequest = 0
+
+watch(() => props.mode, async (mode) => {
+    const request = ++itemRequest
+    try {
+        const response = await fetch(`/api/items?mode=${encodeURIComponent(mode)}`)
+        if (!response.ok) return
+        const definitions = await response.json() as ItemDefinition[]
+        if (request === itemRequest) itemCatalog.value = Object.fromEntries(definitions.map(item => [item.id, item]))
+    } catch {
+        if (request === itemRequest) itemCatalog.value = {}
+    }
+}, { immediate: true })
 
 const labelFor = (value: string) => {
     if (!props.readableLabels) return value
@@ -32,7 +46,7 @@ const markMissing = (unit: AnalyticsBoardUnit) => {
 }
 
 const unitLabel = (unit: AnalyticsBoardUnit) => labelFor(unit.definitionId)
-const itemLabel = (itemId: string) => labelFor(itemId)
+const itemLabel = (itemId: string) => itemCatalog.value[itemId]?.name || labelFor(itemId)
 </script>
 
 <template>
@@ -58,6 +72,7 @@ const itemLabel = (itemId: string) => labelFor(itemId)
         :aria-label="`Items: ${unit.itemIds.map(itemLabel).join(', ')}`"
       >
         <span v-for="(itemId, itemIndex) in unit.itemIds" :key="`${itemId}-${itemIndex}`" class="item-badge" role="listitem">
+          <img v-if="itemCatalog[itemId]?.icon" :src="itemCatalog[itemId]?.icon" alt="" />
           {{ itemLabel(itemId) }}
         </span>
       </span>
@@ -73,6 +88,7 @@ const itemLabel = (itemId: string) => labelFor(itemId)
 .composition-stars { color: #fbbf24; font-size: .7rem; }
 .composition-items { grid-column: 1 / span 2; display: flex; flex-wrap: wrap; gap: 3px; }
 .item-badge { max-width: 100%; overflow: hidden; padding: 2px 5px; border-radius: 999px; background: #312e81; color: #ddd6fe; font-size: .62rem; line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; }
+.item-badge img { width: 14px; height: 14px; vertical-align: middle; }
 .compact .composition-unit { min-width: 112px; grid-template-columns: 28px 1fr; }
 .compact .composition-unit img { width: 28px; height: 28px; }
 .composition-unavailable, .composition-empty { color: #8293aa; font-size: .78rem; }

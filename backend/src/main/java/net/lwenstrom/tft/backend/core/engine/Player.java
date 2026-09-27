@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 import lombok.AccessLevel;
@@ -13,9 +14,12 @@ import net.lwenstrom.tft.backend.core.DataLoader;
 import net.lwenstrom.tft.backend.core.GameConstants;
 import net.lwenstrom.tft.backend.core.model.AugmentOffer;
 import net.lwenstrom.tft.backend.core.model.BotPersonality;
+import net.lwenstrom.tft.backend.core.model.GameItem;
 import net.lwenstrom.tft.backend.core.model.GameMode;
 import net.lwenstrom.tft.backend.core.model.GameState.PlayerState;
+import net.lwenstrom.tft.backend.core.model.GameState.UnitStats;
 import net.lwenstrom.tft.backend.core.model.GameUnit;
+import net.lwenstrom.tft.backend.core.model.ItemInstance;
 import net.lwenstrom.tft.backend.core.model.LootOrb;
 import net.lwenstrom.tft.backend.core.model.LootType;
 import net.lwenstrom.tft.backend.core.model.MatchStats;
@@ -48,6 +52,8 @@ public class Player {
     private final Bench bench = new Bench();
     private final List<GameUnit> boardUnits = new ArrayList<>();
     private final List<LootOrb> lootOrbs = new ArrayList<>();
+    private final List<GameItem> inventory = new ArrayList<>();
+    private int itemSlotsPerUnit = GameConstants.DEFAULT_ITEM_SLOTS;
     private final List<AugmentOffer> augmentChoices = new ArrayList<>();
     private final List<SelectedAugment> selectedAugments = new ArrayList<>();
 
@@ -127,6 +133,7 @@ public class Player {
         this.inCombat = false;
         this.pendingUpgrades.clear();
         this.lootOrbs.clear();
+        this.inventory.clear();
         this.augmentChoices.clear();
         this.selectedAugments.clear();
         resetMatchStats();
@@ -181,6 +188,11 @@ public class Player {
                     .findFirst()
                     .orElse(unitsToRemove.get(0));
 
+            var carriedItems = new ArrayList<GameItem>(targetPosUnit.getItems());
+            unitsToRemove.stream()
+                    .filter(unit -> unit != targetPosUnit)
+                    .forEach(unit -> carriedItems.addAll(unit.getItems()));
+
             int x = targetPosUnit.getX();
             int y = targetPosUnit.getY();
 
@@ -202,6 +214,8 @@ public class Player {
             if (def != null) {
                 var upgraded = new StandardGameUnit(def, starLevel + 1);
                 upgraded.setOwnerId(this.id);
+                carriedItems.stream().limit(itemSlotsPerUnit).forEach(upgraded.getItems()::add);
+                carriedItems.stream().skip(itemSlotsPerUnit).forEach(inventory::add);
 
                 if (boardUnits.contains(targetPosUnit) || (y >= 0 && grid.isEmpty(x, y))) {
                     if (grid.isValid(x, y) && grid.isEmpty(x, y)) {
@@ -249,6 +263,7 @@ public class Player {
         if (benchEntry.isPresent()) {
             var unit = benchEntry.get().unit();
             var refund = calculateSellValue(unit);
+            inventory.addAll(unit.getItems());
             bench.clear(benchEntry.get().index());
             gold += refund;
             return;
@@ -263,6 +278,7 @@ public class Player {
                 .orElse(null);
         if (boardUnit != null) {
             var refund = calculateSellValue(boardUnit);
+            inventory.addAll(boardUnit.getItems());
             grid.removeUnit(boardUnit);
             boardUnits.remove(boardUnit);
             gold += refund;
@@ -325,6 +341,11 @@ public class Player {
                     unit.setOwnerId(this.id);
                     addToBenchOrRefund(unit, def.cost());
                 }
+            } else if (orb.type() == LootType.ITEM) {
+                dataLoader
+                        .getItem(gameMode, orb.contentId())
+                        .map(ItemInstance::from)
+                        .ifPresent(inventory::add);
             }
         }
     }
@@ -337,6 +358,36 @@ public class Player {
 
     private Stream<GameUnit> ownedUnits() {
         return Stream.concat(bench.units(), boardUnits.stream());
+    }
+
+    public boolean moveItem(String itemInstanceId, String targetUnitId) {
+        var from = ownedUnits()
+                .map(GameUnit::getItems)
+                .filter(items -> findItem(items, itemInstanceId).isPresent())
+                .findFirst()
+                .orElse(inventory);
+        var item = findItem(from, itemInstanceId);
+        if (item.isEmpty()) return false;
+
+        var to = inventory;
+        if (targetUnitId != null) {
+            var target = ownedUnits()
+                    .filter(unit -> unit.getId().equals(targetUnitId))
+                    .findFirst();
+            if (target.isEmpty() || target.get().getItems().size() >= itemSlotsPerUnit) return false;
+            to = target.get().getItems();
+        }
+        if (from == to) return false;
+
+        from.remove(item.get());
+        to.add(item.get());
+        return true;
+    }
+
+    private static Optional<GameItem> findItem(List<GameItem> items, String instanceId) {
+        return items.stream()
+                .filter(item -> item.getInstanceId().equals(instanceId))
+                .findFirst();
     }
 
     public void collectAllOrbs() {
@@ -665,6 +716,10 @@ public class Player {
     }
 
     public PlayerState toState() {
+        return toState(Map.of());
+    }
+
+    public PlayerState toState(Map<String, UnitStats> statPreviews) {
         return new PlayerState(
                 id,
                 name,
@@ -684,7 +739,9 @@ public class Player {
                 ghost,
                 bot,
                 botPersonality,
-                getMatchStats());
+                getMatchStats(),
+                new ArrayList<>(inventory),
+                statPreviews);
     }
 
     // Legacy getter for backward compatibility with tests

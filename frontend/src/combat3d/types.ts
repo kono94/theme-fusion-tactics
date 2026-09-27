@@ -25,6 +25,7 @@ export interface CombatUnit3d {
   abilityType: string | null
   abilityName: string | null
   abilityPattern: string | null
+  items: { id: string; name: string; icon: string }[]
   attack: AttackAnimationConfig
   ability: AbilityAnimationConfig
 }

@@ -192,6 +192,17 @@ export class UnitView {
     this.manaFill.className = 'fill'
     manaBar.append(this.manaFill)
     this.label.append(name, hpBar, manaBar)
+    if (unit.items.length) {
+      const items = document.createElement('div')
+      items.className = 'unit-items'
+      for (const item of unit.items) {
+        const icon = document.createElement('img')
+        icon.src = item.icon
+        icon.alt = item.name
+        items.append(icon)
+      }
+      this.label.append(items)
+    }
 
     const world = gridToWorld(unit.gridX, unit.gridY)
     this.moveTo.set(world.x, 0, world.z)

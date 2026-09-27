@@ -1,6 +1,7 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it, vi } from 'vitest'
 import GameInterface from './GameInterface.vue'
+import UnitTooltip from './UnitTooltip.vue'
 import type { GameAction, GamePhase, GameState, GameUnit, PlayerState, UnitDefinition } from '../types'
 
 vi.mock('../utils/dragPreview', () => ({
@@ -62,6 +63,8 @@ function player(health: number, place: number): PlayerState {
         board: [],
         shop: [],
         lootOrbs: [],
+        inventory: [],
+        statPreviews: {},
         augmentChoices: [],
         selectedAugments: [],
         isGhost: false,
@@ -97,6 +100,7 @@ function gameState(phase: GamePhase, health: number, place: number): GameState {
         planningTimerPaused: false,
         planningReadyPlayerId: null,
         planningPauseReason: null,
+        itemSlotsPerUnit: 2,
     }
 }
 
@@ -107,9 +111,90 @@ const childStubs = {
     AugmentSelectionOverlay: true,
     PhaseAnnouncement: true,
     UnitTooltip: true,
+    DamageReport: true,
 }
 
 describe('GameInterface end celebration', () => {
+    it('keeps players and items visible and swaps the players card for the combat report', async () => {
+        const wrapper = mount(GameInterface, {
+            props: { state: gameState('PLANNING', 100, 1), currentPlayerId: 'player-1' },
+            global: { stubs: childStubs },
+        })
+
+        expect(wrapper.findComponent({ name: 'PlayerList' }).exists()).toBe(true)
+        expect(wrapper.find('.inventory-card').exists()).toBe(true)
+        await wrapper.get('[role="tab"]:nth-child(2)').trigger('click')
+        expect(wrapper.findComponent({ name: 'PlayerList' }).exists()).toBe(false)
+        expect(wrapper.findComponent({ name: 'DamageReport' }).exists()).toBe(true)
+        expect(wrapper.find('.inventory-card').exists()).toBe(true)
+        wrapper.unmount()
+    })
+    it('equips a selected inventory item on a bench unit during planning', async () => {
+        const state = gameState('PLANNING', 100, 1)
+        state.players['player-1'].bench = [benchUnit()]
+        state.players['player-1'].inventory = [{
+            instanceId: 'item-copy', id: 'onepiece_axe', name: 'Haki Axe', description: '+40% ATK',
+            icon: '/assets/items/onepiece/axe.png', statBonuses: { ATTACK_DAMAGE_PERCENT: 40 },
+        }]
+        const wrapper = mount(GameInterface, {
+            props: { state, currentPlayerId: 'player-1' },
+            global: { stubs: childStubs },
+        })
+
+        await wrapper.get('.inventory-item').trigger('click')
+        await wrapper.get('.bench-unit').trigger('click')
+        expect((wrapper.emitted('action') as [GameAction][])[0][0]).toMatchObject({
+            type: 'MOVE_ITEM', itemInstanceId: 'item-copy', targetUnitId: 'bench-unit', playerId: 'player-1',
+        })
+        wrapper.unmount()
+    })
+    it('updates an open unit tooltip when a fresh snapshot changes equipment and stats', async () => {
+        const state = gameState('PLANNING', 100, 1)
+        state.players['player-1'].bench = [benchUnit()]
+        const wrapper = mount(GameInterface, {
+            props: { state, currentPlayerId: 'player-1' },
+            global: { stubs: { ...childStubs, UnitTooltip: false } },
+        })
+
+        await wrapper.get('.bench-unit').trigger('mouseenter')
+        expect(wrapper.findComponent(UnitTooltip).text()).toContain('10')
+
+        const updated = gameState('PLANNING', 100, 1)
+        const equipped = benchUnit()
+        equipped.items = [{
+            instanceId: 'item-copy', id: 'onepiece_axe', name: 'Haki Axe', description: '+40% ATK',
+            icon: '/assets/items/onepiece/axe.png', statBonuses: { ATTACK_DAMAGE_PERCENT: 40 },
+        }]
+        updated.players['player-1'].bench = [equipped]
+        updated.players['player-1'].statPreviews = { 'bench-unit': {
+            maxHealth: 100, currentHealth: 100, mana: 0, maxMana: 100, attackDamage: 14,
+            defense: 0, attackSpeed: 1, abilityDamageMultiplier: 1, shield: 0,
+            damageReduction: 0, lifesteal: 0,
+        } }
+        await wrapper.setProps({ state: updated })
+
+        expect(wrapper.findComponent(UnitTooltip).text()).toContain('Item-adjusted bench stats')
+        expect(wrapper.findComponent(UnitTooltip).props('preview')).toMatchObject({ attackDamage: 14 })
+        wrapper.unmount()
+    })
+    it('shows equipped item bonuses on tap during combat without moving the item', async () => {
+        const state = gameState('COMBAT', 100, 1)
+        const equipped = benchUnit()
+        equipped.items = [{
+            instanceId: 'item-copy', id: 'onepiece_axe', name: 'Haki Axe', description: '+40% ATK',
+            icon: '/assets/items/onepiece/axe.png', statBonuses: { ATTACK_DAMAGE_PERCENT: 40 },
+        }]
+        state.players['player-1'].bench = [equipped]
+        const wrapper = mount(GameInterface, {
+            props: { state, currentPlayerId: 'player-1' },
+            global: { stubs: childStubs },
+        })
+
+        await wrapper.get('.equipped-item').trigger('click')
+        expect(document.body.querySelector('.item-tooltip')?.textContent).toContain('+40% Attack')
+        expect(wrapper.emitted('action')).toBeUndefined()
+        wrapper.unmount()
+    })
     it.each([
         ['losing', 0, 2],
         ['winning', 100, 1],

@@ -1,5 +1,7 @@
 package net.lwenstrom.tft.backend.core;
 
+import java.util.Set;
+
 public final class GameConstants {
 
     // Combat
@@ -28,6 +30,8 @@ public final class GameConstants {
     public static final int PLAYER_ROWS = 3;
     public static final int COMBAT_ROWS = 6;
     public static final int MAX_STAR_LEVEL = 3;
+    public static final int DEFAULT_ITEM_SLOTS = 2;
+    public static final Set<Integer> ITEM_LOOT_ROUNDS = Set.of(2, 4, 6, 10);
     public static final int COPIES_TO_UPGRADE_TO_TWO_STAR = 3;
     public static final int COPIES_TO_UPGRADE_TO_THREE_STAR = 2;
     public static final int THREE_STAR_SELL_COPY_COUNT = 6;

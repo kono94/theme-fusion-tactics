@@ -23,13 +23,14 @@ const props = defineProps<{
     viewedPlayerId?: string,
     isReadOnly?: boolean,
     isDraggingProp?: boolean,
+    selectedItemId?: string | null,
     highlightedTraitId?: string | null,
     emergencyDrop?: EmergencyDropPayload | null,
     emergencyDropActive?: boolean,
     combatView?: CombatViewSetting
 }>()
 
-const emit = defineEmits(['move', 'drag-start', 'drag-end', 'collect-orb', 'update:cell-size', 'update:is-over-grid', 'show-tooltip', 'hide-tooltip', 'combat-view-fallback'])
+const emit = defineEmits(['move', 'drag-start', 'drag-end', 'collect-orb', 'update:cell-size', 'update:is-over-grid', 'show-tooltip', 'hide-tooltip', 'combat-view-fallback', 'item-drop', 'item-select', 'item-drag-start', 'item-drag-end', 'unit-click', 'show-item-tooltip', 'hide-item-tooltip'])
 
 const show3dCombat = computed(() => props.combatView === '3d' && props.state?.phase === 'COMBAT')
 
@@ -383,6 +384,12 @@ const onDrop = (evt: DragEvent, x: number, y: number) => {
         return 
     }
     if (evt.dataTransfer) {
+        const itemId = evt.dataTransfer.getData('itemInstanceId')
+        if (itemId) {
+            const target = renderedUnits.value.find(unit => unit.visualX === x && unit.visualY === y && unit.ownerId === props.actingPlayerId)
+            if (target) emit('item-drop', itemId, target.id)
+            return
+        }
         const unitId = evt.dataTransfer.getData('unitId')
         if (unitId) {
             // Translate Visual Drop Y to Backend Y (Planning Phase)
@@ -462,6 +469,7 @@ function triggerAutoPickupEffects(orbs: RenderedOrb[]) {
 function formatPickupLabel(orb: RenderedOrb): string {
     const type = orb.type as string
     if (type === 'GOLD') return `+${orb.amount}g`
+    if (type === 'ITEM') return '+Item'
     if (type === 'XP' || type === 'EXP') return `+${orb.amount} XP`
     if (type === 'UNIT') return '+Unit'
     return '+Reward'
@@ -976,7 +984,8 @@ const onOrbClick = (orbId: string) => {
                          @dragstart="(e) => onDragStart(e, unit)"
                          @dragend="onDragEnd"
                          @mouseenter="(e) => onUnitMouseEnter(e, unit)"
-                         @mouseleave="onUnitMouseLeave">
+                         @mouseleave="onUnitMouseLeave"
+                         @click="emit('unit-click', unit.id)">
 
                         <div class="hp-bar-container">
                             <div class="hp-bar-fill" :style="{
@@ -999,6 +1008,18 @@ const onOrbClick = (orbId: string) => {
                             <div v-if="unit.spdBuff < 0.99" class="buff-icon spd-debuff">❄️</div>
                         </div>
                         <img :src="unit.image" class="unit-img" :alt="unit.name" draggable="false" />
+                        <div v-if="unit.items?.length" class="board-items">
+                            <button v-for="item in unit.items" :key="item.instanceId" type="button" class="board-item"
+                                :class="{ selected: item.instanceId === selectedItemId }"
+                                :aria-label="`${item.name}: ${item.description}`" :draggable="unit.ownerId === actingPlayerId && !isReadOnly && props.state?.phase === 'PLANNING'"
+                                @mouseenter.stop="(event) => emit('show-item-tooltip', { rect: (event.currentTarget as HTMLElement).getBoundingClientRect(), item })"
+                                @mouseleave="emit('hide-item-tooltip')"
+                                @click.stop="(event) => emit('item-select', item.instanceId, event.currentTarget)"
+                                @dragstart.stop="(event) => emit('item-drag-start', event, item)"
+                                @dragend.stop="emit('item-drag-end')">
+                                <img :src="item.icon" :alt="item.name" draggable="false" />
+                            </button>
+                        </div>
                         <div class="cost-top-glow"></div>
                         <div v-if="unit.starLevel === 2" class="star-2-halo"></div>
                         <div v-if="unit.starLevel === 3" class="star-3-flow"></div>
@@ -1027,6 +1048,7 @@ const onOrbClick = (orbId: string) => {
                             <div class="orb-glow"></div>
                             <div class="orb-content" :style="{ fontSize: (CELL_SIZE * 0.45) + 'px' }">
                                 <span v-if="orb.type === 'GOLD'">🪙</span>
+                                <span v-else-if="orb.type === 'ITEM'">🧰</span>
                                 <span v-else>🎁</span>
                             </div>
                         </div>
@@ -1535,6 +1557,29 @@ const onOrbClick = (orbId: string) => {
     pointer-events: none;
     z-index: 2; /* Relative to parent .unit, ensures it stays above halos but under bars */
 }
+.board-items {
+    position: absolute;
+    z-index: 30;
+    top: 50%;
+    left: -10px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    transform: translateY(-50%);
+}
+.board-item {
+    width: var(--item-slot-size);
+    height: var(--item-slot-size);
+    padding: 0;
+    border: 1px solid #fbbf24;
+    border-radius: 4px;
+    background: #0f172a;
+    cursor: pointer;
+}
+.board-item.selected,
+.board-item:hover { outline: 2px solid #fbbf24; }
+.board-item img { display: block; width: 100%; height: 100%; }
+.loot-orb.item .orb-inner { border-color: #a78bfa; background: #312e81; }
 
 .hp-bar-container {
     position: absolute;
@@ -1599,8 +1644,8 @@ const onOrbClick = (orbId: string) => {
 
 .buff-container {
     position: absolute;
-    left: -15px;
-    top: 50%;
+    right: -15px;
+    top: 35%;
     transform: translateY(-50%);
     display: flex;
     flex-direction: column;
