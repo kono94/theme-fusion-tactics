@@ -12,8 +12,10 @@ import DamageReport from './components/game/DamageReport.vue'
 import VersionDisplay from './components/VersionDisplay.vue'
 import AdminAnalytics from './components/admin/AdminAnalytics.vue'
 import MatchHistory from './components/MatchHistory.vue'
+import SettingsPanel from './components/SettingsPanel.vue'
 
 import { setTraitData } from './data/traitData'
+import { loadClientSettings, saveClientSettings, type ClientSettings } from './utils/clientSettings'
 import {
     getGameModeMetadata,
     isGameMode,
@@ -90,6 +92,12 @@ const gameTitle = 'Theme Fusion Tactics'
 
 const restoredRoom = loadActiveRoomSession()
 const playerName = ref(loadPlayerName())
+const clientSettings = ref<ClientSettings>(loadClientSettings())
+
+function updateClientSettings(settings: ClientSettings) {
+    clientSettings.value = settings
+    saveClientSettings(settings)
+}
 const activePlayerName = ref(restoredRoom?.playerName ?? '')
 const currentPlayerId = ref<string | null>(restoredRoom?.playerId ?? null)
 const analyticsClientId = getAnalyticsClientId()
@@ -909,6 +917,10 @@ const applyThemeMeta = (mode: GameMode) => {
             @click="handleOpenMatchHistory">
         Match history
     </button>
+    <SettingsPanel v-if="showVersion && currentView === 'lobby'"
+                   class="settings-dock"
+                   :settings="clientSettings"
+                   @update-settings="updateClientSettings" />
     <VersionDisplay :visible="showVersion" />
 
     <component :is="UltimateGallery" v-if="isUltimateGallery && UltimateGallery" :mode="ultimateGalleryMode" />
@@ -952,6 +964,8 @@ const applyThemeMeta = (mode: GameMode) => {
 	                                    :emergency-drop="emergencyDrop"
 	                                    :queued-emergency-drop="pendingEmergencyDrop"
 	                                    :suppress-planning-announcement="hasQueuedEmergencyDrop"
+	                                    :settings="clientSettings"
+	                                    @update-settings="updateClientSettings"
 	                                    @action="handleGameAction"
 	                                    @view-player="(playerId) => viewedPlayerId = playerId"
 	                                    @exit-game="leaveCurrentGame"
@@ -1101,6 +1115,13 @@ body {
 
 .match-history-dock {
   left: 90px;
+}
+
+.settings-dock {
+  position: fixed;
+  bottom: 30px;
+  left: 204px;
+  z-index: 10000;
 }
 
 .changelog-dock:hover,

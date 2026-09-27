@@ -45,6 +45,7 @@ src/
 │   ├── PhaseAnnouncement.vue       phase/ready/emergency messaging
 │   ├── EndScreen.vue               placement and exit controls
 │   ├── Changelog.vue               in-app release notes
+│   ├── SettingsPanel.vue           gear button and per-device client settings
 │   ├── MatchHistory.vue            public completed solo-match feed
 │   ├── FinalCompositionStrip.vue   shared final-board composition renderer
 │   ├── admin/AdminAnalytics.vue    protected analytics dashboard
@@ -54,12 +55,16 @@ src/
 │       ├── OutcomeOverlay.vue      short win/loss/draw overlay
 │       └── UltimateGallery.vue     development-only animation gallery
 ├── animations/                     shared animation render policy and gallery registry
+├── combat3d/                       lazy-loaded Three.js combat view (preview), arenas, choreographies
 ├── data/                           mode metadata, shop odds, trait cache, gallery rosters
 ├── services/analyticsClient.ts     admin REST client/token handling
 ├── services/matchHistoryClient.ts  public latest-match REST client
 ├── types/                          backend DTO mirrors and render-only types
 └── utils/
     ├── clientIdentity.ts           analytics id and per-tab reconnect session
+    ├── clientSettings.ts           per-device client settings (combat view)
+    ├── combatView.ts               shared combat event dedupe and nearest-enemy lookup
+    ├── arenaSelection.ts           deterministic per-room 3D arena choice
     ├── combatAnimationConfig.ts    live shared animation lookup
     ├── economy.ts                  backend-aligned sell preview
     ├── dragPreview.ts              drag image support
@@ -228,6 +233,8 @@ the safety boundary.
 - Renders only the acting player's loot orbs and disables interaction while spectating.
 - Normalizes backend events into `NormalizedCombatVisualEvent` objects consumed by `CombatEffectsCanvas`.
 - Preserves short-lived previous/dying unit state so final events can animate after a unit leaves the snapshot.
+- When the effective combat view is `3d` and the phase is `COMBAT`, mounts the lazy `combat3d/CombatView3d.vue` over
+  the board and skips `CombatEffectsCanvas`. It emits `combat-view-fallback` when WebGL is missing or the context is lost.
 
 ### Player navigation and reports
 
@@ -258,12 +265,31 @@ from the stable mode and unit definition ID, never from a display name.
 `utils/combatAnimationConfig.ts` resolves the shared animation configuration for live units.
 
 `animations/renderPolicy.ts` reduces particle density and expensive effects for crowded batches and reduced-motion
-users. `CombatEffectsCanvas.vue` is the live layered renderer. `AttackAnimation.vue` has no live import and is legacy.
+users. `CombatEffectsCanvas.vue` is the live layered renderer.
 Family configuration controls geometry, duration, projectile and ring counts, trail width, glyphs, and accents rather
 than serving as gallery-only metadata.
 
+### 3D battle view (preview)
+
+Client settings live in `utils/clientSettings.ts` (`tactics.settings` in `localStorage`). `App.vue` owns the state and
+passes it to `GameInterface`, which computes the effective view and falls back to Classic for the rest of the session
+after a `combat-view-fallback`. Planning always stays on the 2D board.
+
+`combat3d/` is only reached through `defineAsyncComponent`, so Three.js is a separate chunk:
+
+- `CombatView3d.vue` receives the same `RenderedUnit[]` and `recentEvents` as the 2D view, dedupes events with
+  `utils/combatView.ts`, and never replays events that were already present when it mounted.
+- `battleScene.ts` owns the renderer, portrait billboards (`unitView.ts`), effect budget (`effects.ts`, using
+  `renderPolicy`), camera shake/punch, and screen flashes. It respects `prefersReducedMotion()`.
+- `choreography/registry.ts` resolves ultimates by `definitionId` (`signatures.ts`), then Pokemon `effectStyle`
+  (`elements.ts`), then an `effectStyle` family fallback. Auto-attacks resolve by `AttackType`. Colors and shake come
+  from `data/animationConfig.ts`. New signatures are small compositions of `choreography/primitives.ts`.
+- `arenas/` holds procedural stages that use no downloaded assets. Mode metadata lists arena ids per mode, and
+  `utils/arenaSelection.ts` picks one from `roomId`. In development `?arena=<id>` forces a stage.
+
 The `#/ultimate-gallery/{mode}` route is development-only. `UltimateGallery.vue` and some gallery roster files are
-excluded from `tsconfig.build.json`; do not document the gallery as a production feature.
+excluded from `tsconfig.build.json`; do not document the gallery as a production feature. Its 2D/3D switch previews
+any unit's attack or ultimate in the 3D view with a selectable arena.
 
 ## 11. Admin analytics
 

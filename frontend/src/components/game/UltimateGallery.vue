@@ -1,13 +1,16 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, onMounted, onUnmounted, ref, watch } from 'vue'
 import CombatEffectsCanvas from './CombatEffectsCanvas.vue'
 import { getGalleryAbilityRoster, getGalleryAttackRoster } from '../../animations/galleryRegistry'
 import { getAnimationRenderPolicy, getAttackParticleBudget } from '../../animations/renderPolicy'
 import { getGalleryEntryKey, type GalleryGameMode, type UltimateGalleryUnit } from '../../data/ultimateGalleryRoster'
 import { getAbilityConfig, getAttackConfig } from '../../data/animationConfig'
-import type { AbilityDefinition, RenderedUnit } from '../../types'
+import type { AbilityDefinition, CombatEvent, RenderedUnit } from '../../types'
 import type { NormalizedCombatVisualEvent } from '../../types/combatEffects'
 import { getUnitIconPath } from '../../utils/iconUtils'
+import { getGameModeMetadata } from '../../data/gameModeMetadata'
+
+const CombatView3d = defineAsyncComponent(() => import('../../combat3d/CombatView3d.vue'))
 
 const GRID_COLS = 9
 const GRID_ROWS = 6
@@ -22,6 +25,12 @@ const starLevel = ref(3)
 const autoReplay = ref(true)
 const previewType = ref<'ultimate' | 'attack'>('ultimate')
 const events = ref<NormalizedCombatVisualEvent[]>([])
+const renderView = ref<'2d' | '3d'>('2d')
+const combatEvents3d = ref<CombatEvent[]>([])
+const arenaOptions = computed(() => getGameModeMetadata(galleryMode.value).arenas)
+const selectedArena = ref(arenaOptions.value[0])
+const view3dKey = computed(() => `${selectedKey.value}-${starLevel.value}-${selectedArena.value}`)
+let combatClock = 0
 
 const roster = computed(() => previewType.value === 'attack'
     ? getGalleryAttackRoster(galleryMode.value)
@@ -142,6 +151,19 @@ function replayUltimate() {
     const value = source.ability?.type === 'HEAL' ? -180 : (isSupportAbility(source.ability?.type ?? '') ? 0 : 240)
     const isUltimate = previewType.value === 'ultimate'
 
+    combatClock += 100
+    combatEvents3d.value = [
+        ...combatEvents3d.value.slice(-4),
+        {
+            timestamp: combatClock,
+            type: isUltimate ? (source.ability?.type === 'HEAL' ? 'HEAL' : 'SKILL') : 'DAMAGE',
+            sourceId: source.id,
+            targetId: target.id,
+            value: isUltimate ? Math.abs(value) : 80,
+            skillName: isUltimate ? abilityConfig.signature ?? source.ability?.name : undefined,
+        },
+    ]
+
     events.value = [
         ...events.value.slice(-4),
         {
@@ -201,6 +223,10 @@ watch([selectedKey, starLevel, galleryMode, previewType], () => {
 
 watch(autoReplay, scheduleReplay)
 
+watch(arenaOptions, (options) => {
+    selectedArena.value = options[0]
+})
+
 watch(pageTitle, (title) => {
     document.title = title
 })
@@ -252,6 +278,13 @@ onUnmounted(() => {
               Auto
             </button>
           </div>
+          <div class="segmented-control" aria-label="Render view">
+            <button type="button" :class="{ active: renderView === '2d' }" @click="renderView = '2d'">2D</button>
+            <button type="button" :class="{ active: renderView === '3d' }" @click="renderView = '3d'">3D</button>
+          </div>
+          <select v-if="renderView === '3d'" v-model="selectedArena" class="arena-select" aria-label="Arena">
+            <option v-for="arena in arenaOptions" :key="arena" :value="arena">{{ arena }}</option>
+          </select>
           <button type="button" class="replay-button" @click="replayUltimate">Replay</button>
           <label class="auto-toggle">
             <input v-model="autoReplay" type="checkbox">
@@ -262,6 +295,20 @@ onUnmounted(() => {
 
       <div class="board-shell">
         <div
+          v-if="renderView === '3d'"
+          class="gallery-board-3d"
+          :style="{ width: `${GRID_COLS * CELL_SIZE}px`, height: `${GRID_ROWS * CELL_SIZE}px` }"
+        >
+          <CombatView3d
+            :key="view3dKey"
+            :units="renderedUnits"
+            :events="combatEvents3d"
+            :arena-id="selectedArena"
+            @fallback="renderView = '2d'"
+          />
+        </div>
+        <div
+          v-else
             class="gallery-board"
           :style="{ width: `${GRID_COLS * CELL_SIZE}px`, height: `${GRID_ROWS * CELL_SIZE}px` }"
         >
@@ -416,6 +463,22 @@ p {
     min-height: 32px;
     border-color: transparent;
     border-radius: 6px;
+}
+
+.arena-select {
+    min-height: 38px;
+    padding: 0 8px;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    background: #111827;
+    color: #e5e7eb;
+    font-weight: 800;
+}
+
+.gallery-board-3d {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
 }
 
 .auto-toggle {

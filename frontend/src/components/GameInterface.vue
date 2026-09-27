@@ -7,6 +7,7 @@ import TraitSidebar from './TraitSidebar.vue'
 import PlayerList from './PlayerList.vue'
 import EndScreen from './EndScreen.vue'
 import AugmentSelectionOverlay from './AugmentSelectionOverlay.vue'
+import SettingsPanel from './SettingsPanel.vue'
 import type {
   AugmentOffer,
   EmergencyDropPayload,
@@ -20,6 +21,7 @@ import { getRarityColor } from '../utils/colorUtils'
 import { setUnitDragPreview } from '../utils/dragPreview'
 import { calculateSellRefund } from '../utils/economy'
 import { SHOP_ODDS } from '../data/shopOdds'
+import type { ClientSettings, CombatViewSetting } from '../utils/clientSettings'
 
 const props = defineProps<{
   state: GameState | null
@@ -27,9 +29,28 @@ const props = defineProps<{
   emergencyDrop?: EmergencyDropPayload | null
   queuedEmergencyDrop?: EmergencyDropPayload | null
   suppressPlanningAnnouncement?: boolean
+  settings?: ClientSettings
 }>()
 
-const emit = defineEmits(['action', 'view-player', 'exit-game', 'abandon-game'])
+const emit = defineEmits(['action', 'view-player', 'exit-game', 'abandon-game', 'update-settings'])
+
+const combat3dUnavailable = ref(false)
+const showCombat3dFallbackNotice = ref(false)
+let combat3dFallbackNoticeTimer: number | undefined
+
+const effectiveCombatView = computed((): CombatViewSetting =>
+  props.settings?.combatView === '3d' && !combat3dUnavailable.value ? '3d' : 'classic',
+)
+
+function handleCombatViewFallback() {
+  if (combat3dUnavailable.value) return
+  combat3dUnavailable.value = true
+  showCombat3dFallbackNotice.value = true
+  window.clearTimeout(combat3dFallbackNoticeTimer)
+  combat3dFallbackNoticeTimer = window.setTimeout(() => {
+    showCombat3dFallbackNotice.value = false
+  }, 6000)
+}
 
 const myPlayer = computed((): PlayerState | null => {
   if (!props.state?.players || !props.currentPlayerId) return null
@@ -424,6 +445,7 @@ onUnmounted(() => {
   window.removeEventListener('keydown', handleKeyboardShortcut)
   cleanupBenchDragPreview()
   starUpTimers.value.forEach((timer) => clearTimeout(timer))
+  window.clearTimeout(combat3dFallbackNoticeTimer)
 })
 
 onMounted(() => {
@@ -607,6 +629,13 @@ watch(
                   <path d="M12 12h8m-3-3 3 3-3 3M8 12h4" />
                 </svg>
               </button>
+              <SettingsPanel
+                v-if="settings"
+                compact
+                :settings="settings"
+                :combat3d-unavailable="combat3dUnavailable"
+                @update-settings="(value) => emit('update-settings', value)"
+              />
             </div>
           </div>
           <div class="round-actions">
@@ -640,6 +669,9 @@ watch(
           :game-mode="state.gameMode"
           @hover-trait="(traitId) => (hoveredTraitId = traitId)"
         />
+        <div v-if="showCombat3dFallbackNotice" class="combat-3d-fallback-notice" role="status">
+          3D battle view isn't available on this device, so combat is shown in Classic.
+        </div>
         <div v-if="isSpectating && viewedPlayer" class="spectator-notice">
           <span>Viewing {{ viewedPlayer.name }}</span>
           <button class="home-btn" type="button" @click="returnHome">Home</button>
@@ -653,6 +685,8 @@ watch(
           :highlighted-trait-id="hoveredTraitId"
           :emergency-drop="emergencyDrop || queuedEmergencyDrop"
           :emergency-drop-active="!!emergencyDrop"
+          :combat-view="effectiveCombatView"
+          @combat-view-fallback="handleCombatViewFallback"
           @move="handleBoardMove"
           @drag-start="onGridDragStart"
           @drag-end="onGridDragEnd"
@@ -1107,6 +1141,20 @@ watch(
   background: #1a1a1a;
   overflow: visible;
   z-index: 60; /* Under bottom-ui (70) so bottom tooltips can overlap */
+}
+
+.combat-3d-fallback-notice {
+  position: absolute;
+  top: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 120;
+  padding: 8px 12px;
+  border: 1px solid rgba(251, 191, 36, 0.5);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.92);
+  color: #fde68a;
+  font-size: 0.8rem;
 }
 
 .spectator-notice {

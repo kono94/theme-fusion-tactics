@@ -9,6 +9,7 @@ export interface GameModeMetadata {
     unitAssetFolder: string
     themeClass: string
     galleryPath: string
+    arenas: string[]
     order: number
 }
 
@@ -22,6 +23,7 @@ export const GAME_MODE_METADATA: Record<GameMode, GameModeMetadata> = {
         unitAssetFolder: 'onepiece',
         themeClass: 'theme-onepiece',
         galleryPath: '#/ultimate-gallery/onepiece',
+        arenas: ['foosha', 'baratie', 'sabaody', 'marineford', 'wano'],
         order: 1,
     },
     pokemon: {
@@ -33,6 +35,7 @@ export const GAME_MODE_METADATA: Record<GameMode, GameModeMetadata> = {
         unitAssetFolder: 'pokemon',
         themeClass: 'theme-pokemon',
         galleryPath: '#/ultimate-gallery/pokemon',
+        arenas: ['stadium', 'rock-gym'],
         order: 2,
     },
 }

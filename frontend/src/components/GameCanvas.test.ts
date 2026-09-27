@@ -1,10 +1,20 @@
-import { mount } from '@vue/test-utils'
+import { flushPromises, mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { GameState, GameUnit, PlayerState } from '../types'
 import GameCanvas from './GameCanvas.vue'
 
 vi.mock('../utils/dragPreview', () => ({
     setUnitDragPreview: vi.fn(() => null),
+}))
+
+vi.mock('../combat3d/CombatView3d.vue', () => ({
+    __esModule: true,
+    default: {
+        name: 'CombatView3d',
+        props: ['units', 'events', 'arenaId'],
+        emits: ['fallback'],
+        template: '<div class="combat-3d-stub" :data-arena="arenaId" :data-units="units.length" @click="$emit(\'fallback\')"></div>',
+    },
 }))
 
 function unit(id: string, ownerId: string, traits: string[], x: number, y: number): GameUnit {
@@ -151,5 +161,49 @@ describe('GameCanvas trait highlighting', () => {
         expect(opponent?.classes()).not.toContain('trait-contributor')
         expect(opponent?.classes()).not.toContain('trait-dimmed')
         wrapper.unmount()
+    })
+})
+
+describe('GameCanvas 3D battle view', () => {
+    beforeEach(() => {
+        vi.stubGlobal('ResizeObserver', class {
+            observe() {}
+            disconnect() {}
+        })
+    })
+
+    it('renders combat in 3D with a mode arena when the setting is on', async () => {
+        const wrapper = mount(GameCanvas, {
+            props: { state: state('COMBAT'), actingPlayerId: 'me', viewedPlayerId: 'me', combatView: '3d' },
+            global: { stubs: { CombatEffectsCanvas: true } },
+        })
+        await flushPromises()
+
+        const view = wrapper.get('.combat-3d-stub')
+        expect(view.attributes('data-units')).toBe('3')
+        expect(['foosha', 'baratie', 'sabaody', 'marineford', 'wano']).toContain(view.attributes('data-arena'))
+        expect(wrapper.findComponent({ name: 'CombatEffectsCanvas' }).exists()).toBe(false)
+
+        await view.trigger('click')
+        expect(wrapper.emitted('combat-view-fallback')).toHaveLength(1)
+        wrapper.unmount()
+    })
+
+    it('keeps planning and the classic setting on the 2D board', async () => {
+        const planning = mount(GameCanvas, {
+            props: { state: state('PLANNING'), actingPlayerId: 'me', viewedPlayerId: 'me', combatView: '3d' },
+            global: { stubs: { CombatEffectsCanvas: true } },
+        })
+        const classic = mount(GameCanvas, {
+            props: { state: state('COMBAT'), actingPlayerId: 'me', viewedPlayerId: 'me', combatView: 'classic' },
+            global: { stubs: { CombatEffectsCanvas: true } },
+        })
+        await flushPromises()
+
+        expect(planning.find('.combat-3d-stub').exists()).toBe(false)
+        expect(classic.find('.combat-3d-stub').exists()).toBe(false)
+        expect(classic.findComponent({ name: 'CombatEffectsCanvas' }).exists()).toBe(true)
+        planning.unmount()
+        classic.unmount()
     })
 })

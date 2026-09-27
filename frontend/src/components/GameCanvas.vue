@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch, onUnmounted, onMounted } from 'vue'
+import { computed, defineAsyncComponent, ref, watch, onUnmounted, onMounted } from 'vue'
 import CombatEffectsCanvas from './game/CombatEffectsCanvas.vue'
 import { resolveAbilityConfig, resolveAttackConfig } from '../utils/combatAnimationConfig'
 import type { EmergencyDropPayload, GameState, GameUnit, GamePhase, RenderedUnit, RenderedOrb, PlayerState, DisplayedUnit, CombatEvent, SelectedAugment } from '../types'
@@ -9,6 +9,13 @@ import { getRarityColor, TEAM_COLORS } from '../utils/colorUtils'
 import { setUnitDragPreview } from '../utils/dragPreview'
 import { isBenchCoordinate, projectBoardCoordinate, type BoardProjectionPhase } from '../utils/boardProjection'
 import { normalizeTraitId } from '../data/traitData'
+import { findNearestEnemy, latestCombatEventTimestamp, takeNewCombatEvents } from '../utils/combatView'
+import type { CombatViewSetting } from '../utils/clientSettings'
+import { pickArenaId, readArenaOverride } from '../utils/arenaSelection'
+import { getGameModeMetadata, isGameMode } from '../data/gameModeMetadata'
+
+// Three.js is only downloaded by players who enable the 3D battle view.
+const CombatView3d = defineAsyncComponent(() => import('../combat3d/CombatView3d.vue'))
 
 const props = defineProps<{
     state: GameState | null,
@@ -18,10 +25,20 @@ const props = defineProps<{
     isDraggingProp?: boolean,
     highlightedTraitId?: string | null,
     emergencyDrop?: EmergencyDropPayload | null,
-    emergencyDropActive?: boolean
+    emergencyDropActive?: boolean,
+    combatView?: CombatViewSetting
 }>()
 
-const emit = defineEmits(['move', 'drag-start', 'drag-end', 'collect-orb', 'update:cell-size', 'update:is-over-grid', 'show-tooltip', 'hide-tooltip'])
+const emit = defineEmits(['move', 'drag-start', 'drag-end', 'collect-orb', 'update:cell-size', 'update:is-over-grid', 'show-tooltip', 'hide-tooltip', 'combat-view-fallback'])
+
+const show3dCombat = computed(() => props.combatView === '3d' && props.state?.phase === 'COMBAT')
+
+const combatArenaId = computed(() => {
+    const state = props.state
+    if (!state || !isGameMode(state.gameMode)) return 'neutral'
+    const override = import.meta.env.DEV ? readArenaOverride(window.location.search) : null
+    return pickArenaId(getGameModeMetadata(state.gameMode).arenas, state.roomId, override)
+})
 
 // Grid Constants
 const GRID_ROWS = 6
@@ -553,24 +570,6 @@ function clearCombatVisualState() {
     lastProcessedEventTime.value = 0
 }
 
-// Find nearest enemy for a unit (to animate attacks toward)
-function findNearestEnemy(unit: RenderedUnit, allUnits: RenderedUnit[]): RenderedUnit | null {
-    const enemies = allUnits.filter(u => u.ownerId !== unit.ownerId && u.currentHealth > 0)
-    if (enemies.length === 0) return null
-    
-    let nearest = enemies[0]
-    let minDist = Math.max(Math.abs(nearest.visualX - unit.visualX), Math.abs(nearest.visualY - unit.visualY))
-    
-    for (const enemy of enemies) {
-        const dist = Math.max(Math.abs(enemy.visualX - unit.visualX), Math.abs(enemy.visualY - unit.visualY))
-        if (dist < minDist) {
-            minDist = dist
-            nearest = enemy
-        }
-    }
-    return nearest
-}
-
 // Watch for health changes to spawn attack animations
 // Store previous units for death detection
 const prevUnitsMap = ref<Map<string, RenderedUnit>>(new Map())
@@ -586,10 +585,7 @@ function reconcileCombatRenderState() {
     renderedUnits.value.forEach((unit) => {
         prevUnitsMap.value.set(unit.id, { ...unit })
     })
-    lastProcessedEventTime.value = (props.state.recentEvents ?? []).reduce(
-        (latest, event) => Math.max(latest, event.timestamp),
-        0
-    )
+    lastProcessedEventTime.value = latestCombatEventTimestamp(props.state.recentEvents)
 }
 
 const unitsById = computed(() => {
@@ -664,14 +660,11 @@ function isHealingCombatEvent(event: CombatEvent, source: RenderedUnit | Display
 
 watch(() => props.state?.recentEvents, (newEvents) => {
     if (!newEvents || newEvents.length === 0) return
-    
-    // Deduplication based on timestamp
-    let maxTime = lastProcessedEventTime.value
-    
-    newEvents.forEach((event: CombatEvent) => {
-        if (event.timestamp <= lastProcessedEventTime.value) return
-        if (event.timestamp > maxTime) maxTime = event.timestamp
-        
+
+    const fresh = takeNewCombatEvents(newEvents, lastProcessedEventTime.value)
+
+    fresh.events.forEach((event: CombatEvent) => {
+
         const targetFromEvent = lookupUnit(event.targetId)
         const source = lookupUnit(event.sourceId) || targetFromEvent
         if (!source) return
@@ -765,7 +758,7 @@ watch(() => props.state?.recentEvents, (newEvents) => {
     if (combatVisualEvents.value.length > 120) {
         combatVisualEvents.value = combatVisualEvents.value.slice(-80)
     }
-    lastProcessedEventTime.value = maxTime
+    lastProcessedEventTime.value = fresh.lastTimestamp
 }, { deep: true })
 
 watch(() => renderedUnits.value, (newUnits) => {
@@ -925,6 +918,14 @@ const onOrbClick = (orbId: string) => {
         width: (GRID_COLS * CELL_SIZE + (GRID_GUTTER * 2)) + 'px', 
         height: (GRID_ROWS * CELL_SIZE + (GRID_GUTTER * 2)) + 'px'
     }">
+        <div v-if="show3dCombat" class="combat-3d-layer">
+            <CombatView3d
+                :units="renderedUnits"
+                :events="props.state?.recentEvents"
+                :arena-id="combatArenaId"
+                @fallback="emit('combat-view-fallback')"
+            />
+        </div>
         <div class="board-clipper">
             <div class="grid" :style="{
                 gridTemplateColumns: `repeat(${GRID_COLS}, ${CELL_SIZE}px)`,
@@ -947,6 +948,7 @@ const onOrbClick = (orbId: string) => {
                 <!-- Absolute content overlay (aligned to grid cells) -->
                 <div class="grid-overlay" :style="{ inset: GRID_GUTTER + 'px' }">
                     <CombatEffectsCanvas
+                        v-if="!show3dCombat"
                         :events="combatVisualEvents"
                         :units="displayedUnits"
                         :cell-size="CELL_SIZE"
@@ -1125,6 +1127,14 @@ const onOrbClick = (orbId: string) => {
         inset 0 0 40px rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(4px);
     overflow: visible; /* CRITICAL: Allow names/tooltips outside grid */
+}
+
+.combat-3d-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 70;
+    border-radius: 9px;
+    overflow: hidden;
 }
 
 .board-clipper {
