@@ -92,7 +92,7 @@ public class AdminAnalyticsRepository {
             Cursor cursor,
             int size) {
         var sql = new StringBuilder("SELECT r.*, m.room_id, m.mode, m.backend_version, m.backend_commit,"
-                + " m.status match_status, m.ended_at,"
+                + " m.match_rule_id, m.status match_status, m.ended_at,"
                 + " SUM(CASE WHEN pr.outcome = 'WIN' THEN 1 ELSE 0 END) wins,"
                 + " SUM(CASE WHEN pr.outcome = 'LOSS' THEN 1 ELSE 0 END) losses,"
                 + " SUM(CASE WHEN pr.outcome = 'DRAW' THEN 1 ELSE 0 END) draws"
@@ -136,7 +136,7 @@ public class AdminAnalyticsRepository {
     public RunDetail runDetail(String runId) {
         var runs = jdbcTemplate.query(
                 "SELECT r.*, m.room_id, m.mode, m.backend_version, m.backend_commit,"
-                        + " m.status match_status, m.ended_at,"
+                        + " m.match_rule_id, m.status match_status, m.ended_at,"
                         + " SUM(CASE WHEN pr.outcome = 'WIN' THEN 1 ELSE 0 END) wins,"
                         + " SUM(CASE WHEN pr.outcome = 'LOSS' THEN 1 ELSE 0 END) losses,"
                         + " SUM(CASE WHEN pr.outcome = 'DRAW' THEN 1 ELSE 0 END) draws"
@@ -234,6 +234,7 @@ public class AdminAnalyticsRepository {
                 resultSet.getString("match_id"),
                 resultSet.getString("analytics_client_id"),
                 canonicalMode(resultSet.getString("mode")),
+                resultSet.getString("match_rule_id"),
                 valueOrUnknown(resultSet.getString("backend_version")),
                 valueOrUnknown(resultSet.getString("backend_commit")),
                 resultSet.getString("status"),
@@ -477,6 +478,7 @@ public class AdminAnalyticsRepository {
             String matchId,
             String anonymousPlayerId,
             String mode,
+            String matchRuleId,
             String backendVersion,
             String backendCommit,
             String status,

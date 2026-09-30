@@ -292,6 +292,7 @@ onBeforeUnmount(() => {
             <div><span>Run</span><strong>{{ detail.run.runId }}</strong></div>
             <div><span>Started</span><strong>{{ formatDate(detail.run.startedAt) }}</strong></div>
             <div><span>Mode</span><strong>{{ detail.run.mode }}</strong></div>
+            <div><span>Match rule</span><strong>{{ detail.run.matchRuleId ?? 'None / not recorded' }}</strong></div>
             <div><span>Build</span><strong>{{ detail.run.backendVersion }} · {{ shortId(detail.run.backendCommit) }}</strong></div>
             <div><span>Status</span><strong>{{ detail.run.status }}</strong></div>
             <div><span>Placement</span><strong>{{ detail.run.finalPlacement ?? '—' }}</strong></div>
@@ -321,6 +322,7 @@ onBeforeUnmount(() => {
               <div v-if="round.board.length" class="chips">
                 <span v-for="(unit, index) in round.board" :key="`${unit.definitionId}-${index}`" class="chip">
                   {{ unit.definitionId }} <b>{{ '★'.repeat(unit.starLevel) }}</b>
+                  <small v-if="unit.itemIds?.length">Items: {{ unit.itemIds.join(', ') }}</small>
                 </span>
               </div>
               <p v-else class="muted">Empty board</p>
@@ -393,8 +395,8 @@ onBeforeUnmount(() => {
             <div v-if="runs.length === 0" class="state compact">No runs match these filters.</div>
             <div v-else class="table-wrap">
               <table>
-                <thead><tr><th>Started</th><th>Mode</th><th>Build</th><th>Anonymous ID</th><th>Status</th><th>Abandoned</th><th>Place</th><th>Final board</th><th>W / L / D</th></tr></thead>
-                <tbody><tr v-for="run in runs" :key="run.runId" tabindex="0" @click="openRun(run.runId)" @keyup.enter="openRun(run.runId)"><td>{{ formatDate(run.startedAt) }}</td><td>{{ run.mode }}</td><td :title="run.backendCommit">{{ run.backendVersion }}</td><td :title="run.anonymousPlayerId">{{ shortId(run.anonymousPlayerId) }}</td><td>{{ run.status }}</td><td>{{ run.abandonedAt ? 'Yes' : 'No' }}</td><td>{{ run.finalPlacement ?? '—' }}</td><td><FinalCompositionStrip :mode="run.mode" :composition="run.finalComposition" compact /></td><td>{{ run.wins }} / {{ run.losses }} / {{ run.draws }}</td></tr></tbody>
+                <thead><tr><th>Started</th><th>Mode</th><th>Match rule</th><th>Build</th><th>Anonymous ID</th><th>Status</th><th>Abandoned</th><th>Place</th><th>Final board</th><th>W / L / D</th></tr></thead>
+                <tbody><tr v-for="run in runs" :key="run.runId" tabindex="0" @click="openRun(run.runId)" @keyup.enter="openRun(run.runId)"><td>{{ formatDate(run.startedAt) }}</td><td>{{ run.mode }}</td><td>{{ run.matchRuleId ?? 'None / not recorded' }}</td><td :title="run.backendCommit">{{ run.backendVersion }}</td><td :title="run.anonymousPlayerId">{{ shortId(run.anonymousPlayerId) }}</td><td>{{ run.status }}</td><td>{{ run.abandonedAt ? 'Yes' : 'No' }}</td><td>{{ run.finalPlacement ?? '—' }}</td><td><FinalCompositionStrip :mode="run.mode" :composition="run.finalComposition" compact /></td><td>{{ run.wins }} / {{ run.losses }} / {{ run.draws }}</td></tr></tbody>
               </table>
             </div>
             <button v-if="nextCursor" class="load-more" type="button" :disabled="loadingMore" @click="loadMore">{{ loadingMore ? 'Loading…' : 'Load more' }}</button>

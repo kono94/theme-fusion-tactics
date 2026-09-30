@@ -79,6 +79,7 @@ describe('AdminAnalytics', () => {
                         {
                             runId: 'run-1',
                             matchId: 'match-1',
+                            matchRuleId: 'volatile',
                             anonymousPlayerId: 'browser-1',
                             mode: 'pokemon',
                             backendVersion: '2.0.0',
@@ -118,6 +119,7 @@ describe('AdminAnalytics', () => {
         expect(runRequest).toContain('completed=true')
         expect(runRequest).toContain('abandoned=false')
         expect(wrapper.text()).toContain('Low sample: advantage ranking is suppressed')
+        expect(wrapper.find('.runs-panel').text()).toContain('volatile')
         expect(wrapper.findAll('#analytics-mode option').map((option) => option.text())).toEqual([
             'All modes',
             'pokemon',
@@ -139,6 +141,46 @@ describe('AdminAnalytics', () => {
         await wrapper.find('.runs-panel tbody tr').trigger('keyup', { key: 'Enter' })
 
         expect(window.location.hash).toBe('#/admin/analytics/runs/run-1')
+        wrapper.unmount()
+    })
+
+    it('shows the match rule and equipment in round snapshots', async () => {
+        window.location.hash = '#/admin/analytics/runs/run-1'
+        vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
+            if (String(input).startsWith('/api/items?')) return jsonResponse([])
+            return jsonResponse({
+                run: {
+                    runId: 'run-1',
+                    mode: 'pokemon',
+                    matchRuleId: 'volatile',
+                    backendVersion: '3.0.0',
+                    backendCommit: 'abc123',
+                    startedAt: '2026-09-30T00:00:00Z',
+                    status: 'COMPLETED',
+                    finalPlacement: 1,
+                    abandonedAt: null,
+                    placementFinalizedAt: null,
+                    finalComposition: [],
+                },
+                rounds: [{
+                    round: 4,
+                    healthBefore: 100,
+                    healthAfter: 100,
+                    gold: 20,
+                    level: 4,
+                    xp: 0,
+                    outcome: 'WIN',
+                    opponentType: 'BOT',
+                    board: [{ definitionId: 'pikachu', lineId: 'pikachu', starLevel: 2, itemIds: ['choice-band', 'leftovers'] }],
+                    augments: [],
+                }],
+            })
+        })
+
+        const wrapper = mount(AdminAnalytics)
+        await flushPromises()
+        expect(wrapper.find('.run-heading').text()).toContain('volatile')
+        expect(wrapper.find('.round-card').text()).toContain('Items: choice-band, leftovers')
         wrapper.unmount()
     })
 })

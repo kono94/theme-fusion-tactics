@@ -357,7 +357,13 @@ independently of active mode/version/commit filters, so the dashboard can keep c
 Grafana reads the same SQLite database through the pinned `frser-sqlite-datasource` plugin. The provisioned `Gameplay
 Analytics` datasource is non-editable and the plugin opens SQLite in query-only mode. The dashboards reproduce the
 summary, cohort, unit-presence, and player-run views and add a linked run drill-down for round boards, augments, and
-per-unit combat statistics. Grafana is a trusted-admin surface: its users can inspect the anonymous analytics tables
+per-unit combat statistics. Match rule IDs are included in admin run summaries and details. Grafana exposes the rule in
+run tables and provides a match-rule filter across overview panels; None and historical matches without a recorded rule
+share the `None / not recorded` option. Round and final boards retain equipped item IDs, shown in Grafana's board tables
+and the admin run views. `GrafanaGameplayDashboardsTest` executes the provisioned SQL against migrated SQLite fixtures,
+including rule filters and older boards without item IDs. The analytics database must be migrated by the backend before
+dashboards using new columns are queried.
+Grafana is a trusted-admin surface: its users can inspect the anonymous analytics tables
 directly, so anonymous access and self-service signup remain disabled.
 
 ## 11. Observability

@@ -5,28 +5,6 @@ defineOptions({
 
 defineEmits(['back'])
 
-const version300Highlights = [
-  'Items now appear in loot on rounds 2, 4, 6, and 10 in both One Piece and Pokemon. Collected items land in the Items panel at the bottom right. Hover or tap any item, in your inventory or on a unit, to see its bonuses. Each unit can equip up to two items.',
-  'During planning, drag an item onto a board or bench unit, or tap the item and then tap the unit. Drag equipped items straight from one unit to another, or drop one back on the Items panel to unequip it. The player list and combat report now share one panel on the right with Players and Combat report tabs, and your Items stay visible right below it.',
-  'Every One Piece and Pokemon item now has a distinct pixel-art icon that matches the character portraits.',
-  'Unit details now show the combat stats they will start with, including equipped items, active board traits, and augments. Equipped items also appear in both battle views and final team summaries.',
-  'New Settings button: open it from the lobby corner or next to the room code during a match. Your choices are remembered on this device.',
-  'Turn on “3D battle view” in Settings to watch combat in a 3D arena. Drag to rotate the camera, scroll to zoom, and double-click to reset. Planning stays on the classic board, and you can switch views at any time, even mid-fight.',
-  'One Piece battles take place on story stages (Foosha Village, Baratie, Sabaody Archipelago, Marineford, and Wano Country). Pokemon battles take place in a Battle Stadium or a Rock Gym. Everyone in a room sees the same stage.',
-  'In 3D, every One Piece character has its own auto-attack and signature ultimate from the anime, from Luffy’s Gum Gum Pistol to Whitebeard’s Quake Punch and Kaido’s Thunder Bagua.',
-  'Every Pokemon move has its own 3D animation, and evolving changes the move you see: Charmander’s Ember grows into Charizard’s Flamethrower, and Dratini’s Dragon Breath into Dragonite’s Hyper Beam.',
-  'Hits, knockouts, stuns, heals, shields, and team buffs are easier to read at a glance in 3D.',
-  'Big 3D fights stay easy to watch: the camera only zooms in for occasional big moments, and there are no screen flashes.',
-  'If your device can’t show 3D, combat automatically switches back to the classic view.',
-  'New Match Rules: the host picks one twist for the whole room in the lobby, right below the game theme. Choose Random (the default, revealed when the match starts), None for a standard match, or a specific rule. Everyone sees the active rule next to the room code during the match; hover it for details.',
-  'Shared rules: Cheap Rerolls (rerolls cost 1 gold), Volatile (units explode when they die), Loot Rain (loot orbs every round), Second Wind (every unit comes back once), Glass Cannons (+40% damage, -25% max HP), Mana Surge (units start fights with half their mana), and Head Start (start at level 4).',
-  'Each theme adds its own rule: Bounty Hunt in One Piece pays 1 gold for every enemy unit you defeat, and Type Master in Pokemon doubles type advantages and resistances.',
-  'Volatile explosions respect unused revives. Final explosion knockouts trigger ally shields and team attack bonuses, and Glass Cannons also boosts ability burn and poison damage by 40%.',
-  'Every augment now has its own pixel-art icon that matches the items and characters.',
-  'You can now see your interest: a small chip next to your gold shows how much bonus gold you will earn at the start of the next round (1 gold per 10 gold held, up to 5).',
-  'The game client, server, and monitoring services now run on the latest maintenance releases for up-to-date stability and security fixes.',
-]
-
 const version253Highlights = [
   'Improved the gameplay dashboard with clearer run filtering and more responsive live monitoring.',
 ]
@@ -143,20 +121,106 @@ const version160Commits = [
         <div class="release-header">
           <p class="eyebrow">Latest</p>
           <h2>Version 3.0.0</h2>
-          <p>Items arrive, and battles can now play out in 3D: find stat items in loot to shape your team, and watch combat on themed stages with a signature move for every unit.</p>
+          <p>
+            Shape your team with items, choose a room-wide Match Rule, and watch battles in 3D on
+            themed stages. New augment icons and an interest indicator make your choices easier to
+            read during play.
+          </p>
         </div>
         <div class="release-grid">
-          <article class="release-panel">
-            <div class="section-heading">
-              <span class="marker release"></span>
-              <h3>Highlights</h3>
+          <div class="release-features">
+            <div class="feature-note">
+              <h3>Items</h3>
+              <p>
+                Find <strong>themed stat items</strong> in loot on rounds
+                <strong>2, 4, 6, and 10</strong> in both One Piece and Pokemon. Each unit can equip
+                <strong>two items</strong>. Hover or tap an item to see its bonuses.
+              </p>
+              <p>
+                During planning, <strong>drag an item onto a board or bench unit</strong>, or tap
+                the item and then the unit. Move equipment between units or drop it back into the
+                <strong>Items panel</strong>. Selling and combining units keeps your items; extra
+                equipment returns to inventory. Unit details include equipment, traits, and augments
+                in their starting combat stats.
+              </p>
             </div>
-            <ul class="commit-list highlight-list">
-              <li v-for="highlight in version300Highlights" :key="highlight">
-                <span>{{ highlight }}</span>
-              </li>
-            </ul>
-          </article>
+            <div class="feature-note">
+              <h3>Match Rules</h3>
+              <p>
+                The <strong>host chooses one rule for the whole room</strong> in the lobby.
+                <strong>Random</strong> is the default and reveals the rule when the match starts;
+                choose <strong>None</strong> for a standard match. The active rule appears next to
+                the room code and in public solo match history.
+              </p>
+              <ul class="feature-rules">
+                <li><strong>Cheap Rerolls:</strong> rerolls cost 1 gold.</li>
+                <li>
+                  <strong>Volatile:</strong> defeated units explode. Explosions respect unused
+                  revives and trigger knockout bonuses only after a unit's final defeat.
+                </li>
+                <li><strong>Loot Rain:</strong> loot drops every round.</li>
+                <li><strong>Second Wind:</strong> each unit revives once per fight.</li>
+                <li>
+                  <strong>Glass Cannons:</strong> +40% damage, including burn and poison, and -25%
+                  max HP.
+                </li>
+                <li><strong>Mana Surge:</strong> gain 50% max mana at the start of each fight.</li>
+                <li><strong>Head Start:</strong> start at level 4.</li>
+                <li>
+                  <strong>Bounty Hunt (One Piece):</strong> earn 1 gold per enemy unit defeated.
+                </li>
+                <li>
+                  <strong>Type Master (Pokemon):</strong> double type advantages and resistances.
+                </li>
+              </ul>
+            </div>
+            <div class="feature-note">
+              <h3>3D Battles</h3>
+              <p>
+                Enable <strong>“3D battle view” in Settings</strong> to watch fights on themed
+                stages with character-specific attacks and signature moves. Pokemon moves change as
+                units evolve. Everyone in a room sees the same stage.
+              </p>
+              <p>
+                One Piece stages include
+                <strong
+                  >Foosha Village, Baratie, Sabaody Archipelago, Marineford, and Wano
+                  Country</strong
+                >. Pokemon battles use a <strong>Battle Stadium or Rock Gym</strong>.
+              </p>
+              <p>
+                <strong>Drag</strong> to rotate the camera, <strong>scroll</strong> to zoom, and
+                <strong>double-click</strong> to reset. Planning stays on the classic board, and you
+                can switch views during a fight. Devices that cannot show 3D use the classic view
+                automatically.
+              </p>
+            </div>
+            <div class="feature-note">
+              <h3>Settings and Team Panels</h3>
+              <p>
+                Open <strong>Settings</strong> from the lobby corner or beside the room code during
+                a match. Your preferences are saved on this device. The right panel now has
+                <strong>Players</strong> and <strong>Combat report</strong> tabs, with
+                <strong>Items</strong> always visible below. Equipped items also appear in battle
+                views, final team summaries, and public match history.
+              </p>
+            </div>
+            <div class="feature-note">
+              <h3>Augment Icons</h3>
+              <p>
+                Every <strong>augment and item</strong> now has its own pixel-art icon, matching the
+                character portraits.
+              </p>
+            </div>
+            <div class="feature-note">
+              <h3>Interest Indicator</h3>
+              <p>
+                A chip beside your gold shows
+                <strong>projected interest for the next round</strong>: 1 bonus gold per 10 gold
+                held, up to 5.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
       <section class="release-section">
@@ -299,71 +363,357 @@ const version160Commits = [
               <h3>Balance Changes</h3>
             </div>
             <div class="balance-block">
-              <div class="balance-title"><span class="tag mixed">Rework</span><h4>Normal</h4></div>
-              <p>Breakpoints: <span class="old-value">1 / 2 / 3 / 4</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 2 / 3 / 4 / 5 / 6 / 7 / 8</strong>.</p>
-              <p>ATK at 4 units: <span class="old-value">22%</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value nerf">19%</strong>.</p>
-              <p>New ATK capstones at 5 / 6 / 7 / 8 units: <strong class="value buff">23% / 28% / 34% / 40%</strong>.</p>
+              <div class="balance-title">
+                <span class="tag mixed">Rework</span>
+                <h4>Normal</h4>
+              </div>
+              <p>
+                Breakpoints: <span class="old-value">1 / 2 / 3 / 4</span
+                ><span class="change-arrow">&nbsp;=>&nbsp;</span
+                ><strong class="value buff">1 / 2 / 3 / 4 / 5 / 6 / 7 / 8</strong>.
+              </p>
+              <p>
+                ATK at 4 units: <span class="old-value">22%</span
+                ><span class="change-arrow">&nbsp;=>&nbsp;</span
+                ><strong class="value nerf">19%</strong>.
+              </p>
+              <p>
+                New ATK capstones at 5 / 6 / 7 / 8 units:
+                <strong class="value buff">23% / 28% / 34% / 40%</strong>.
+              </p>
             </div>
             <div class="balance-block">
-              <div class="balance-title"><span class="tag mixed">Rework</span><h4>Flying</h4></div>
-              <p>Breakpoints: <span class="old-value">1 / 2 / 3 / 4</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 2 / 3 / 4 / 5 / 6 / 7 / 8</strong>.</p>
-              <p>Low-health AS at 4 units: <span class="old-value">30%</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value nerf">26%</strong>.</p>
-              <p>New low-health AS capstones at 5 / 6 / 7 / 8 units: <strong class="value buff">31% / 37% / 43% / 50%</strong>.</p>
+              <div class="balance-title">
+                <span class="tag mixed">Rework</span>
+                <h4>Flying</h4>
+              </div>
+              <p>
+                Breakpoints: <span class="old-value">1 / 2 / 3 / 4</span
+                ><span class="change-arrow">&nbsp;=>&nbsp;</span
+                ><strong class="value buff">1 / 2 / 3 / 4 / 5 / 6 / 7 / 8</strong>.
+              </p>
+              <p>
+                Low-health AS at 4 units: <span class="old-value">30%</span
+                ><span class="change-arrow">&nbsp;=>&nbsp;</span
+                ><strong class="value nerf">26%</strong>.
+              </p>
+              <p>
+                New low-health AS capstones at 5 / 6 / 7 / 8 units:
+                <strong class="value buff">31% / 37% / 43% / 50%</strong>.
+              </p>
             </div>
             <div class="balance-block">
-              <div class="balance-title"><span class="tag mixed">Rework</span><h4>Water</h4></div>
-              <p>Breakpoints: <span class="old-value">1 / 2 / 3 / 4</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 2 / 3 / 4 / 5 / 6 / 7 / 8</strong>.</p>
-              <p>Mana gain at 4 units: <span class="old-value">90%</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value nerf">78%</strong>.</p>
-              <p>New mana-gain capstones at 5 / 6 / 7 / 8 units: <strong class="value buff">92% / 103% / 114% / 125%</strong>.</p>
+              <div class="balance-title">
+                <span class="tag mixed">Rework</span>
+                <h4>Water</h4>
+              </div>
+              <p>
+                Breakpoints: <span class="old-value">1 / 2 / 3 / 4</span
+                ><span class="change-arrow">&nbsp;=>&nbsp;</span
+                ><strong class="value buff">1 / 2 / 3 / 4 / 5 / 6 / 7 / 8</strong>.
+              </p>
+              <p>
+                Mana gain at 4 units: <span class="old-value">90%</span
+                ><span class="change-arrow">&nbsp;=>&nbsp;</span
+                ><strong class="value nerf">78%</strong>.
+              </p>
+              <p>
+                New mana-gain capstones at 5 / 6 / 7 / 8 units:
+                <strong class="value buff">92% / 103% / 114% / 125%</strong>.
+              </p>
             </div>
             <div class="balance-block">
-              <div class="balance-title"><span class="tag mixed">Rework</span><h4>Poison</h4></div>
-              <p>Breakpoints: <span class="old-value">1 / 2 / 3 / 4 / 5 / 6</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 2 / 3 / 4 / 5 / 6 / 7 / 8</strong>.</p>
-              <p>Damage per tick at 4 / 5 / 6 units: <span class="old-value">30% / 45% / 60% ATK</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value nerf">28% / 40% / 52% ATK</strong>.</p>
-              <p>New damage capstones at 7 / 8 units: <strong class="value buff">61% / 68% ATK</strong>.</p>
+              <div class="balance-title">
+                <span class="tag mixed">Rework</span>
+                <h4>Poison</h4>
+              </div>
+              <p>
+                Breakpoints: <span class="old-value">1 / 2 / 3 / 4 / 5 / 6</span
+                ><span class="change-arrow">&nbsp;=>&nbsp;</span
+                ><strong class="value buff">1 / 2 / 3 / 4 / 5 / 6 / 7 / 8</strong>.
+              </p>
+              <p>
+                Damage per tick at 4 / 5 / 6 units:
+                <span class="old-value">30% / 45% / 60% ATK</span
+                ><span class="change-arrow">&nbsp;=>&nbsp;</span
+                ><strong class="value nerf">28% / 40% / 52% ATK</strong>.
+              </p>
+              <p>
+                New damage capstones at 7 / 8 units:
+                <strong class="value buff">61% / 68% ATK</strong>.
+              </p>
             </div>
             <div class="balance-block">
-              <div class="balance-title"><span class="tag mixed">Rework</span><h4>Psychic</h4></div>
-              <p>Breakpoints: <span class="old-value">1 / 2 / 3 / 4</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 2 / 3 / 4 / 5 / 6</strong>.</p>
-              <p>Starting mana at 4 units: <span class="old-value">35%</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value nerf">30%</strong>.</p>
-              <p>New starting-mana capstones at 5 / 6 units: <strong class="value buff">36% / 42%</strong>.</p>
+              <div class="balance-title">
+                <span class="tag mixed">Rework</span>
+                <h4>Psychic</h4>
+              </div>
+              <p>
+                Breakpoints: <span class="old-value">1 / 2 / 3 / 4</span
+                ><span class="change-arrow">&nbsp;=>&nbsp;</span
+                ><strong class="value buff">1 / 2 / 3 / 4 / 5 / 6</strong>.
+              </p>
+              <p>
+                Starting mana at 4 units: <span class="old-value">35%</span
+                ><span class="change-arrow">&nbsp;=>&nbsp;</span
+                ><strong class="value nerf">30%</strong>.
+              </p>
+              <p>
+                New starting-mana capstones at 5 / 6 units:
+                <strong class="value buff">36% / 42%</strong>.
+              </p>
             </div>
             <div class="balance-block">
-              <div class="balance-title"><span class="tag mixed">Rework</span><h4>Fire</h4></div>
-              <p>Breakpoints: <span class="old-value">1 / 2 / 3 / 4</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 2 / 3 / 4 / 5</strong>.</p>
-              <p>Ability damage at 4 units: <span class="old-value">32%</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value nerf">28%</strong>.</p>
-              <p>New ability-damage capstone at 5 units: <strong class="value buff">34%</strong>.</p>
+              <div class="balance-title">
+                <span class="tag mixed">Rework</span>
+                <h4>Fire</h4>
+              </div>
+              <p>
+                Breakpoints: <span class="old-value">1 / 2 / 3 / 4</span
+                ><span class="change-arrow">&nbsp;=>&nbsp;</span
+                ><strong class="value buff">1 / 2 / 3 / 4 / 5</strong>.
+              </p>
+              <p>
+                Ability damage at 4 units: <span class="old-value">32%</span
+                ><span class="change-arrow">&nbsp;=>&nbsp;</span
+                ><strong class="value nerf">28%</strong>.
+              </p>
+              <p>
+                New ability-damage capstone at 5 units: <strong class="value buff">34%</strong>.
+              </p>
             </div>
             <div class="balance-block">
-              <div class="balance-title"><span class="tag mixed">Rework</span><h4>Fighting</h4></div>
-              <p>Breakpoints: <span class="old-value">1 / 2 / 3 / 4</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 2 / 3 / 4 / 5</strong>.</p>
-              <p>ATK at 4 units: <span class="old-value">38%</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value nerf">33%</strong>.</p>
+              <div class="balance-title">
+                <span class="tag mixed">Rework</span>
+                <h4>Fighting</h4>
+              </div>
+              <p>
+                Breakpoints: <span class="old-value">1 / 2 / 3 / 4</span
+                ><span class="change-arrow">&nbsp;=>&nbsp;</span
+                ><strong class="value buff">1 / 2 / 3 / 4 / 5</strong>.
+              </p>
+              <p>
+                ATK at 4 units: <span class="old-value">38%</span
+                ><span class="change-arrow">&nbsp;=>&nbsp;</span
+                ><strong class="value nerf">33%</strong>.
+              </p>
               <p>New ATK capstone at 5 units: <strong class="value buff">40%</strong>.</p>
             </div>
             <div class="balance-block">
-              <div class="balance-title"><span class="tag mixed">Rework</span><h4>Ice</h4></div>
-              <p>Breakpoints: <span class="old-value">1 / 2 / 3 / 4</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 2 / 3 / 4 / 5</strong>.</p>
-              <p>DEF at 4 units: <span class="old-value">40</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value nerf">34</strong>.</p>
+              <div class="balance-title">
+                <span class="tag mixed">Rework</span>
+                <h4>Ice</h4>
+              </div>
+              <p>
+                Breakpoints: <span class="old-value">1 / 2 / 3 / 4</span
+                ><span class="change-arrow">&nbsp;=>&nbsp;</span
+                ><strong class="value buff">1 / 2 / 3 / 4 / 5</strong>.
+              </p>
+              <p>
+                DEF at 4 units: <span class="old-value">40</span
+                ><span class="change-arrow">&nbsp;=>&nbsp;</span
+                ><strong class="value nerf">34</strong>.
+              </p>
               <p>New DEF capstone at 5 units: <strong class="value buff">44</strong>.</p>
             </div>
-            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Bulbasaur</h4></div><p>Attack range: <span class="old-value">1 / 1 / 1</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">2 / 2 / 2</strong>.</p></div>
-            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Charmander</h4></div><p>Attack range: <span class="old-value">1 / 1 / 1</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">2 / 2 / 2</strong>.</p></div>
-            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Weedle</h4></div><p>Attack range: <span class="old-value">1 / 1 / 1</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">2 / 2 / 2</strong>.</p></div>
-            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Poliwag</h4></div><p>Attack range: <span class="old-value">1 / 1 / 1</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">3 / 3 / 3</strong>.</p></div>
-            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Pikachu</h4></div><p>Attack range: <span class="old-value">1 / 1 / 1</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">3 / 3 / 3</strong>.</p></div>
-            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Grimer</h4></div><p>Attack range: <span class="old-value">1 / 1 / 1</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">2 / 2 / 2</strong>.</p></div>
-            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Aerodactyl</h4></div><p>Attack range: <span class="old-value">1 / 1 / 1</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">3 / 3 / 3</strong>.</p></div>
-            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Mewtwo</h4></div><p>Attack range: <span class="old-value">1 / 1 / 1</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">4 / 4 / 4</strong>.</p></div>
-            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Ivysaur</h4></div><p>Razor Leaf range: <span class="old-value">1 / 1 / 2</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 2 / 2</strong>.</p></div>
-            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Charmeleon</h4></div><p>Fire Fang range: <span class="old-value">1 / 1 / 1</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 2 / 2</strong>.</p></div>
-            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Poliwrath</h4></div><p>Dynamic Punch range: <span class="old-value">1 / 1 / 1</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 3 / 3</strong>.</p></div>
-            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Raichu</h4></div><p>Thunder range: <span class="old-value">2 / 2 / 3</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">2 / 3 / 3</strong>.</p></div>
-            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Pidgey</h4></div><p>Gust range: <span class="old-value">3 / 3 / 4</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">4 / 3 / 4</strong>.</p></div>
-            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Spearow</h4></div><p>Peck range: <span class="old-value">2 / 2 / 3</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">4 / 2 / 3</strong>.</p></div>
-            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Vulpix</h4></div><p>Will-O-Wisp range: <span class="old-value">2 / 2 / 3</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">3 / 2 / 3</strong>.</p></div>
-            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Wigglytuff</h4></div><p>Play Rough range: <span class="old-value">1 / 1 / 2</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">1 / 1 / 3</strong>.</p></div>
-            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Kingdra</h4></div><p>Draco Meteor range: <span class="old-value">2 / 3 / 3</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">2 / 3 / 4</strong>.</p></div>
-            <div class="balance-block"><div class="balance-title"><span class="tag buff">Buff</span><h4>Dragonair</h4></div><p>Aqua Tail range: <span class="old-value">2 / 2 / 3</span><span class="change-arrow">&nbsp;=>&nbsp;</span><strong class="value buff">2 / 4 / 3</strong>.</p></div>
+            <div class="balance-block">
+              <div class="balance-title">
+                <span class="tag buff">Buff</span>
+                <h4>Bulbasaur</h4>
+              </div>
+              <p>
+                Attack range: <span class="old-value">1 / 1 / 1</span
+                ><span class="change-arrow">&nbsp;=>&nbsp;</span
+                ><strong class="value buff">2 / 2 / 2</strong>.
+              </p>
+            </div>
+            <div class="balance-block">
+              <div class="balance-title">
+                <span class="tag buff">Buff</span>
+                <h4>Charmander</h4>
+              </div>
+              <p>
+                Attack range: <span class="old-value">1 / 1 / 1</span
+                ><span class="change-arrow">&nbsp;=>&nbsp;</span
+                ><strong class="value buff">2 / 2 / 2</strong>.
+              </p>
+            </div>
+            <div class="balance-block">
+              <div class="balance-title">
+                <span class="tag buff">Buff</span>
+                <h4>Weedle</h4>
+              </div>
+              <p>
+                Attack range: <span class="old-value">1 / 1 / 1</span
+                ><span class="change-arrow">&nbsp;=>&nbsp;</span
+                ><strong class="value buff">2 / 2 / 2</strong>.
+              </p>
+            </div>
+            <div class="balance-block">
+              <div class="balance-title">
+                <span class="tag buff">Buff</span>
+                <h4>Poliwag</h4>
+              </div>
+              <p>
+                Attack range: <span class="old-value">1 / 1 / 1</span
+                ><span class="change-arrow">&nbsp;=>&nbsp;</span
+                ><strong class="value buff">3 / 3 / 3</strong>.
+              </p>
+            </div>
+            <div class="balance-block">
+              <div class="balance-title">
+                <span class="tag buff">Buff</span>
+                <h4>Pikachu</h4>
+              </div>
+              <p>
+                Attack range: <span class="old-value">1 / 1 / 1</span
+                ><span class="change-arrow">&nbsp;=>&nbsp;</span
+                ><strong class="value buff">3 / 3 / 3</strong>.
+              </p>
+            </div>
+            <div class="balance-block">
+              <div class="balance-title">
+                <span class="tag buff">Buff</span>
+                <h4>Grimer</h4>
+              </div>
+              <p>
+                Attack range: <span class="old-value">1 / 1 / 1</span
+                ><span class="change-arrow">&nbsp;=>&nbsp;</span
+                ><strong class="value buff">2 / 2 / 2</strong>.
+              </p>
+            </div>
+            <div class="balance-block">
+              <div class="balance-title">
+                <span class="tag buff">Buff</span>
+                <h4>Aerodactyl</h4>
+              </div>
+              <p>
+                Attack range: <span class="old-value">1 / 1 / 1</span
+                ><span class="change-arrow">&nbsp;=>&nbsp;</span
+                ><strong class="value buff">3 / 3 / 3</strong>.
+              </p>
+            </div>
+            <div class="balance-block">
+              <div class="balance-title">
+                <span class="tag buff">Buff</span>
+                <h4>Mewtwo</h4>
+              </div>
+              <p>
+                Attack range: <span class="old-value">1 / 1 / 1</span
+                ><span class="change-arrow">&nbsp;=>&nbsp;</span
+                ><strong class="value buff">4 / 4 / 4</strong>.
+              </p>
+            </div>
+            <div class="balance-block">
+              <div class="balance-title">
+                <span class="tag buff">Buff</span>
+                <h4>Ivysaur</h4>
+              </div>
+              <p>
+                Razor Leaf range: <span class="old-value">1 / 1 / 2</span
+                ><span class="change-arrow">&nbsp;=>&nbsp;</span
+                ><strong class="value buff">1 / 2 / 2</strong>.
+              </p>
+            </div>
+            <div class="balance-block">
+              <div class="balance-title">
+                <span class="tag buff">Buff</span>
+                <h4>Charmeleon</h4>
+              </div>
+              <p>
+                Fire Fang range: <span class="old-value">1 / 1 / 1</span
+                ><span class="change-arrow">&nbsp;=>&nbsp;</span
+                ><strong class="value buff">1 / 2 / 2</strong>.
+              </p>
+            </div>
+            <div class="balance-block">
+              <div class="balance-title">
+                <span class="tag buff">Buff</span>
+                <h4>Poliwrath</h4>
+              </div>
+              <p>
+                Dynamic Punch range: <span class="old-value">1 / 1 / 1</span
+                ><span class="change-arrow">&nbsp;=>&nbsp;</span
+                ><strong class="value buff">1 / 3 / 3</strong>.
+              </p>
+            </div>
+            <div class="balance-block">
+              <div class="balance-title">
+                <span class="tag buff">Buff</span>
+                <h4>Raichu</h4>
+              </div>
+              <p>
+                Thunder range: <span class="old-value">2 / 2 / 3</span
+                ><span class="change-arrow">&nbsp;=>&nbsp;</span
+                ><strong class="value buff">2 / 3 / 3</strong>.
+              </p>
+            </div>
+            <div class="balance-block">
+              <div class="balance-title">
+                <span class="tag buff">Buff</span>
+                <h4>Pidgey</h4>
+              </div>
+              <p>
+                Gust range: <span class="old-value">3 / 3 / 4</span
+                ><span class="change-arrow">&nbsp;=>&nbsp;</span
+                ><strong class="value buff">4 / 3 / 4</strong>.
+              </p>
+            </div>
+            <div class="balance-block">
+              <div class="balance-title">
+                <span class="tag buff">Buff</span>
+                <h4>Spearow</h4>
+              </div>
+              <p>
+                Peck range: <span class="old-value">2 / 2 / 3</span
+                ><span class="change-arrow">&nbsp;=>&nbsp;</span
+                ><strong class="value buff">4 / 2 / 3</strong>.
+              </p>
+            </div>
+            <div class="balance-block">
+              <div class="balance-title">
+                <span class="tag buff">Buff</span>
+                <h4>Vulpix</h4>
+              </div>
+              <p>
+                Will-O-Wisp range: <span class="old-value">2 / 2 / 3</span
+                ><span class="change-arrow">&nbsp;=>&nbsp;</span
+                ><strong class="value buff">3 / 2 / 3</strong>.
+              </p>
+            </div>
+            <div class="balance-block">
+              <div class="balance-title">
+                <span class="tag buff">Buff</span>
+                <h4>Wigglytuff</h4>
+              </div>
+              <p>
+                Play Rough range: <span class="old-value">1 / 1 / 2</span
+                ><span class="change-arrow">&nbsp;=>&nbsp;</span
+                ><strong class="value buff">1 / 1 / 3</strong>.
+              </p>
+            </div>
+            <div class="balance-block">
+              <div class="balance-title">
+                <span class="tag buff">Buff</span>
+                <h4>Kingdra</h4>
+              </div>
+              <p>
+                Draco Meteor range: <span class="old-value">2 / 3 / 3</span
+                ><span class="change-arrow">&nbsp;=>&nbsp;</span
+                ><strong class="value buff">2 / 3 / 4</strong>.
+              </p>
+            </div>
+            <div class="balance-block">
+              <div class="balance-title">
+                <span class="tag buff">Buff</span>
+                <h4>Dragonair</h4>
+              </div>
+              <p>
+                Aqua Tail range: <span class="old-value">2 / 2 / 3</span
+                ><span class="change-arrow">&nbsp;=>&nbsp;</span
+                ><strong class="value buff">2 / 4 / 3</strong>.
+              </p>
+            </div>
           </article>
         </div>
       </section>
@@ -2745,6 +3095,41 @@ const version160Commits = [
   border-radius: 8px;
   background: rgba(15, 23, 42, 0.72);
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+}
+
+.release-features {
+  display: grid;
+  gap: 18px;
+}
+.feature-note {
+  padding: 24px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.72);
+}
+.feature-note h3 {
+  margin: 0 0 16px;
+  color: #67e8f9;
+  font-size: 20px;
+}
+.feature-note p,
+.feature-rules {
+  margin: 0 0 14px;
+  color: #cbd5e1;
+  line-height: 1.65;
+}
+.feature-note p:last-child,
+.feature-rules:last-child {
+  margin-bottom: 0;
+}
+.feature-note strong {
+  color: #f8fafc;
+}
+.feature-rules {
+  padding-left: 22px;
+}
+.feature-rules li + li {
+  margin-top: 10px;
 }
 
 .release-panel {

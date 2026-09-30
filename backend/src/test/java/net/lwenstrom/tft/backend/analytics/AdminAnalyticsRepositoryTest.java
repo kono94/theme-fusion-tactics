@@ -40,6 +40,27 @@ class AdminAnalyticsRepositoryTest {
     }
 
     @Test
+    void exposesMatchRulesAndEquippedItemsInRunListAndDetail() {
+        insertCompletedRun("ruled", "match-ruled", 1_000, false, "WIN", "BOT");
+        insertCompletedRun("plain", "match-plain", 2_000, false, "LOSS", "BOT");
+        jdbcTemplate.update("UPDATE analytics_match SET match_rule_id = 'volatile' WHERE id = 'match-ruled'");
+        var board =
+                "[{\"definitionId\":\"unit-a\",\"lineId\":\"line-a\",\"starLevel\":2,\"itemIds\":[\"item-a\",\"item-b\"]}]";
+        jdbcTemplate.update("UPDATE analytics_player_run SET final_board_json = ? WHERE id = 'ruled'", board);
+        jdbcTemplate.update("UPDATE analytics_player_round SET board_json = ? WHERE run_id = 'ruled'", board);
+
+        var page = repository.runs(0, 3_000, null, null, null, null, 10);
+        assertThat(page.items())
+                .extracting(AdminAnalyticsRepository.RunSummary::matchRuleId)
+                .containsExactly(null, "volatile");
+        var detail = repository.runDetail("ruled");
+        assertThat(detail.run().matchRuleId()).isEqualTo("volatile");
+        assertThat(detail.run().finalComposition().getFirst().itemIds()).containsExactly("item-a", "item-b");
+        assertThat(detail.rounds().getFirst().board().get(0).get("itemIds").size())
+                .isEqualTo(2);
+    }
+
+    @Test
     void aggregatesAndPagesRuns() {
         insertCompletedRun("run-2", "match-2", 2_000, true, "LOSS", "BOT");
         insertCompletedRun("run-1", "match-1", 1_000, false, "WIN", "HUMAN");

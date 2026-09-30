@@ -334,11 +334,14 @@ any unit's attack or ultimate in the 3D view with a selectable arena and extra b
 `#/match-history` renders `MatchHistory.vue` without starting the game WebSocket and loads the public latest-20 feed from
 `matchHistoryClient.ts`. It uses the server-provided opaque history ID for card identity, displays local completion time,
 mode, final round, placement, and a shared `FinalCompositionStrip.vue` board renderer with readable star and item labels.
+Match cards also show the recorded match rule using the mode's rule catalog.
 Unavailable historical board JSON is shown per card, without preventing the rest of the feed from rendering. The page also
 provides loading, empty, retry, and Back states.
 `#/admin/analytics` renders `AdminAnalytics.vue` without starting the game WebSocket. `analyticsClient.ts` handles login,
 bearer token storage for the current tab, summary queries, paginated run queries, final-composition unit-presence
-comparisons, run detail, and logout. The dashboard defaults to completed, non-abandoned runs and exposes exact mode,
+comparisons, run detail, and logout. Run lists and details show the recorded match rule, and round boards include equipped
+item IDs. Null rules are labeled `None / not recorded` for compatibility with older matches.
+The dashboard defaults to completed, non-abandoned runs and exposes exact mode,
 version, commit, placement, completion, abandonment, and anonymous-player filters. Mode, version, commit, build-cohort,
 and anonymous-player selections come from all distinct values in the summary date range. The admin REST API is protected
 by the backend; frontend route hiding is not security.

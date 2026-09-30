@@ -38,6 +38,7 @@ export interface AnalyticsRunSummary {
     matchId: string
     anonymousPlayerId: string
     mode: string
+    matchRuleId: string | null
     backendVersion: string
     backendCommit: string
     startedAt: string
