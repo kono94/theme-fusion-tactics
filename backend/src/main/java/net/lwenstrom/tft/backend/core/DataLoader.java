@@ -1,6 +1,7 @@
 package net.lwenstrom.tft.backend.core;
 
 import jakarta.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -10,10 +11,12 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import net.lwenstrom.tft.backend.core.combat.ElementalAffinityConfig;
 import net.lwenstrom.tft.backend.core.combat.ElementalAffinityLoader;
+import net.lwenstrom.tft.backend.core.engine.MatchRuleManager;
 import net.lwenstrom.tft.backend.core.engine.UnitDefinition;
 import net.lwenstrom.tft.backend.core.model.AugmentDefinition;
 import net.lwenstrom.tft.backend.core.model.GameMode;
 import net.lwenstrom.tft.backend.core.model.ItemDefinition;
+import net.lwenstrom.tft.backend.core.model.MatchRuleDefinition;
 import net.lwenstrom.tft.backend.core.model.TraitMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -47,13 +50,17 @@ public class DataLoader {
             List<AugmentDefinition> augments,
             List<ItemDefinition> items) {}
 
+    private static final String COMMON_MATCH_RULES_PATH = "/data/match_rules_common.json";
+
     private final Map<GameMode, ModeData> modeDataCache = new ConcurrentHashMap<>();
+    private final Map<GameMode, List<MatchRuleDefinition>> matchRuleCache = new ConcurrentHashMap<>();
 
     @PostConstruct
     public void loadData() {
         gameModeRegistry.getAvailableModes().forEach(mode -> {
             getModeData(mode);
             getElementalAffinity(mode);
+            getMatchRules(mode);
         });
     }
 
@@ -166,6 +173,64 @@ public class DataLoader {
                 && item.statBonuses() != null
                 && !item.statBonuses().isEmpty()
                 && item.statBonuses().values().stream().allMatch(value -> value != null && value > 0);
+    }
+
+    public List<MatchRuleDefinition> getMatchRules(GameMode mode) {
+        return matchRuleCache.computeIfAbsent(mode, this::loadMatchRulesForMode);
+    }
+
+    private List<MatchRuleDefinition> loadMatchRulesForMode(GameMode mode) {
+        var rules = new ArrayList<>(loadMatchRules(COMMON_MATCH_RULES_PATH, true));
+        var provider = gameModeRegistry.getProvider(mode);
+        rules.addAll(loadMatchRules(provider == null ? null : provider.getMatchRulesPath(), false));
+        var ids = new HashSet<String>();
+        rules.forEach(rule -> {
+            if (!ids.add(rule.id())) {
+                throw new IllegalStateException("Duplicate match rule id " + rule.id() + " for mode " + mode);
+            }
+        });
+        return List.copyOf(rules);
+    }
+
+    private List<MatchRuleDefinition> loadMatchRules(String path, boolean required) {
+        if (path == null) {
+            return List.of();
+        }
+        try (var inputStream = getClass().getResourceAsStream(path)) {
+            if (inputStream == null) {
+                if (required) {
+                    throw new IllegalStateException("Could not find match rules at " + path);
+                }
+                return List.of();
+            }
+            List<MatchRuleDefinition> rules = jsonMapper.readValue(inputStream, new TypeReference<>() {});
+            var ids = new HashSet<String>();
+            for (var rule : rules) {
+                if (!isValidMatchRule(rule) || !ids.add(rule.id())) {
+                    throw new IllegalStateException("Invalid match rule definition " + rule.id() + " in " + path);
+                }
+            }
+            log.info("Loaded {} match rules from {}", rules.size(), path);
+            return rules;
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to load match rule data: " + path, e);
+        }
+    }
+
+    private static boolean isValidMatchRule(MatchRuleDefinition rule) {
+        return rule.id() != null
+                && !rule.id().isBlank()
+                && !MatchRuleManager.RANDOM.equalsIgnoreCase(rule.id())
+                && !MatchRuleManager.NONE.equalsIgnoreCase(rule.id())
+                && rule.name() != null
+                && !rule.name().isBlank()
+                && rule.description() != null
+                && !rule.description().isBlank()
+                && rule.icon() != null
+                && !rule.icon().isBlank()
+                && rule.effectType() != null
+                && rule.values() != null
+                && !rule.values().isEmpty();
     }
 
     public UnitDefinition getUnitDefinition(GameMode mode, String id) {

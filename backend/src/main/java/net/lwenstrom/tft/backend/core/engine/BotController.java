@@ -72,7 +72,7 @@ public final class BotController {
                 continue;
             }
             if (rerolls >= rerollLimit
-                    || player.getGold() - GameConstants.REROLL_COST < reserve
+                    || player.getGold() - player.getRerollCost() < reserve
                     || player.isShopLocked()
                     || player.getBenchSlots().findFirstEmptySlot().isEmpty()
                     || !canAffordRerolledUnit(player, reserve)) break;
@@ -126,7 +126,7 @@ public final class BotController {
 
     private boolean canAffordRerolledUnit(Player player, int reserve) {
         var budget = player.getGold()
-                - GameConstants.REROLL_COST
+                - player.getRerollCost()
                 - (player.getBoardUnits().size() < player.getLevel() ? 0 : reserve);
         return dataLoader.getAllUnits(player.getGameMode()).stream()
                 .anyMatch(

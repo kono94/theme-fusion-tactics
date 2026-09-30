@@ -468,7 +468,8 @@ public class DefaultAbilityCaster implements AbilityCaster {
 
         for (var modifier : ability.modifiers()) {
             if (modifier instanceof DotModifier dotModifier) {
-                int damagePerTick = dotModifier.getDamagePerTick(starLevel);
+                int damagePerTick =
+                        Math.round(dotModifier.getDamagePerTick(starLevel) * source.getAbilityDotDamageMultiplier());
                 int durationSeconds = dotModifier.getDurationSeconds(starLevel);
                 int tickIntervalMs = dotModifier.getTickIntervalMs(starLevel);
                 if (damagePerTick <= 0 || durationSeconds <= 0 || tickIntervalMs <= 0) {

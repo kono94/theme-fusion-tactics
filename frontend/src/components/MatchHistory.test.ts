@@ -1,4 +1,4 @@
-import { mount } from '@vue/test-utils'
+import { flushPromises, mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { getMatchHistory, MatchHistoryApiError } from '../services/matchHistoryClient'
 import MatchHistory from './MatchHistory.vue'
@@ -55,6 +55,25 @@ describe('MatchHistory', () => {
         const wrapper = mount(MatchHistory)
 
         await vi.waitFor(() => expect(wrapper.findAll('[data-test="match-history-card"]')).toHaveLength(2))
+    })
+
+    it('shows the match rule the game was played with', async () => {
+        vi.stubGlobal(
+            'fetch',
+            vi.fn().mockResolvedValue({
+                ok: true,
+                json: async () => [
+                    { id: 'volatile', name: 'Volatile', description: 'Boom.', icon: '/assets/match-rules/volatile.png' },
+                ],
+            })
+        )
+        getMatchHistoryMock.mockResolvedValue({ matches: [{ ...match, matchRuleId: 'volatile' }] })
+
+        const wrapper = mount(MatchHistory)
+        await flushPromises()
+
+        expect(wrapper.get('[data-test="match-history-rule"]').text()).toBe('Volatile')
+        vi.unstubAllGlobals()
     })
 
     it('shows an empty state when no matches qualify', async () => {

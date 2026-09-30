@@ -1,0 +1,10 @@
+[
+  {
+    "id": "bounty-hunt",
+    "name": "Bounty Hunt",
+    "description": "Earn 1 gold for every enemy unit your team defeats in combat.",
+    "icon": "/assets/match-rules/bounty-hunt.png",
+    "effectType": "KILL_BOUNTY",
+    "values": [1]
+  }
+]

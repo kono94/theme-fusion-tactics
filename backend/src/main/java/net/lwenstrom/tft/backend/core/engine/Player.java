@@ -54,6 +54,7 @@ public class Player {
     private final List<LootOrb> lootOrbs = new ArrayList<>();
     private final List<GameItem> inventory = new ArrayList<>();
     private int itemSlotsPerUnit = GameConstants.DEFAULT_ITEM_SLOTS;
+    private int rerollCost = GameConstants.REROLL_COST;
     private final List<AugmentOffer> augmentChoices = new ArrayList<>();
     private final List<SelectedAugment> selectedAugments = new ArrayList<>();
 
@@ -108,10 +109,10 @@ public class Player {
     }
 
     public void refreshShop() {
-        if (shopLocked || gold < GameConstants.REROLL_COST) {
+        if (shopLocked || gold < rerollCost) {
             return;
         }
-        gold -= GameConstants.REROLL_COST;
+        gold -= rerollCost;
 
         refreshShopFree();
     }

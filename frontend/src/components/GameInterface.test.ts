@@ -101,6 +101,11 @@ function gameState(phase: GamePhase, health: number, place: number): GameState {
         planningReadyPlayerId: null,
         planningPauseReason: null,
         itemSlotsPerUnit: 2,
+        matchRuleSelection: 'RANDOM',
+        activeMatchRule: null,
+        baseIncome: 5,
+        maxInterest: 5,
+        rerollCost: 2,
     }
 }
 
@@ -313,6 +318,57 @@ describe('GameInterface end celebration', () => {
         input.dispatchEvent(new KeyboardEvent('keydown', { key: 'r', bubbles: true }))
 
         expect(wrapper.emitted('action')).toBeUndefined()
+        wrapper.unmount()
+    })
+})
+
+describe('GameInterface match rules and economy', () => {
+    it('shows the active match rule badge with its description', () => {
+        const state = gameState('PLANNING', 100, 1)
+        state.activeMatchRule = {
+            id: 'volatile',
+            name: 'Volatile',
+            description: 'Units explode on death.',
+            icon: '/assets/match-rules/volatile.png',
+        }
+        const wrapper = mount(GameInterface, {
+            props: { state, currentPlayerId: 'player-1' },
+            global: { stubs: childStubs },
+        })
+
+        const badge = wrapper.get('[data-testid="rule-badge"]')
+        expect(badge.text()).toContain('Volatile')
+        expect(badge.get('[role="tooltip"]').text()).toBe('Units explode on death.')
+        expect(badge.get('img').attributes('src')).toBe('/assets/match-rules/volatile.png')
+        wrapper.unmount()
+    })
+
+    it('hides the rule badge when no rule is active', () => {
+        const wrapper = mount(GameInterface, {
+            props: { state: gameState('PLANNING', 100, 1), currentPlayerId: 'player-1' },
+            global: { stubs: childStubs },
+        })
+
+        expect(wrapper.find('[data-testid="rule-badge"]').exists()).toBe(false)
+        wrapper.unmount()
+    })
+
+    it('uses the room reroll cost for the button and the R shortcut', () => {
+        const state = gameState('PLANNING', 100, 1)
+        state.players['player-1'].gold = 1
+        state.rerollCost = 1
+        const wrapper = mount(GameInterface, {
+            props: { state, currentPlayerId: 'player-1' },
+            global: { stubs: childStubs },
+        })
+
+        expect(wrapper.get('.reroll-btn .cost').text()).toBe('1g')
+        expect(wrapper.get('.reroll-btn').attributes('disabled')).toBeUndefined()
+
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'r' }))
+
+        const emittedActions = wrapper.emitted('action') as [GameAction][]
+        expect(emittedActions.map(([action]) => action.type)).toEqual(['REROLL'])
         wrapper.unmount()
     })
 })

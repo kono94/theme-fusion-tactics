@@ -20,7 +20,7 @@ Delivered from the previous roadmap:
 
 | Order | Initiative | Player outcome |
 |---|---|---|
-| 1 | Match Rules | Every match can have a distinct flavor chosen by the host |
+| 1 | Match Rules | Every match can have a distinct flavor chosen by the host (first release implemented: 7 shared rules plus one themed rule per mode; the open questions below are settled, Random is the default) |
 | 2 | Item system | Shipped stat-item foundation; triggered effects and Match Rule variants remain later work |
 | 3 | Mobile support | Full matches playable on tablets and landscape phones |
 | 4 | Bot improvements | Bots use Match Rules and items credibly and position better |

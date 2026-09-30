@@ -70,6 +70,8 @@ const myPlayer = computed((): PlayerState | null => {
   return props.state.players[props.currentPlayerId] ?? null
 })
 
+const rerollCost = computed(() => props.state?.rerollCost ?? 2)
+
 const allPlayers = computed((): PlayerState[] => {
   if (!props.state?.players) return []
   return Object.values(props.state.players)
@@ -503,7 +505,7 @@ function handleKeyboardShortcut(event: KeyboardEvent) {
     return
 
   const key = event.key.toLowerCase()
-  if (key === 'r' && canManageShopAndBench.value && (myPlayer.value?.gold ?? 0) >= 2) {
+  if (key === 'r' && canManageShopAndBench.value && (myPlayer.value?.gold ?? 0) >= rerollCost.value) {
     event.preventDefault()
     refreshShop()
     return
@@ -740,6 +742,11 @@ watch(
           <span class="phase-name">{{ state.phase }}</span>
           <div class="game-meta">
             <span class="game-mode">{{ state.gameMode }}</span>
+            <div v-if="state.activeMatchRule" class="rule-badge" tabindex="0" data-testid="rule-badge">
+              <img class="rule-badge-icon" :src="state.activeMatchRule.icon" alt="" />
+              <span class="rule-badge-name">{{ state.activeMatchRule.name }}</span>
+              <span class="rule-tooltip" role="tooltip">{{ state.activeMatchRule.description }}</span>
+            </div>
             <div class="room-details">
               <span class="room-id">Room: {{ state.roomId }}</span>
               <button
@@ -1108,11 +1115,11 @@ watch(
             <button
               class="reroll-btn horizontal"
               @click="refreshShop"
-              :disabled="!canManageShopAndBench || myPlayer.gold < 2"
+              :disabled="!canManageShopAndBench || myPlayer.gold < rerollCost"
             >
               <span class="refresh-icon">⚓</span>
               <span class="btn-text">Refresh Shop</span>
-              <span class="cost">2g</span>
+              <span class="cost">{{ rerollCost }}g</span>
             </button>
           </div>
         </div>
@@ -1240,6 +1247,61 @@ watch(
   font-size: 10px;
   opacity: 0.6;
   text-transform: uppercase;
+}
+
+.rule-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px 2px 4px;
+  border-radius: 999px;
+  border: 1px solid rgba(251, 191, 36, 0.45);
+  background: rgba(15, 23, 42, 0.7);
+  color: #fde68a;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  cursor: default;
+}
+
+.rule-badge-icon {
+  width: 20px;
+  height: 20px;
+  image-rendering: pixelated;
+}
+
+.rule-tooltip {
+  position: absolute;
+  z-index: 50;
+  width: 220px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(15, 23, 42, 0.96);
+  color: #cbd5e1;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.35;
+  text-transform: none;
+  text-align: left;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease;
+}
+
+.rule-tooltip {
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.rule-badge:hover .rule-tooltip,
+.rule-badge:focus-visible .rule-tooltip {
+  opacity: 1;
+  visibility: visible;
 }
 
 .room-id {

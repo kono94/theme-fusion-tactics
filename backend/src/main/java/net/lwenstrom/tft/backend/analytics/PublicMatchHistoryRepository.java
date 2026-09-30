@@ -20,7 +20,7 @@ public class PublicMatchHistoryRepository {
 
     public Response latest() {
         var matches = jdbcTemplate.query(
-                "SELECT m.id, m.mode, m.ended_at, m.final_round, r.final_placement, r.final_board_json"
+                "SELECT m.id, m.mode, m.match_rule_id, m.ended_at, m.final_round, r.final_placement, r.final_board_json"
                         + " FROM analytics_match m JOIN analytics_player_run r ON r.match_id = m.id"
                         + " WHERE m.status = 'COMPLETED' AND m.ended_at IS NOT NULL AND m.final_round IS NOT NULL"
                         + " AND r.status = 'COMPLETED' AND r.abandoned_at IS NULL"
@@ -35,6 +35,7 @@ public class PublicMatchHistoryRepository {
         return new Match(
                 resultSet.getString("id"),
                 canonicalMode(resultSet.getString("mode")),
+                resultSet.getString("match_rule_id"),
                 Instant.ofEpochMilli(resultSet.getLong("ended_at")),
                 resultSet.getInt("final_round"),
                 resultSet.getInt("final_placement"),
@@ -105,6 +106,7 @@ public class PublicMatchHistoryRepository {
     public record Match(
             String historyId,
             String mode,
+            String matchRuleId,
             Instant completedAt,
             int finalRound,
             int finalPlacement,

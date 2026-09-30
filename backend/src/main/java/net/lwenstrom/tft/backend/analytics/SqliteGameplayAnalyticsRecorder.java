@@ -82,6 +82,11 @@ public class SqliteGameplayAnalyticsRecorder implements GameplayAnalyticsRecorde
 
     @Override
     public void matchStarted(String roomId, GameMode mode, long occurredAt, List<Player> players) {
+        matchStarted(roomId, mode, null, occurredAt, players);
+    }
+
+    @Override
+    public void matchStarted(String roomId, GameMode mode, String matchRuleId, long occurredAt, List<Player> players) {
         var runs = humanPlayers(players).stream()
                 .map(player -> new PlayerRun(player.getId(), player.getAnalyticsClientId()))
                 .toList();
@@ -89,15 +94,16 @@ public class SqliteGameplayAnalyticsRecorder implements GameplayAnalyticsRecorde
             var matchId = UUID.randomUUID().toString();
             jdbcTemplate.update(
                     "INSERT OR IGNORE INTO analytics_match"
-                            + " (id, room_id, mode, backend_version, backend_commit, backend_build_time, started_at, status)"
-                            + " VALUES (?, ?, ?, ?, ?, ?, ?, 'STARTED')",
+                            + " (id, room_id, mode, backend_version, backend_commit, backend_build_time, started_at,"
+                            + " status, match_rule_id) VALUES (?, ?, ?, ?, ?, ?, ?, 'STARTED', ?)",
                     matchId,
                     roomId,
                     mode.name(),
                     backendVersion,
                     backendCommit,
                     backendBuildTime,
-                    occurredAt);
+                    occurredAt,
+                    matchRuleId);
             var persistedMatchId = jdbcTemplate.queryForObject(
                     "SELECT id FROM analytics_match WHERE room_id = ?", String.class, roomId);
             runs.forEach(player -> jdbcTemplate.update(

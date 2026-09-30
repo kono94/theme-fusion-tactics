@@ -54,8 +54,15 @@ function gameState(gameMode: GameState['gameMode'] = 'pokemon'): GameState {
         planningReadyPlayerId: null,
         planningPauseReason: null,
         itemSlotsPerUnit: 2,
+        matchRuleSelection: 'RANDOM',
+        activeMatchRule: null,
+        baseIncome: 5,
+        maxInterest: 5,
+        rerollCost: 2,
     }
 }
+
+const modeOptionSelector = '[aria-label="Select game theme"] .mode-option'
 
 describe('WaitingRoom mode selection', () => {
     it('renders both modes and emits the selected mode for the host', async () => {
@@ -69,7 +76,7 @@ describe('WaitingRoom mode selection', () => {
             },
         })
 
-        const modeButtons = wrapper.findAll('.mode-option')
+        const modeButtons = wrapper.findAll(modeOptionSelector)
         expect(modeButtons).toHaveLength(2)
         expect(modeButtons.map((button) => button.find('span.mode-name').text())).toEqual(['One Piece', 'Pokemon'])
         expect(wrapper.find('.waiting-room').classes()).toContain('theme-onepiece')
@@ -89,8 +96,8 @@ describe('WaitingRoom mode selection', () => {
             },
         })
 
-        expect(wrapper.findAll('.mode-option').every((button) => button.attributes('disabled') !== undefined)).toBe(true)
-        expect(wrapper.find('.mode-option.active').text()).toContain('Pokemon')
+        expect(wrapper.findAll(modeOptionSelector).every((button) => button.attributes('disabled') !== undefined)).toBe(true)
+        expect(wrapper.find(`${modeOptionSelector}.active`).text()).toContain('Pokemon')
         expect(wrapper.emitted('mode-change')).toBeUndefined()
     })
 
@@ -114,5 +121,57 @@ describe('WaitingRoom mode selection', () => {
         expect(writeText).toHaveBeenCalledWith(expect.stringMatching(/#\/join\/mode-room$/))
         expect(wrapper.get('.invite-btn').text()).toBe('Copied!')
         wrapper.unmount()
+    })
+})
+
+describe('WaitingRoom match rule selection', () => {
+    const matchRules = [
+        { id: 'volatile', name: 'Volatile', description: 'Units explode on death.', icon: '/assets/match-rules/volatile.png' },
+        { id: 'head-start', name: 'Head Start', description: 'Start at level 4.', icon: '/assets/match-rules/head-start.png' },
+    ]
+
+    const mountRoom = (currentPlayerId: string, matchRuleSelection = 'RANDOM') =>
+        mount(WaitingRoom, {
+            props: {
+                gameState: { ...gameState(), matchRuleSelection },
+                currentPlayerId,
+                availableModes: ['onepiece', 'pokemon'],
+                defaultMode: 'onepiece',
+                matchRules,
+            },
+        })
+
+    it('lists Random, None and every rule with the selection highlighted', () => {
+        const wrapper = mountRoom('player-1')
+
+        const options = wrapper.findAll('.rule-option')
+        expect(options.map((option) => option.find('.mode-name').text())).toEqual([
+            'Random',
+            'None',
+            'Volatile',
+            'Head Start',
+        ])
+        expect(wrapper.find('.rule-option.active').text()).toContain('Random')
+    })
+
+    it('emits the chosen rule id for the host and describes the selection', async () => {
+        const wrapper = mountRoom('player-1', 'volatile')
+
+        expect(wrapper.get('[data-testid="rule-description"]').text()).toContain('Units explode on death.')
+
+        await wrapper.get('[data-rule="head-start"]').trigger('click')
+        await wrapper.get('[data-rule="NONE"]').trigger('click')
+
+        expect(wrapper.emitted('rule-change')).toEqual([['head-start'], ['NONE']])
+    })
+
+    it('shows the host choice read-only for other players', async () => {
+        const wrapper = mountRoom('guest-player', 'volatile')
+
+        const options = wrapper.findAll('.rule-option')
+        expect(options.every((option) => option.attributes('disabled') !== undefined)).toBe(true)
+        await options[0].trigger('click')
+        expect(wrapper.emitted('rule-change')).toBeUndefined()
+        expect(wrapper.find('.rule-option.active').text()).toContain('Volatile')
     })
 })

@@ -21,7 +21,12 @@ public record GameState(
         boolean planningTimerPaused,
         String planningReadyPlayerId,
         PlanningPauseReason planningPauseReason,
-        int itemSlotsPerUnit) {
+        int itemSlotsPerUnit,
+        String matchRuleSelection,
+        ActiveMatchRule activeMatchRule,
+        int baseIncome,
+        int maxInterest,
+        int rerollCost) {
 
     public GameState(
             String roomId,
@@ -53,7 +58,12 @@ public record GameState(
                 planningTimerPaused,
                 planningReadyPlayerId,
                 planningPauseReason,
-                GameConstants.DEFAULT_ITEM_SLOTS);
+                GameConstants.DEFAULT_ITEM_SLOTS,
+                "NONE",
+                null,
+                GameConstants.BASE_INCOME,
+                GameConstants.MAX_INTEREST,
+                GameConstants.REROLL_COST);
     }
 
     public record UnitStats(

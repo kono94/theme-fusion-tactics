@@ -178,6 +178,40 @@ class SqliteGameplayAnalyticsRecorderTest {
     }
 
     @Test
+    void storesTheActiveMatchRuleOnTheMatch() throws Exception {
+        var sqliteConfig = new SQLiteConfig();
+        sqliteConfig.enforceForeignKeys(true);
+        var dataSource = new SQLiteDataSource(sqliteConfig);
+        dataSource.setUrl("jdbc:sqlite:" + temporaryDirectory.resolve("match-rule.db"));
+        Flyway.configure()
+                .dataSource(dataSource)
+                .locations("classpath:db/migration")
+                .load()
+                .migrate();
+        var jdbcTemplate = new JdbcTemplate(dataSource);
+        var recorder = new SqliteGameplayAnalyticsRecorder(
+                jdbcTemplate,
+                JsonMapper.builder().build(),
+                new TransactionTemplate(new DataSourceTransactionManager(dataSource)),
+                "1.0.0",
+                "commit-a",
+                "build");
+        var dataLoader = TestHelpers.createMockDataLoader();
+        var player = new Player("Anonymous", GameMode.ONEPIECE, dataLoader, TestHelpers.createSeededRandomProvider());
+
+        recorder.matchStarted("ruled", GameMode.ONEPIECE, "volatile", 1_000, List.of(player));
+        recorder.matchStarted("plain", GameMode.ONEPIECE, 1_000, List.of(player));
+        recorder.awaitPendingWrites();
+
+        assertThat(jdbcTemplate.queryForObject(
+                        "SELECT match_rule_id FROM analytics_match WHERE room_id = 'ruled'", String.class))
+                .isEqualTo("volatile");
+        assertThat(jdbcTemplate.queryForObject(
+                        "SELECT match_rule_id FROM analytics_match WHERE room_id = 'plain'", String.class))
+                .isNull();
+    }
+
+    @Test
     void firstFinalCompositionWinsAndCapturedEmptyBoardIsNotMissing() throws Exception {
         var sqliteConfig = new SQLiteConfig();
         sqliteConfig.enforceForeignKeys(true);

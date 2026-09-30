@@ -18,6 +18,10 @@ const version300Highlights = [
   'Hits, knockouts, stuns, heals, shields, and team buffs are easier to read at a glance in 3D.',
   'Big 3D fights stay easy to watch: the camera only zooms in for occasional big moments, and there are no screen flashes.',
   'If your device can’t show 3D, combat automatically switches back to the classic view.',
+  'New Match Rules: the host picks one twist for the whole room in the lobby, right below the game theme. Choose Random (the default, revealed when the match starts), None for a standard match, or a specific rule. Everyone sees the active rule next to the room code during the match; hover it for details.',
+  'Shared rules: Cheap Rerolls (rerolls cost 1 gold), Volatile (units explode when they die), Loot Rain (loot orbs every round), Second Wind (every unit comes back once), Glass Cannons (+40% damage, -25% max HP), Mana Surge (units start fights with half their mana), and Head Start (start at level 4).',
+  'Each theme adds its own rule: Bounty Hunt in One Piece pays 1 gold for every enemy unit you defeat, and Type Master in Pokemon doubles type advantages and resistances.',
+  'Volatile explosions respect unused revives. Final explosion knockouts trigger ally shields and team attack bonuses, and Glass Cannons also boosts ability burn and poison damage by 40%.',
   'Every augment now has its own pixel-art icon that matches the items and characters.',
   'The game client, server, and monitoring services now run on the latest maintenance releases for up-to-date stability and security fixes.',
 ]

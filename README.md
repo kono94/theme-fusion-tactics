@@ -29,6 +29,7 @@ For detailed architectural information, refer to the context documents:
 - **Auto-battler mechanics**: Shop, XP, Gold (with interest), Trait Synergies, Unit Combinations
 - **Grid-based combat** with BFS pathfinding, ability casting, and directional attack animations
 - **Star-level progression** — combine 3 matching 1★ units into 1 2★, then 2 matching 2★ units into 1 3★, including Pokemon evolution forms
+- **Match Rules** — the host picks one room-wide twist in the lobby (Random by default, None, or a specific rule such as Volatile, Loot Rain, or Second Wind); rules are data-driven and shown during the match
 - **Round-based augment choices** — players choose team-wide economy or combat bonuses on rounds 3, 6, and 11
 - **Advanced ability system** — Damage, Stun, Shield, Heal, Buff with modifiers (Lifesteal, Execute, Scaling, Conditional, Knockback)
 - **Data-driven trait system** — Trait definitions and values are loaded from mode data; providers register their runtime effects
@@ -187,8 +188,10 @@ mode-specific combat rules for that room.
 
 | Mode | Mode ID | Data Files |
 |------|----------------|------------|
-| One Piece | `onepiece` | `units_onepiece.json`, `traits_onepiece.json`, `augments_onepiece.json` |
-| Pokemon | `pokemon` | `units_pokemon.json`, `traits_pokemon.json`, `augments_pokemon.json`, `affinities_pokemon.json` |
+| One Piece | `onepiece` | `units_onepiece.json`, `traits_onepiece.json`, `augments_onepiece.json`, `match_rules_onepiece.json` |
+| Pokemon | `pokemon` | `units_pokemon.json`, `traits_pokemon.json`, `augments_pokemon.json`, `match_rules_pokemon.json`, `affinities_pokemon.json` |
+
+Shared Match Rules live in `match_rules_common.json` and are available in every mode.
 
 To add a new theme, implement `GameModeProvider` and add corresponding JSON data files. See
 [Backend Context](backend/BACKEND_CONTEXT.md#6-modes-and-data-loading) for details.
@@ -208,6 +211,7 @@ To add a new theme, implement `GameModeProvider` and add corresponding JSON data
 | `/app/start` | Client → Server | Host starts the match |
 | `/app/room/{id}/add-bot` | Client → Server | Host adds a lobby bot |
 | `/app/room/{id}/mode` | Client → Server | Host changes the room game mode during lobby |
+| `/app/room/{id}/match-rule` | Client → Server | Host selects `RANDOM`, `NONE`, or a match rule id during lobby |
 | `/app/room/{id}/action` | Client → Server | Player action (BUY, MOVE, MOVE_ITEM, REROLL, EXP, SELL, LOCK, COLLECT_ORB, READY_FOR_COMBAT, SELECT_AUGMENT) |
 | `/app/telemetry/action-ack` | Client → Server | Browser-observed action-acknowledgement latency for the bound session |
 | `/topic/room/{id}` | Server → Client | Game state broadcast (100ms) |
@@ -223,6 +227,7 @@ Augment choices are included in each player's `GameState` snapshot as `augmentCh
 | `/api/config` | GET | Default game mode and available lobby modes |
 | `/api/mode` | GET | Default game mode |
 | `/api/traits?mode={mode}` | GET | Trait definitions and cost-ordered unit rosters for the selected mode |
+| `/api/match-rules?mode={mode}` | GET | Selectable match rules (shared plus mode-specific) with descriptions and icons |
 | `/api/items?mode={mode}` | GET | Item definitions, icons, descriptions, and stat bonuses for the selected mode |
 | `/api/match-history` | GET | Public latest-20 completed solo matches with final placements and compositions |
 | `/api/admin/auth/login` | POST | Exchange the configured admin password for an eight-hour bearer token |

@@ -2,9 +2,11 @@ package net.lwenstrom.tft.backend.core.engine;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import net.lwenstrom.tft.backend.core.GameConstants;
 import net.lwenstrom.tft.backend.core.combat.AbilityCaster;
@@ -29,10 +31,16 @@ public class CombatSystem {
     private final UnitMover unitMover;
     private final AbilityCaster abilityCaster;
     private final RandomProvider randomProvider;
+    private static final int EXPLOSION_RADIUS = 1;
+    private static final int MAX_DEATH_SETTLE_PASSES = 16;
+    private static final int DEFAULT_REVIVE_HEALTH_PERCENT = 40;
+
     private DamageResolver damageResolver;
 
     private Map<String, DamageEntry> damageLog = new HashMap<>();
     private List<GameState.CombatEvent> recentEvents = new ArrayList<>();
+    private MatchRuleDeathEffects deathEffects = MatchRuleDeathEffects.NONE;
+    private final Set<String> settledDeaths = new HashSet<>();
 
     public record DamageEntry(
             String unitName,
@@ -206,6 +214,11 @@ public class CombatSystem {
     public void clearDamageLog() {
         damageLog.clear();
         recentEvents.clear();
+        settledDeaths.clear();
+    }
+
+    public void configureDeathEffects(MatchRuleDeathEffects effects) {
+        this.deathEffects = effects == null ? MatchRuleDeathEffects.NONE : effects;
     }
 
     public void startCombat(java.util.Collection<Player> players) {
@@ -281,8 +294,11 @@ public class CombatSystem {
 
         processDotEffects(allUnits, currentTime);
 
+        settleDeaths(participants, allUnits, currentTime);
+
         var snapshot = List.copyOf(allUnits);
         for (var unit : snapshot) {
+            settleDeaths(participants, allUnits, currentTime);
             if (unit.getCurrentHealth() <= 0) {
                 continue;
             }
@@ -418,9 +434,7 @@ public class CombatSystem {
                     grantDirectHitMana(target);
                     applyOnHitDot(unit, target, currentTime);
                     if (target.getCurrentHealth() <= 0) {
-                        if (target.hasRevive() && !target.isReviveUsed()) {
-                            target.setReviveUsed(true);
-                            target.setCurrentHealth((int) (target.getMaxHealth() * 0.4)); // Revive with 40% HP
+                        if (reviveUnit(target)) {
                             log.info("{} revives!", target.getName());
                         } else {
                             // Trigger Whitebeard Pirates shield on death
@@ -481,6 +495,8 @@ public class CombatSystem {
             }
         }
 
+        settleDeaths(participants, allUnits, currentTime);
+
         long playersWithUnits = participants.stream()
                 .filter(p -> p.getBoardUnits().stream().anyMatch(u -> u.getCurrentHealth() > 0))
                 .count();
@@ -496,6 +512,74 @@ public class CombatSystem {
         }
 
         return new CombatResult(false, null, Map.of(), new ArrayList<>(recentEvents));
+    }
+
+    private void settleDeaths(List<Player> participants, List<GameUnit> allUnits, long currentTime) {
+        if (!deathEffects.isActive()) {
+            return;
+        }
+        var progressed = true;
+        for (var pass = 0; progressed && pass < MAX_DEATH_SETTLE_PASSES; pass++) {
+            progressed = false;
+            for (var unit : List.copyOf(allUnits)) {
+                if (unit.getCurrentHealth() > 0 || settledDeaths.contains(unit.getId())) {
+                    continue;
+                }
+                progressed = true;
+                if (reviveUnit(unit)) {
+                    continue;
+                }
+                settledDeaths.add(unit.getId());
+                awardKillBounty(unit, participants);
+                explode(unit, allUnits, currentTime);
+            }
+        }
+    }
+
+    private void awardKillBounty(GameUnit deadUnit, List<Player> participants) {
+        if (deathEffects.killBounty() <= 0) {
+            return;
+        }
+        participants.stream()
+                .filter(player -> !player.getId().equals(deadUnit.getOwnerId()))
+                .forEach(player -> player.gainGold(deathEffects.killBounty()));
+    }
+
+    private void explode(GameUnit deadUnit, List<GameUnit> allUnits, long currentTime) {
+        if (deathEffects.explosionPercent() <= 0) {
+            return;
+        }
+        var damage = Math.max(1, deadUnit.getMaxHealth() * deathEffects.explosionPercent() / 100);
+        allUnits.stream()
+                .filter(target -> target.getCurrentHealth() > 0)
+                .filter(target -> CombatUtils.isEnemy(deadUnit, target))
+                .filter(target -> CombatUtils.getDistance(deadUnit, target) <= EXPLOSION_RADIUS)
+                .forEach(target -> {
+                    var actualDamage = applyAndMeasureDamage(target, () -> target.takeAbilityDamage(damage));
+                    accumulateDamage(deadUnit, actualDamage);
+                    accumulateDamageTaken(target, actualDamage);
+                    grantDirectHitMana(target);
+                    recentEvents.add(new GameState.CombatEvent(
+                            currentTime, "DAMAGE", deadUnit.getId(), target.getId(), actualDamage, "Explosion"));
+                    if (target.getCurrentHealth() <= 0 && !reviveUnit(target)) {
+                        triggerShieldOnDeath(target, allUnits, currentTime);
+                        AugmentManager.applyTeamAttackDamageOnKill(deadUnit, allUnits);
+                        recentEvents.add(new GameState.CombatEvent(
+                                currentTime, "DEATH", deadUnit.getId(), target.getId(), 0, null));
+                    }
+                });
+    }
+
+    private boolean reviveUnit(GameUnit unit) {
+        if (!unit.hasRevive() || unit.isReviveUsed()) {
+            return false;
+        }
+        var healthPercent = deathEffects.reviveHealthPercent() > 0
+                ? deathEffects.reviveHealthPercent()
+                : DEFAULT_REVIVE_HEALTH_PERCENT;
+        unit.setReviveUsed(true);
+        unit.setCurrentHealth(Math.max(1, unit.getMaxHealth() * healthPercent / 100));
+        return true;
     }
 
     private void grantDirectHitMana(GameUnit target) {
@@ -581,10 +665,7 @@ public class CombatSystem {
                 }
 
                 if (target.getCurrentHealth() <= 0) {
-                    if (target.hasRevive() && !target.isReviveUsed()) {
-                        target.setReviveUsed(true);
-                        target.setCurrentHealth((int) (target.getMaxHealth() * 0.4));
-                    } else {
+                    if (!reviveUnit(target)) {
                         triggerShieldOnDeath(target, allUnits, currentTime);
                         recentEvents.add(new GameState.CombatEvent(
                                 currentTime, "DEATH", effect.sourceId(), target.getId(), 0, null));

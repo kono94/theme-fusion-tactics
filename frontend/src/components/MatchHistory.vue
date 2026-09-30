@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { getMatchHistory, MatchHistoryApiError } from '../services/matchHistoryClient'
+import type { ActiveMatchRule } from '../types'
 import type { PublicMatch } from '../types/analytics'
 import FinalCompositionStrip from './FinalCompositionStrip.vue'
 
@@ -15,6 +16,7 @@ const emit = defineEmits<{
 const matches = ref<PublicMatch[]>([])
 const loading = ref(true)
 const error = ref('')
+const ruleCatalogs = ref<Record<string, ActiveMatchRule[]>>({})
 let requestController: AbortController | null = null
 
 const loadMatches = async () => {
@@ -25,6 +27,7 @@ const loadMatches = async () => {
     try {
         const response = await getMatchHistory(requestController.signal)
         matches.value = response.matches
+        void loadRuleCatalogs(response.matches)
     } catch (cause) {
         if (cause instanceof DOMException && cause.name === 'AbortError') return
         if (cause instanceof MatchHistoryApiError) {
@@ -36,6 +39,23 @@ const loadMatches = async () => {
         loading.value = false
     }
 }
+
+const loadRuleCatalogs = async (loadedMatches: PublicMatch[]) => {
+    const modes = new Set(loadedMatches.filter((match) => match.matchRuleId).map((match) => match.mode))
+    for (const mode of modes) {
+        try {
+            const response = await fetch(`/api/match-rules?mode=${encodeURIComponent(mode)}`)
+            if (!response.ok) continue
+            const rules = await response.json()
+            if (Array.isArray(rules)) ruleCatalogs.value = { ...ruleCatalogs.value, [mode]: rules }
+        } catch {
+            // The rule chip is decorative; the history stays readable without it.
+        }
+    }
+}
+
+const ruleFor = (match: PublicMatch): ActiveMatchRule | null =>
+    ruleCatalogs.value[match.mode]?.find((rule) => rule.id === match.matchRuleId) ?? null
 
 const formatDate = (value: string) =>
     new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(new Date(value))
@@ -74,6 +94,10 @@ onBeforeUnmount(() => {
           <div>
             <h2>{{ modeLabel(match.mode) }} solo match</h2>
             <time :datetime="match.completedAt">{{ formatDate(match.completedAt) }}</time>
+            <span v-if="ruleFor(match)" class="match-history-card__rule" data-test="match-history-rule">
+              <img :src="ruleFor(match)!.icon" alt="" />
+              {{ ruleFor(match)!.name }}
+            </span>
           </div>
           <div class="match-history-card__result">
             <strong>#{{ match.finalPlacement }}</strong>
@@ -93,6 +117,25 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+.match-history-card__rule {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 10px;
+  padding: 1px 10px 1px 4px;
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  border-radius: 999px;
+  color: #fde68a;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.match-history-card__rule img {
+  width: 18px;
+  height: 18px;
+  image-rendering: pixelated;
+}
+
 .match-history-page {
   min-height: 100vh;
   padding: 28px clamp(18px, 5vw, 72px) 64px;

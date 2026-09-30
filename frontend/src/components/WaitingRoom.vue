@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onUnmounted, ref, watch } from 'vue'
-import type { GameMode, GameState, PlayerState } from '../types'
+import type { ActiveMatchRule, GameMode, GameState, PlayerState } from '../types'
 import { getGameModeMetadata, sortGameModes } from '../data/gameModeMetadata'
 import { buildInviteUrl } from '../utils/roomInvite'
 
@@ -10,9 +10,10 @@ const props = defineProps<{
   availableModes: GameMode[]
   defaultMode: GameMode
   themeClass?: string
+  matchRules?: ActiveMatchRule[]
 }>()
 
-const emit = defineEmits(['start', 'leave', 'mode-change'])
+const emit = defineEmits(['start', 'leave', 'mode-change', 'rule-change'])
 
 const isHost = computed(() => {
     return props.currentPlayerId === props.gameState.hostId
@@ -72,6 +73,45 @@ async function copyInviteLink() {
 onUnmounted(() => {
     if (copyResetTimer !== null) window.clearTimeout(copyResetTimer)
 })
+
+interface RuleOption {
+  value: string
+  name: string
+  description: string
+  icon: string
+}
+
+const ruleOptions = computed((): RuleOption[] => [
+    {
+        value: 'RANDOM',
+        name: 'Random',
+        description: 'A random rule is picked when the match starts.',
+        icon: '/assets/match-rules/random.png',
+    },
+    {
+        value: 'NONE',
+        name: 'None',
+        description: 'Play a standard match without a special rule.',
+        icon: '/assets/match-rules/none.png',
+    },
+    ...(props.matchRules ?? []).map((rule) => ({
+        value: rule.id,
+        name: rule.name,
+        description: rule.description,
+        icon: rule.icon,
+    })),
+])
+
+const selectedRule = computed(() => props.gameState?.matchRuleSelection ?? 'RANDOM')
+
+const selectedRuleOption = computed(
+    () => ruleOptions.value.find((option) => option.value === selectedRule.value) ?? ruleOptions.value[0]
+)
+
+function selectRule(value: string) {
+    if (!isHost.value || value === selectedRule.value) return
+    emit('rule-change', value)
+}
 
 function selectMode(mode: GameMode) {
     if (mode === selectedMode.value) return
@@ -146,6 +186,42 @@ function selectMode(mode: GameMode) {
                 <span v-if="selectedMode === mode" class="mode-check" aria-hidden="true">✓</span>
             </button>
         </div>
+    </div>
+
+    <div class="mode-panel rule-panel">
+        <div class="mode-heading">
+            <div>
+                <div class="mode-label">Match rule</div>
+                <h3>Twist the match</h3>
+                <p>One rule changes how the whole room plays.</p>
+            </div>
+            <div class="mode-status" :class="{ locked: !isHost }">
+                <span class="status-dot" aria-hidden="true"></span>
+                {{ isHost ? 'Host selection' : 'Host controlled' }}
+            </div>
+        </div>
+        <div class="mode-control rule-control" role="group" aria-label="Select match rule">
+            <button
+                v-for="option in ruleOptions"
+                :key="option.value"
+                type="button"
+                class="mode-option rule-option"
+                :class="{ active: selectedRule === option.value }"
+                :aria-pressed="selectedRule === option.value"
+                :aria-label="`Select ${option.name} match rule`"
+                :aria-disabled="!isHost"
+                :disabled="!isHost"
+                :data-rule="option.value"
+                @click="selectRule(option.value)"
+            >
+                <img class="rule-icon" :src="option.icon" alt="" />
+                <span class="mode-name">{{ option.name }}</span>
+                <span v-if="selectedRule === option.value" class="mode-check" aria-hidden="true">✓</span>
+            </button>
+        </div>
+        <p class="rule-description" data-testid="rule-description">
+            <strong>{{ selectedRuleOption.name }}:</strong> {{ selectedRuleOption.description }}
+        </p>
     </div>
 
     <div class="actions">
@@ -427,6 +503,33 @@ function selectMode(mode: GameMode) {
     content: '';
 }
 
+.rule-control {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.rule-option {
+    min-height: 54px;
+}
+
+.rule-icon {
+    flex: 0 0 34px;
+    width: 34px;
+    height: 34px;
+    image-rendering: pixelated;
+}
+
+.rule-description {
+    margin: 14px 2px 0;
+    color: var(--room-muted);
+    font-size: 0.82em;
+    line-height: 1.4;
+}
+
+.rule-description strong {
+    color: var(--room-fg);
+}
+
 .mode-motif-star {
     transform: translateY(-1px);
     text-shadow: 0 0 10px rgba(255, 255, 255, 0.75);
@@ -545,6 +648,10 @@ button {
     .mode-control {
         width: 100%;
         grid-template-columns: 1fr;
+    }
+
+    .rule-control {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .mode-option {

@@ -11,6 +11,10 @@ public interface GameplayAnalyticsRecorder {
 
     default void matchStarted(String roomId, GameMode mode, long occurredAt, List<Player> players) {}
 
+    default void matchStarted(String roomId, GameMode mode, String matchRuleId, long occurredAt, List<Player> players) {
+        matchStarted(roomId, mode, occurredAt, players);
+    }
+
     default void roundStarted(String roomId, int round, long occurredAt, List<Player> players) {}
 
     default void combatResolved(

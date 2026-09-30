@@ -121,15 +121,26 @@ tanks/melee in front with ranged units behind. The existing human-only emergency
 One Piece mode. The host can change the room mode only while it is in `LOBBY`; deployment does not select or restrict the
 mode. Focused tests that register only one provider use that available provider as their initial mode.
 
-| Mode | Units | Traits | Augments | Items | Affinities |
-|---|---|---|---|---|---|
-| One Piece | `units_onepiece.json` | `traits_onepiece.json` | `augments_onepiece.json` | `items_onepiece.json` | neutral |
-| Pokemon | `units_pokemon.json` | `traits_pokemon.json` | `augments_pokemon.json` | `items_pokemon.json` | `affinities_pokemon.json` |
+| Mode | Units | Traits | Augments | Items | Match rules | Affinities |
+|---|---|---|---|---|---|---|
+| One Piece | `units_onepiece.json` | `traits_onepiece.json` | `augments_onepiece.json` | `items_onepiece.json` | `match_rules_common.json` + `match_rules_onepiece.json` | neutral |
+| Pokemon | `units_pokemon.json` | `traits_pokemon.json` | `augments_pokemon.json` | `items_pokemon.json` | `match_rules_common.json` + `match_rules_pokemon.json` | `affinities_pokemon.json` |
 
 `DataLoader.loadData()` preloads every registered mode at startup. Missing resources, malformed JSON, duplicate unit IDs,
 or an empty required units/traits/augments/items dataset fail startup. Item `statBonuses` keys are the `ItemStat` enum, so an
 unknown stat, duplicate item ID, missing icon, or non-positive bonus also fails startup. A provider that declares an affinity file must supply a
 valid one. One Piece intentionally has no affinity file and receives a neutral resolver.
+
+Match rules (`MatchRuleDefinition`: id, name, description, icon, `effectType`, `values`) are loaded by
+`DataLoader.getMatchRules(mode)` from the shared common file plus an optional mode file (`GameModeProvider.getMatchRulesPath()`).
+Malformed or duplicate rules fail startup; a missing mode file is allowed. `MatchRuleManager` owns the room's selection
+(`RANDOM` default, `NONE`, or a rule id) and the resolved active rule. The host may change the selection only in `LOBBY`;
+a mode change resets it to `RANDOM`. `startMatch` resolves `RANDOM` with the room `RandomProvider`, then pushes economy
+values (starting level, reroll cost) into players, configures death effects and affinity scaling on `CombatSystem`, and
+records the rule id in analytics. Combat stat effects (Glass Cannons, Mana Surge, Second Wind) are applied right after
+augments in both combat start and planning stat previews. Death effects (explosions, kill bounty, revive) run from one
+settle pass in `CombatSystem.simulateTick`, so every damage source is covered. Effects use a generic vocabulary
+(`MatchRuleEffectType`); themed names live only in data.
 
 `UnitDefinition.lineId` is the combination identity. Optional `forms` can change definition ID, name, role, traits,
 range, and ability at higher stars while preserving the line used for upgrades.
@@ -157,6 +168,7 @@ range, and ability at higher stars while preserving the line used for upgrades.
 | `/app/start` | `RoomRequest` | Session-bound host starts the room |
 | `/app/room/{id}/add-bot` | none | Session-bound host adds one lobby bot |
 | `/app/room/{id}/mode` | `ModeChangeRequest` | Session-bound host changes lobby mode |
+| `/app/room/{id}/match-rule` | `MatchRuleChangeRequest` | Session-bound host selects `RANDOM`, `NONE`, or a rule id in the lobby |
 | `/app/room/{id}/action` | `GameAction` | Applies one validated session-bound command |
 | `/app/telemetry/action-ack` | `ClientActionAcknowledgementTelemetry` | Records a bounded browser-observed action-acknowledgement round trip for the bound session |
 
@@ -218,8 +230,13 @@ For `MOVE`, `targetX` is `0-8`. A `targetY` of `0-2` selects a planning-board ro
 ```text
 roomId, hostId, phase, round, timeRemainingMs, totalPhaseDuration,
 players, matchups, recentEvents, damageLog, gameMode,
-planningTimerPaused, planningReadyPlayerId, planningPauseReason, itemSlotsPerUnit
+planningTimerPaused, planningReadyPlayerId, planningPauseReason, itemSlotsPerUnit,
+matchRuleSelection, activeMatchRule, baseIncome, maxInterest, rerollCost
 ```
+
+`matchRuleSelection` is the lobby choice (`RANDOM`, `NONE`, or a rule id); `activeMatchRule` (`id, name, description, icon`)
+is null until a match starts with a rule. `baseIncome` and `maxInterest` let clients preview round income without hardcoding
+constants, and `rerollCost` reflects the active rule.
 
 `hostId` is null before the first player or after the final lobby player leaves. `players` is keyed by player ID.
 
@@ -301,9 +318,10 @@ Public endpoints:
 - `GET /api/config`
 - `GET /api/mode`
 - `GET /api/traits?mode={mode}` returns trait metadata plus the resolved unit roster for each trait
+- `GET /api/match-rules?mode={mode}` returns the selectable match rules (`id, name, description, icon`) for the mode
 - `GET /api/match-history` returns at most 20 completed solo matches. A row is included only when exactly one human
   run completed without abandonment, has a valid placement and captured final board, and its match has a completion
-  timestamp and final round. The response exposes an opaque history ID, mode, completion time, final round, placement,
+  timestamp and final round. The response exposes an opaque history ID, mode, match rule id (null for none or legacy rows), completion time, final round, placement,
   and final board units; a malformed stored board is represented as an unavailable composition so one bad row does not
   break the feed. Room IDs, run IDs, player names/IDs, analytics client IDs, and build metadata are never serialized.
 

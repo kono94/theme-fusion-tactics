@@ -118,6 +118,11 @@ function state(phase: GameState['phase']): GameState {
         planningReadyPlayerId: null,
         planningPauseReason: null,
         itemSlotsPerUnit: 2,
+        matchRuleSelection: 'RANDOM',
+        activeMatchRule: null,
+        baseIncome: 5,
+        maxInterest: 5,
+        rerollCost: 2,
     }
 }
 

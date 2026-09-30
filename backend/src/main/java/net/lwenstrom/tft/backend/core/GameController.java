@@ -356,6 +356,22 @@ public class GameController {
         }
     }
 
+    @MessageMapping("/room/{id}/match-rule")
+    public void changeMatchRule(
+            @DestinationVariable String id,
+            @Payload MatchRuleChangeRequest request,
+            @Header("simpSessionId") String sessionId) {
+        var room = gameEngine.getRoom(id);
+        if (room == null) return;
+
+        var sessionPlayer = resolveSessionPlayer(room.getId(), sessionId);
+        if (sessionPlayer != null
+                && request != null
+                && room.setMatchRuleForHost(sessionPlayer.playerId(), request.matchRule())) {
+            broadcastRoomState(room);
+        }
+    }
+
     private void broadcastRoomState(GameRoom room) {
         synchronized (room) {
             messagingTemplate.convertAndSend("/topic/room/" + room.getId(), room.getState());
@@ -435,6 +451,8 @@ public class GameController {
     }
 
     public record ModeChangeRequest(String playerName, GameMode gameMode) {}
+
+    public record MatchRuleChangeRequest(String playerName, String matchRule) {}
 
     public record ActionResult(String clientActionId, ActionType actionType, String outcome, String reason) {}
 

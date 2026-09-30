@@ -63,6 +63,7 @@ export interface AnalyticsBoardUnit {
 export interface PublicMatch {
     historyId: string
     mode: string
+    matchRuleId?: string | null
     completedAt: string
     finalRound: number
     finalPlacement: number

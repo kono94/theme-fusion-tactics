@@ -169,6 +169,13 @@ public interface GameUnit {
 
     default void setAbilityDamageMultiplier(float multiplier) {}
 
+    @JsonIgnore
+    default float getAbilityDotDamageMultiplier() {
+        return 1.0f;
+    }
+
+    default void setAbilityDotDamageMultiplier(float multiplier) {}
+
     default float getLifesteal() {
         return 0.0f;
     }

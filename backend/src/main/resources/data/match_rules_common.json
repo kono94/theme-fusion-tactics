@@ -1,0 +1,58 @@
+[
+  {
+    "id": "cheap-rerolls",
+    "name": "Cheap Rerolls",
+    "description": "Rerolling the shop costs 1 gold instead of 2.",
+    "icon": "/assets/match-rules/cheap-rerolls.png",
+    "effectType": "REROLL_COST",
+    "values": [1]
+  },
+  {
+    "id": "volatile",
+    "name": "Volatile",
+    "description": "Units explode when they die, dealing 25% of their max HP as damage to adjacent enemies.",
+    "icon": "/assets/match-rules/volatile.png",
+    "effectType": "DEATH_EXPLOSION",
+    "values": [25]
+  },
+  {
+    "id": "loot-rain",
+    "name": "Loot Rain",
+    "description": "Loot orbs appear every round instead of every second round.",
+    "icon": "/assets/match-rules/loot-rain.png",
+    "effectType": "LOOT_EVERY_ROUND",
+    "values": [1]
+  },
+  {
+    "id": "second-wind",
+    "name": "Second Wind",
+    "description": "Every unit comes back once with 40% of its max HP after being defeated.",
+    "icon": "/assets/match-rules/second-wind.png",
+    "effectType": "SECOND_WIND",
+    "values": [40]
+  },
+  {
+    "id": "glass-cannons",
+    "name": "Glass Cannons",
+    "description": "All units deal 40% more damage but have 25% less max HP.",
+    "icon": "/assets/match-rules/glass-cannons.png",
+    "effectType": "DAMAGE_FOR_HEALTH",
+    "values": [40, 25]
+  },
+  {
+    "id": "mana-surge",
+    "name": "Mana Surge",
+    "description": "Units start every fight with 50% of their mana.",
+    "icon": "/assets/match-rules/mana-surge.png",
+    "effectType": "STARTING_MANA_PERCENT",
+    "values": [50]
+  },
+  {
+    "id": "head-start",
+    "name": "Head Start",
+    "description": "Everyone starts the match at level 4.",
+    "icon": "/assets/match-rules/head-start.png",
+    "effectType": "STARTING_LEVEL",
+    "values": [4]
+  }
+]

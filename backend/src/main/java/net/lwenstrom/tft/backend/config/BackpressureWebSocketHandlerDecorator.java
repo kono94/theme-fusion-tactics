@@ -315,7 +315,7 @@ public class BackpressureWebSocketHandlerDecorator implements WebSocketHandlerDe
             if (destination != null && destination.endsWith("/action")) {
                 return "action";
             }
-            if (destination != null && destination.endsWith("/mode")) {
+            if (destination != null && (destination.endsWith("/mode") || destination.endsWith("/match-rule"))) {
                 return "room_mode";
             }
             if (destination != null

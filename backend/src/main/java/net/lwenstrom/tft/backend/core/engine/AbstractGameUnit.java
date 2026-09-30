@@ -76,6 +76,7 @@ public abstract class AbstractGameUnit implements GameUnit {
 
     // Trait specific values
     private float abilityDamageMultiplier = 1.0f;
+    private float abilityDotDamageMultiplier = 1.0f;
     private float lifesteal = 0.0f;
     private float manaGainMultiplier = 1.0f;
     private float extraAttackChance = 0.0f;
@@ -192,6 +193,7 @@ public abstract class AbstractGameUnit implements GameUnit {
         this.buffExpirationTime = other.buffExpirationTime;
         this.activeMusicianBuff = other.activeMusicianBuff;
         this.abilityDamageMultiplier = other.abilityDamageMultiplier;
+        this.abilityDotDamageMultiplier = other.abilityDotDamageMultiplier;
         this.lifesteal = other.lifesteal;
         this.manaGainMultiplier = other.manaGainMultiplier;
         this.extraAttackChance = other.extraAttackChance;
@@ -564,6 +566,7 @@ public abstract class AbstractGameUnit implements GameUnit {
 
         // Reset trait values
         this.abilityDamageMultiplier = 1.0f;
+        this.abilityDotDamageMultiplier = 1.0f;
         this.lifesteal = 0.0f;
         this.manaGainMultiplier = 1.0f;
         this.extraAttackChance = 0.0f;
@@ -599,6 +602,17 @@ public abstract class AbstractGameUnit implements GameUnit {
     @Override
     public void setAbilityDamageMultiplier(float multiplier) {
         this.abilityDamageMultiplier = multiplier;
+    }
+
+    @Override
+    @JsonIgnore
+    public float getAbilityDotDamageMultiplier() {
+        return abilityDotDamageMultiplier;
+    }
+
+    @Override
+    public void setAbilityDotDamageMultiplier(float multiplier) {
+        this.abilityDotDamageMultiplier = multiplier;
     }
 
     @Override

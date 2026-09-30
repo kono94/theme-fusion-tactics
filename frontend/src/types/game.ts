@@ -160,6 +160,13 @@ export interface ActiveStatusView {
   description?: string
 }
 
+export interface ActiveMatchRule {
+  id: string
+  name: string
+  description: string
+  icon: string
+}
+
 export type LootType = 'GOLD' | 'UNIT' | 'ITEM'
 
 export interface LootOrb {
@@ -312,6 +319,11 @@ export interface GameState {
   planningReadyPlayerId: string | null
   planningPauseReason: PlanningPauseReason
   itemSlotsPerUnit: number
+  matchRuleSelection: string // 'RANDOM', 'NONE' or a match rule id
+  activeMatchRule: ActiveMatchRule | null
+  baseIncome: number
+  maxInterest: number
+  rerollCost: number
 }
 
 // ============================================================================

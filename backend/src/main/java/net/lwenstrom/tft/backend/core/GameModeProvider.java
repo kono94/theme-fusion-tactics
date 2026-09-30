@@ -19,6 +19,10 @@ public interface GameModeProvider {
         return "/data/items_" + getMode().getValue() + ".json";
     }
 
+    default String getMatchRulesPath() {
+        return "/data/match_rules_" + getMode().getValue() + ".json";
+    }
+
     default Optional<String> getAffinitiesPath() {
         return Optional.empty();
     }

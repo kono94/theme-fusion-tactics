@@ -67,6 +67,14 @@ public final class TestHelpers {
             List<UnitDefinition> units,
             List<AugmentDefinition> augments,
             List<net.lwenstrom.tft.backend.core.model.ItemDefinition> items) {
+        return createMockDataLoader(units, augments, items, List.of());
+    }
+
+    public static DataLoader createMockDataLoader(
+            List<UnitDefinition> units,
+            List<AugmentDefinition> augments,
+            List<net.lwenstrom.tft.backend.core.model.ItemDefinition> items,
+            List<net.lwenstrom.tft.backend.core.model.MatchRuleDefinition> matchRules) {
         var registry = createMockRegistry();
         return new DataLoader(
                 registry, tools.jackson.databind.json.JsonMapper.builder().build()) {
@@ -96,6 +104,11 @@ public final class TestHelpers {
             @Override
             public List<net.lwenstrom.tft.backend.core.model.ItemDefinition> getItems(GameMode mode) {
                 return items;
+            }
+
+            @Override
+            public List<net.lwenstrom.tft.backend.core.model.MatchRuleDefinition> getMatchRules(GameMode mode) {
+                return matchRules;
             }
 
             @Override

@@ -1,0 +1,10 @@
+[
+  {
+    "id": "type-master",
+    "name": "Type Master",
+    "description": "Type advantages and resistances are twice as strong.",
+    "icon": "/assets/match-rules/type-master.png",
+    "effectType": "AFFINITY_STRENGTH",
+    "values": [2]
+  }
+]

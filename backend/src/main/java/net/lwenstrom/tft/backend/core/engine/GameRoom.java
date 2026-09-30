@@ -21,6 +21,7 @@ import net.lwenstrom.tft.backend.core.analytics.GameplayAnalyticsRecorder;
 import net.lwenstrom.tft.backend.core.combat.BfsUnitMover;
 import net.lwenstrom.tft.backend.core.combat.DefaultAbilityCaster;
 import net.lwenstrom.tft.backend.core.combat.NearestEnemyTargetSelector;
+import net.lwenstrom.tft.backend.core.model.ActiveMatchRule;
 import net.lwenstrom.tft.backend.core.model.AugmentTier;
 import net.lwenstrom.tft.backend.core.model.BotPersonality;
 import net.lwenstrom.tft.backend.core.model.EmergencyDropPayload;
@@ -73,6 +74,7 @@ public class GameRoom {
     private final GameTelemetry telemetry;
     private boolean matchCompletedRecorded;
     private AugmentManager augmentManager;
+    private MatchRuleManager matchRuleManager;
     private final List<GameState.CombatEvent> lastTickEvents = new ArrayList<>();
     private final Map<String, CombatSystem.DamageEntry> currentRoundDamageLog = new ConcurrentHashMap<>();
     private final List<PendingEmergencyDrop> pendingEmergencyDrops = new ArrayList<>();
@@ -159,6 +161,7 @@ public class GameRoom {
                 randomProvider,
                 dataLoader.getAffinityConfig(this.gameMode));
         this.augmentManager = new AugmentManager(dataLoader.getAugments(this.gameMode), randomProvider);
+        this.matchRuleManager = new MatchRuleManager(dataLoader.getMatchRules(this.gameMode));
 
         this.round = 0;
 
@@ -176,7 +179,13 @@ public class GameRoom {
                 this.gameMode,
                 false,
                 null,
-                null);
+                null,
+                itemSlotsPerUnit,
+                matchRuleManager.getSelection(),
+                null,
+                GameConstants.BASE_INCOME,
+                GameConstants.MAX_INTEREST,
+                matchRuleManager.rerollCost());
 
         // In LOBBY, no timer runs until startMatch is called
         this.phaseEndTime = Long.MAX_VALUE;
@@ -207,6 +216,7 @@ public class GameRoom {
         gameModeRegistry.getProvider(newMode).registerTraitEffects(traitManager);
         combatSystem.configureAffinity(dataLoader.getAffinityConfig(newMode));
         augmentManager = new AugmentManager(dataLoader.getAugments(newMode), randomProvider);
+        matchRuleManager = new MatchRuleManager(dataLoader.getMatchRules(newMode));
         players.values().forEach(p -> p.resetForMode(newMode));
         updateGameState(0);
         return true;
@@ -274,8 +284,14 @@ public class GameRoom {
             addBot();
         }
 
-        recordAnalytics(() ->
-                analyticsRecorder.matchStarted(analyticsMatchKey, gameMode, clock.currentTimeMillis(), humanPlayers()));
+        matchRuleManager.resolveForMatch(randomProvider);
+        combatSystem.configureAffinity(matchRuleManager.adjustAffinity(dataLoader.getAffinityConfig(gameMode)));
+        combatSystem.configureDeathEffects(matchRuleManager.deathEffects());
+        players.values().forEach(matchRuleManager::applyEconomy);
+
+        var matchRuleId = matchRuleManager.activeRule().map(ActiveMatchRule::id).orElse(null);
+        recordAnalytics(() -> analyticsRecorder.matchStarted(
+                analyticsMatchKey, gameMode, matchRuleId, clock.currentTimeMillis(), humanPlayers()));
         telemetry.matchStarted(gameMode);
         startPhase(GamePhase.PLANNING);
     }
@@ -290,6 +306,14 @@ public class GameRoom {
 
     public synchronized boolean setGameModeForHost(String playerId, GameMode newMode) {
         return isHost(playerId) && setGameMode(newMode);
+    }
+
+    public synchronized boolean setMatchRuleForHost(String playerId, String selection) {
+        if (!isHost(playerId) || phase != GamePhase.LOBBY || !matchRuleManager.select(selection)) {
+            return false;
+        }
+        updateGameState(0);
+        return true;
     }
 
     public synchronized Optional<Player> addBotForHost(String playerId) {
@@ -684,7 +708,7 @@ public class GameRoom {
 
                 p.gainXp(GameConstants.XP_PER_PHASE);
                 p.refreshShop();
-                if (round % 2 == 0) {
+                if (round % 2 == 0 || matchRuleManager.spawnsLootEveryRound()) {
                     spawnLootOrbsForPlayer(p);
                 }
             });
@@ -748,6 +772,7 @@ public class GameRoom {
             activeCombats.forEach(combat -> {
                 combatSystem.startCombat(combat);
                 augmentManager.applyCombatEffects(combat);
+                combat.forEach(player -> matchRuleManager.applyCombatEffects(player.getBoardUnits()));
             });
         }
 
@@ -790,7 +815,12 @@ public class GameRoom {
                 planningTimerPaused,
                 planningReadyPlayerId,
                 planningPauseReason,
-                itemSlotsPerUnit);
+                itemSlotsPerUnit,
+                matchRuleManager.getSelection(),
+                matchRuleManager.activeRule().orElse(null),
+                GameConstants.BASE_INCOME,
+                GameConstants.MAX_INTEREST,
+                matchRuleManager.rerollCost());
     }
 
     private Map<String, UnitStats> buildStatPreviews(Player player) {
@@ -799,6 +829,7 @@ public class GameRoom {
         var copies = board.stream().map(GameUnit::cloneUnit).toList();
         combatSystem.applyStartingBonuses(copies);
         augmentManager.applyCombatEffects(copies, player.getSelectedAugments());
+        matchRuleManager.applyCombatEffects(copies);
         for (var index = 0; index < board.size(); index++) {
             previews.put(board.get(index).getId(), UnitStats.from(copies.get(index)));
         }

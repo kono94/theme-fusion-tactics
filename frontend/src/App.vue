@@ -23,6 +23,7 @@ import {
 } from './data/gameModeMetadata'
 import type {
     ActionResult,
+    ActiveMatchRule,
     ActionType,
     CombatResultPayload,
     EmergencyDropPayload,
@@ -65,6 +66,7 @@ const fallbackModes = sortGameModes(['onepiece', 'pokemon'])
 const availableModes = ref<GameMode[]>(fallbackModes)
 const defaultMode = ref<GameMode>('onepiece')
 const activeTraitMode = ref<GameMode | null>(null)
+const matchRules = ref<ActiveMatchRule[]>([])
 const roomSubscription = ref<StompSubscription | null>(null)
 const eventSubscription = ref<StompSubscription | null>(null)
 const roomResultSubscription = ref<StompSubscription | null>(null)
@@ -265,6 +267,7 @@ const subscribeToRoomState = (roomId: string) => {
             if (activeTraitMode.value !== mode) {
                 activeTraitMode.value = mode;
                 fetchTraitsForMode(mode);
+                fetchMatchRulesForMode(mode);
             }
 
         } catch (e) {
@@ -484,6 +487,7 @@ const rejectPendingJoin = (message: string) => {
     gameState.value = null
     currentRoomId.value = ''
     activeTraitMode.value = null
+    matchRules.value = []
     traitRequestGeneration += 1
     currentPlayerId.value = null
     lobbyError.value = message
@@ -712,6 +716,27 @@ const fetchTraitsForMode = async (mode: GameMode) => {
     }
 }
 
+const fetchMatchRulesForMode = async (mode: GameMode) => {
+    try {
+        const response = await fetch(`/api/match-rules?mode=${mode}`)
+        if (!response.ok) return
+        const rules = await response.json()
+        if (gameState.value?.gameMode === mode && Array.isArray(rules)) {
+            matchRules.value = rules
+        }
+    } catch (e) {
+        console.error('Failed to fetch match rules for mode', mode, e)
+    }
+}
+
+const handleRuleChange = (matchRule: string) => {
+    if (!client.value || !isConnected.value) return
+    client.value.publish({
+        destination: `/app/room/${currentRoomId.value}/match-rule`,
+        body: JSON.stringify({ playerName: activePlayerName.value, matchRule })
+    })
+}
+
 const handleModeChange = (mode: GameMode) => {
     if (!client.value || !isConnected.value) return
     client.value.publish({
@@ -731,6 +756,7 @@ const resetToLobby = () => {
     gameState.value = null
     currentRoomId.value = ''
     activeTraitMode.value = null
+    matchRules.value = []
     hasLostRoomControl.value = false
     traitRequestGeneration += 1
     pendingJoinRoomId.value = null
@@ -927,6 +953,8 @@ const applyThemeMeta = (mode: GameMode) => {
                               :available-modes="availableModes"
                               :default-mode="defaultMode"
                               :theme-class="activeThemeClass"
+                              :match-rules="matchRules"
+                              @rule-change="handleRuleChange"
                               @start="handleStartGame"
                               @leave="handleLeaveLobby"
                               @mode-change="handleModeChange" />

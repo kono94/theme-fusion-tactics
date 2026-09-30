@@ -173,6 +173,11 @@ interface GameState {
   planningReadyPlayerId: string | null
   planningPauseReason: 'AUGMENT_SELECTION' | 'SOLO_READY' | null
   itemSlotsPerUnit: number
+  matchRuleSelection: string // 'RANDOM' | 'NONE' | rule id
+  activeMatchRule: { id: string; name: string; description: string; icon: string } | null
+  baseIncome: number
+  maxInterest: number
+  rerollCost: number
 }
 ```
 
@@ -209,7 +214,9 @@ bonus metadata for analytics; owned copies in snapshots include their display da
 - Lets every player copy a `#/join/{roomId}` invite. Recipients with a valid remembered name join automatically after
   the WebSocket connects; new visitors confirm their name first.
 - Shows backend-configured mode choices in stable One Piece/Pokemon order.
-- Emits mode selection, start, and leave; it does not publish STOMP directly.
+- Shows a second panel for the Match Rule (Random, None, and the rules passed in `matchRules`), read-only for non-hosts, with
+  the selected rule's description. `App.vue` fetches `/api/match-rules?mode=` when the room mode changes.
+- Emits mode selection, rule selection, start, and leave; it does not publish STOMP directly.
 
 ### `GameInterface.vue`
 
@@ -221,6 +228,8 @@ bonus metadata for analytics; owned copies in snapshots include their display da
 - Emits `GameAction` objects upward to `App.vue`.
 - Resolves hovered units from the latest snapshot. Planning board tooltips use backend projected item/trait/augment
   stats, bench tooltips use item-only stats, and combat tooltips show live stats.
+- Shows the active Match Rule as a badge with a tooltip in the top bar. Reroll enablement, the button label, and the
+  `R` shortcut use `state.rerollCost`.
 - Uses `utils/economy.ts` for refund previews. Refund copies are 1/3/6 at stars 1/2/3, matching the backend's
   two-copy second upgrade.
 - Shows the end screen as soon as `END_CELEBRATION` arrives, including for an already eliminated player, with selectable
