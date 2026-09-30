@@ -18,6 +18,7 @@ const version300Highlights = [
   'Hits, knockouts, stuns, heals, shields, and team buffs are easier to read at a glance in 3D.',
   'Big 3D fights stay easy to watch: the camera only zooms in for occasional big moments, and there are no screen flashes.',
   'If your device can’t show 3D, combat automatically switches back to the classic view.',
+  'Every augment now has its own pixel-art icon that matches the items and characters.',
   'The game client, server, and monitoring services now run on the latest maintenance releases for up-to-date stability and security fixes.',
 ]
 

@@ -9,7 +9,7 @@
       "Your team gains 5% Attack Speed for each ranged unit on your board.",
       "Your team gains 8% Attack Speed for each ranged unit on your board."
     ],
-    "image": null
+    "image": "/assets/augments/ranged-tempo.png"
   },
   {
     "id": "guarded-formation",
@@ -21,7 +21,7 @@
       "Your team takes 10% reduced damage.",
       "Your team takes 15% reduced damage."
     ],
-    "image": null
+    "image": "/assets/augments/guarded-formation.png"
   },
   {
     "id": "snowball-strike",
@@ -33,7 +33,7 @@
       "When one of your units gets a kill, your team gains 10 Attack Damage for the rest of combat.",
       "When one of your units gets a kill, your team gains 15 Attack Damage for the rest of combat."
     ],
-    "image": null
+    "image": "/assets/augments/snowball-strike.png"
   },
   {
     "id": "treasure-cache",
@@ -45,7 +45,7 @@
       "Gain 16 gold.",
       "Gain 24 gold."
     ],
-    "image": null
+    "image": "/assets/augments/treasure-cache.png"
   },
   {
     "id": "training-arc",
@@ -57,7 +57,7 @@
       "Gain 16 XP.",
       "Gain 24 XP."
     ],
-    "image": null
+    "image": "/assets/augments/training-arc.png"
   },
   {
     "id": "battle-standard",
@@ -69,7 +69,7 @@
       "Your team gains 275 Health.",
       "Your team gains 450 Health."
     ],
-    "image": null
+    "image": "/assets/augments/battle-standard.png"
   },
   {
     "id": "sharpened-blades",
@@ -81,7 +81,7 @@
       "Your team gains 14 Attack Damage.",
       "Your team gains 22 Attack Damage."
     ],
-    "image": null
+    "image": "/assets/augments/sharpened-blades.png"
   },
   {
     "id": "focused-haki",
@@ -93,7 +93,7 @@
       "Your team’s damaging abilities deal 18% more damage.",
       "Your team’s damaging abilities deal 30% more damage."
     ],
-    "image": null
+    "image": "/assets/augments/focused-haki.png"
   },
   {
     "id": "iron-line",
@@ -105,7 +105,7 @@
       "Your team gains 14 DEF.",
       "Your team gains 22 DEF."
     ],
-    "image": null
+    "image": "/assets/augments/iron-line.png"
   },
   {
     "id": "close-quarters",
@@ -117,7 +117,7 @@
       "Melee units gain 20% Lifesteal.",
       "Melee units gain 30% Lifesteal."
     ],
-    "image": null
+    "image": "/assets/augments/close-quarters.png"
   },
   {
     "id": "backline-barrage",
@@ -129,7 +129,7 @@
       "Ranged units gain 15 Attack Damage.",
       "Ranged units gain 24 Attack Damage."
     ],
-    "image": null
+    "image": "/assets/augments/backline-barrage.png"
   },
   {
     "id": "quick-study",
@@ -141,7 +141,7 @@
       "Your team gains 25% more mana from attacks.",
       "Your team gains 40% more mana from attacks."
     ],
-    "image": null
+    "image": "/assets/augments/quick-study.png"
   },
   {
     "id": "opening-burst",
@@ -153,7 +153,7 @@
       "Your team starts combat with 15 additional mana.",
       "Your team starts combat with 20 additional mana."
     ],
-    "image": null
+    "image": "/assets/augments/opening-burst.png"
   },
   {
     "id": "clean-bench",
@@ -165,7 +165,7 @@
       "Gain 2 gold for each empty bench slot.",
       "Gain 3 gold for each empty bench slot."
     ],
-    "image": null
+    "image": "/assets/augments/clean-bench.png"
   },
   {
     "id": "first-guard",
@@ -177,6 +177,6 @@
       "Your team starts combat with a 225 shield.",
       "Your team starts combat with a 375 shield."
     ],
-    "image": null
+    "image": "/assets/augments/first-guard.png"
   }
 ]
