@@ -353,6 +353,21 @@ describe('GameInterface match rules and economy', () => {
         wrapper.unmount()
     })
 
+    it('previews interest from the current gold using the server cap', () => {
+        const state = gameState('PLANNING', 100, 1)
+        state.players['player-1'].gold = 37
+        state.maxInterest = 5
+        const wrapper = mount(GameInterface, {
+            props: { state, currentPlayerId: 'player-1' },
+            global: { stubs: childStubs },
+        })
+
+        const chip = wrapper.get('[data-testid="interest-chip"]')
+        expect(chip.text()).toContain('+3 interest')
+        expect(chip.get('[role="tooltip"]').text()).toContain('up to 5')
+        wrapper.unmount()
+    })
+
     it('uses the room reroll cost for the button and the R shortcut', () => {
         const state = gameState('PLANNING', 100, 1)
         state.players['player-1'].gold = 1

@@ -7,3 +7,6 @@ export const calculateSellRefund = (unit: GameUnit | null): number => {
     const copies = starLevel === 1 ? 1 : starLevel === 2 ? 3 : 6
     return cost * copies
 }
+
+export const calculateInterest = (gold: number, maxInterest: number): number =>
+    Math.max(0, Math.min(Math.floor(gold / 10), maxInterest))

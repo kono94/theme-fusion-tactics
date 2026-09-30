@@ -24,7 +24,7 @@ import type {
 import { getUnitIconPath } from '../utils/iconUtils'
 import { getRarityColor } from '../utils/colorUtils'
 import { setUnitDragPreview } from '../utils/dragPreview'
-import { calculateSellRefund } from '../utils/economy'
+import { calculateInterest, calculateSellRefund } from '../utils/economy'
 import { SHOP_ODDS } from '../data/shopOdds'
 import type { ClientSettings, CombatViewSetting } from '../utils/clientSettings'
 
@@ -71,6 +71,10 @@ const myPlayer = computed((): PlayerState | null => {
 })
 
 const rerollCost = computed(() => props.state?.rerollCost ?? 2)
+
+const interest = computed(() =>
+  calculateInterest(myPlayer.value?.gold ?? 0, props.state?.maxInterest ?? 0)
+)
 
 const allPlayers = computed((): PlayerState[] => {
   if (!props.state?.players) return []
@@ -948,6 +952,18 @@ watch(
             <div class="gold-info">
               <span class="gold-amount" style="font-size: 28px">{{ myPlayer.gold }}</span>
               <span class="gold-label" style="font-size: 14px">Gold</span>
+              <span
+                class="interest-chip"
+                :class="{ maxed: interest >= (state?.maxInterest ?? 0) }"
+                tabindex="0"
+                data-testid="interest-chip"
+              >
+                +{{ interest }} interest
+                <span class="interest-tooltip" role="tooltip">
+                  Earn 1 gold of interest for every 10 gold you hold, up to {{ state?.maxInterest ?? 0 }}.
+                  Paid with your {{ state?.baseIncome ?? 0 }} gold base income at the start of each planning phase.
+                </span>
+              </span>
             </div>
             <div
               class="unit-count"
@@ -1271,7 +1287,8 @@ watch(
   image-rendering: pixelated;
 }
 
-.rule-tooltip {
+.rule-tooltip,
+.interest-tooltip {
   position: absolute;
   z-index: 50;
   width: 220px;
@@ -1299,9 +1316,33 @@ watch(
 }
 
 .rule-badge:hover .rule-tooltip,
-.rule-badge:focus-visible .rule-tooltip {
+.rule-badge:focus-visible .rule-tooltip,
+.interest-chip:hover .interest-tooltip,
+.interest-chip:focus-visible .interest-tooltip {
   opacity: 1;
   visibility: visible;
+}
+
+.interest-chip {
+  position: relative;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  color: #fcd34d;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: default;
+}
+
+.interest-chip.maxed {
+  background: rgba(251, 191, 36, 0.24);
+  border-color: rgba(251, 191, 36, 0.6);
+}
+
+.interest-tooltip {
+  bottom: calc(100% + 8px);
+  left: 0;
 }
 
 .room-id {

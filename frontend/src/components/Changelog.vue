@@ -23,6 +23,7 @@ const version300Highlights = [
   'Each theme adds its own rule: Bounty Hunt in One Piece pays 1 gold for every enemy unit you defeat, and Type Master in Pokemon doubles type advantages and resistances.',
   'Volatile explosions respect unused revives. Final explosion knockouts trigger ally shields and team attack bonuses, and Glass Cannons also boosts ability burn and poison damage by 40%.',
   'Every augment now has its own pixel-art icon that matches the items and characters.',
+  'You can now see your interest: a small chip next to your gold shows how much bonus gold you will earn at the start of the next round (1 gold per 10 gold held, up to 5).',
   'The game client, server, and monitoring services now run on the latest maintenance releases for up-to-date stability and security fixes.',
 ]
 

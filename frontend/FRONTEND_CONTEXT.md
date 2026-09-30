@@ -228,8 +228,8 @@ bonus metadata for analytics; owned copies in snapshots include their display da
 - Emits `GameAction` objects upward to `App.vue`.
 - Resolves hovered units from the latest snapshot. Planning board tooltips use backend projected item/trait/augment
   stats, bench tooltips use item-only stats, and combat tooltips show live stats.
-- Shows the active Match Rule as a badge with a tooltip in the top bar. Reroll enablement, the button label, and the
-  `R` shortcut use `state.rerollCost`.
+- Shows the active Match Rule as a badge with a tooltip in the top bar and an interest chip next to gold
+  (`calculateInterest` with the server's `maxInterest`). Reroll enablement, the button label, and the `R` shortcut use `state.rerollCost`.
 - Uses `utils/economy.ts` for refund previews. Refund copies are 1/3/6 at stars 1/2/3, matching the backend's
   two-copy second upgrade.
 - Shows the end screen as soon as `END_CELEBRATION` arrives, including for an already eliminated player, with selectable
