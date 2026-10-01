@@ -120,6 +120,41 @@ const version160Commits = [
       <section class="release-section">
         <div class="release-header">
           <p class="eyebrow">Latest</p>
+          <h2>Version 3.0.1</h2>
+          <p>A more compact match layout, clearer interest, and larger item artwork.</p>
+        </div>
+        <div class="release-grid">
+          <div class="release-features">
+            <div class="feature-note">
+              <h3>Compact Match Header</h3>
+              <p>
+                The <strong>room code and active Match Rule share one line</strong>, leaving more
+                space for your board.
+              </p>
+            </div>
+            <div class="feature-note">
+              <h3>Interest and Next-Round Income</h3>
+              <p>
+                Up to <strong>five small coin icons to the left of your gold</strong> light up as
+                you earn interest. <strong>Hover or focus your gold</strong> to see next-round
+                income, split into base income and interest. The preview updates when you spend
+                gold.
+              </p>
+            </div>
+            <div class="feature-note">
+              <h3>Larger Stash Icons</h3>
+              <p>
+                The <strong>Items</strong> stash now uses
+                <strong>larger icons, six per row</strong>, keeping more room for player health
+                above it. Extra rows scroll within the stash; equipped items stay compact on units.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="release-section">
+        <div class="release-header">
+          <p class="eyebrow">Previous</p>
           <h2>Version 3.0.0</h2>
           <p>
             Shape your team with items, choose a room-wide Match Rule, and watch battles in 3D on

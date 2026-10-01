@@ -73,8 +73,10 @@ const myPlayer = computed((): PlayerState | null => {
 const rerollCost = computed(() => props.state?.rerollCost ?? 2)
 
 const interest = computed(() =>
-  calculateInterest(myPlayer.value?.gold ?? 0, props.state?.maxInterest ?? 0)
+  calculateInterest(myPlayer.value?.gold ?? 0, props.state?.maxInterest ?? 0),
 )
+const interestSlots = computed(() => Math.min(5, Math.max(0, props.state?.maxInterest ?? 0)))
+const nextRoundIncome = computed(() => (props.state?.baseIncome ?? 0) + interest.value)
 
 const allPlayers = computed((): PlayerState[] => {
   if (!props.state?.players) return []
@@ -746,13 +748,18 @@ watch(
           <span class="phase-name">{{ state.phase }}</span>
           <div class="game-meta">
             <span class="game-mode">{{ state.gameMode }}</span>
-            <div v-if="state.activeMatchRule" class="rule-badge" tabindex="0" data-testid="rule-badge">
-              <img class="rule-badge-icon" :src="state.activeMatchRule.icon" alt="" />
-              <span class="rule-badge-name">{{ state.activeMatchRule.name }}</span>
-              <span class="rule-tooltip" role="tooltip">{{ state.activeMatchRule.description }}</span>
-            </div>
             <div class="room-details">
               <span class="room-id">Room: {{ state.roomId }}</span>
+              <div
+                v-if="state.activeMatchRule"
+                class="rule-badge"
+                tabindex="0"
+                data-testid="rule-badge"
+              >
+                <img class="rule-badge-icon" :src="state.activeMatchRule.icon" alt="" />
+                <span class="rule-badge-name">{{ state.activeMatchRule.name }}</span>
+                <span class="rule-tooltip" role="tooltip">{{ state.activeMatchRule.description }}</span>
+              </div>
               <button
                 v-if="myPlayer && state.phase !== 'END'"
                 class="abandon-game-btn"
@@ -949,20 +956,34 @@ watch(
             </div>
           </div>
           <div class="stats-row">
-            <div class="gold-info">
-              <span class="gold-amount" style="font-size: 28px">{{ myPlayer.gold }}</span>
-              <span class="gold-label" style="font-size: 14px">Gold</span>
+            <div class="gold-info" tabindex="0" aria-describedby="gold-income-tooltip">
               <span
-                class="interest-chip"
-                :class="{ maxed: interest >= (state?.maxInterest ?? 0) }"
-                tabindex="0"
-                data-testid="interest-chip"
+                class="interest-markers"
+                role="img"
+                :aria-label="`${interest} gold interest out of ${state.maxInterest}`"
+                data-testid="interest-markers"
               >
-                +{{ interest }} interest
-                <span class="interest-tooltip" role="tooltip">
-                  Earn 1 gold of interest for every 10 gold you hold, up to {{ state?.maxInterest ?? 0 }}.
-                  Paid with your {{ state?.baseIncome ?? 0 }} gold base income at the start of each planning phase.
-                </span>
+                <svg
+                  v-for="slot in interestSlots"
+                  :key="slot"
+                  class="interest-coin"
+                  :class="{ filled: slot <= interest }"
+                  viewBox="0 0 16 16"
+                  aria-hidden="true"
+                >
+                  <circle cx="8" cy="8" r="6.5" />
+                  <path d="M10 5.5H7a1.25 1.25 0 0 0 0 2.5h2a1.25 1.25 0 0 1 0 2.5H6M8 4v8" />
+                </svg>
+              </span>
+              <span class="gold-amount">{{ myPlayer.gold }}</span>
+              <span class="gold-label">Gold</span>
+              <span id="gold-income-tooltip" class="gold-tooltip" role="tooltip">
+                <strong>Next round: +{{ nextRoundIncome }} gold</strong>
+                <span>{{ state.baseIncome }} base + {{ interest }} interest</span>
+                <small>
+                  Based on your current gold. Earn 1 interest per 10 gold held, up to
+                  {{ state.maxInterest }}.
+                </small>
               </span>
             </div>
             <div
@@ -1244,7 +1265,8 @@ watch(
 .phase-info {
   display: flex;
   justify-content: space-between;
-  padding: 10px 24px;
+  padding: 8px 24px;
+  gap: 16px;
   font-size: 18px;
   font-weight: 800;
   text-transform: uppercase;
@@ -1254,9 +1276,9 @@ watch(
 
 .game-meta {
   display: flex;
-  flex-direction: column;
+  min-width: 0;
   align-items: center;
-  gap: 2px;
+  gap: 10px;
 }
 
 .game-mode {
@@ -1279,16 +1301,26 @@ watch(
   font-weight: 700;
   letter-spacing: 0.4px;
   cursor: default;
+  min-width: 0;
+  flex-shrink: 1;
+  text-transform: none;
+}
+
+.rule-badge-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .rule-badge-icon {
   width: 20px;
   height: 20px;
   image-rendering: pixelated;
+  flex-shrink: 0;
 }
 
 .rule-tooltip,
-.interest-tooltip {
+.gold-tooltip {
   position: absolute;
   z-index: 50;
   width: 220px;
@@ -1317,32 +1349,60 @@ watch(
 
 .rule-badge:hover .rule-tooltip,
 .rule-badge:focus-visible .rule-tooltip,
-.interest-chip:hover .interest-tooltip,
-.interest-chip:focus-visible .interest-tooltip {
+.gold-info:hover .gold-tooltip,
+.gold-info:focus-within .gold-tooltip {
   opacity: 1;
   visibility: visible;
 }
 
-.interest-chip {
-  position: relative;
-  padding: 1px 8px;
-  border-radius: 999px;
-  background: rgba(251, 191, 36, 0.12);
-  border: 1px solid rgba(251, 191, 36, 0.3);
-  color: #fcd34d;
-  font-size: 11px;
-  font-weight: 700;
-  cursor: default;
+.interest-markers {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
 }
 
-.interest-chip.maxed {
-  background: rgba(251, 191, 36, 0.24);
-  border-color: rgba(251, 191, 36, 0.6);
+.interest-coin {
+  width: 10px;
+  height: 10px;
+  color: #475569;
 }
 
-.interest-tooltip {
+.interest-coin circle {
+  fill: transparent;
+  stroke: currentColor;
+}
+
+.interest-coin path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.interest-coin.filled {
+  color: #fbbf24;
+}
+
+.interest-coin.filled circle {
+  fill: rgba(251, 191, 36, 0.16);
+}
+
+.gold-tooltip {
   bottom: calc(100% + 8px);
   left: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.gold-tooltip strong {
+  color: #fbbf24;
+}
+
+.gold-tooltip small {
+  color: #94a3b8;
+  font-size: 11px;
 }
 
 .room-id {
@@ -1352,12 +1412,38 @@ watch(
   padding: 2px 8px;
   border-radius: 4px;
   letter-spacing: 0.5px;
+  white-space: nowrap;
 }
 
 .room-details {
   display: flex;
   align-items: center;
   gap: 5px;
+  min-width: 0;
+}
+
+@media (max-width: 700px) {
+  .phase-info {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 6px 12px;
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+
+  .game-meta {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-content: center;
+  }
+
+  .game-mode {
+    display: none;
+  }
+
+  .round-actions {
+    min-width: 0;
+  }
 }
 
 .round-actions {
@@ -1752,9 +1838,16 @@ watch(
 }
 
 .gold-info {
+  position: relative;
   display: flex;
-  align-items: baseline;
-  gap: 8px;
+  align-items: center;
+  gap: 6px;
+}
+
+.gold-info:focus-visible {
+  outline: 2px solid #fbbf24;
+  outline-offset: 4px;
+  border-radius: 4px;
 }
 .gold-amount {
   color: #fbbf24;

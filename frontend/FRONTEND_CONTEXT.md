@@ -228,8 +228,10 @@ bonus metadata for analytics; owned copies in snapshots include their display da
 - Emits `GameAction` objects upward to `App.vue`.
 - Resolves hovered units from the latest snapshot. Planning board tooltips use backend projected item/trait/augment
   stats, bench tooltips use item-only stats, and combat tooltips show live stats.
-- Shows the active Match Rule as a badge with a tooltip in the top bar and an interest chip next to gold
-  (`calculateInterest` with the server's `maxInterest`). Reroll enablement, the button label, and the `R` shortcut use `state.rerollCost`.
+- Shows the active Match Rule beside the room code in a compact top bar. Up to five small coin markers to the left of
+  gold show interest (`calculateInterest` with the server's `maxInterest`). Hovering or focusing gold shows projected
+  next-round income as server-provided base income plus current interest. Reroll enablement, the button label, and the
+  `R` shortcut use `state.rerollCost`.
 - Uses `utils/economy.ts` for refund previews. Refund copies are 1/3/6 at stars 1/2/3, matching the backend's
   two-copy second upgrade.
 - Shows the end screen as soon as `END_CELEBRATION` arrives, including for an already eliminated player, with selectable
@@ -259,7 +261,8 @@ the safety boundary.
 and combined `healing`/`shielding` totals. Damage dealt and taken are actual post-mitigation health and shield removed.
 `GameInterface` renders an always-visible right column: one card that switches between `PlayerList` and `DamageReport`
 (the report follows the viewed player and their matchup), with `ItemInventory` pinned below it for the local player. It
-is a grid of at least six slots, one per item copy, sized by the shared `--item-slot-size` like the badges on units
+is a grid of at least six slots, one per item copy, with six 36 px slots per row and at most two visible rows before
+scrolling. Stash sizing is local to `ItemInventory`; equipped badges keep the shared 24 px `--item-slot-size`
 (board badges stack on the unit's left edge; combat buff icons sit on the right). Items move by drag/drop or tap-select
 then tap a unit; dropping an equipped item on the inventory card (or tapping an empty slot while it is selected)
 unequips it. `ItemTooltip` is teleported by `GameInterface` for hover, focus, and tap on any item badge; the unit

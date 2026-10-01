@@ -67,7 +67,9 @@ function onItemEnter(event: MouseEvent | FocusEvent, item: GameItem) {
     <header class="inventory-header">
       <span>Items</span>
       <span class="inventory-hint">
-        {{ items.length ? (canManage ? 'Drag onto a unit' : 'Planning only') : 'Found in loot orbs' }}
+        {{
+          items.length ? (canManage ? 'Drag onto a unit' : 'Planning only') : 'Found in loot orbs'
+        }}
       </span>
     </header>
     <div class="inventory-grid">
@@ -104,12 +106,16 @@ function onItemEnter(event: MouseEvent | FocusEvent, item: GameItem) {
 
 <style scoped>
 .inventory-card {
+  --inventory-slot-size: 36px;
+
   padding: 8px 10px 10px;
   background: rgba(15, 23, 42, 0.9);
   border: 1px solid #334155;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-  transition: border-color 0.15s ease, background 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
 }
 
 .inventory-card.drop-target {
@@ -139,16 +145,16 @@ function onItemEnter(event: MouseEvent | FocusEvent, item: GameItem) {
 
 .inventory-grid {
   display: grid;
-  grid-template-columns: repeat(6, var(--item-slot-size));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   justify-content: space-between;
-  row-gap: 6px;
-  max-height: calc(var(--item-slot-size) * 2 + 6px);
+  gap: 6px 2px;
+  max-height: calc(var(--inventory-slot-size) * 2 + 6px);
   overflow-y: auto;
 }
 
 .item-slot {
-  width: var(--item-slot-size);
-  height: var(--item-slot-size);
+  width: min(100%, var(--inventory-slot-size));
+  aspect-ratio: 1;
   padding: 0;
   display: grid;
   place-items: center;

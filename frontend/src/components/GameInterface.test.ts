@@ -340,6 +340,7 @@ describe('GameInterface match rules and economy', () => {
         expect(badge.text()).toContain('Volatile')
         expect(badge.get('[role="tooltip"]').text()).toBe('Units explode on death.')
         expect(badge.get('img').attributes('src')).toBe('/assets/match-rules/volatile.png')
+        expect(badge.element.parentElement).toBe(wrapper.get('.room-details').element)
         wrapper.unmount()
     })
 
@@ -353,7 +354,7 @@ describe('GameInterface match rules and economy', () => {
         wrapper.unmount()
     })
 
-    it('previews interest from the current gold using the server cap', () => {
+    it('shows small interest markers before gold and updates the projected income after spending', async () => {
         const state = gameState('PLANNING', 100, 1)
         state.players['player-1'].gold = 37
         state.maxInterest = 5
@@ -362,11 +363,38 @@ describe('GameInterface match rules and economy', () => {
             global: { stubs: childStubs },
         })
 
-        const chip = wrapper.get('[data-testid="interest-chip"]')
-        expect(chip.text()).toContain('+3 interest')
-        expect(chip.get('[role="tooltip"]').text()).toContain('up to 5')
+        const markers = wrapper.get('[data-testid="interest-markers"]')
+        expect(markers.findAll('svg')).toHaveLength(5)
+        expect(markers.findAll('.filled')).toHaveLength(3)
+        expect(markers.attributes('aria-label')).toBe('3 gold interest out of 5')
+        expect(wrapper.get('.gold-info').element.firstElementChild).toBe(markers.element)
+        expect(wrapper.get('.gold-tooltip').text()).toContain('Next round: +8 gold')
+        expect(wrapper.get('.gold-tooltip').text()).toContain('5 base + 3 interest')
+
+        const spentState = gameState('PLANNING', 100, 1)
+        spentState.players['player-1'].gold = 29
+        await wrapper.setProps({ state: spentState })
+        expect(markers.findAll('.filled')).toHaveLength(2)
+        expect(wrapper.get('.gold-tooltip').text()).toContain('Next round: +7 gold')
         wrapper.unmount()
     })
+
+    it.each([[0, 5, 0], [50, 5, 5], [100, 2, 2]])(
+        'uses the server cap for %s gold and %s interest slots', (gold, cap, filled) => {
+            const state = gameState('PLANNING', 100, 1)
+            state.players['player-1'].gold = gold
+            state.maxInterest = cap
+            state.baseIncome = 7
+            const wrapper = mount(GameInterface, {
+                props: { state, currentPlayerId: 'player-1' },
+                global: { stubs: childStubs },
+            })
+            expect(wrapper.findAll('.interest-coin')).toHaveLength(cap)
+            expect(wrapper.findAll('.interest-coin.filled')).toHaveLength(filled)
+            expect(wrapper.get('.gold-tooltip').text()).toContain(`Next round: +${7 + filled} gold`)
+            wrapper.unmount()
+        },
+    )
 
     it('uses the room reroll cost for the button and the R shortcut', () => {
         const state = gameState('PLANNING', 100, 1)
