@@ -354,6 +354,8 @@ by the backend; frontend route hiding is not security.
 
 ## 12. Build, test, and deploy
 
+Source setup is documented in [the development guide](../build/README.md).
+
 ```bash
 cd frontend
 npm ci

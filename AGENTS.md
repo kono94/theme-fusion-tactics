@@ -1,10 +1,11 @@
 # Theme Fusion Tactics (TFT) Project Guidelines
 
 ## Project Context
-- Start with [README.md](README.md) for project overview, quick start, architecture, and API reference.
+- Start with [README.md](README.md) for the player-facing overview and installation. Use [build/README.md](build/README.md) for source setup, verification commands, and simulations.
 - Use [backend/BACKEND_CONTEXT.md](backend/BACKEND_CONTEXT.md) for backend architecture, game engine details, WebSocket contracts, and state management.
 - Use [frontend/FRONTEND_CONTEXT.md](frontend/FRONTEND_CONTEXT.md) for Vue architecture, component structure, rendering responsibilities, and frontend data flow.
 - Keep `AGENTS.md` for stable repository rules. Keep the context files focused on the current architecture, contracts, operational boundaries, and change checklists; do not use them as changelogs or duplicate source code line by line.
+- Keep the README focused on players: gameplay, current screenshots, installation, and links to deeper documentation. Keep API tables and developer workflows in the context files or development guide.
 - Treat files under `archive/` as historical plans, not as current implementation guidance.
 
 ## 1. Tech Stack & Environment

@@ -17,9 +17,37 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parent.parent
 
+# Temurin 25 links from its runtime image, without a jmods directory. Explicit
+# providers avoid pulling build tools (including the non-linkable jdk.jlink) in.
+RUNTIME_MODULES = (
+    'java.se',
+    'jdk.charsets',
+    'jdk.crypto.ec',
+    'jdk.httpserver',
+    'jdk.jfr',
+    'jdk.localedata',
+    'jdk.management',
+    'jdk.naming.dns',
+    'jdk.net',
+    'jdk.security.auth',
+    'jdk.unsupported',
+    'jdk.zipfs',
+)
+
 
 def run(*command, cwd=ROOT, env=None):
     subprocess.run([str(value) for value in command], cwd=cwd, env=env, check=True)
+
+
+def build_runtime(java_home, runtime, suffix):
+    run(java_home / 'bin' / ('jlink' + suffix), '--add-modules', ','.join(RUNTIME_MODULES),
+        '--strip-debug', '--no-man-pages', '--no-header-files', '--output', runtime)
+    java = runtime / 'bin' / ('java' + suffix)
+    linked_modules = {line.split('@')[0] for line in subprocess.check_output(
+        [str(java), '--list-modules'], text=True).splitlines()}
+    missing = set(RUNTIME_MODULES) - linked_modules
+    if missing or {'jdk.jlink', 'jdk.jpackage'} & linked_modules:
+        raise RuntimeError('Packaged Java runtime has an unexpected module set: ' + ','.join(sorted(linked_modules)))
 
 
 def prepare(version, skip_build):
@@ -136,8 +164,7 @@ def main():
         shutil.rmtree(output)
     output.mkdir(parents=True)
     runtime = output / 'runtime'
-    run(java_home / 'bin' / ('jlink' + suffix), '--module-path', java_home / 'jmods', '--add-modules', 'ALL-MODULE-PATH', '--bind-services',
-        '--strip-debug', '--no-man-pages', '--no-header-files', '--output', runtime)
+    build_runtime(java_home, runtime, suffix)
     images = output / 'images'
     package = [java_home / 'bin' / ('jpackage' + suffix), '--type', 'app-image', '--name', 'Theme Fusion Tactics',
                '--app-version', version.split('-')[0], '--vendor', 'Theme Fusion Tactics', '--description',

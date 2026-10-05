@@ -54,7 +54,9 @@ Launcher or Java upgrades require a new installer; the launcher offers the match
 
 ## Build and verify
 
-Build with Java 25, Maven, Node 26+, npm, and Python 3. Native packaging also needs Xcode command-line tools on macOS or WiX on Windows. Use a Temurin JDK for release builds. The launcher itself has no Spring runtime and shares the bundled Java 25 runtime with its child backend.
+Build with Java 25, Maven, Node 26+, npm, and Python 3. Python only orchestrates the build and CI smoke tests; it is not shipped with the game or required on players' computers. The installer is produced by Java's native `jpackage` tool, and the launcher is Java. Native packaging also needs Xcode command-line tools on macOS or WiX on Windows. Use a Temurin JDK for release builds. The launcher itself has no Spring runtime and shares the bundled Java 25 runtime with its child backend.
+
+`jlink` builds the runtime from explicit Java SE and JDK provider modules listed in `build.py`. It does not assume a `jmods` directory: Temurin 25 links directly from its runtime image. Provider modules cover HTTPS crypto, DNS, locales/charsets, ZIP filesystems, management/JFR, the launcher's local single-instance HTTP server, and the backend's Unsafe access. Build tools and broad service binding are excluded because they can pull in `jdk.jlink`, which Temurin cannot relink from its runtime image. Packaged smoke tests verify startup, both themes, SQLite history, and launcher lifecycle using this runtime.
 
 ```sh
 python3 desktop/build.py --version 3.0.2
