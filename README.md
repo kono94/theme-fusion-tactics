@@ -17,6 +17,7 @@ For detailed architectural information, refer to the context documents:
 | **[Backend Context](backend/BACKEND_CONTEXT.md)** | Game engine, combat system, WebSocket API, state management |
 | **[Frontend Context](frontend/FRONTEND_CONTEXT.md)** | Vue.js architecture, component hierarchy, animation system |
 | **[Deployment Guide](deployment/DEPLOYMENT_GUIDE.md)** | Docker Compose setup, GitOps deployment to production |
+| **[Standalone Preview](desktop/README.md)** | Windows/macOS installation, offline play, launcher updates, and packaging |
 
 ---
 
@@ -136,6 +137,9 @@ For detailed architectural information, refer to the context documents:
 ## 🚀 Quick Start
 
 ### Prerequisites
+For the standalone Windows/macOS preview, download the matching installer from GitHub Releases; the Java runtime and
+game assets are included. See [Standalone Preview](desktop/README.md). The prerequisites below are for development.
+
 - Java 25
 - Node.js 26+ & npm
 - Docker (optional, for containerized deployment)

@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#203449"/>
+      <stop offset="0.5" stop-color="#101f35"/>
+      <stop offset="1" stop-color="#091324"/>
+    </linearGradient>
+    <radialGradient id="warm"><stop stop-color="#ffba55" stop-opacity="0.28"/><stop offset="1" stop-color="#ffba55" stop-opacity="0"/></radialGradient>
+    <radialGradient id="cool"><stop stop-color="#48baf2" stop-opacity="0.3"/><stop offset="1" stop-color="#48baf2" stop-opacity="0"/></radialGradient>
+    <linearGradient id="board" x1="0" y1="0" x2="1" y2="0">
+      <stop stop-color="#edb35b"/><stop offset="0.48" stop-color="#8294aa"/><stop offset="1" stop-color="#59bdeb"/>
+    </linearGradient>
+    <linearGradient id="letters" x1="0" y1="0" x2="1" y2="0.65">
+      <stop stop-color="#ffd881"/><stop offset="0.37" stop-color="#fff4d6"/><stop offset="0.64" stop-color="#f0f8ff"/><stop offset="1" stop-color="#8bd5ff"/>
+    </linearGradient>
+    <linearGradient id="edge" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#edc583"/><stop offset="0.45" stop-color="#526b82"/><stop offset="1" stop-color="#579ed0"/>
+    </linearGradient>
+    <clipPath id="clip"><rect x="72" y="72" width="880" height="880" rx="196"/></clipPath>
+    <path id="word" d="M194 354H392V425H329V648H257V425H194Z M430 354H624V423H506V465H608V533H506V648H430Z M664 354H862V425H799V648H727V425H664Z"/>
+    <path id="star" d="M0-27 8-8 29-6 13 8 18 29 0 18-18 29-13 8-29-6-8-8Z"/>
+  </defs>
+  <rect x="72" y="84" width="880" height="880" rx="196" fill="#050a13" opacity="0.3"/>
+  <rect x="72" y="72" width="880" height="880" rx="196" fill="url(#tile)"/>
+  <g clip-path="url(#clip)">
+    <circle cx="196" cy="282" r="530" fill="url(#warm)"/>
+    <circle cx="872" cy="490" r="530" fill="url(#cool)"/>
+    <path d="M40 496 512 222 984 496 512 810Z" fill="#223951" opacity="0.35"/>
+    <g fill="none" stroke="url(#board)" stroke-width="4" opacity="0.3">
+      <path d="M44 660 512 390 980 660 512 930Z M44 570 512 300 980 570 512 840Z M44 480 512 210 980 480 512 750Z"/>
+      <path d="M161 593 629 863 M278 525 746 795 M395 458 863 728 M629 458 161 728 M746 525 278 795 M863 593 395 863"/>
+    </g>
+    <g fill="url(#board)" opacity="0.18">
+      <path d="M278 660 395 592 512 660 395 728Z"/>
+      <path d="M512 795 629 727 746 795 629 863Z"/>
+      <path d="M746 525 863 458 980 525 863 593Z"/>
+    </g>
+    <path d="M181 681 490 860" fill="none" stroke="#efbd6c" stroke-width="6" stroke-linecap="round" opacity="0.58"/>
+    <path d="M534 860 843 681" fill="none" stroke="#69c1ed" stroke-width="6" stroke-linecap="round" opacity="0.58"/>
+    <g fill="#edc583">
+      <use href="#star" transform="translate(426 261) scale(0.72)"/>
+      <use href="#star" transform="translate(512 242)"/>
+      <use href="#star" transform="translate(598 261) scale(0.72)"/>
+    </g>
+    <g transform="translate(35) skewX(-6)" stroke-linejoin="round">
+      <use href="#word" transform="translate(0 18)" fill="#050b17" stroke="#050b17" stroke-width="22"/>
+      <use href="#word" fill="url(#letters)" stroke="#0b1729" stroke-width="18"/>
+      <use href="#word" fill="none" stroke="#e5f1fb" stroke-width="2" opacity="0.6"/>
+    </g>
+  </g>
+  <rect x="78" y="78" width="868" height="868" rx="190" fill="none" stroke="url(#edge)" stroke-width="4" opacity="0.55"/>
+</svg>

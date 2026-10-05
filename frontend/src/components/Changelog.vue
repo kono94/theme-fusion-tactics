@@ -120,6 +120,42 @@ const version160Commits = [
       <section class="release-section">
         <div class="release-header">
           <p class="eyebrow">Latest</p>
+          <h2>Version 3.0.2</h2>
+          <p>Play solo on your own computer, even without an internet connection.</p>
+        </div>
+        <div class="release-grid">
+          <div class="release-features">
+            <div class="feature-note">
+              <h3>Standalone Preview</h3>
+              <p>
+                Download the Windows or macOS preview and launch TFT from its application icon.
+                Play One Piece or Pokemon against bots in your browser without a hosted server.
+                Java and all game artwork and fonts are included.
+                A dedicated TFT app icon helps you spot the game in your Dock or taskbar.
+              </p>
+            </div>
+            <div class="feature-note">
+              <h3>Updates Before You Play</h3>
+              <p>
+                The launcher offers new game versions before starting a match. Choose to update,
+                keep playing your installed version, or enable automatic updates. Your settings and
+                local match history stay on your computer. Offline launches keep working.
+              </p>
+            </div>
+            <div class="feature-note">
+              <h3>Local Match History</h3>
+              <p>
+                Completed solo matches appear in your local history. Closing the browser keeps the
+                game running; use Quit in the launcher to stop it. Active matches cannot be resumed
+                after quitting.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="release-section">
+        <div class="release-header">
+          <p class="eyebrow">Previous</p>
           <h2>Version 3.0.1</h2>
           <p>A more compact match layout, clearer interest, and larger item artwork.</p>
         </div>

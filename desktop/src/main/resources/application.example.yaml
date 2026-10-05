@@ -1,0 +1,10 @@
+# Optional Spring Boot overrides. Copy to application.yaml in this directory.
+# Leave this file absent to use the defaults.
+# Changing the port creates a different browser storage origin.
+server:
+  port: 18765
+logging:
+  level:
+    root: INFO
+# The launcher manages the profile, loopback address, SQLite storage, readiness,
+# and build identity. These properties cannot be overridden here.
