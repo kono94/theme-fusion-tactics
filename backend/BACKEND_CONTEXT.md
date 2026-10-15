@@ -1,6 +1,6 @@
 # Backend Context
 
-> Last verified: 2026-09-27
+> Last reviewed: 2026-10-15
 >
 > Scope: the current Java backend, transport contracts, mode data, analytics, observability, and test/build workflow.
 >
@@ -23,7 +23,7 @@ Live `GameState` is held in memory. SQLite stores anonymous gameplay analytics, 
 | Framework | Spring Boot 4.1, Spring MVC, Spring Security, scheduling, STOMP WebSockets |
 | JSON | Jackson 3 `JsonMapper` |
 | Storage | SQLite + Flyway for analytics |
-| Build | Maven; Spotless 3.9 formats Java and the POM |
+| Build | Maven; Spotless formats Java and the POM; versions are pinned in [pom.xml](pom.xml) |
 | Observability | OpenTelemetry API with Java-agent runtime instrumentation; no Micrometer or Actuator |
 | Tests | JUnit 5, Mockito as an explicit Java agent, JaCoCo report during `verify` |
 
@@ -40,6 +40,11 @@ mvn verify
 checks formatting, packages the application, and writes JaCoCo output under `target/site/jacoco`.
 
 ## 3. Architecture map
+
+The backend and frontend are separate services. nginx serves the built Vue application and
+proxies `/api` to the backend and `/ws` to `/tft-websocket`. The VPS deployment script builds
+both images with Git version metadata. The `prod` Spring profile requires the configured
+analytics admin password. See the [deployment guide](../deployment/DEPLOYMENT_GUIDE.md).
 
 ```text
 BackendApplication

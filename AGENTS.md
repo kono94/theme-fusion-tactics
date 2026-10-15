@@ -1,11 +1,11 @@
 # Theme Fusion Tactics (TFT) Project Guidelines
 
 ## Project Context
-- Start with [README.md](README.md) for the player-facing overview and installation. Use [build/README.md](build/README.md) for source setup, verification commands, and simulations.
+- Start with [README.md](README.md) for the player-facing overview and browser play. Use [build/README.md](build/README.md) for source setup, verification commands, and simulations.
 - Use [backend/BACKEND_CONTEXT.md](backend/BACKEND_CONTEXT.md) for backend architecture, game engine details, WebSocket contracts, and state management.
 - Use [frontend/FRONTEND_CONTEXT.md](frontend/FRONTEND_CONTEXT.md) for Vue architecture, component structure, rendering responsibilities, and frontend data flow.
 - Keep `AGENTS.md` for stable repository rules. Keep the context files focused on the current architecture, contracts, operational boundaries, and change checklists; do not use them as changelogs or duplicate source code line by line.
-- Keep the README focused on players: gameplay, current screenshots, installation, and links to deeper documentation. Keep API tables and developer workflows in the context files or development guide.
+- Keep the README focused on players: gameplay, current screenshots, browser play, and links to hosting documentation. Keep API tables and developer workflows in the context files or development guide.
 - Treat files under `archive/` as historical plans, not as current implementation guidance.
 
 ## 1. Tech Stack & Environment
@@ -85,7 +85,7 @@
 - Write changelog entries for players and customers, not developers. Use a short release summary followed by concrete, player-facing highlights that explain how to use a feature or what changes during play.
 - Do not expose commit hashes or copy terse commit messages into new release sections. Do not include dependency versions, build tooling, CI, refactors, internal architecture, documentation maintenance, or other development-only work unless it directly changes the player experience.
 - Use the established release grid for new sections: player-facing highlights stay in the bounded left column and balance changes stay in the right column. Keep the highlights in the left column even when a release has no balance changes.
-- Once a final release exists, remove its standalone prerelease sections and fold only their player-visible changes into the final release notes.
+- Once a final release exists, remove its separate prerelease sections and fold only their player-visible changes into the final release notes.
 - Balance notes must include both new and previous values (passed through) and "=>" before the new values, and should visually distinguish buffs and nerfs when shown in the changelog UI.
 - Follow the established balance-entry style: give each character or unit its own `.balance-block` with its name in the heading, and keep each old value, `=>` arrow, and new value in separate styled spans/elements. Do not combine multiple character changes into a wall of text.
 - When reformatting an existing release, change only the presentation and preserve the existing changelog entries and values; do not add new changelog items or alter balance values unless explicitly requested.

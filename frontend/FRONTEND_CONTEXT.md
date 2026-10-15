@@ -1,6 +1,6 @@
 # Frontend Context
 
-> Last verified: 2026-09-27
+> Last reviewed: 2026-10-15
 >
 > Scope: the current Vue application, backend contracts, animation pipeline, analytics UI, and test/build workflow.
 >
@@ -21,7 +21,7 @@ The application supports One Piece and Pokemon rooms. The host can change mode w
 |---|---|
 | Vue | Vue 3.5 with Composition API and `<script setup>` |
 | Language | TypeScript 6.0 |
-| Build | Vite 8.2, `vue-tsc` 3.3 |
+| Build | Vite and `vue-tsc`, as pinned in [package.json](package.json) |
 | Realtime | `@stomp/stompjs` 7.3 over native WebSocket |
 | Styling | Global and scoped vanilla CSS; no Tailwind or component framework |
 | Tests | Vitest 5, Vue Test Utils, jsdom, V8 coverage |
@@ -96,8 +96,8 @@ small amount of render history for movement/death transitions and deduplicates r
 ## 5. Connection, room, and reconnect behavior
 
 The WebSocket URL is `VITE_WS_URL` when provided; otherwise it is derived as `/ws` on the current host. Vite and nginx
-rewrite `/ws` to the backend's `/tft-websocket` endpoint. Barlow fonts are bundled locally
-with their OFL license so rendering needs no external font service.
+rewrite `/ws` to the backend's `/tft-websocket` endpoint. nginx serves the production frontend;
+the backend is a separate service. Barlow fonts are bundled locally with their OFL license.
 
 The client reconnect delay is five seconds. On connection:
 
@@ -389,7 +389,7 @@ Current focused tests cover:
 - Overall line coverage is low because canvas rendering and drag/drop paths are expensive to exercise in jsdom. The
   coverage command makes this visible; prioritize contract and pure-function extraction when touching these areas.
 - Full snapshots arrive every game tick. The client has no delta/revision protocol.
-- Hash routing is manual and sufficient for the current three standalone routes, but it will not scale to a larger app.
+- Hash routing is manual and sufficient for the current page routes, but it will not scale to a larger app.
 - Runtime payload parsing uses TypeScript assertions, not a schema validator. Backend/frontend integration tests are the
   primary contract guard today.
 

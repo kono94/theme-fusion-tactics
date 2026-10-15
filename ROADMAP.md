@@ -1,8 +1,13 @@
 # TFT Roadmap
 
 Status: approved direction  
-Planning snapshot: 2026-09-27 (after release 2.5.3)
+Progress reviewed: 2026-10-15
 Supersedes: `archive/2026-08-03_NEXT_PRODUCT_INITIATIVES.md`
+
+TFT is a browser game hosted on a VPS. Server operations are documented in the
+[deployment guide](deployment/DEPLOYMENT_GUIDE.md). Current behavior and contracts live in the
+[backend context](backend/BACKEND_CONTEXT.md) and [frontend context](frontend/FRONTEND_CONTEXT.md);
+this roadmap describes remaining product work rather than live balance values.
 
 ## 1. Where we are
 
@@ -57,21 +62,16 @@ and keeps the core theme-agnostic.
   split by rule.
 - `frontend/src/types/game.ts` stays aligned with the new wire fields.
 
-### First rule set (to be refined)
+### Shipped rule set
 
-Six to eight shared rules and one or two themed rules per mode, for example:
+The common pool contains Cheap Rerolls, Volatile, Loot Rain, Second Wind, Glass Cannons,
+Mana Surge, and Head Start. One Piece adds Bounty Hunt; Pokémon adds Type Master.
+Random is the default lobby choice; the host may also choose None or a specific rule.
 
-| Rule | Effect idea |
-|---|---|
-| Treasure Chest | +20 starting gold |
-| Glass Cannons | All units deal +50% damage and have −25% HP |
-| Close Quarters | Melee units deal +100% damage |
-| Volatile | Units explode on death for area damage based on their max HP |
-| Fast Forward | Start at level 4, and XP costs less |
-| Loot Rain | Loot orbs spawn every round |
-| Big Shop | The shop shows 6 units |
-
-Values are placeholders until playtests confirm them.
+Definitions and values are maintained in
+[`match_rules_common.json`](backend/src/main/resources/data/match_rules_common.json),
+[`match_rules_onepiece.json`](backend/src/main/resources/data/match_rules_onepiece.json), and
+[`match_rules_pokemon.json`](backend/src/main/resources/data/match_rules_pokemon.json).
 
 ### Done when
 
@@ -189,21 +189,13 @@ Rules:
 - Still open: a quick view toggle inside the match UI, hover tooltips in 3D, label collisions, a mobile performance
   budget, more stages per mode, and a visual polish pass over the rest of the roster.
 
-### Next steps (not scheduled; after the main initiatives or when there is room)
+### Remaining work (not scheduled)
 
-1. **3D view for live combat.** Render the combat phase from the live `GameState` stream in a Three.js view, reusing
-   the demo's replay logic (per-tick positions, HP, mana, `recentEvents`). The planning phase and all board
-   interaction stay in the existing `GameCanvas` 2D view in both modes. Lazy-load Three.js so players who use the
-   2D view do not download it.
-2. **Reuse the existing effects first, port them later.** `CombatEffectsCanvas` (about 2,600 lines) and
-   `AttackAnimation` hold the current per-ability 2D effects and `animationConfig`. First, draw them as a transparent
-   screen-space overlay on top of the 3D view, fed with the units' projected screen positions. Then port only the
-   highest-impact effects (ultimates, projectiles) to Three.js, where depth actually helps. Reduced-motion and
-   crowding rules from `renderPolicy` still apply.
-3. **Polish.** Camera framing per combat side (the player's own board toward the camera), arena theming per mode,
-   performance on mobile and tablets (initiative 3), and overlay labels that do not collide in crowded fights.
-4. **Seeded fight endpoint (optional).** The original step 3, a dev endpoint that runs a seeded fight between two
-   boards, is only needed if replays outside a live match become useful (for example, for match history).
+- Polish camera framing, arena variety, and crowded labels, and measure performance on mobile and tablets.
+- Add a quick view toggle inside the match UI and hover tooltips in 3D.
+- Consider a seeded fight/replay endpoint only if replaying fights outside a live match becomes useful.
+
+Live 3D combat, lazy loading, and signature 3D effects are already shipped; they are not new implementation tasks.
 
 Done when combat in both game modes (One Piece and Pokemon) can be watched in either view, players can switch
 between Classic and 3D at any time, every existing ability has a visible effect in both views, and 3D falls back
@@ -221,6 +213,5 @@ to Classic cleanly.
 
 ## 9. Open questions
 
-- Should "Random" be the default Match Rule for new rooms, or "None"?
 - Should the public match history be filterable by Match Rule?
 - Is invite polish (share sheet, QR, host lock/kick, rematch link) worth scheduling alongside mobile support?

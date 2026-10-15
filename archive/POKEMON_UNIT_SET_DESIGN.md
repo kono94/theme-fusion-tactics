@@ -1,4 +1,8 @@
 # Pokemon Unit Set Design
+
+> Historical roster design, retained for reference. Current units, abilities, traits, and evolution
+> forms are defined in the [live catalog](../backend/src/main/resources/data/units_pokemon.json);
+> use [backend context](../backend/BACKEND_CONTEXT.md) for implemented mechanics.
 55 purchasable lines with Kanto base Pokemon and cross-generation evolutions where useful.
 ## Cost Distribution
 - Cost 1: 12 lines - Bulbasaur, Charmander, Squirtle, Caterpie, Weedle, Pidgey, Rattata, Spearow, Nidoran-F, Nidoran-M, Oddish, Poliwag

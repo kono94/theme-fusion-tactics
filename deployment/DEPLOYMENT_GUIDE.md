@@ -9,8 +9,12 @@ Simple GitOps deployment to Hetzner VPS.
 | Command | What it does |
 |---------|--------------|
 | `docker compose --profile dev up` | Local dev (HTTP) |
-| `docker compose --profile prod up -d` | Production (HTTPS) |
-| `git tag 1.0.0 && git push origin 1.0.0` | Verify and deploy to the VPS |
+| `docker compose --profile prod up -d` | Start the configured production stack (HTTPS) |
+| Push a new Git tag | Verify and deploy that tag to the VPS |
+
+Production commands below run from `/opt/tft` after the setup wizard has created `.env`,
+rendered nginx configuration, and obtained HTTPS certificates. Development setup is in the
+[build guide](../build/README.md#run-the-docker-development-stack).
 
 Operational telemetry and gameplay analytics are available together at `https://<your-domain>/grafana/`. The legacy
 application analytics view remains available at `https://<your-domain>/#/admin/analytics`.
@@ -64,7 +68,7 @@ Replace the placeholders:
 
 Add A record: `tft.yourdomain.com` → `<SERVER_IP>`
 
-Wait 5-10 min for propagation.
+Wait until the domain resolves to the server before requesting its HTTPS certificate.
 
 ### 5. GitHub Secrets
 
@@ -82,11 +86,13 @@ Repo → Settings → Secrets → Actions:
 ssh -p 2222 deployer@<SERVER_IP> -i ~/.ssh/id_tft_admin
 
 # Run setup wizard
-bash /opt/tft/deployment/initial-setup.sh
+sudo bash /opt/tft/deployment/initial-setup.sh
 ```
 
 The wizard requires the gameplay analytics password plus a separate Grafana admin password, generates a random Grafana
 secret key, and creates the persistent SQLite data directory at `/var/lib/tft/analytics`.
+Both `deployer` and `github-deployer` use SSH port 2222. GitHub's key is restricted to the
+deployment trigger; the admin key is used for setup and maintenance.
 
 ### Upgrade an existing server
 
@@ -160,12 +166,31 @@ network access once; the installed plugin then persists in the named volume. A c
 
 Push a tag:
 ```bash
-git tag 1.0.0
-git push origin 1.0.0
+# From your development checkout; choose a new, unused version.
+git tag 3.0.3
+git push origin 3.0.3
 ```
 
 Every pushed tag runs backend and frontend verification before triggering deployment to the configured VPS.
 Configure the server and GitHub secrets above before pushing a release tag.
+The VPS fetches and checks out that tag, builds both Docker images with version metadata,
+starts the production stack, and validates and reloads nginx. Players receive the frontend update
+when they reload the site. Backend restarts end active matches.
+
+## Persistent state
+
+- `/opt/tft/.env` contains server configuration and secrets.
+- `/opt/tft/deployment/certbot/` contains certificate state and challenge files.
+- `/var/lib/tft/analytics/` contains SQLite match history and analytics.
+- Docker named volumes hold Grafana settings, Mimir metrics, Loki logs, and Collector state.
+  Find their actual Docker names with `docker volume ls`, then inspect them with
+  `docker volume inspect <volume-name>`.
+
+Keep backups of the configuration, certificates, analytics database, and any Grafana settings
+you need before replacing the VPS. Use SQLite's backup mechanism for a live database, or stop
+the backend before copying the database directory. Provisioned dashboards and datasources are
+versioned in this repository. Player names, reconnect identity, and display settings remain
+in each player's browser.
 
 ---
 
@@ -208,7 +233,7 @@ flows over STOMP. The JVM chart intentionally shows heap only; non-heap memory i
 code, and other runtime structures and is not directly comparable with the heap limit. Root filesystem capacity and
 inode usage are both shown as percentages.
 
-The VPS refresh failure is Mimir rejecting overlapping dashboard queries with HTTP 429 after the single tenant reaches
+Mimir can reject overlapping dashboard queries with HTTP 429 after the single tenant reaches
 the query scheduler's outstanding-request limit. The configured limit of 512 accommodates a complete overview refresh
 plus short manual-refresh bursts, while the 30-second dashboard refresh reduces overlap. This is targeted queue
 protection for dashboard bursts, not a general Mimir health fix; ring heartbeat and auto-forget settings remain at their
@@ -290,7 +315,7 @@ sudo docker exec tft-nginx nginx -s reload
 
 ---
 
-## SSH Config (Recommended)
+## SSH Config
 
 Add to `~/.ssh/config`:
 ```

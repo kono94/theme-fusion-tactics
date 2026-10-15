@@ -39,7 +39,9 @@ and [augment selection](docs/screenshots/augment-selection.jpg).
 
 ## Play in your browser
 
-Open your server's game URL in a current browser, choose a player name, and create a room.
+Players need a current desktop browser and a connection to the game server.
+
+Open your server's game URL, choose a player name, and create a room.
 Invite friends with the room's invite link or room code. The host can choose One Piece or
 Pokémon, select a Match Rule, and start; empty seats fill with bots.
 

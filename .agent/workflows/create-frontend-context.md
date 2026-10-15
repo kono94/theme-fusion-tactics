@@ -27,7 +27,7 @@ Analyze the current Vue.js 3 codebase and generate a comprehensive `FRONTEND_CON
     - **Data Flow**: Explain how data moves from the API/Backend -> State -> Components.
     - **Logic Sharing**: Check for the use of Composables (hooks) vs Utility functions.
     - **Game Modes & Assets**: Explain how One Piece/Pokemon modes influence title/favicon, trait loading, icon paths, unit assets, and gallery data.
-    - **Combat Visuals**: Cover the combat animation pipeline, including event normalization, `CombatEffectsCanvas`, `AttackAnimation`, and the standalone ultimate gallery route.
+    - **Combat Visuals**: Cover the combat animation pipeline, including event normalization, `CombatEffectsCanvas`, `AttackAnimation`, and the development-only ultimate gallery route. Follow the animation isolation rules in `AGENTS.md` when deciding which source files to read.
 
 ## Output Requirements (The `FRONTEND_CONTEXT.md` File in the /frontend folder)
 The generated file must contain:

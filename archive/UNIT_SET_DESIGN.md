@@ -1,5 +1,9 @@
 # One Piece Unit Set Design
 
+> Historical roster design, retained for reference. Current units, abilities, traits, and evolution
+> forms are defined in the [live catalog](../backend/src/main/resources/data/units_onepiece.json);
+> use [backend context](../backend/BACKEND_CONTEXT.md) for implemented mechanics.
+
 > **55 units** | **7 Origins** | Abilities balanced for implementation effort
 
 ---
