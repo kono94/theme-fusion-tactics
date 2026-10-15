@@ -12,12 +12,12 @@ import org.springframework.web.socket.config.annotation.WebSocketTransportRegist
 class WebSocketConfigTest {
 
     @Test
-    void registersHostedAndDirectStandaloneEndpointsWithTheSameOriginPolicy() {
+    void registersHostedEndpointWithConfiguredOriginPolicy() {
         var interceptor = mock(ClientUserAgentHandshakeInterceptor.class);
         var origins = new String[] {"http://127.0.0.1:*"};
         var registry = mock(StompEndpointRegistry.class);
         var endpoint = mock(StompWebSocketEndpointRegistration.class);
-        when(registry.addEndpoint("/tft-websocket", "/ws")).thenReturn(endpoint);
+        when(registry.addEndpoint("/tft-websocket")).thenReturn(endpoint);
         when(endpoint.addInterceptors(interceptor)).thenReturn(endpoint);
         new WebSocketConfig(origins, interceptor, mock(BackpressureWebSocketHandlerDecorator.class))
                 .registerStompEndpoints(registry);

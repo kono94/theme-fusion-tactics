@@ -120,6 +120,25 @@ const version160Commits = [
       <section class="release-section">
         <div class="release-header">
           <p class="eyebrow">Latest</p>
+          <h2>Version X.X.X</h2>
+          <p>TFT returns to browser play on hosted servers.</p>
+        </div>
+        <div class="release-grid">
+          <div class="release-features">
+            <div class="feature-note">
+              <h3>Play on Your Server</h3>
+              <p>
+                Open your server's game URL to play with friends or against bots. The standalone
+                Windows and macOS app, installers, and launcher updates are no longer supported.
+                Completed solo matches appear in that server's Match History.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="release-section">
+        <div class="release-header">
+          <p class="eyebrow">Previous</p>
           <h2>Version 3.0.2</h2>
           <p>Play solo on your own computer, even without an internet connection.</p>
         </div>

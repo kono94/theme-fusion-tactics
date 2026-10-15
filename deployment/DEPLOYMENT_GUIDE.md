@@ -10,7 +10,7 @@ Simple GitOps deployment to Hetzner VPS.
 |---------|--------------|
 | `docker compose --profile dev up` | Local dev (HTTP) |
 | `docker compose --profile prod up -d` | Production (HTTPS) |
-| `git tag 1.0.0 && git push origin 1.0.0` | Build desktop release; deploy to VPS when enabled |
+| `git tag 1.0.0 && git push origin 1.0.0` | Verify and deploy to the VPS |
 
 Operational telemetry and gameplay analytics are available together at `https://<your-domain>/grafana/`. The legacy
 application analytics view remains available at `https://<your-domain>/#/admin/analytics`.
@@ -67,11 +67,6 @@ Add A record: `tft.yourdomain.com` → `<SERVER_IP>`
 Wait 5-10 min for propagation.
 
 ### 5. GitHub Secrets
-
-Hosted deployment is opt-in. In **Settings → Secrets and variables → Actions → Variables**, add the repository variable
-`VPS_DEPLOY_ENABLED` with the value `true` only when a VPS is available. If the variable is absent or has another value,
-the SSH deployment job is skipped; desktop releases and installers still build and publish. Remove the variable or set
-it to `false` when retiring the server. Docker/Compose and hosted deployment support remain available.
 
 Repo → Settings → Secrets → Actions:
 
@@ -169,8 +164,8 @@ git tag 1.0.0
 git push origin 1.0.0
 ```
 
-The tag must include the current release workflow. It publishes desktop artifacts after verification and also deploys
-to the VPS when `VPS_DEPLOY_ENABLED=true`. The desktop release does not depend on the SSH deployment job.
+Every pushed tag runs backend and frontend verification before triggering deployment to the configured VPS.
+Configure the server and GitHub secrets above before pushing a release tag.
 
 ---
 

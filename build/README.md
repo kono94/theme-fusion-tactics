@@ -1,6 +1,6 @@
 # Build and development
 
-Player downloads and installation are in the [README](../README.md). Start changes with
+The player overview and browser play instructions are in the [README](../README.md). Start changes with
 [AGENTS.md](../AGENTS.md), [backend context](../backend/BACKEND_CONTEXT.md), and
 [frontend context](../frontend/FRONTEND_CONTEXT.md). Those documents own coding conventions,
 architecture, and API contracts.
@@ -40,10 +40,6 @@ Open `http://localhost`. Monitoring is available at `http://localhost/grafana/` 
 The [backend observability context](../backend/BACKEND_CONTEXT.md#11-observability) describes
 telemetry and dashboard ownership.
 
-For a local standalone JAR, build the frontend first and then use the backend's `standalone`
-Maven profile. For native installers and packaged smoke tests, follow
-[desktop packaging](../desktop/README.md#build-and-verify).
-
 ## Verify changes
 
 Run backend commands from `backend/`:
@@ -62,8 +58,6 @@ npm run build
 # Optional coverage report
 npm run test:coverage
 ```
-
-Launcher changes also require `mvn -f desktop/pom.xml verify` from the repository root.
 
 ## Balance reports
 

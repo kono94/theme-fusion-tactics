@@ -41,15 +41,6 @@ checks formatting, packages the application, and writes JaCoCo output under `tar
 
 ## 3. Architecture map
 
-Standalone distribution uses the `standalone` Maven profile to include `frontend/dist` in the JAR's static resources,
-plus filtered build metadata. The `standalone` Spring profile binds HTTP to loopback on port 18765 by default. The
-desktop launcher supplies managed SQLite paths and optional external YAML, uses the shared `/ws` STOMP alias, and
-waits for `StandaloneController` to publish the actual port and launch identity after application readiness. Its
-profile-only `/api/standalone/status` endpoint reports version, launch identity, port, and whether a match is active.
-Game rules and existing wire contracts remain shared with hosted deployment. See `desktop/README.md` for lifecycle,
-updates, recovery, and release packaging. The launcher discovers the effective port rather than interpreting Spring
-configuration itself. Local history stays in the per-user SQLite database; live matches remain memory-only.
-
 ```text
 BackendApplication
 ├── config/WebSocketConfig          STOMP endpoint, broker prefixes, origin policy

@@ -183,29 +183,4 @@
             </plugin>
         </plugins>
     </build>
-    <profiles>
-        <profile>
-            <id>standalone</id>
-            <properties>
-                <standalone.build-time>unknown</standalone.build-time>
-                <standalone.game-version>1.0.0-dev</standalone.game-version>
-                <standalone.git-commit>unknown</standalone.git-commit>
-            </properties>
-            <build>
-                <resources>
-                    <resource>
-                        <directory>src/main/resources</directory>
-                    </resource>
-                    <resource>
-                        <targetPath>static</targetPath>
-                        <directory>../frontend/dist</directory>
-                    </resource>
-                    <resource>
-                        <filtering>true</filtering>
-                        <directory>src/standalone/resources</directory>
-                    </resource>
-                </resources>
-            </build>
-        </profile>
-    </profiles>
 </project>

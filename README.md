@@ -3,11 +3,24 @@
 **Build your team. Find your synergies. Watch the battle unfold.**
 
 A fan-made auto-battler inspired by Teamfight Tactics. Recruit a One Piece crew or evolve a
-Pokémon team, equip items, choose augments, and outlast seven opponents. Play solo offline
-against bots, with Classic or optional 3D battles.
+Pokémon team, equip items, choose augments, and outlast seven opponents. Play in your browser
+with friends or against bots, with Classic or optional 3D battles.
 
-[Download TFT](https://github.com/kono94/theme-fusion-tactics/releases) ·
-[Installation & help](desktop/README.md)
+[Host your own server](deployment/DEPLOYMENT_GUIDE.md) ·
+[Run from source](build/README.md)
+
+## See it in action
+
+| One Piece · Classic | Pokémon · Classic |
+| --- | --- |
+| [![One Piece Classic battle](docs/screenshots/onepiece-classic.jpg)](docs/screenshots/onepiece-classic.jpg) | [![Pokémon Classic battle](docs/screenshots/pokemon-classic.jpg)](docs/screenshots/pokemon-classic.jpg) |
+
+| One Piece · 3D Wano arena | Pokémon · 3D stadium |
+| --- | --- |
+| [![One Piece 3D battle](docs/screenshots/onepiece-3d.jpg)](docs/screenshots/onepiece-3d.jpg) | [![Pokémon 3D battle](docs/screenshots/pokemon-3d.jpg)](docs/screenshots/pokemon-3d.jpg) |
+
+Click an image for full size. Also see [items and the bench](docs/screenshots/planning-items.jpg)
+and [augment selection](docs/screenshots/augment-selection.jpg).
 
 ## Core features
 
@@ -24,35 +37,18 @@ against bots, with Classic or optional 3D battles.
 - **Play solo at your own pace.** Face seven bots that buy, save, and upgrade their own teams.
   Planning waits until you're ready; fight for first place and review your team in Match History.
 
-## See it in action
+## Play in your browser
 
-| One Piece · Classic | Pokémon · Classic |
-| --- | --- |
-| [![One Piece Classic battle](docs/screenshots/onepiece-classic.jpg)](docs/screenshots/onepiece-classic.jpg) | [![Pokémon Classic battle](docs/screenshots/pokemon-classic.jpg)](docs/screenshots/pokemon-classic.jpg) |
+Open your server's game URL in a current browser, choose a player name, and create a room.
+Invite friends with the room's invite link or room code. The host can choose One Piece or
+Pokémon, select a Match Rule, and start; empty seats fill with bots.
 
-| One Piece · 3D Wano arena | Pokémon · 3D stadium |
-| --- | --- |
-| [![One Piece 3D battle](docs/screenshots/onepiece-3d.jpg)](docs/screenshots/onepiece-3d.jpg) | [![Pokémon 3D battle](docs/screenshots/pokemon-3d.jpg)](docs/screenshots/pokemon-3d.jpg) |
+For a solo match, start a room on your own and face seven bots. Planning waits until you're
+ready. Enable **3D** in Settings for the arena view, and browse completed solo games in
+**Match History** on the server. Active matches remain in memory and end if the server restarts.
 
-Click an image for full size. Also see [items and the bench](docs/screenshots/planning-items.jpg)
-and [augment selection](docs/screenshots/augment-selection.jpg).
-
-## Download and play
-
-Choose your installer under **Assets** on [GitHub Releases](https://github.com/kono94/theme-fusion-tactics/releases):
-
-| Platform | Installer |
-| --- | --- |
-| Windows 64-bit Intel/AMD | `tft-windows-x64-VERSION.exe` |
-| Mac with Apple Silicon (M1 or newer) | `tft-macos-arm64-VERSION.dmg` |
-
-No Java, Python, Node, or Docker setup required. Use a current desktop browser.
-These are unsigned previews; see the [installation guide](desktop/README.md#install-and-play)
-for setup and security prompts. Intel Macs and Linux are outside this preview.
-
-Open TFT, create a room, choose your theme, and start—empty seats fill with bots.
-Enable **3D** in Settings for the arena view. The launcher handles game updates, and completed
-solo matches stay in local Match History. Active matches aren't saved after quitting.
+To set up a game server on a VPS, follow the [deployment guide](deployment/DEPLOYMENT_GUIDE.md).
+To play locally from source, follow the [development guide](build/README.md#run-from-source).
 
 ## Build or self-host
 

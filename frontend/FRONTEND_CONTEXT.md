@@ -96,10 +96,8 @@ small amount of render history for movement/death transitions and deduplicates r
 ## 5. Connection, room, and reconnect behavior
 
 The WebSocket URL is `VITE_WS_URL` when provided; otherwise it is derived as `/ws` on the current host. Vite and nginx
-rewrite `/ws` to the backend's `/tft-websocket` endpoint. The backend also accepts `/ws` directly for standalone
-packaging, where the built frontend and assets are served from the same Java process. Barlow fonts are bundled locally
-with their OFL license so rendering needs no external font service. Standalone build metadata uses the same Vite
-environment inputs as hosted builds. See `desktop/README.md` for native packaging and offline smoke verification.
+rewrite `/ws` to the backend's `/tft-websocket` endpoint. Barlow fonts are bundled locally
+with their OFL license so rendering needs no external font service.
 
 The client reconnect delay is five seconds. On connection:
 

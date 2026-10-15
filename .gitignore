@@ -1,6 +1,9 @@
 .DS_Store
 .vscode/
 
+# Generated Python bytecode
+__pycache__/
+
 # Environment (contains secrets on server)
 .env
 

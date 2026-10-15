@@ -34,7 +34,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/tft-websocket", "/ws")
+        registry.addEndpoint("/tft-websocket")
                 .addInterceptors(clientUserAgentHandshakeInterceptor)
                 .setAllowedOriginPatterns(allowedOriginPatterns);
     }
