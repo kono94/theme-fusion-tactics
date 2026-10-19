@@ -1,6 +1,8 @@
 # TFT Docker Compose
 # Dev:  docker compose --profile dev up
 # Prod: docker compose --profile prod up -d
+# Prod behind an HTTPS reverse proxy on network $PROXY_NETWORK (default `web`):
+#       docker compose --profile proxied up -d
 
 services:
   observability-init:
@@ -198,6 +200,24 @@ services:
     profiles:
       - prod
 
+  # Production nginx behind an external HTTPS reverse proxy (plain HTTP, no published ports)
+  nginx-proxied:
+    image: nginx:alpine@sha256:df221db836e1754089190208cee7eeda94f233197056426eda74a43ab1abeac2
+    container_name: tft-nginx
+    labels:
+      net.lwenstrom.tft.nginx-config-sha256: ${NGINX_CONFIG_SHA256:-development}
+    volumes:
+      - ./deployment/nginx/proxied.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - default
+      - proxy
+    depends_on:
+      - backend
+      - frontend
+      - grafana
+    profiles:
+      - proxied
+
   # Certificate renewal (production only)
   certbot:
     image: certbot/certbot@sha256:f70ad0adbb7e117f0fe42a63c553f28ea451edabc0148757b6efcd9735acaa20
@@ -208,6 +228,12 @@ services:
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
     profiles:
       - prod
+
+networks:
+  # Shared network of the external reverse proxy (profile `proxied` only)
+  proxy:
+    external: true
+    name: ${PROXY_NETWORK:-web}
 
 volumes:
   grafana-data:
