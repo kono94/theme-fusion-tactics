@@ -144,8 +144,13 @@ SQLite gameplay analytics ──────────────────
 - Prometheus is not a transport or backend in this stack. The Collector only uses its Prometheus receiver to read the
   `/metrics` endpoints already exposed by the Collector, Mimir, Loki, and Grafana, then sends those metrics to Mimir as
   OTLP alongside native host metrics.
-- Metrics are retained for 30 days and logs for 7 days. This is a single-replica, single-tenant deployment intended for
+- Metrics and logs are retained for 30 days. This is a single-replica, single-tenant deployment intended for
   one Linux Docker host. On Docker Desktop, host panels describe Docker's Linux VM.
+- Every long-running service has `restart: unless-stopped` and a memory limit (`mem_limit`) so it survives a Docker or
+  host restart and cannot starve other workloads on a shared host. The backend heap is 70% of its limit
+  (`-XX:MaxRAMPercentage`); the Go services (Mimir, Loki, Collector, Grafana) set `GOMEMLIMIT` below their limit so the
+  garbage collector works harder before the kernel would kill them. Limits are about 2–4× the measured idle usage;
+  raise them if `docker stats` shows a service near its limit under load.
 - Tracing is explicitly disabled. There is no traces pipeline, Tempo service, or trace datasource.
 - Grafana uses the pinned `frser-sqlite-datasource` plugin to query the existing gameplay analytics database. The
   datasource is non-editable and SQLite query-only mode blocks mutations. Its host directory remains writable by
