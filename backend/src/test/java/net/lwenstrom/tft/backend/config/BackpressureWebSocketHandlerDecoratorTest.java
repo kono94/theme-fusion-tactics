@@ -141,7 +141,8 @@ class BackpressureWebSocketHandlerDecoratorTest {
         decoratedSession.sendMessage(criticalFrame);
         decoratedSession.sendMessage(criticalFrame);
 
-        org.mockito.Mockito.verify(rawSession, org.mockito.Mockito.timeout(2000)).close(CloseStatus.SESSION_NOT_RELIABLE);
+        org.mockito.Mockito.verify(rawSession, org.mockito.Mockito.timeout(2000))
+                .close(CloseStatus.SESSION_NOT_RELIABLE);
         assertTrue(telemetry.backpressureEvents.contains("critical_overflow"));
         releaseFirstSend.countDown();
         decorator.afterConnectionClosed(rawSession, CloseStatus.SESSION_NOT_RELIABLE);
@@ -170,7 +171,8 @@ class BackpressureWebSocketHandlerDecoratorTest {
 
         awaitOutcome(telemetry, "send_error");
         // close() runs right after the outcome is recorded, on the sender thread: wait for it.
-        org.mockito.Mockito.verify(rawSession, org.mockito.Mockito.timeout(2000)).close(CloseStatus.SESSION_NOT_RELIABLE);
+        org.mockito.Mockito.verify(rawSession, org.mockito.Mockito.timeout(2000))
+                .close(CloseStatus.SESSION_NOT_RELIABLE);
         decorator.afterConnectionClosed(rawSession, CloseStatus.SESSION_NOT_RELIABLE);
     }
 
@@ -198,7 +200,8 @@ class BackpressureWebSocketHandlerDecoratorTest {
 
         awaitOutcome(telemetry, "send_timeout");
         // close() runs right after the outcome is recorded, on the sender thread: wait for it.
-        org.mockito.Mockito.verify(rawSession, org.mockito.Mockito.timeout(2000)).close(CloseStatus.SESSION_NOT_RELIABLE);
+        org.mockito.Mockito.verify(rawSession, org.mockito.Mockito.timeout(2000))
+                .close(CloseStatus.SESSION_NOT_RELIABLE);
         decorator.afterConnectionClosed(rawSession, CloseStatus.SESSION_NOT_RELIABLE);
     }
 
