@@ -68,6 +68,7 @@ services:
         condition: service_started
     expose:
       - "8080"
+    restart: unless-stopped
 
   frontend:
     build:
@@ -76,6 +77,7 @@ services:
     container_name: tft-frontend
     expose:
       - "80"
+    restart: unless-stopped
 
   mimir:
     image: grafana/mimir:3.2.1@sha256:92838f113ba54230014e79bc812e57ca90bb9ebc06e665f59e4f700098c2dd04
@@ -177,6 +179,7 @@ services:
       - backend
       - frontend
       - grafana
+    restart: unless-stopped
     profiles:
       - dev
 
@@ -197,6 +200,7 @@ services:
       - backend
       - frontend
       - grafana
+    restart: unless-stopped
     profiles:
       - prod
 
@@ -215,6 +219,7 @@ services:
       - backend
       - frontend
       - grafana
+    restart: unless-stopped
     profiles:
       - proxied
 
@@ -226,6 +231,7 @@ services:
       - ./deployment/certbot/conf:/etc/letsencrypt
       - ./deployment/certbot/www:/var/www/certbot
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    restart: unless-stopped
     profiles:
       - prod
 
