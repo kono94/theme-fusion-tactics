@@ -211,12 +211,20 @@ public class GameRoom {
         if (newMode == null || newMode == gameMode || phase != GamePhase.LOBBY) {
             return false;
         }
+        if (!gameModeRegistry.getAvailableModes().contains(newMode)) {
+            return false;
+        }
+        var provider = gameModeRegistry.getProvider(newMode);
+        var affinityConfig = dataLoader.getAffinityConfig(newMode);
+        var newAugmentManager = new AugmentManager(dataLoader.getAugments(newMode), randomProvider);
+        var newMatchRuleManager = new MatchRuleManager(dataLoader.getMatchRules(newMode));
+
         this.gameMode = newMode;
         traitManager.clearEffects();
-        gameModeRegistry.getProvider(newMode).registerTraitEffects(traitManager);
-        combatSystem.configureAffinity(dataLoader.getAffinityConfig(newMode));
-        augmentManager = new AugmentManager(dataLoader.getAugments(newMode), randomProvider);
-        matchRuleManager = new MatchRuleManager(dataLoader.getMatchRules(newMode));
+        provider.registerTraitEffects(traitManager);
+        combatSystem.configureAffinity(affinityConfig);
+        augmentManager = newAugmentManager;
+        matchRuleManager = newMatchRuleManager;
         players.values().forEach(p -> p.resetForMode(newMode));
         updateGameState(0);
         return true;

@@ -8,13 +8,15 @@ import { POKEMON_TIER_4_5_ATTACKS } from './pokemonTier45'
 import { REVOLUTION_WHITEBEARD_ATTACKS } from './revolutionWhitebeard'
 import { STRAW_HATS_ATTACKS } from './strawHats'
 
-export const SIGNATURE_ATTACKS: AttackSet = {
-  ...STRAW_HATS_ATTACKS,
-  ...MARINES_WARLORDS_ATTACKS,
-  ...BEASTS_BIG_MOM_ATTACKS,
-  ...REVOLUTION_WHITEBEARD_ATTACKS,
-  ...POKEMON_TIER_1_ATTACKS,
-  ...POKEMON_TIER_2_ATTACKS,
-  ...POKEMON_TIER_3_ATTACKS,
-  ...POKEMON_TIER_4_5_ATTACKS,
+export const SIGNATURE_ATTACK_SETS: Record<string, AttackSet> = {
+  strawHats: STRAW_HATS_ATTACKS,
+  marinesWarlords: MARINES_WARLORDS_ATTACKS,
+  beastsBigMom: BEASTS_BIG_MOM_ATTACKS,
+  revolutionWhitebeard: REVOLUTION_WHITEBEARD_ATTACKS,
+  pokemonTier1: POKEMON_TIER_1_ATTACKS,
+  pokemonTier2: POKEMON_TIER_2_ATTACKS,
+  pokemonTier3: POKEMON_TIER_3_ATTACKS,
+  pokemonTier45: POKEMON_TIER_4_5_ATTACKS,
 }
+
+export const SIGNATURE_ATTACKS: AttackSet = Object.assign({}, ...Object.values(SIGNATURE_ATTACK_SETS))

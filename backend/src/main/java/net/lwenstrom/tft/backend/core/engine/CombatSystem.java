@@ -428,21 +428,12 @@ public class CombatSystem {
                     effectiveDamage = damageResolver.apply(unit, target, effectiveDamage);
                     log.debug("{} attacks {} for {}", unit.getName(), target.getName(), effectiveDamage);
 
-                    // Handle Revive (Big Mom Pirates)
                     var attackDamage = effectiveDamage;
                     var actualDamage = applyAndMeasureDamage(target, () -> target.takeDamage(attackDamage));
                     grantDirectHitMana(target);
                     applyOnHitDot(unit, target, currentTime);
                     if (target.getCurrentHealth() <= 0) {
-                        if (reviveUnit(target)) {
-                            log.info("{} revives!", target.getName());
-                        } else {
-                            // Trigger Whitebeard Pirates shield on death
-                            triggerShieldOnDeath(target, allUnits, currentTime);
-                            AugmentManager.applyTeamAttackDamageOnKill(unit, allUnits);
-                            recentEvents.add(new GameState.CombatEvent(
-                                    currentTime, "DEATH", unit.getId(), target.getId(), 0, null));
-                        }
+                        resolveLethal(target, unit.getId(), unit, allUnits, currentTime);
                     }
 
                     accumulateDamage(unit, actualDamage);
@@ -561,13 +552,24 @@ public class CombatSystem {
                     grantDirectHitMana(target);
                     recentEvents.add(new GameState.CombatEvent(
                             currentTime, "DAMAGE", deadUnit.getId(), target.getId(), actualDamage, "Explosion"));
-                    if (target.getCurrentHealth() <= 0 && !reviveUnit(target)) {
-                        triggerShieldOnDeath(target, allUnits, currentTime);
-                        AugmentManager.applyTeamAttackDamageOnKill(deadUnit, allUnits);
-                        recentEvents.add(new GameState.CombatEvent(
-                                currentTime, "DEATH", deadUnit.getId(), target.getId(), 0, null));
+                    if (target.getCurrentHealth() <= 0) {
+                        resolveLethal(target, deadUnit.getId(), deadUnit, allUnits, currentTime);
                     }
                 });
+    }
+
+    // Damage-over-time kills pass no on-kill beneficiary, so they never grant the on-kill attack damage augment.
+    private void resolveLethal(
+            GameUnit target, String killerId, GameUnit onKillBeneficiary, List<GameUnit> allUnits, long currentTime) {
+        if (reviveUnit(target)) {
+            log.info("{} revives!", target.getName());
+            return;
+        }
+        triggerShieldOnDeath(target, allUnits, currentTime);
+        if (onKillBeneficiary != null) {
+            AugmentManager.applyTeamAttackDamageOnKill(onKillBeneficiary, allUnits);
+        }
+        recentEvents.add(new GameState.CombatEvent(currentTime, "DEATH", killerId, target.getId(), 0, null));
     }
 
     private boolean reviveUnit(GameUnit unit) {
@@ -665,11 +667,7 @@ public class CombatSystem {
                 }
 
                 if (target.getCurrentHealth() <= 0) {
-                    if (!reviveUnit(target)) {
-                        triggerShieldOnDeath(target, allUnits, currentTime);
-                        recentEvents.add(new GameState.CombatEvent(
-                                currentTime, "DEATH", effect.sourceId(), target.getId(), 0, null));
-                    }
+                    resolveLethal(target, effect.sourceId(), null, allUnits, currentTime);
                     iterator.forEachRemaining(ignored -> {});
                     break;
                 }

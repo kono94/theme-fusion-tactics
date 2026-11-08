@@ -26,6 +26,7 @@ import { getRarityColor } from '../utils/colorUtils'
 import { setUnitDragPreview } from '../utils/dragPreview'
 import { calculateInterest, calculateSellRefund } from '../utils/economy'
 import { SHOP_ODDS } from '../data/shopOdds'
+import { getGameModeMetadata } from '../data/gameModeMetadata'
 import type { ClientSettings, CombatViewSetting } from '../utils/clientSettings'
 
 const props = defineProps<{
@@ -747,7 +748,7 @@ watch(
         <div class="phase-info">
           <span class="phase-name">{{ state.phase }}</span>
           <div class="game-meta">
-            <span class="game-mode">{{ state.gameMode }}</span>
+            <span class="game-mode">{{ getGameModeMetadata(state.gameMode).shortLabel }}</span>
             <div class="room-details">
               <span class="room-id">Room: {{ state.roomId }}</span>
               <div

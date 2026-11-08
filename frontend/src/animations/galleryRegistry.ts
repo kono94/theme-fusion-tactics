@@ -1,13 +1,8 @@
-import { POKEMON_ULTIMATE_GALLERY_ROSTER } from '../data/pokemonUltimateGalleryRoster'
-import { ULTIMATE_GALLERY_ROSTER, type GalleryGameMode, type UltimateGalleryUnit } from '../data/ultimateGalleryRoster'
-
-export const GALLERY_ROSTERS: Record<GalleryGameMode, UltimateGalleryUnit[]> = {
-    onepiece: ULTIMATE_GALLERY_ROSTER,
-    pokemon: POKEMON_ULTIMATE_GALLERY_ROSTER,
-}
+import { getGalleryModeConfig } from '../data/galleryModeConfig'
+import type { GalleryGameMode } from '../data/ultimateGalleryRoster'
 
 export function getGalleryRoster(mode: GalleryGameMode) {
-    return GALLERY_ROSTERS[mode]
+    return getGalleryModeConfig(mode).roster
 }
 
 export function getGalleryAbilityRoster(mode: GalleryGameMode) {

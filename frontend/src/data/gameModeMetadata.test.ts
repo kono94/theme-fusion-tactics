@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
+    allGameModes,
     getGameModeMetadata,
+    isGameMode,
     parseGalleryModeHash,
     sortGameModes,
 } from './gameModeMetadata'
@@ -10,6 +12,7 @@ describe('game mode metadata', () => {
         expect(sortGameModes(['pokemon', 'onepiece'])).toEqual(['onepiece', 'pokemon'])
         expect(getGameModeMetadata('onepiece')).toMatchObject({
             label: 'One Piece',
+            lobbyCaption: 'Set sail with legendary pirates',
             documentTitle: 'Theme Fusion Tactics — One Piece',
             favicon: '/favicon.svg',
             unitAssetFolder: 'onepiece',
@@ -19,6 +22,7 @@ describe('game mode metadata', () => {
         })
         expect(getGameModeMetadata('pokemon')).toMatchObject({
             label: 'Pokemon',
+            lobbyCaption: 'Build a team of iconic trainers',
             documentTitle: 'Theme Fusion Tactics — Pokemon',
             favicon: '/pokeball.png',
             unitAssetFolder: 'pokemon',
@@ -26,6 +30,12 @@ describe('game mode metadata', () => {
             galleryPath: '#/ultimate-gallery/pokemon',
             order: 2,
         })
+    })
+
+    it('lists every supported mode in lobby order', () => {
+        expect(allGameModes()).toEqual(['onepiece', 'pokemon'])
+        expect(allGameModes().every(isGameMode)).toBe(true)
+        expect(isGameMode('retired-mode')).toBe(false)
     })
 
     it('accepts only exact gallery routes for supported modes', () => {

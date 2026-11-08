@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onUnmounted, ref, watch } from 'vue'
 import type { ActiveMatchRule, GameMode, GameState, PlayerState } from '../types'
-import { getGameModeMetadata, sortGameModes } from '../data/gameModeMetadata'
+import { allGameModes, getGameModeMetadata, sortGameModes } from '../data/gameModeMetadata'
 import { buildInviteUrl } from '../utils/roomInvite'
 
 const props = defineProps<{
@@ -38,15 +38,10 @@ watch(
 const modeOptions = computed((): GameMode[] => {
     return props.availableModes && props.availableModes.length > 0
         ? sortGameModes(props.availableModes)
-        : ['onepiece', 'pokemon']
+        : allGameModes()
 })
 
 const modeMetadata = (mode: GameMode) => getGameModeMetadata(mode)
-
-const modeDescriptions: Record<GameMode, string> = {
-    onepiece: 'Set sail with legendary pirates',
-    pokemon: 'Build a team of iconic trainers',
-}
 
 const themeClass = computed(() => {
     return props.themeClass ?? getGameModeMetadata(props.gameState?.gameMode ?? props.defaultMode).themeClass
@@ -182,7 +177,7 @@ function selectMode(mode: GameMode) {
                     <span v-if="mode === 'onepiece'" class="mode-motif-star">✦</span>
                 </span>
                 <span class="mode-name">{{ modeMetadata(mode).label }}</span>
-                <span class="mode-caption">{{ modeDescriptions[mode] }}</span>
+                <span class="mode-caption">{{ modeMetadata(mode).lobbyCaption }}</span>
                 <span v-if="selectedMode === mode" class="mode-check" aria-hidden="true">✓</span>
             </button>
         </div>
@@ -431,7 +426,7 @@ function selectMode(mode: GameMode) {
 
 .mode-control {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 12px;
 }
 

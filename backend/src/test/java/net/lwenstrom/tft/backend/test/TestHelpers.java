@@ -21,12 +21,19 @@ import net.lwenstrom.tft.backend.core.model.TraitMetadata;
 import net.lwenstrom.tft.backend.core.model.UnitRole;
 import net.lwenstrom.tft.backend.core.random.RandomProvider;
 import net.lwenstrom.tft.backend.core.time.Clock;
+import net.lwenstrom.tft.backend.game.onepiece.OnePieceGameModeProvider;
+import net.lwenstrom.tft.backend.game.pokemon.PokemonGameModeProvider;
+import tools.jackson.databind.json.JsonMapper;
 
 public final class TestHelpers {
 
     private TestHelpers() {}
 
     public static final long TEST_SEED = 42L;
+
+    public static List<GameModeProvider> allModeProviders(JsonMapper mapper) {
+        return List.of(new OnePieceGameModeProvider(mapper), new PokemonGameModeProvider(mapper));
+    }
 
     public static GameModeRegistry createMockRegistry() {
         GameModeProvider provider = new GameModeProvider() {
@@ -76,8 +83,7 @@ public final class TestHelpers {
             List<net.lwenstrom.tft.backend.core.model.ItemDefinition> items,
             List<net.lwenstrom.tft.backend.core.model.MatchRuleDefinition> matchRules) {
         var registry = createMockRegistry();
-        return new DataLoader(
-                registry, tools.jackson.databind.json.JsonMapper.builder().build()) {
+        return new DataLoader(registry, JsonMapper.builder().build()) {
             @Override
             public List<UnitDefinition> getAllUnits(GameMode mode) {
                 return units;

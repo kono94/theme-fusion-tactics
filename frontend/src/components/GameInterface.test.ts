@@ -354,6 +354,16 @@ describe('GameInterface match rules and economy', () => {
         wrapper.unmount()
     })
 
+    it('labels the room mode with its display name', () => {
+        const wrapper = mount(GameInterface, {
+            props: { state: gameState('PLANNING', 100, 1), currentPlayerId: 'player-1' },
+            global: { stubs: childStubs },
+        })
+
+        expect(wrapper.get('.game-mode').text()).toBe('One Piece')
+        wrapper.unmount()
+    })
+
     it('shows small interest markers before gold and updates the projected income after spending', async () => {
         const state = gameState('PLANNING', 100, 1)
         state.players['player-1'].gold = 37

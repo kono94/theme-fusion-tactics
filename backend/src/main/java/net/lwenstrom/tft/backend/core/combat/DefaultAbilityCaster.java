@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
-import net.lwenstrom.tft.backend.core.GameConstants;
 import net.lwenstrom.tft.backend.core.engine.AbstractGameUnit;
 import net.lwenstrom.tft.backend.core.engine.AugmentManager;
 import net.lwenstrom.tft.backend.core.engine.Grid;
@@ -24,8 +23,6 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class DefaultAbilityCaster implements AbilityCaster {
-    private static final float[] STUN_DURATION_MULTIPLIERS = {1.0f, 0.8f, 0.6f};
-
     private DamageResolver damageResolver = new DamageResolver();
 
     @Override
@@ -132,7 +129,7 @@ public class DefaultAbilityCaster implements AbilityCaster {
             CombatStatCallback callback,
             long currentTime) {
         targets.forEach(target -> {
-            applyStun(target, stunSeconds, currentTime);
+            StunRules.applyStun(target, stunSeconds, currentTime);
             callback.onSkill(source.getId(), source.getName(), target.getId(), 0);
         });
     }
@@ -433,33 +430,12 @@ public class DefaultAbilityCaster implements AbilityCaster {
         for (var modifier : ability.modifiers()) {
             if (modifier instanceof StunModifier stunModifier) {
                 int seconds = stunModifier.getStunSeconds(starLevel);
-                applyStun(target, seconds, currentTime);
+                StunRules.applyStun(target, seconds, currentTime);
             } else if (modifier instanceof KnockbackModifier knockbackModifier) {
                 int cells = knockbackModifier.getCells(starLevel);
                 applyKnockback(source, target, cells, allUnits);
             }
         }
-    }
-
-    private void applyStun(GameUnit target, float stunSeconds, long currentTime) {
-        if (stunSeconds <= 0) {
-            return;
-        }
-
-        var recentStunCount = target.getRecentStunCount();
-        var lastStunAppliedAt = target.getLastStunAppliedAt();
-        if (recentStunCount == 0
-                || currentTime < lastStunAppliedAt
-                || currentTime - lastStunAppliedAt >= GameConstants.STUN_DIMINISHING_RETURNS_RESET_MS) {
-            recentStunCount = 0;
-        }
-
-        var multiplier = STUN_DURATION_MULTIPLIERS[Math.min(recentStunCount, STUN_DURATION_MULTIPLIERS.length - 1)];
-        var diminishedDuration =
-                Math.min(stunSeconds, Math.max(GameConstants.MIN_DIMINISHED_STUN_SECONDS, stunSeconds * multiplier));
-        target.setStunSecondsRemaining(Math.max(target.getStunSecondsRemaining(), diminishedDuration));
-        target.setRecentStunCount(Math.min(recentStunCount + 1, STUN_DURATION_MULTIPLIERS.length));
-        target.setLastStunAppliedAt(currentTime);
     }
 
     private void applyDotModifiers(GameUnit source, GameUnit target, AbilityDefinition ability, long currentTime) {

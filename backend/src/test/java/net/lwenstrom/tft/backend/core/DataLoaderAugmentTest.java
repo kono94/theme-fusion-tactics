@@ -10,8 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import net.lwenstrom.tft.backend.core.model.AugmentEffectType;
 import net.lwenstrom.tft.backend.core.model.GameMode;
-import net.lwenstrom.tft.backend.game.onepiece.OnePieceGameModeProvider;
-import net.lwenstrom.tft.backend.game.pokemon.PokemonGameModeProvider;
+import net.lwenstrom.tft.backend.test.TestHelpers;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -20,8 +19,7 @@ class DataLoaderAugmentTest {
     @Test
     void loadsAndValidatesModeAugments() {
         var jsonMapper = JsonMapper.builder().build();
-        var registry = new GameModeRegistry(
-                List.of(new OnePieceGameModeProvider(jsonMapper), new PokemonGameModeProvider(jsonMapper)));
+        var registry = new GameModeRegistry(TestHelpers.allModeProviders(jsonMapper));
         var dataLoader = new DataLoader(registry, jsonMapper);
 
         validate(dataLoader, GameMode.ONEPIECE);

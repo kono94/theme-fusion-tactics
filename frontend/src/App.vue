@@ -16,6 +16,7 @@ import SettingsPanel from './components/SettingsPanel.vue'
 import { setTraitData } from './data/traitData'
 import { loadClientSettings, saveClientSettings, type ClientSettings } from './utils/clientSettings'
 import {
+    allGameModes,
     getGameModeMetadata,
     isGameMode,
     parseGalleryModeHash,
@@ -62,7 +63,7 @@ const gameState = ref<GameState | null>(null)
 const client = ref<Client | null>(null)
 const currentView = ref<'lobby' | 'game' | 'changelog'>('lobby')
 const currentRoomId = ref('')
-const fallbackModes = sortGameModes(['onepiece', 'pokemon'])
+const fallbackModes = allGameModes()
 const availableModes = ref<GameMode[]>(fallbackModes)
 const defaultMode = ref<GameMode>('onepiece')
 const activeTraitMode = ref<GameMode | null>(null)

@@ -4,8 +4,7 @@ import java.util.List;
 import net.lwenstrom.tft.backend.core.DataLoader;
 import net.lwenstrom.tft.backend.core.GameModeProvider;
 import net.lwenstrom.tft.backend.core.GameModeRegistry;
-import net.lwenstrom.tft.backend.game.onepiece.OnePieceGameModeProvider;
-import net.lwenstrom.tft.backend.game.pokemon.PokemonGameModeProvider;
+import net.lwenstrom.tft.backend.test.TestHelpers;
 import tools.jackson.databind.json.JsonMapper;
 
 final class SimulationTestSupport {
@@ -14,8 +13,7 @@ final class SimulationTestSupport {
 
     static Fixture createFixture() {
         var jsonMapper = JsonMapper.builder().build();
-        List<GameModeProvider> providers =
-                List.of(new OnePieceGameModeProvider(jsonMapper), new PokemonGameModeProvider(jsonMapper));
+        List<GameModeProvider> providers = TestHelpers.allModeProviders(jsonMapper);
         var registry = new GameModeRegistry(providers);
         var dataLoader = new DataLoader(registry, jsonMapper);
         dataLoader.loadData();

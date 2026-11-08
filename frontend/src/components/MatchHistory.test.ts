@@ -48,6 +48,20 @@ describe('MatchHistory', () => {
         )
     })
 
+    it('labels known modes from metadata and shows unknown modes as sent', async () => {
+        getMatchHistoryMock.mockResolvedValue({
+            matches: [
+                { ...match, mode: 'onepiece' },
+                { ...match, historyId: 'history-2', mode: 'retired-mode' },
+            ],
+        })
+        const wrapper = mount(MatchHistory)
+
+        await vi.waitFor(() => expect(wrapper.findAll('[data-test="match-history-card"]')).toHaveLength(2))
+        expect(wrapper.text()).toContain('One Piece solo match')
+        expect(wrapper.text()).toContain('retired-mode solo match')
+    })
+
     it('uses the server history ID for distinct cards with matching metadata', async () => {
         getMatchHistoryMock.mockResolvedValue({
             matches: [match, { ...match, historyId: 'history-2' }],

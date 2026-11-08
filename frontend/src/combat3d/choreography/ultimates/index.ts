@@ -9,15 +9,18 @@ import { POKEMON_TIER_4_5_ULTIMATES } from './pokemonTier45'
 import { REVOLUTION_WHITEBEARD_ULTIMATES } from './revolutionWhitebeard'
 import { STRAW_HATS_ULTIMATES } from './strawHats'
 
-export const SIGNATURE_ULTIMATES: UltimateSet = {
-  ...STRAW_HATS_ULTIMATES,
-  ...MARINES_WARLORDS_ULTIMATES,
-  ...BEASTS_BIG_MOM_ULTIMATES,
-  ...REVOLUTION_WHITEBEARD_ULTIMATES,
-  ...POKEMON_TIER_1_ULTIMATES,
-  ...POKEMON_TIER_2_ULTIMATES,
-  ...POKEMON_TIER_3_ULTIMATES,
-  ...POKEMON_TIER_4_5_ULTIMATES,
+// Later sets win on key collisions.
+export const SIGNATURE_ULTIMATE_SETS: Record<string, UltimateSet> = {
+  strawHats: STRAW_HATS_ULTIMATES,
+  marinesWarlords: MARINES_WARLORDS_ULTIMATES,
+  beastsBigMom: BEASTS_BIG_MOM_ULTIMATES,
+  revolutionWhitebeard: REVOLUTION_WHITEBEARD_ULTIMATES,
+  pokemonTier1: POKEMON_TIER_1_ULTIMATES,
+  pokemonTier2: POKEMON_TIER_2_ULTIMATES,
+  pokemonTier3: POKEMON_TIER_3_ULTIMATES,
+  pokemonTier45: POKEMON_TIER_4_5_ULTIMATES,
   // Reworked showpieces override their tier entries.
-  ...POKEMON_MYTHIC_ULTIMATES,
+  pokemonMythic: POKEMON_MYTHIC_ULTIMATES,
 }
+
+export const SIGNATURE_ULTIMATES: UltimateSet = Object.assign({}, ...Object.values(SIGNATURE_ULTIMATE_SETS))

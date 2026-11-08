@@ -3,10 +3,10 @@ package net.lwenstrom.tft.backend.core;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.List;
 import net.lwenstrom.tft.backend.core.model.GameMode;
 import net.lwenstrom.tft.backend.game.onepiece.OnePieceGameModeProvider;
 import net.lwenstrom.tft.backend.game.pokemon.PokemonGameModeProvider;
+import net.lwenstrom.tft.backend.test.TestHelpers;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -25,8 +25,7 @@ class DataLoaderAffinityTest {
 
     @Test
     void dataLoaderCachesPokemonAndOnePieceAffinityConfigs() {
-        var registry = new GameModeRegistry(
-                List.of(new OnePieceGameModeProvider(jsonMapper), new PokemonGameModeProvider(jsonMapper)));
+        var registry = new GameModeRegistry(TestHelpers.allModeProviders(jsonMapper));
         var dataLoader = new DataLoader(registry, jsonMapper);
 
         assertEquals(

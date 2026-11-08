@@ -87,7 +87,8 @@ npm run test:coverage
 ## Balance reports
 
 Run from `backend/`. Reports are opt-in because large simulations are expensive; outputs go to
-`target/simulation-reports`.
+`target/simulation-reports`. File names include the mode (for example `balance-report-pokemon.md` and
+`unit-tier-list-pokemon-board-size-4.md`), so runs for different modes do not overwrite each other.
 
 ```sh
 # Same-star boards; use -Dsimulation.mode=pokemon for Pokémon

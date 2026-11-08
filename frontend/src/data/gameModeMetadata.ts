@@ -4,6 +4,7 @@ export interface GameModeMetadata {
     id: GameMode
     label: string
     shortLabel: string
+    lobbyCaption: string
     documentTitle: string
     favicon: string
     unitAssetFolder: string
@@ -18,6 +19,7 @@ export const GAME_MODE_METADATA: Record<GameMode, GameModeMetadata> = {
         id: 'onepiece',
         label: 'One Piece',
         shortLabel: 'One Piece',
+        lobbyCaption: 'Set sail with legendary pirates',
         documentTitle: 'Theme Fusion Tactics — One Piece',
         favicon: '/favicon.svg',
         unitAssetFolder: 'onepiece',
@@ -30,6 +32,7 @@ export const GAME_MODE_METADATA: Record<GameMode, GameModeMetadata> = {
         id: 'pokemon',
         label: 'Pokemon',
         shortLabel: 'Pokemon',
+        lobbyCaption: 'Build a team of iconic trainers',
         documentTitle: 'Theme Fusion Tactics — Pokemon',
         favicon: '/pokeball.png',
         unitAssetFolder: 'pokemon',
@@ -54,6 +57,10 @@ export function sortGameModes(modes: readonly GameMode[]): GameMode[] {
     return [...new Set(modes)].sort((left, right) =>
         getGameModeMetadata(left).order - getGameModeMetadata(right).order,
     )
+}
+
+export function allGameModes(): GameMode[] {
+    return sortGameModes(SUPPORTED_GAME_MODES)
 }
 
 export function parseGalleryModeHash(hash: string): GameMode | null {

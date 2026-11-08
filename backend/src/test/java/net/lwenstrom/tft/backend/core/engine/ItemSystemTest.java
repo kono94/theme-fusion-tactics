@@ -21,8 +21,6 @@ import net.lwenstrom.tft.backend.core.model.ItemInstance;
 import net.lwenstrom.tft.backend.core.model.ItemStat;
 import net.lwenstrom.tft.backend.core.model.LootType;
 import net.lwenstrom.tft.backend.core.model.SelectedAugment;
-import net.lwenstrom.tft.backend.game.onepiece.OnePieceGameModeProvider;
-import net.lwenstrom.tft.backend.game.pokemon.PokemonGameModeProvider;
 import net.lwenstrom.tft.backend.test.TestHelpers;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.json.JsonMapper;
@@ -35,8 +33,7 @@ class ItemSystemTest {
     @Test
     void bothModesLoadEightDistinctItems() {
         var mapper = JsonMapper.builder().build();
-        var registry = new GameModeRegistry(
-                List.of(new OnePieceGameModeProvider(mapper), new PokemonGameModeProvider(mapper)));
+        var registry = new GameModeRegistry(TestHelpers.allModeProviders(mapper));
         var loader = new DataLoader(registry, mapper);
 
         assertEquals(8, loader.getItems(GameMode.ONEPIECE).size());
@@ -49,8 +46,7 @@ class ItemSystemTest {
     @Test
     void largeAndMixedProfilesAddBonusesBeforeApplyingThem() {
         var mapper = JsonMapper.builder().build();
-        var registry = new GameModeRegistry(
-                List.of(new OnePieceGameModeProvider(mapper), new PokemonGameModeProvider(mapper)));
+        var registry = new GameModeRegistry(TestHelpers.allModeProviders(mapper));
         var loader = new DataLoader(registry, mapper);
         var catalog = loader.getItems(GameMode.ONEPIECE);
         var axe = catalog.stream()
@@ -79,8 +75,7 @@ class ItemSystemTest {
     @Test
     void scheduledRewardCanBeEquippedInBothModes() {
         var mapper = JsonMapper.builder().build();
-        var registry = new GameModeRegistry(
-                List.of(new OnePieceGameModeProvider(mapper), new PokemonGameModeProvider(mapper)));
+        var registry = new GameModeRegistry(TestHelpers.allModeProviders(mapper));
         var loader = new DataLoader(registry, mapper);
         for (var mode : List.of(GameMode.ONEPIECE, GameMode.POKEMON)) {
             var room = new GameRoom(

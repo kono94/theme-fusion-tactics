@@ -18,8 +18,6 @@ import net.lwenstrom.tft.backend.core.model.GameMode;
 import net.lwenstrom.tft.backend.core.model.LootOrb;
 import net.lwenstrom.tft.backend.core.model.LootType;
 import net.lwenstrom.tft.backend.core.random.DefaultRandomProvider;
-import net.lwenstrom.tft.backend.game.onepiece.OnePieceGameModeProvider;
-import net.lwenstrom.tft.backend.game.pokemon.PokemonGameModeProvider;
 import net.lwenstrom.tft.backend.test.TestHelpers;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -43,8 +41,7 @@ class BotProgressionSimulationTest {
 
     private List<String> simulate(GameMode mode, long seed) {
         var mapper = JsonMapper.builder().build();
-        var registry = new GameModeRegistry(
-                List.of(new OnePieceGameModeProvider(mapper), new PokemonGameModeProvider(mapper)));
+        var registry = new GameModeRegistry(TestHelpers.allModeProviders(mapper));
         var loader = new DataLoader(registry, mapper);
         var random = new DefaultRandomProvider();
         random.getRandom().setSeed(seed);

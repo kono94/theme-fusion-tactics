@@ -1,0 +1,13 @@
+[
+    {
+        "id": "Iron Guard",
+        "effectType": "DEFENSE",
+        "targetScope": "TEAM",
+        "effects": [
+            { "minUnits": 2, "values": { "defense": 10 } }
+        ]
+    },
+    {
+        "id": "plain"
+    }
+]

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { getGameModeMetadata, isGameMode } from '../data/gameModeMetadata'
 import { getMatchHistory, MatchHistoryApiError } from '../services/matchHistoryClient'
 import type { ActiveMatchRule } from '../types'
 import type { PublicMatch } from '../types/analytics'
@@ -60,7 +61,7 @@ const ruleFor = (match: PublicMatch): ActiveMatchRule | null =>
 const formatDate = (value: string) =>
     new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(new Date(value))
 
-const modeLabel = (mode: string) => mode === 'onepiece' ? 'One Piece' : mode === 'pokemon' ? 'Pokemon' : mode
+const modeLabel = (mode: string) => (isGameMode(mode) ? getGameModeMetadata(mode).shortLabel : mode)
 
 onMounted(() => void loadMatches())
 

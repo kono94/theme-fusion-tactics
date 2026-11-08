@@ -9,8 +9,6 @@ import net.lwenstrom.tft.backend.core.DataLoader;
 import net.lwenstrom.tft.backend.core.GameModeRegistry;
 import net.lwenstrom.tft.backend.core.model.BotPersonality;
 import net.lwenstrom.tft.backend.core.model.GameMode;
-import net.lwenstrom.tft.backend.game.onepiece.OnePieceGameModeProvider;
-import net.lwenstrom.tft.backend.game.pokemon.PokemonGameModeProvider;
 import net.lwenstrom.tft.backend.test.TestHelpers;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -21,8 +19,7 @@ class GameRoomBotTest {
     @EnumSource(GameMode.class)
     void assignsDistinctPlanningPersonalities(GameMode mode) {
         var mapper = JsonMapper.builder().build();
-        var registry = new GameModeRegistry(
-                List.of(new OnePieceGameModeProvider(mapper), new PokemonGameModeProvider(mapper)));
+        var registry = new GameModeRegistry(TestHelpers.allModeProviders(mapper));
         var loader = new DataLoader(registry, mapper);
         var room = new GameRoom(
                 "personalities",
@@ -53,8 +50,7 @@ class GameRoomBotTest {
     @EnumSource(GameMode.class)
     void botsBuyNormalUnitsOncePerPlanningRound(GameMode mode) {
         var mapper = JsonMapper.builder().build();
-        var registry = new GameModeRegistry(
-                List.of(new OnePieceGameModeProvider(mapper), new PokemonGameModeProvider(mapper)));
+        var registry = new GameModeRegistry(TestHelpers.allModeProviders(mapper));
         var loader = new DataLoader(registry, mapper);
         var clock = TestHelpers.createTestClock();
         var room = new GameRoom("bots", loader, registry, clock, TestHelpers.createSeededRandomProvider(), mode);

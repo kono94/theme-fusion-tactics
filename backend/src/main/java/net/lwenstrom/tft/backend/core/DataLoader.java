@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.lwenstrom.tft.backend.core.combat.ElementalAffinityConfig;
 import net.lwenstrom.tft.backend.core.combat.ElementalAffinityLoader;
 import net.lwenstrom.tft.backend.core.engine.MatchRuleManager;
+import net.lwenstrom.tft.backend.core.engine.TraitManager;
 import net.lwenstrom.tft.backend.core.engine.UnitDefinition;
 import net.lwenstrom.tft.backend.core.model.AugmentDefinition;
 import net.lwenstrom.tft.backend.core.model.GameMode;
@@ -61,6 +62,7 @@ public class DataLoader {
             getModeData(mode);
             getElementalAffinity(mode);
             getMatchRules(mode);
+            gameModeRegistry.getProvider(mode).registerTraitEffects(new TraitManager());
         });
     }
 

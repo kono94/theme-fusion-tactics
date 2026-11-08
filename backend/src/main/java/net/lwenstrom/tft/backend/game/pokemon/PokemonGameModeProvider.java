@@ -3,6 +3,7 @@ package net.lwenstrom.tft.backend.game.pokemon;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import net.lwenstrom.tft.backend.core.GameModeProvider;
+import net.lwenstrom.tft.backend.core.engine.JsonTraitLoader;
 import net.lwenstrom.tft.backend.core.engine.TraitManager;
 import net.lwenstrom.tft.backend.core.model.GameMode;
 import org.springframework.stereotype.Component;
@@ -40,6 +41,6 @@ public class PokemonGameModeProvider implements GameModeProvider {
 
     @Override
     public void registerTraitEffects(TraitManager traitManager) {
-        PokemonTraitLoader.load(traitManager, jsonMapper);
+        JsonTraitLoader.load(getTraitsPath(), traitManager, jsonMapper);
     }
 }

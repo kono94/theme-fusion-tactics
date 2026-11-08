@@ -86,6 +86,24 @@ describe('WaitingRoom mode selection', () => {
         expect(wrapper.emitted('mode-change')).toEqual([['onepiece'], ['pokemon']])
     })
 
+    it('falls back to every known mode with its lobby caption', () => {
+        const wrapper = mount(WaitingRoom, {
+            props: {
+                gameState: gameState(),
+                currentPlayerId: 'player-1',
+                availableModes: [],
+                defaultMode: 'onepiece',
+            },
+        })
+
+        const modeButtons = wrapper.findAll(modeOptionSelector)
+        expect(modeButtons.map((button) => button.find('span.mode-name').text())).toEqual(['One Piece', 'Pokemon'])
+        expect(modeButtons.map((button) => button.find('span.mode-caption').text())).toEqual([
+            'Set sail with legendary pirates',
+            'Build a team of iconic trainers',
+        ])
+    })
+
     it('keeps mode choices visible but disabled for non-hosts', () => {
         const wrapper = mount(WaitingRoom, {
             props: {

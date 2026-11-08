@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 import net.lwenstrom.tft.backend.core.model.GameMode;
-import net.lwenstrom.tft.backend.game.onepiece.OnePieceGameModeProvider;
 import net.lwenstrom.tft.backend.game.pokemon.PokemonGameModeProvider;
+import net.lwenstrom.tft.backend.test.TestHelpers;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -16,8 +16,8 @@ class GameModeRegistryTest {
 
     @Test
     void onePieceIsTheInitialRoomModeWhenAllModesAreRegistered() {
-        var registry = new GameModeRegistry(
-                List.of(new PokemonGameModeProvider(jsonMapper), new OnePieceGameModeProvider(jsonMapper)));
+        var registry =
+                new GameModeRegistry(TestHelpers.allModeProviders(jsonMapper).reversed());
 
         assertEquals(GameMode.ONEPIECE, registry.getDefaultMode());
     }

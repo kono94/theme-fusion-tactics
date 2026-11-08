@@ -9,24 +9,12 @@ import type { AbilityDefinition, CombatEvent, RenderedUnit } from '../../types'
 import type { NormalizedCombatVisualEvent } from '../../types/combatEffects'
 import { getUnitIconPath } from '../../utils/iconUtils'
 import { getGameModeMetadata } from '../../data/gameModeMetadata'
-import onePieceUnits from '../../../../backend/src/main/resources/data/units_onepiece.json'
-import pokemonUnits from '../../../../backend/src/main/resources/data/units_pokemon.json'
+import { buildGalleryUnitRanges, GALLERY_MODE_CONFIG, getGalleryModeConfig } from '../../data/galleryModeConfig'
 
 const CombatView3d = defineAsyncComponent(() => import('../../combat3d/CombatView3d.vue'))
 
-interface RawRangeUnit {
-    id: string
-    range: number[]
-    forms?: { definitionId: string }[]
-}
-
 // Real attack ranges, so the 3D lab shows melee units next to their target and ranged units casting from afar.
-const UNIT_RANGES = new Map<string, number>(
-    [...onePieceUnits, ...pokemonUnits].flatMap((unit: RawRangeUnit) => [
-        [unit.id, unit.range[0]] as const,
-        ...(unit.forms ?? []).map((form) => [form.definitionId, unit.range[0]] as const)
-    ])
-)
+const UNIT_RANGES = buildGalleryUnitRanges(Object.values(GALLERY_MODE_CONFIG))
 
 const GRID_COLS = 9
 const GRID_ROWS = 6
@@ -37,6 +25,20 @@ const props = defineProps<{
 }>()
 
 const galleryMode = computed<GalleryGameMode>(() => props.mode ?? 'onepiece')
+const modeConfig = computed(() => getGalleryModeConfig(galleryMode.value))
+const boardThemeStyle = computed(() => {
+    const theme = modeConfig.value.boardTheme
+    return theme
+        ? {
+            '--gallery-board-border': theme.boardBorder,
+            '--gallery-board-background': theme.boardBackground,
+            '--gallery-shell-border': theme.shellBorder,
+            '--gallery-shell-shadow': theme.shellShadow,
+            '--gallery-active-card-border': theme.activeCardBorder,
+            '--gallery-active-card-background': theme.activeCardBackground
+        }
+        : {}
+})
 const starLevel = ref(3)
 const autoReplay = ref(true)
 const previewType = ref<'ultimate' | 'attack'>('ultimate')
@@ -51,7 +53,7 @@ let combatClock = 0
 const roster = computed(() => previewType.value === 'attack'
     ? getGalleryAttackRoster(galleryMode.value)
     : getGalleryAbilityRoster(galleryMode.value))
-const defaultSelectedKey = computed(() => galleryKey(roster.value.find(unit => unit.id === (galleryMode.value === 'pokemon' ? 'pikachu' : 'whitebeard_v1')) ?? roster.value[0]))
+const defaultSelectedKey = computed(() => galleryKey(roster.value.find(unit => unit.id === modeConfig.value.defaultUnitId) ?? roster.value[0]))
 const selectedKey = ref(defaultSelectedKey.value)
 
 let nextEventId = 1
@@ -60,12 +62,12 @@ let replayTimer: number | null = null
 const selectedUnit = computed(() => roster.value.find(unit => galleryKey(unit) === selectedKey.value) ?? roster.value[0])
 const selectedAbilityConfig = computed(() => resolveAbilityConfig(selectedUnit.value))
 const selectedTargetIsAlly = computed(() => isSupportAbility(selectedUnit.value.abilityType))
-const pageTitle = computed(() => galleryMode.value === 'pokemon' ? 'Pokemon Animation Lab' : 'Ultimate Gallery')
-const modeLabel = computed(() => galleryMode.value === 'pokemon' ? 'Pokemon' : 'One Piece')
+const pageTitle = computed(() => modeConfig.value.pageTitle)
+const modeLabel = computed(() => getGameModeMetadata(galleryMode.value).label)
 
 const sourceUnit = computed(() => createRenderedUnit(selectedUnit.value, 'gallery-source', 2, 4, 'PLAYER', true))
-const enemyUnit = computed(() => createRenderedUnit(createDummyUnit('Training Target', galleryMode.value === 'pokemon' ? 'snorlax' : 'kaido_v1', 3), 'gallery-target', 6, 1, 'ENEMY', false))
-const allyUnit = computed(() => createRenderedUnit(createDummyUnit('Ally Preview', galleryMode.value === 'pokemon' ? 'bulbasaur' : 'luffy_v1', 3), 'gallery-ally', 5, 4, 'PLAYER', true))
+const enemyUnit = computed(() => createRenderedUnit(createDummyUnit('Training Target', modeConfig.value.trainingTargetId, 3), 'gallery-target', 6, 1, 'ENEMY', false))
+const allyUnit = computed(() => createRenderedUnit(createDummyUnit('Ally Preview', modeConfig.value.allyPreviewId, 3), 'gallery-ally', 5, 4, 'PLAYER', true))
 const targetUnit = computed(() => selectedTargetIsAlly.value ? allyUnit.value : enemyUnit.value)
 const renderedUnits = computed(() => selectedTargetIsAlly.value
     ? [sourceUnit.value, allyUnit.value]
@@ -74,7 +76,7 @@ const renderedUnits = computed(() => selectedTargetIsAlly.value
 
 // The 3D lab adds bystanders so area, chain, and team-wide ultimates have more than one unit to hit.
 const renderedUnits3d = computed(() => {
-    const dummyIds = galleryMode.value === 'pokemon' ? ['geodude', 'rattata', 'squirtle'] : ['gifter_v1', 'chess_soldiers_v1', 'koby_v1']
+    const dummyIds = modeConfig.value.bystanderIds
     const source = sourceUnit.value
     const target = targetUnit.value
     const melee = source.range <= 1 && target.ownerId !== source.ownerId
@@ -84,7 +86,7 @@ const renderedUnits3d = computed(() => {
         createRenderedUnit(createDummyUnit('Bystander', dummyIds[0], 1), 'gallery-extra-enemy-1', 5, 0, 'ENEMY', false),
         createRenderedUnit(createDummyUnit('Bystander', dummyIds[1], 1), 'gallery-extra-enemy-2', 7, 2, 'ENEMY', false),
         ...(selectedTargetIsAlly.value
-            ? [createRenderedUnit(createDummyUnit('Training Target', galleryMode.value === 'pokemon' ? 'snorlax' : 'kaido_v1', 3), 'gallery-target', 6, 1, 'ENEMY', false)]
+            ? [createRenderedUnit(createDummyUnit('Training Target', modeConfig.value.trainingTargetId, 3), 'gallery-target', 6, 1, 'ENEMY', false)]
             : [createRenderedUnit(createDummyUnit('Ally Preview', dummyIds[2], 1), 'gallery-extra-ally', 3, 5, 'PLAYER', true)])
     ]
 })
@@ -276,7 +278,11 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <main class="ultimate-gallery" :class="`mode-${galleryMode}`">
+  <main
+    class="ultimate-gallery"
+    :class="[`mode-${galleryMode}`, { 'themed-gallery': modeConfig.boardTheme !== null }]"
+    :style="boardThemeStyle"
+  >
     <section class="gallery-preview">
       <div class="preview-header">
         <div>
@@ -553,22 +559,19 @@ p {
     background: linear-gradient(180deg, rgba(226, 232, 240, 0.92) 0 50%, rgba(148, 163, 184, 0.92) 50% 100%);
 }
 
-.mode-pokemon .gallery-board {
-    border-color: #2f5f58;
-    background:
-        radial-gradient(circle at 28% 72%, rgba(34, 197, 94, 0.16), transparent 28%),
-        radial-gradient(circle at 74% 28%, rgba(248, 113, 113, 0.12), transparent 24%),
-        linear-gradient(180deg, rgba(34, 72, 66, 0.7) 0 50%, rgba(32, 43, 58, 0.94) 50% 100%);
+.themed-gallery .gallery-board {
+    border-color: var(--gallery-board-border);
+    background: var(--gallery-board-background);
 }
 
-.mode-pokemon .board-shell {
-    border-color: #24554d;
-    box-shadow: inset 0 0 42px rgba(45, 212, 191, 0.14);
+.themed-gallery .board-shell {
+    border-color: var(--gallery-shell-border);
+    box-shadow: var(--gallery-shell-shadow);
 }
 
-.mode-pokemon .roster-card.active {
-    border-color: #facc15;
-    background: #14532d;
+.themed-gallery .roster-card.active {
+    border-color: var(--gallery-active-card-border);
+    background: var(--gallery-active-card-background);
 }
 
 .gallery-cell {

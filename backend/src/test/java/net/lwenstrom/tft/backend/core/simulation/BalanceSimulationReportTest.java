@@ -53,7 +53,7 @@ class BalanceSimulationReportTest {
         var traitPairImpacts = traitPairImpactRows(scenarios, mode, fixture);
 
         Files.writeString(
-                outputDir.resolve(style.reportFileName()),
+                outputDir.resolve(style.reportFileName(mode)),
                 toMarkdown(
                         mode,
                         seed,
@@ -465,7 +465,7 @@ class BalanceSimulationReportTest {
         appendImpactSection(builder, "Trait Count Ranking", traitImpacts, 40);
         appendImpactSection(builder, "Trait Pair Ranking", traitPairImpacts, 40);
         appendCostProfileSection(builder, style);
-        appendBoardSizeTierListLinks(builder, style);
+        appendBoardSizeTierListLinks(builder, mode, style);
         return builder.toString();
     }
 
@@ -499,16 +499,16 @@ class BalanceSimulationReportTest {
             appendUnitSections(builder, unitRows);
             appendImpactSection(builder, "Trait Count Ranking", traitRows, 40);
             appendImpactSection(builder, "Trait Pair Ranking", traitPairRows, 40);
-            Files.writeString(outputDir.resolve(style.tierListFileName(boardSize)), builder.toString());
+            Files.writeString(outputDir.resolve(style.tierListFileName(mode, boardSize)), builder.toString());
         }
     }
 
-    private void appendBoardSizeTierListLinks(StringBuilder builder, SimulationStyle style) {
+    private void appendBoardSizeTierListLinks(StringBuilder builder, GameMode mode, SimulationStyle style) {
         builder.append("\n## Balance Reports by Board Size\n\n");
         BOARD_SIZES.forEach(boardSize -> builder.append("- [Board size ")
                 .append(boardSize)
                 .append("](")
-                .append(style.tierListFileName(boardSize))
+                .append(style.tierListFileName(mode, boardSize))
                 .append(")\n"));
     }
 
@@ -673,37 +673,31 @@ class BalanceSimulationReportTest {
     private enum SimulationStyle {
         SAME_STAR(
                 "same-star",
-                "balance-report.md",
                 "",
                 "all-1-star, all-2-star, all-3-star boards",
                 "uniformly sampled from all cost profiles available at board size/player level"),
         RANDOM_STARS(
                 "random-stars",
-                "balance-report-random-stars.md",
                 "",
                 "independently randomized from 1 to 3 stars per unit",
                 "uniformly sampled from all cost profiles available at board size/player level"),
         RANDOM_BOARDS(
                 "random-boards",
-                "balance-report-random-boards.md",
                 "; independently randomized per board",
                 "independently randomized from 1 to 3 stars per unit",
                 "uniformly sampled from the full unit pool, independent of shop cost odds");
 
         private final String propertyValue;
-        private final String reportFileName;
         private final String boardSizeDescription;
         private final String starLevelDescription;
         private final String unitSelectionDescription;
 
         SimulationStyle(
                 String propertyValue,
-                String reportFileName,
                 String boardSizeDescription,
                 String starLevelDescription,
                 String unitSelectionDescription) {
             this.propertyValue = propertyValue;
-            this.reportFileName = reportFileName;
             this.boardSizeDescription = boardSizeDescription;
             this.starLevelDescription = starLevelDescription;
             this.unitSelectionDescription = unitSelectionDescription;
@@ -720,17 +714,20 @@ class BalanceSimulationReportTest {
             };
         }
 
-        private String tierListFileName(int boardSize) {
-            var suffix = this == SAME_STAR ? "" : "-" + propertyValue;
-            return "unit-tier-list-board-size-" + boardSize + suffix + ".md";
+        private String reportFileName(GameMode mode) {
+            return "balance-report-" + mode.getValue() + fileNameSuffix() + ".md";
+        }
+
+        private String tierListFileName(GameMode mode, int boardSize) {
+            return "unit-tier-list-" + mode.getValue() + "-board-size-" + boardSize + fileNameSuffix() + ".md";
+        }
+
+        private String fileNameSuffix() {
+            return this == SAME_STAR ? "" : "-" + propertyValue;
         }
 
         private String propertyValue() {
             return propertyValue;
-        }
-
-        private String reportFileName() {
-            return reportFileName;
         }
 
         private String boardSizeDescription() {

@@ -1,0 +1,6 @@
+[
+    {
+        "id": "broken",
+        "targetScope": "NOT_A_REAL_SCOPE"
+    }
+]
