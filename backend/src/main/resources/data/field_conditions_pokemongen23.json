@@ -2,19 +2,19 @@
   {
     "id": "rain",
     "name": "Rain",
-    "description": "Water damage +25%, Fire damage -25%. Water units gain 15% attack speed.",
+    "description": "Water damage +20%, Fire damage -20%. Water units gain 12% attack speed.",
     "icon": "/assets/field-conditions/rain.png",
-    "elementDamageMultipliers": { "Water": 1.25, "Fire": 0.75 },
-    "traitAttackSpeedBonus": { "Water": 0.15 },
+    "elementDamageMultipliers": { "Water": 1.2, "Fire": 0.8 },
+    "traitAttackSpeedBonus": { "Water": 0.12 },
     "selectableByRule": true
   },
   {
     "id": "sun",
     "name": "Harsh Sunlight",
-    "description": "Fire damage +25%, Water damage -25%. Grass units gain 15% attack speed.",
+    "description": "Fire damage +20%, Water damage -20%. Grass units gain 12% attack speed.",
     "icon": "/assets/field-conditions/sun.png",
-    "elementDamageMultipliers": { "Fire": 1.25, "Water": 0.75 },
-    "traitAttackSpeedBonus": { "Grass": 0.15 },
+    "elementDamageMultipliers": { "Fire": 1.2, "Water": 0.8 },
+    "traitAttackSpeedBonus": { "Grass": 0.12 },
     "selectableByRule": true
   },
   {
@@ -29,9 +29,9 @@
   {
     "id": "hail",
     "name": "Hail",
-    "description": "Units that are not Ice lose 3% max HP every second. Ice units gain 15 defense.",
+    "description": "Units that are not Ice lose 2.5% max HP every second. Ice units gain 15 defense.",
     "icon": "/assets/field-conditions/hail.png",
-    "periodicDamage": { "maxHealthPercent": 3, "intervalMs": 1000, "immuneTraits": ["Ice"] },
+    "periodicDamage": { "maxHealthPercent": 2.5, "intervalMs": 1000, "immuneTraits": ["Ice"] },
     "traitDefenseBonus": { "Ice": 15 },
     "selectableByRule": true
   },

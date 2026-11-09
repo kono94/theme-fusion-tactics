@@ -731,34 +731,34 @@
         "effects": [
             {
                 "minUnits": 1,
-                "description": "-5% damage taken",
+                "description": "-4% damage taken",
                 "style": "bronze",
                 "values": {
-                    "damageReduction": 5
+                    "damageReduction": 4
                 }
             },
             {
                 "minUnits": 2,
-                "description": "-12% damage taken",
+                "description": "-8% damage taken",
                 "style": "silver",
+                "values": {
+                    "damageReduction": 8
+                }
+            },
+            {
+                "minUnits": 3,
+                "description": "-12% damage taken",
+                "style": "gold",
                 "values": {
                     "damageReduction": 12
                 }
             },
             {
-                "minUnits": 3,
-                "description": "-20% damage taken",
-                "style": "gold",
-                "values": {
-                    "damageReduction": 20
-                }
-            },
-            {
                 "minUnits": 4,
-                "description": "-30% damage taken",
+                "description": "-16% damage taken",
                 "style": "prismatic",
                 "values": {
-                    "damageReduction": 30
+                    "damageReduction": 16
                 }
             }
         ]
@@ -774,55 +774,55 @@
         "effects": [
             {
                 "minUnits": 1,
-                "description": "+6% attack damage below 50% HP",
+                "description": "+10% attack damage below 50% HP",
                 "style": "bronze",
                 "values": {
-                    "damageBonus": 0.06,
+                    "damageBonus": 0.1,
                     "hpThreshold": 0.5
                 }
             },
             {
                 "minUnits": 2,
-                "description": "+14% attack damage below 50% HP",
+                "description": "+22% attack damage below 50% HP",
                 "style": "silver",
                 "values": {
-                    "damageBonus": 0.14,
+                    "damageBonus": 0.22,
                     "hpThreshold": 0.5
                 }
             },
             {
                 "minUnits": 3,
-                "description": "+24% attack damage below 50% HP",
+                "description": "+36% attack damage below 50% HP",
                 "style": "gold",
                 "values": {
-                    "damageBonus": 0.24,
+                    "damageBonus": 0.36,
                     "hpThreshold": 0.5
                 }
             },
             {
                 "minUnits": 4,
-                "description": "+32% attack damage below 50% HP",
+                "description": "+48% attack damage below 50% HP",
                 "style": "gold",
                 "values": {
-                    "damageBonus": 0.32,
+                    "damageBonus": 0.48,
                     "hpThreshold": 0.5
                 }
             },
             {
                 "minUnits": 5,
-                "description": "+40% attack damage below 50% HP",
+                "description": "+60% attack damage below 50% HP",
                 "style": "prismatic",
                 "values": {
-                    "damageBonus": 0.4,
+                    "damageBonus": 0.6,
                     "hpThreshold": 0.5
                 }
             },
             {
                 "minUnits": 6,
-                "description": "+50% attack damage below 50% HP",
+                "description": "+72% attack damage below 50% HP",
                 "style": "prismatic",
                 "values": {
-                    "damageBonus": 0.5,
+                    "damageBonus": 0.72,
                     "hpThreshold": 0.5
                 }
             }

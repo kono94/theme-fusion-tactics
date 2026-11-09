@@ -159,8 +159,8 @@ const version160Commits = [
                 Focus Band survives the first lethal hit at 1 HP, King's Rock can make targets
                 flinch, Shell Bell heals from damage dealt, Sitrus Berry heals once at low HP, Lum
                 Berry ignores the first stun, Quick Claw grants extra attacks, and Choice Band adds
-                lots of attack but halves mana gain. Hover an item to read its effect; the item's
-                name pops up over the unit when it triggers.
+                lots of attack but cuts mana gain. Hover an item to read its effect; the item's name
+                pops up over the unit when it triggers.
               </p>
             </div>
             <div class="feature-note">
@@ -169,17 +169,17 @@ const version160Commits = [
                 Fights in Pokemon Gen 2/3 can change with the weather. Kyogre brings Rain, Groudon
                 and Torkoal bring Harsh Sunlight, and 3-star Tyranitar brings a Sandstorm for the
                 whole fight; if both boards bring weather, the more expensive unit wins. Pelipper's
-                Rain Dance and Glalie's and Walrein's Hail start weather for a few seconds, Castform's
-                Weather Ball extends the current weather (or starts Rain), and Rayquaza's Dragon
-                Ascent clears it.
+                Rain Dance and Glalie's and Walrein's Hail start weather for a few seconds,
+                Castform's Weather Ball extends the current weather (or starts Rain), and Rayquaza's
+                Dragon Ascent clears it.
               </p>
               <p>
-                Rain boosts Water damage by 25%, weakens Fire damage by 25% and speeds up Water
-                Pokemon. Harsh Sunlight does the opposite and speeds up Grass Pokemon. Sandstorm and
-                Hail chip 3% max HP every second from everyone except Rock, Ground and Steel or Ice
-                Pokemon, and give Rock or Ice Pokemon extra defense. The current weather shows next to
-                the match rule at the top of the screen, and on the board as falling rain, drifting
-                sand, hail or warm sunlight.
+                Rain boosts Water damage by 20%, weakens Fire damage by 20% and speeds up Water
+                Pokemon. Harsh Sunlight does the opposite and speeds up Grass Pokemon. Sandstorm
+                chips 3% and Hail 2.5% max HP every second from everyone except Rock, Ground and
+                Steel or Ice Pokemon, and give Rock or Ice Pokemon extra defense. The current
+                weather shows next to the match rule at the top of the screen, and on the board as
+                falling rain, drifting sand, hail or warm sunlight.
               </p>
               <p>
                 New match rule <strong>Weather Front</strong>: every fight starts in random weather,
