@@ -23,6 +23,7 @@ import net.lwenstrom.tft.backend.core.random.RandomProvider;
 import net.lwenstrom.tft.backend.core.time.Clock;
 import net.lwenstrom.tft.backend.game.onepiece.OnePieceGameModeProvider;
 import net.lwenstrom.tft.backend.game.pokemon.PokemonGameModeProvider;
+import net.lwenstrom.tft.backend.game.pokemongen23.PokemonGen23GameModeProvider;
 import tools.jackson.databind.json.JsonMapper;
 
 public final class TestHelpers {
@@ -32,7 +33,10 @@ public final class TestHelpers {
     public static final long TEST_SEED = 42L;
 
     public static List<GameModeProvider> allModeProviders(JsonMapper mapper) {
-        return List.of(new OnePieceGameModeProvider(mapper), new PokemonGameModeProvider(mapper));
+        return List.of(
+                new OnePieceGameModeProvider(mapper),
+                new PokemonGameModeProvider(mapper),
+                new PokemonGen23GameModeProvider(mapper));
     }
 
     public static GameModeRegistry createMockRegistry() {

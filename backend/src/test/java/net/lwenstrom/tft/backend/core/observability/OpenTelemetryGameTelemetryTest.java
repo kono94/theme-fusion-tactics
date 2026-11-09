@@ -78,7 +78,7 @@ class OpenTelemetryGameTelemetryTest {
 
             var roomPoints =
                     metric(reader, "tft.game.rooms.active").getLongGaugeData().getPoints();
-            assertEquals(10, roomPoints.size());
+            assertEquals(GameMode.values().length * 5, roomPoints.size());
             assertTrue(roomPoints.stream()
                     .anyMatch(point -> point.getValue() == 1
                             && "onepiece".equals(point.getAttributes().get(GAME_MODE))
@@ -90,7 +90,7 @@ class OpenTelemetryGameTelemetryTest {
 
             var playerPoints =
                     metric(reader, "tft.game.players.active").getLongGaugeData().getPoints();
-            assertEquals(8, playerPoints.size());
+            assertEquals(GameMode.values().length * 4, playerPoints.size());
             assertTrue(playerPoints.stream()
                     .anyMatch(point -> point.getValue() == 2
                             && "onepiece".equals(point.getAttributes().get(GAME_MODE))

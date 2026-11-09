@@ -53,12 +53,14 @@ describe('MatchHistory', () => {
             matches: [
                 { ...match, mode: 'onepiece' },
                 { ...match, historyId: 'history-2', mode: 'retired-mode' },
+                { ...match, historyId: 'history-3', mode: 'pokemongen23' },
             ],
         })
         const wrapper = mount(MatchHistory)
 
-        await vi.waitFor(() => expect(wrapper.findAll('[data-test="match-history-card"]')).toHaveLength(2))
+        await vi.waitFor(() => expect(wrapper.findAll('[data-test="match-history-card"]')).toHaveLength(3))
         expect(wrapper.text()).toContain('One Piece solo match')
+        expect(wrapper.text()).toContain('Gen 2/3 solo match')
         expect(wrapper.text()).toContain('retired-mode solo match')
     })
 

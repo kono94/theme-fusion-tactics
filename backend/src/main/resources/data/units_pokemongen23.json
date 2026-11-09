@@ -1,0 +1,5103 @@
+[
+  {
+    "id": "chikorita",
+    "lineId": "chikorita",
+    "name": "Chikorita",
+    "cost": 1,
+    "role": "SUPPORT",
+    "maxHealth": [590, 1062, 1947],
+    "maxMana": [50, 50, 50],
+    "attackDamage": [33, 59, 109],
+    "abilityPower": [0, 0, 0],
+    "defense": [21, 21, 21],
+    "attackSpeed": [0.66, 0.66, 0.66],
+    "range": [2, 2, 2],
+    "traits": [
+      "Grass"
+    ],
+    "ability": {
+      "name": "Synthesis",
+      "description": "Soaks up sunlight, healing nearby allies for $value.",
+      "type": "HEAL",
+      "pattern": "SURROUND",
+      "values": [160, 350, 760],
+      "range": [3, 3, 4]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "chikorita",
+        "name": "Chikorita",
+        "role": "SUPPORT",
+        "traits": [
+          "Grass"
+        ],
+        "ability": {
+          "name": "Synthesis",
+          "description": "Soaks up sunlight, healing nearby allies for $value.",
+          "type": "HEAL",
+          "pattern": "SURROUND",
+          "values": [160, 350, 760],
+          "range": [3, 3, 4]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "bayleef",
+        "name": "Bayleef",
+        "role": "SUPPORT",
+        "traits": [
+          "Grass"
+        ],
+        "ability": {
+          "name": "Reflect",
+          "description": "Raises a leafy barrier, shielding allies for $value.",
+          "type": "SHIELD",
+          "pattern": "SURROUND",
+          "values": [95, 175, 310],
+          "range": [3, 3, 4]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "meganium",
+        "name": "Meganium",
+        "role": "SUPPORT",
+        "traits": [
+          "Grass"
+        ],
+        "ability": {
+          "name": "Aromatherapy",
+          "description": "Releases a soothing aroma, healing allies for $value.",
+          "type": "HEAL",
+          "pattern": "SURROUND",
+          "values": [176, 385, 836],
+          "range": [3, 3, 4]
+        }
+      }
+    ]
+  },
+  {
+    "id": "cyndaquil",
+    "lineId": "cyndaquil",
+    "name": "Cyndaquil",
+    "cost": 1,
+    "role": "DAMAGE",
+    "maxHealth": [450, 810, 1485],
+    "maxMana": [50, 50, 50],
+    "attackDamage": [62, 112, 205],
+    "abilityPower": [0, 0, 0],
+    "defense": [14, 14, 14],
+    "attackSpeed": [0.7, 0.7, 0.7],
+    "range": [2, 2, 2],
+    "traits": [
+      "Fire"
+    ],
+    "ability": {
+      "name": "Ember",
+      "description": "Flicks embers for $value damage and burn.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [210, 480, 1000],
+      "range": [2, 2, 3],
+      "modifiers": [
+        {
+          "type": "DOT",
+          "dotType": "BURN",
+          "damagePerTick": [25, 55, 110],
+          "durationSeconds": [3, 3, 4],
+          "tickIntervalMs": [1000, 1000, 1000]
+        }
+      ]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "cyndaquil",
+        "name": "Cyndaquil",
+        "role": "DAMAGE",
+        "traits": [
+          "Fire"
+        ],
+        "ability": {
+          "name": "Ember",
+          "description": "Flicks embers for $value damage and burn.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [210, 480, 1000],
+          "range": [2, 2, 3],
+          "modifiers": [
+            {
+              "type": "DOT",
+              "dotType": "BURN",
+              "damagePerTick": [25, 55, 110],
+              "durationSeconds": [3, 3, 4],
+              "tickIntervalMs": [1000, 1000, 1000]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "quilava",
+        "name": "Quilava",
+        "role": "DAMAGE",
+        "traits": [
+          "Fire"
+        ],
+        "ability": {
+          "name": "Flame Wheel",
+          "description": "Rolls through a line in flames for $value damage and burn.",
+          "type": "DAMAGE",
+          "pattern": "LINE",
+          "values": [115, 260, 560],
+          "range": [4, 4, 5],
+          "modifiers": [
+            {
+              "type": "DOT",
+              "dotType": "BURN",
+              "damagePerTick": [25, 55, 110],
+              "durationSeconds": [3, 3, 4],
+              "tickIntervalMs": [1000, 1000, 1000]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "typhlosion",
+        "name": "Typhlosion",
+        "role": "DAMAGE",
+        "traits": [
+          "Fire"
+        ],
+        "ability": {
+          "name": "Eruption",
+          "description": "Erupts around itself for $value damage and burn.",
+          "type": "DAMAGE",
+          "pattern": "SURROUND",
+          "values": [115, 259, 552],
+          "range": [2, 3, 3],
+          "modifiers": [
+            {
+              "type": "DOT",
+              "dotType": "BURN",
+              "damagePerTick": [25, 55, 110],
+              "durationSeconds": [3, 3, 4],
+              "tickIntervalMs": [1000, 1000, 1000]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "totodile",
+    "lineId": "totodile",
+    "name": "Totodile",
+    "cost": 1,
+    "role": "DAMAGE",
+    "maxHealth": [472, 850, 1559],
+    "maxMana": [50, 50, 50],
+    "attackDamage": [62, 112, 205],
+    "abilityPower": [0, 0, 0],
+    "defense": [14, 14, 14],
+    "attackSpeed": [0.7, 0.7, 0.7],
+    "range": [1, 1, 1],
+    "traits": [
+      "Water"
+    ],
+    "ability": {
+      "name": "Bite",
+      "description": "Chomps the target for $value damage.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [210, 480, 1000],
+      "range": [1, 1, 2],
+      "modifiers": [
+        {
+          "type": "EXECUTE",
+          "hpThreshold": [0.27, 0.33, 0.4],
+          "bonusDamageMultiplier": [0.3, 0.42, 0.6]
+        }
+      ]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "totodile",
+        "name": "Totodile",
+        "role": "DAMAGE",
+        "traits": [
+          "Water"
+        ],
+        "ability": {
+          "name": "Bite",
+          "description": "Chomps the target for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [210, 480, 1000],
+          "range": [1, 1, 2],
+          "modifiers": [
+            {
+              "type": "EXECUTE",
+              "hpThreshold": [0.27, 0.33, 0.4],
+              "bonusDamageMultiplier": [0.3, 0.42, 0.6]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "croconaw",
+        "name": "Croconaw",
+        "role": "DAMAGE",
+        "traits": [
+          "Water"
+        ],
+        "ability": {
+          "name": "Ice Fang",
+          "description": "Bites with icy fangs for $value damage and a short stun.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [210, 480, 1000],
+          "range": [1, 1, 2],
+          "modifiers": [
+            {
+              "type": "STUN",
+              "stunSeconds": [1, 1, 1]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "feraligatr",
+        "name": "Feraligatr",
+        "role": "DAMAGE",
+        "traits": [
+          "Water"
+        ],
+        "ability": {
+          "name": "Waterfall",
+          "description": "Crashes down like a waterfall for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [231, 528, 1100],
+          "range": [1, 1, 2],
+          "modifiers": [
+            {
+              "type": "KNOCKBACK",
+              "cells": [1, 1, 1]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "treecko",
+    "lineId": "treecko",
+    "name": "Treecko",
+    "cost": 1,
+    "role": "DAMAGE",
+    "maxHealth": [450, 810, 1485],
+    "maxMana": [50, 50, 50],
+    "attackDamage": [62, 112, 205],
+    "abilityPower": [0, 0, 0],
+    "defense": [14, 14, 14],
+    "attackSpeed": [0.76, 0.76, 0.76],
+    "range": [1, 1, 1],
+    "traits": [
+      "Grass"
+    ],
+    "ability": {
+      "name": "Pound",
+      "description": "Slaps the target for $value damage.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [210, 480, 1000],
+      "range": [1, 1, 2]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "treecko",
+        "name": "Treecko",
+        "role": "DAMAGE",
+        "traits": [
+          "Grass"
+        ],
+        "ability": {
+          "name": "Pound",
+          "description": "Slaps the target for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [210, 480, 1000],
+          "range": [1, 1, 2]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "grovyle",
+        "name": "Grovyle",
+        "role": "DAMAGE",
+        "traits": [
+          "Grass"
+        ],
+        "ability": {
+          "name": "Fury Cutter",
+          "description": "Slices with its leaves for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [210, 480, 1000],
+          "range": [1, 1, 2],
+          "modifiers": [
+            {
+              "type": "SCALING",
+              "scalingType": "TARGET_MISSING_HP",
+              "factor": [0.35, 0.45, 0.6]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "sceptile",
+        "name": "Sceptile",
+        "role": "DAMAGE",
+        "traits": [
+          "Grass"
+        ],
+        "ability": {
+          "name": "Leaf Blade",
+          "description": "Cuts through a line with its arm blades for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "LINE",
+          "values": [115, 260, 560],
+          "range": [3, 3, 4],
+          "modifiers": [
+            {
+              "type": "EXECUTE",
+              "hpThreshold": [0.27, 0.33, 0.4],
+              "bonusDamageMultiplier": [0.3, 0.42, 0.6]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "torchic",
+    "lineId": "torchic",
+    "name": "Torchic",
+    "cost": 1,
+    "role": "DAMAGE",
+    "maxHealth": [450, 810, 1485],
+    "maxMana": [50, 50, 50],
+    "attackDamage": [62, 112, 205],
+    "abilityPower": [0, 0, 0],
+    "defense": [14, 14, 14],
+    "attackSpeed": [0.7, 0.7, 0.7],
+    "range": [1, 1, 1],
+    "traits": [
+      "Fire"
+    ],
+    "ability": {
+      "name": "Peck",
+      "description": "Pecks the target for $value damage and burn.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [210, 480, 1000],
+      "range": [1, 1, 2],
+      "modifiers": [
+        {
+          "type": "DOT",
+          "dotType": "BURN",
+          "damagePerTick": [25, 55, 110],
+          "durationSeconds": [3, 3, 4],
+          "tickIntervalMs": [1000, 1000, 1000]
+        }
+      ]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "torchic",
+        "name": "Torchic",
+        "role": "DAMAGE",
+        "traits": [
+          "Fire"
+        ],
+        "ability": {
+          "name": "Peck",
+          "description": "Pecks the target for $value damage and burn.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [210, 480, 1000],
+          "range": [1, 1, 2],
+          "modifiers": [
+            {
+              "type": "DOT",
+              "dotType": "BURN",
+              "damagePerTick": [25, 55, 110],
+              "durationSeconds": [3, 3, 4],
+              "tickIntervalMs": [1000, 1000, 1000]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "combusken",
+        "name": "Combusken",
+        "role": "DAMAGE",
+        "traits": [
+          "Fire",
+          "Fighting"
+        ],
+        "ability": {
+          "name": "Double Kick",
+          "description": "Kicks twice for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [210, 480, 1000],
+          "range": [1, 1, 2],
+          "modifiers": [
+            {
+              "type": "KNOCKBACK",
+              "cells": [1, 1, 1]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "blaziken",
+        "name": "Blaziken",
+        "role": "DAMAGE",
+        "traits": [
+          "Fire",
+          "Fighting"
+        ],
+        "ability": {
+          "name": "Blaze Kick",
+          "description": "Delivers a flaming kick for $value damage and burn.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [231, 528, 1100],
+          "range": [1, 1, 2],
+          "modifiers": [
+            {
+              "type": "DOT",
+              "dotType": "BURN",
+              "damagePerTick": [25, 55, 110],
+              "durationSeconds": [3, 3, 4],
+              "tickIntervalMs": [1000, 1000, 1000]
+            },
+            {
+              "type": "STUN",
+              "stunSeconds": [1, 1, 1]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "mudkip",
+    "lineId": "mudkip",
+    "name": "Mudkip",
+    "cost": 1,
+    "role": "TANK",
+    "maxHealth": [989, 1780, 3263],
+    "maxMana": [55, 55, 55],
+    "attackDamage": [30, 54, 99],
+    "abilityPower": [0, 0, 0],
+    "defense": [46, 46, 46],
+    "attackSpeed": [0.59, 0.59, 0.59],
+    "range": [1, 1, 1],
+    "traits": [
+      "Water"
+    ],
+    "ability": {
+      "name": "Water Gun",
+      "description": "Sprays water for $value damage.",
+      "type": "DAMAGE",
+      "pattern": "LINE",
+      "values": [63, 143, 308],
+      "range": [3, 3, 4]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "mudkip",
+        "name": "Mudkip",
+        "role": "TANK",
+        "traits": [
+          "Water"
+        ],
+        "ability": {
+          "name": "Water Gun",
+          "description": "Sprays water for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "LINE",
+          "values": [63, 143, 308],
+          "range": [3, 3, 4]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "marshtomp",
+        "name": "Marshtomp",
+        "role": "TANK",
+        "traits": [
+          "Water",
+          "Ground"
+        ],
+        "ability": {
+          "name": "Mud Shot",
+          "description": "Hurls mud for $value damage and slows the target with a stun.",
+          "type": "DAMAGE",
+          "pattern": "LINE",
+          "values": [63, 143, 308],
+          "range": [3, 3, 4],
+          "modifiers": [
+            {
+              "type": "STUN",
+              "stunSeconds": [1, 1, 1]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "swampert",
+        "name": "Swampert",
+        "role": "TANK",
+        "traits": [
+          "Water",
+          "Ground"
+        ],
+        "ability": {
+          "name": "Muddy Water",
+          "description": "Floods the area for $value damage and knockback.",
+          "type": "DAMAGE",
+          "pattern": "SURROUND",
+          "values": [77, 173, 370],
+          "range": [2, 2, 3],
+          "modifiers": [
+            {
+              "type": "KNOCKBACK",
+              "cells": [1, 1, 1]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "hoothoot",
+    "lineId": "hoothoot",
+    "name": "Hoothoot",
+    "cost": 1,
+    "role": "SUPPORT",
+    "maxHealth": [590, 1062, 1947],
+    "maxMana": [50, 50, 50],
+    "attackDamage": [33, 59, 109],
+    "abilityPower": [0, 0, 0],
+    "defense": [21, 21, 21],
+    "attackSpeed": [0.66, 0.66, 0.66],
+    "range": [3, 3, 3],
+    "traits": [
+      "Normal",
+      "Flying"
+    ],
+    "ability": {
+      "name": "Hypnosis",
+      "description": "Lulls the target to sleep for $value seconds.",
+      "type": "STUN",
+      "pattern": "SINGLE",
+      "values": [1, 1, 2],
+      "stunDurationSeconds": [2, 1.5, 2],
+      "range": [3, 3, 4]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "hoothoot",
+        "name": "Hoothoot",
+        "role": "SUPPORT",
+        "traits": [
+          "Normal",
+          "Flying"
+        ],
+        "ability": {
+          "name": "Hypnosis",
+          "description": "Lulls the target to sleep for $value seconds.",
+          "type": "STUN",
+          "pattern": "SINGLE",
+          "values": [1, 1, 2],
+          "stunDurationSeconds": [2, 1.5, 2],
+          "range": [3, 3, 4]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "noctowl",
+        "name": "Noctowl",
+        "role": "SUPPORT",
+        "traits": [
+          "Normal",
+          "Flying"
+        ],
+        "ability": {
+          "name": "Extrasensory",
+          "description": "Bends minds around it, stunning enemies for $value seconds.",
+          "type": "STUN",
+          "pattern": "SURROUND",
+          "values": [1, 1, 2],
+          "range": [2, 3, 4]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "noctowl",
+        "name": "Noctowl",
+        "role": "SUPPORT",
+        "traits": [
+          "Normal",
+          "Flying"
+        ],
+        "ability": {
+          "name": "Extrasensory",
+          "description": "Bends minds around it, stunning enemies for $value seconds.",
+          "type": "STUN",
+          "pattern": "SURROUND",
+          "values": [1, 1, 2],
+          "range": [2, 3, 4]
+        }
+      }
+    ]
+  },
+  {
+    "id": "poochyena",
+    "lineId": "poochyena",
+    "name": "Poochyena",
+    "cost": 1,
+    "role": "DAMAGE",
+    "maxHealth": [450, 810, 1485],
+    "maxMana": [50, 50, 50],
+    "attackDamage": [62, 112, 205],
+    "abilityPower": [0, 0, 0],
+    "defense": [14, 14, 14],
+    "attackSpeed": [0.7, 0.7, 0.7],
+    "range": [1, 1, 1],
+    "traits": [
+      "Dark"
+    ],
+    "ability": {
+      "name": "Bite",
+      "description": "Bites the target for $value damage.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [210, 480, 1000],
+      "range": [1, 1, 2],
+      "modifiers": [
+        {
+          "type": "EXECUTE",
+          "hpThreshold": [0.27, 0.33, 0.4],
+          "bonusDamageMultiplier": [0.3, 0.42, 0.6]
+        }
+      ]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "poochyena",
+        "name": "Poochyena",
+        "role": "DAMAGE",
+        "traits": [
+          "Dark"
+        ],
+        "ability": {
+          "name": "Bite",
+          "description": "Bites the target for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [210, 480, 1000],
+          "range": [1, 1, 2],
+          "modifiers": [
+            {
+              "type": "EXECUTE",
+              "hpThreshold": [0.27, 0.33, 0.4],
+              "bonusDamageMultiplier": [0.3, 0.42, 0.6]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "mightyena",
+        "name": "Mightyena",
+        "role": "DAMAGE",
+        "traits": [
+          "Dark"
+        ],
+        "ability": {
+          "name": "Crunch",
+          "description": "Crunches the target for $value damage, scaling with missing health.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [220, 504, 1050],
+          "range": [1, 1, 2],
+          "modifiers": [
+            {
+              "type": "SCALING",
+              "scalingType": "TARGET_MISSING_HP",
+              "factor": [0.35, 0.45, 0.6]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "mightyena",
+        "name": "Mightyena",
+        "role": "DAMAGE",
+        "traits": [
+          "Dark"
+        ],
+        "ability": {
+          "name": "Crunch",
+          "description": "Crunches the target for $value damage, scaling with missing health.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [220, 504, 1050],
+          "range": [1, 1, 2],
+          "modifiers": [
+            {
+              "type": "SCALING",
+              "scalingType": "TARGET_MISSING_HP",
+              "factor": [0.35, 0.45, 0.6]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "zigzagoon",
+    "lineId": "zigzagoon",
+    "name": "Zigzagoon",
+    "cost": 1,
+    "role": "DAMAGE",
+    "maxHealth": [450, 810, 1485],
+    "maxMana": [50, 50, 50],
+    "attackDamage": [62, 112, 205],
+    "abilityPower": [0, 0, 0],
+    "defense": [14, 14, 14],
+    "attackSpeed": [0.76, 0.76, 0.76],
+    "range": [1, 1, 1],
+    "traits": [
+      "Normal"
+    ],
+    "ability": {
+      "name": "Headbutt",
+      "description": "Rams the target for $value damage and a short stun.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [210, 480, 1000],
+      "range": [1, 1, 2],
+      "modifiers": [
+        {
+          "type": "STUN",
+          "stunSeconds": [1, 1, 1]
+        }
+      ]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "zigzagoon",
+        "name": "Zigzagoon",
+        "role": "DAMAGE",
+        "traits": [
+          "Normal"
+        ],
+        "ability": {
+          "name": "Headbutt",
+          "description": "Rams the target for $value damage and a short stun.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [210, 480, 1000],
+          "range": [1, 1, 2],
+          "modifiers": [
+            {
+              "type": "STUN",
+              "stunSeconds": [1, 1, 1]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "linoone",
+        "name": "Linoone",
+        "role": "DAMAGE",
+        "traits": [
+          "Normal"
+        ],
+        "ability": {
+          "name": "Extreme Speed",
+          "description": "Dashes through a line for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "LINE",
+          "values": [127, 286, 616],
+          "range": [3, 3, 4]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "linoone",
+        "name": "Linoone",
+        "role": "DAMAGE",
+        "traits": [
+          "Normal"
+        ],
+        "ability": {
+          "name": "Extreme Speed",
+          "description": "Dashes through a line for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "LINE",
+          "values": [127, 286, 616],
+          "range": [3, 3, 4]
+        }
+      }
+    ]
+  },
+  {
+    "id": "wurmple",
+    "lineId": "wurmple",
+    "name": "Wurmple",
+    "cost": 1,
+    "role": "SUPPORT",
+    "maxHealth": [590, 1062, 1947],
+    "maxMana": [50, 50, 50],
+    "attackDamage": [33, 59, 109],
+    "abilityPower": [0, 0, 0],
+    "defense": [21, 21, 21],
+    "attackSpeed": [0.66, 0.66, 0.66],
+    "range": [2, 2, 2],
+    "traits": [
+      "Bug"
+    ],
+    "ability": {
+      "name": "String Shot",
+      "description": "Pins the target in silk for $value seconds.",
+      "type": "STUN",
+      "pattern": "SINGLE",
+      "values": [1, 1, 2],
+      "stunDurationSeconds": [2, 1, 2],
+      "range": [3, 3, 4]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "wurmple",
+        "name": "Wurmple",
+        "role": "SUPPORT",
+        "traits": [
+          "Bug"
+        ],
+        "ability": {
+          "name": "String Shot",
+          "description": "Pins the target in silk for $value seconds.",
+          "type": "STUN",
+          "pattern": "SINGLE",
+          "values": [1, 1, 2],
+          "stunDurationSeconds": [2, 1, 2],
+          "range": [3, 3, 4]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "silcoon",
+        "name": "Silcoon",
+        "role": "TANK",
+        "traits": [
+          "Bug"
+        ],
+        "ability": {
+          "name": "Harden",
+          "description": "Hardens its silk shell, gaining $value shield.",
+          "type": "SHIELD",
+          "pattern": "SINGLE",
+          "values": [124, 228, 403],
+          "range": [1, 1, 1]
+        },
+        "range": [1, 1, 1],
+        "branchId": "silcoon",
+        "maxHealth": [960, 1728, 3168],
+        "maxMana": [55, 55, 55],
+        "attackDamage": [30, 54, 99],
+        "defense": [46, 46, 46],
+        "attackSpeed": [0.59, 0.59, 0.59]
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "cascoon",
+        "name": "Cascoon",
+        "role": "TANK",
+        "traits": [
+          "Bug"
+        ],
+        "ability": {
+          "name": "Iron Defense",
+          "description": "Toughens its cocoon, gaining $value shield.",
+          "type": "SHIELD",
+          "pattern": "SINGLE",
+          "values": [105, 193, 343],
+          "range": [1, 1, 1]
+        },
+        "range": [1, 1, 1],
+        "branchId": "cascoon",
+        "maxHealth": [864, 1555, 2851],
+        "maxMana": [55, 55, 55],
+        "attackDamage": [30, 54, 99],
+        "defense": [55, 55, 55],
+        "attackSpeed": [0.59, 0.59, 0.59]
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "beautifly",
+        "name": "Beautifly",
+        "role": "DAMAGE",
+        "traits": [
+          "Bug",
+          "Flying"
+        ],
+        "ability": {
+          "name": "Silver Wind",
+          "description": "Whips up a glittering gust for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "LINE",
+          "values": [127, 286, 616],
+          "range": [5, 5, 6]
+        },
+        "range": [3, 3, 3],
+        "branchId": "silcoon",
+        "maxHealth": [450, 810, 1485],
+        "maxMana": [50, 50, 50],
+        "attackDamage": [62, 112, 205],
+        "defense": [14, 14, 14],
+        "attackSpeed": [0.7, 0.7, 0.7]
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "dustox",
+        "name": "Dustox",
+        "role": "SUPPORT",
+        "traits": [
+          "Bug",
+          "Poison"
+        ],
+        "ability": {
+          "name": "Poison Powder",
+          "description": "Scatters toxic dust around it for $value damage and poison.",
+          "type": "DAMAGE",
+          "pattern": "SURROUND",
+          "values": [72, 162, 346],
+          "range": [2, 3, 3],
+          "modifiers": [
+            {
+              "type": "DOT",
+              "dotType": "POISON",
+              "damagePerTick": [28, 61, 121],
+              "durationSeconds": [3, 4, 5],
+              "tickIntervalMs": [1000, 1000, 1000]
+            }
+          ]
+        },
+        "range": [2, 2, 2],
+        "branchId": "cascoon",
+        "maxHealth": [590, 1062, 1947],
+        "maxMana": [50, 50, 50],
+        "attackDamage": [33, 59, 109],
+        "defense": [21, 21, 21],
+        "attackSpeed": [0.66, 0.66, 0.66]
+      }
+    ]
+  },
+  {
+    "id": "taillow",
+    "lineId": "taillow",
+    "name": "Taillow",
+    "cost": 1,
+    "role": "DAMAGE",
+    "maxHealth": [414, 745, 1366],
+    "maxMana": [50, 50, 50],
+    "attackDamage": [62, 112, 205],
+    "abilityPower": [0, 0, 0],
+    "defense": [14, 14, 14],
+    "attackSpeed": [0.74, 0.74, 0.74],
+    "range": [2, 2, 2],
+    "traits": [
+      "Normal",
+      "Flying"
+    ],
+    "ability": {
+      "name": "Wing Attack",
+      "description": "Swoops for $value damage.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [210, 480, 1000],
+      "range": [2, 2, 3]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "taillow",
+        "name": "Taillow",
+        "role": "DAMAGE",
+        "traits": [
+          "Normal",
+          "Flying"
+        ],
+        "ability": {
+          "name": "Wing Attack",
+          "description": "Swoops for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [210, 480, 1000],
+          "range": [2, 2, 3]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "swellow",
+        "name": "Swellow",
+        "role": "DAMAGE",
+        "traits": [
+          "Normal",
+          "Flying"
+        ],
+        "ability": {
+          "name": "Brave Bird",
+          "description": "Dives recklessly through a line for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "LINE",
+          "values": [132, 299, 644],
+          "range": [4, 4, 5]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "swellow",
+        "name": "Swellow",
+        "role": "DAMAGE",
+        "traits": [
+          "Normal",
+          "Flying"
+        ],
+        "ability": {
+          "name": "Brave Bird",
+          "description": "Dives recklessly through a line for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "LINE",
+          "values": [132, 299, 644],
+          "range": [4, 4, 5]
+        }
+      }
+    ]
+  },
+  {
+    "id": "wingull",
+    "lineId": "wingull",
+    "name": "Wingull",
+    "cost": 1,
+    "role": "SUPPORT",
+    "maxHealth": [590, 1062, 1947],
+    "maxMana": [50, 50, 50],
+    "attackDamage": [33, 59, 109],
+    "abilityPower": [0, 0, 0],
+    "defense": [21, 21, 21],
+    "attackSpeed": [0.66, 0.66, 0.66],
+    "range": [3, 3, 3],
+    "traits": [
+      "Water",
+      "Flying"
+    ],
+    "ability": {
+      "name": "Supersonic",
+      "description": "Emits a piercing cry, stunning the target for $value seconds.",
+      "type": "STUN",
+      "pattern": "SINGLE",
+      "values": [1, 1, 2],
+      "stunDurationSeconds": [1.5, 1, 2],
+      "range": [3, 3, 4]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "wingull",
+        "name": "Wingull",
+        "role": "SUPPORT",
+        "traits": [
+          "Water",
+          "Flying"
+        ],
+        "ability": {
+          "name": "Supersonic",
+          "description": "Emits a piercing cry, stunning the target for $value seconds.",
+          "type": "STUN",
+          "pattern": "SINGLE",
+          "values": [1, 1, 2],
+          "stunDurationSeconds": [1.5, 1, 2],
+          "range": [3, 3, 4]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "pelipper",
+        "name": "Pelipper",
+        "role": "SUPPORT",
+        "traits": [
+          "Water",
+          "Flying"
+        ],
+        "ability": {
+          "name": "Rain Dance",
+          "description": "Summons a downpour that speeds up nearby allies by $value%.",
+          "type": "BUFF_SPD",
+          "pattern": "SURROUND",
+          "values": [13, 19, 28],
+          "range": [4, 4, 4]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "pelipper",
+        "name": "Pelipper",
+        "role": "SUPPORT",
+        "traits": [
+          "Water",
+          "Flying"
+        ],
+        "ability": {
+          "name": "Rain Dance",
+          "description": "Summons a downpour that speeds up nearby allies by $value%.",
+          "type": "BUFF_SPD",
+          "pattern": "SURROUND",
+          "values": [13, 19, 28],
+          "range": [4, 4, 4]
+        }
+      }
+    ]
+  },
+  {
+    "id": "lotad",
+    "lineId": "lotad",
+    "name": "Lotad",
+    "cost": 1,
+    "role": "TANK",
+    "maxHealth": [960, 1728, 3168],
+    "maxMana": [55, 55, 55],
+    "attackDamage": [30, 54, 99],
+    "abilityPower": [0, 0, 0],
+    "defense": [46, 46, 46],
+    "attackSpeed": [0.59, 0.59, 0.59],
+    "range": [1, 1, 1],
+    "traits": [
+      "Water",
+      "Grass"
+    ],
+    "ability": {
+      "name": "Absorb",
+      "description": "Drains the target for $value damage.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [139, 317, 660],
+      "range": [1, 1, 2],
+      "modifiers": [
+        {
+          "type": "LIFESTEAL",
+          "lifestealPercent": [0.35, 0.42, 0.52]
+        }
+      ]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "lotad",
+        "name": "Lotad",
+        "role": "TANK",
+        "traits": [
+          "Water",
+          "Grass"
+        ],
+        "ability": {
+          "name": "Absorb",
+          "description": "Drains the target for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [139, 317, 660],
+          "range": [1, 1, 2],
+          "modifiers": [
+            {
+              "type": "LIFESTEAL",
+              "lifestealPercent": [0.35, 0.42, 0.52]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "lombre",
+        "name": "Lombre",
+        "role": "TANK",
+        "traits": [
+          "Water",
+          "Grass"
+        ],
+        "ability": {
+          "name": "Fake Out",
+          "description": "Startles the target for $value damage and a stun.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [127, 290, 605],
+          "range": [1, 1, 2],
+          "modifiers": [
+            {
+              "type": "STUN",
+              "stunSeconds": [1, 1, 1]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "ludicolo",
+        "name": "Ludicolo",
+        "role": "TANK",
+        "traits": [
+          "Water",
+          "Grass"
+        ],
+        "ability": {
+          "name": "Giga Drain",
+          "description": "Dances and drains nearby enemies for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SURROUND",
+          "values": [72, 161, 343],
+          "range": [2, 2, 3],
+          "modifiers": [
+            {
+              "type": "LIFESTEAL",
+              "lifestealPercent": [0.3, 0.38, 0.48]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "seedot",
+    "lineId": "seedot",
+    "name": "Seedot",
+    "cost": 1,
+    "role": "DAMAGE",
+    "maxHealth": [450, 810, 1485],
+    "maxMana": [50, 50, 50],
+    "attackDamage": [62, 112, 205],
+    "abilityPower": [0, 0, 0],
+    "defense": [14, 14, 14],
+    "attackSpeed": [0.7, 0.7, 0.7],
+    "range": [1, 1, 1],
+    "traits": [
+      "Grass"
+    ],
+    "ability": {
+      "name": "Bullet Seed",
+      "description": "Spits seeds for $value damage.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [210, 480, 1000],
+      "range": [1, 1, 2]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "seedot",
+        "name": "Seedot",
+        "role": "DAMAGE",
+        "traits": [
+          "Grass"
+        ],
+        "ability": {
+          "name": "Bullet Seed",
+          "description": "Spits seeds for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [210, 480, 1000],
+          "range": [1, 1, 2]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "nuzleaf",
+        "name": "Nuzleaf",
+        "role": "DAMAGE",
+        "traits": [
+          "Grass",
+          "Dark"
+        ],
+        "ability": {
+          "name": "Feint Attack",
+          "description": "Strikes from the shadows for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [210, 480, 1000],
+          "range": [1, 1, 2],
+          "modifiers": [
+            {
+              "type": "EXECUTE",
+              "hpThreshold": [0.27, 0.33, 0.4],
+              "bonusDamageMultiplier": [0.3, 0.42, 0.6]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "shiftry",
+        "name": "Shiftry",
+        "role": "DAMAGE",
+        "traits": [
+          "Grass",
+          "Dark"
+        ],
+        "ability": {
+          "name": "Leaf Tornado",
+          "description": "Whirls a tornado of leaves for $value damage and knockback.",
+          "type": "DAMAGE",
+          "pattern": "SURROUND",
+          "values": [115, 259, 552],
+          "range": [2, 2, 3],
+          "modifiers": [
+            {
+              "type": "KNOCKBACK",
+              "cells": [1, 1, 1]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "mareep",
+    "lineId": "mareep",
+    "name": "Mareep",
+    "cost": 2,
+    "role": "DAMAGE",
+    "maxHealth": [505, 909, 1666],
+    "maxMana": [60, 60, 60],
+    "attackDamage": [68, 122, 224],
+    "abilityPower": [0, 0, 0],
+    "defense": [19, 19, 19],
+    "attackSpeed": [0.72, 0.72, 0.72],
+    "range": [3, 3, 3],
+    "traits": [
+      "Electric"
+    ],
+    "ability": {
+      "name": "Thunder Shock",
+      "description": "Zaps the target for $value damage.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [220, 495, 1050],
+      "range": [3, 3, 4]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "mareep",
+        "name": "Mareep",
+        "role": "DAMAGE",
+        "traits": [
+          "Electric"
+        ],
+        "ability": {
+          "name": "Thunder Shock",
+          "description": "Zaps the target for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [220, 495, 1050],
+          "range": [3, 3, 4]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "flaaffy",
+        "name": "Flaaffy",
+        "role": "DAMAGE",
+        "traits": [
+          "Electric"
+        ],
+        "ability": {
+          "name": "Thunder Punch",
+          "description": "Punches with lightning for $value damage and a short stun.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [220, 495, 1050],
+          "range": [3, 3, 4],
+          "modifiers": [
+            {
+              "type": "STUN",
+              "stunSeconds": [1, 1, 1]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "ampharos",
+        "name": "Ampharos",
+        "role": "DAMAGE",
+        "traits": [
+          "Electric"
+        ],
+        "ability": {
+          "name": "Zap Cannon",
+          "description": "Fires an electric cannon through a line for $value damage and stun.",
+          "type": "DAMAGE",
+          "pattern": "LINE",
+          "values": [143, 324, 688],
+          "range": [5, 5, 6],
+          "modifiers": [
+            {
+              "type": "STUN",
+              "stunSeconds": [1, 1, 1]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "marill",
+    "lineId": "marill",
+    "name": "Marill",
+    "cost": 2,
+    "role": "TANK",
+    "maxHealth": [1082, 1947, 3569],
+    "maxMana": [50, 50, 50],
+    "attackDamage": [36, 65, 119],
+    "abilityPower": [0, 0, 0],
+    "defense": [54, 54, 54],
+    "attackSpeed": [0.62, 0.62, 0.62],
+    "range": [1, 1, 1],
+    "traits": [
+      "Water"
+    ],
+    "ability": {
+      "name": "Bubble",
+      "description": "Blows bubbles for $value damage.",
+      "type": "DAMAGE",
+      "pattern": "SURROUND",
+      "values": [64, 146, 275],
+      "range": [2, 2, 3]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "marill",
+        "name": "Marill",
+        "role": "TANK",
+        "traits": [
+          "Water"
+        ],
+        "ability": {
+          "name": "Bubble",
+          "description": "Blows bubbles for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SURROUND",
+          "values": [64, 146, 275],
+          "range": [2, 2, 3]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "azumarill",
+        "name": "Azumarill",
+        "role": "TANK",
+        "traits": [
+          "Water"
+        ],
+        "ability": {
+          "name": "Rollout",
+          "description": "Rolls into enemies for $value damage and knockback.",
+          "type": "DAMAGE",
+          "pattern": "LINE",
+          "values": [100, 227, 481],
+          "range": [3, 3, 4],
+          "modifiers": [
+            {
+              "type": "KNOCKBACK",
+              "cells": [1, 1, 1]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "azumarill",
+        "name": "Azumarill",
+        "role": "TANK",
+        "traits": [
+          "Water"
+        ],
+        "ability": {
+          "name": "Rollout",
+          "description": "Rolls into enemies for $value damage and knockback.",
+          "type": "DAMAGE",
+          "pattern": "LINE",
+          "values": [100, 227, 481],
+          "range": [3, 3, 4],
+          "modifiers": [
+            {
+              "type": "KNOCKBACK",
+              "cells": [1, 1, 1]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "togepi",
+    "lineId": "togepi",
+    "name": "Togepi",
+    "cost": 2,
+    "role": "SUPPORT",
+    "maxHealth": [620, 1116, 2046],
+    "maxMana": [60, 60, 60],
+    "attackDamage": [42, 76, 139],
+    "abilityPower": [0, 0, 0],
+    "defense": [25, 25, 25],
+    "attackSpeed": [0.7, 0.7, 0.7],
+    "range": [3, 3, 3],
+    "traits": [
+      "Normal"
+    ],
+    "ability": {
+      "name": "Charm",
+      "description": "Charms nearby enemies, lowering their DEF by $value.",
+      "type": "DEBUFF_DEF",
+      "pattern": "SURROUND",
+      "values": [10, 22, 36],
+      "range": [3, 3, 4]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "togepi",
+        "name": "Togepi",
+        "role": "SUPPORT",
+        "traits": [
+          "Normal"
+        ],
+        "ability": {
+          "name": "Charm",
+          "description": "Charms nearby enemies, lowering their DEF by $value.",
+          "type": "DEBUFF_DEF",
+          "pattern": "SURROUND",
+          "values": [10, 22, 36],
+          "range": [3, 3, 4]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "togetic",
+        "name": "Togetic",
+        "role": "SUPPORT",
+        "traits": [
+          "Normal",
+          "Flying"
+        ],
+        "ability": {
+          "name": "Wish",
+          "description": "Makes a wish that heals the weakest ally for $value.",
+          "type": "HEAL",
+          "pattern": "SINGLE",
+          "values": [206, 456, 1000],
+          "range": [4, 4, 4]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "togekiss",
+        "name": "Togekiss",
+        "role": "SUPPORT",
+        "traits": [
+          "Normal",
+          "Flying"
+        ],
+        "ability": {
+          "name": "Air Slash",
+          "description": "Slashes the air, healing nearby allies for $value.",
+          "type": "HEAL",
+          "pattern": "SURROUND",
+          "values": [190, 420, 920],
+          "range": [4, 4, 4]
+        }
+      }
+    ]
+  },
+  {
+    "id": "natu",
+    "lineId": "natu",
+    "name": "Natu",
+    "cost": 2,
+    "role": "SUPPORT",
+    "maxHealth": [620, 1116, 2046],
+    "maxMana": [60, 60, 60],
+    "attackDamage": [42, 76, 139],
+    "abilityPower": [0, 0, 0],
+    "defense": [25, 25, 25],
+    "attackSpeed": [0.7, 0.7, 0.7],
+    "range": [3, 3, 3],
+    "traits": [
+      "Psychic",
+      "Flying"
+    ],
+    "ability": {
+      "name": "Confuse Ray",
+      "description": "Confuses the target, stunning it for $value seconds.",
+      "type": "STUN",
+      "pattern": "SINGLE",
+      "values": [1, 1, 2],
+      "stunDurationSeconds": [1.5, 1, 2],
+      "range": [3, 3, 4]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "natu",
+        "name": "Natu",
+        "role": "SUPPORT",
+        "traits": [
+          "Psychic",
+          "Flying"
+        ],
+        "ability": {
+          "name": "Confuse Ray",
+          "description": "Confuses the target, stunning it for $value seconds.",
+          "type": "STUN",
+          "pattern": "SINGLE",
+          "values": [1, 1, 2],
+          "stunDurationSeconds": [1.5, 1, 2],
+          "range": [3, 3, 4]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "xatu",
+        "name": "Xatu",
+        "role": "SUPPORT",
+        "traits": [
+          "Psychic",
+          "Flying"
+        ],
+        "ability": {
+          "name": "Future Sight",
+          "description": "Foresees an attack that stuns enemies in a line for $value seconds.",
+          "type": "STUN",
+          "pattern": "LINE",
+          "values": [1, 1, 2],
+          "range": [4, 4, 5]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "xatu",
+        "name": "Xatu",
+        "role": "SUPPORT",
+        "traits": [
+          "Psychic",
+          "Flying"
+        ],
+        "ability": {
+          "name": "Future Sight",
+          "description": "Foresees an attack that stuns enemies in a line for $value seconds.",
+          "type": "STUN",
+          "pattern": "LINE",
+          "values": [1, 1, 2],
+          "range": [4, 4, 5]
+        }
+      }
+    ]
+  },
+  {
+    "id": "sneasel",
+    "lineId": "sneasel",
+    "name": "Sneasel",
+    "cost": 2,
+    "role": "DAMAGE",
+    "maxHealth": [480, 864, 1583],
+    "maxMana": [60, 60, 60],
+    "attackDamage": [68, 122, 224],
+    "abilityPower": [0, 0, 0],
+    "defense": [19, 19, 19],
+    "attackSpeed": [0.78, 0.78, 0.78],
+    "range": [1, 1, 1],
+    "traits": [
+      "Dark",
+      "Ice"
+    ],
+    "ability": {
+      "name": "Quick Attack",
+      "description": "Darts in for $value damage.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [220, 495, 1050],
+      "range": [1, 1, 2],
+      "modifiers": [
+        {
+          "type": "EXECUTE",
+          "hpThreshold": [0.27, 0.33, 0.4],
+          "bonusDamageMultiplier": [0.3, 0.42, 0.6]
+        }
+      ]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "sneasel",
+        "name": "Sneasel",
+        "role": "DAMAGE",
+        "traits": [
+          "Dark",
+          "Ice"
+        ],
+        "ability": {
+          "name": "Quick Attack",
+          "description": "Darts in for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [220, 495, 1050],
+          "range": [1, 1, 2],
+          "modifiers": [
+            {
+              "type": "EXECUTE",
+              "hpThreshold": [0.27, 0.33, 0.4],
+              "bonusDamageMultiplier": [0.3, 0.42, 0.6]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "weavile",
+        "name": "Weavile",
+        "role": "DAMAGE",
+        "traits": [
+          "Dark",
+          "Ice"
+        ],
+        "ability": {
+          "name": "Night Slash",
+          "description": "Slashes through a line from the shadows for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "LINE",
+          "values": [136, 310, 656],
+          "range": [3, 3, 4],
+          "modifiers": [
+            {
+              "type": "EXECUTE",
+              "hpThreshold": [0.3, 0.36, 0.45],
+              "bonusDamageMultiplier": [0.3, 0.45, 0.65]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "weavile",
+        "name": "Weavile",
+        "role": "DAMAGE",
+        "traits": [
+          "Dark",
+          "Ice"
+        ],
+        "ability": {
+          "name": "Night Slash",
+          "description": "Slashes through a line from the shadows for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "LINE",
+          "values": [136, 310, 656],
+          "range": [3, 3, 4],
+          "modifiers": [
+            {
+              "type": "EXECUTE",
+              "hpThreshold": [0.3, 0.36, 0.45],
+              "bonusDamageMultiplier": [0.3, 0.45, 0.65]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "murkrow",
+    "lineId": "murkrow",
+    "name": "Murkrow",
+    "cost": 2,
+    "role": "DAMAGE",
+    "maxHealth": [505, 909, 1666],
+    "maxMana": [60, 60, 60],
+    "attackDamage": [68, 122, 224],
+    "abilityPower": [0, 0, 0],
+    "defense": [19, 19, 19],
+    "attackSpeed": [0.72, 0.72, 0.72],
+    "range": [3, 3, 3],
+    "traits": [
+      "Dark",
+      "Flying"
+    ],
+    "ability": {
+      "name": "Pursuit",
+      "description": "Chases down the target for $value damage.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [220, 495, 1050],
+      "range": [3, 3, 4],
+      "modifiers": [
+        {
+          "type": "EXECUTE",
+          "hpThreshold": [0.27, 0.33, 0.4],
+          "bonusDamageMultiplier": [0.3, 0.42, 0.6]
+        }
+      ]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "murkrow",
+        "name": "Murkrow",
+        "role": "DAMAGE",
+        "traits": [
+          "Dark",
+          "Flying"
+        ],
+        "ability": {
+          "name": "Pursuit",
+          "description": "Chases down the target for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [220, 495, 1050],
+          "range": [3, 3, 4],
+          "modifiers": [
+            {
+              "type": "EXECUTE",
+              "hpThreshold": [0.27, 0.33, 0.4],
+              "bonusDamageMultiplier": [0.3, 0.42, 0.6]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "honchkrow",
+        "name": "Honchkrow",
+        "role": "DAMAGE",
+        "traits": [
+          "Dark",
+          "Flying"
+        ],
+        "ability": {
+          "name": "Sucker Punch",
+          "description": "Strikes first for $value damage, scaling with missing health.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [242, 544, 1155],
+          "range": [3, 3, 4],
+          "modifiers": [
+            {
+              "type": "SCALING",
+              "scalingType": "TARGET_MISSING_HP",
+              "factor": [0.35, 0.45, 0.6]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "honchkrow",
+        "name": "Honchkrow",
+        "role": "DAMAGE",
+        "traits": [
+          "Dark",
+          "Flying"
+        ],
+        "ability": {
+          "name": "Sucker Punch",
+          "description": "Strikes first for $value damage, scaling with missing health.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [242, 544, 1155],
+          "range": [3, 3, 4],
+          "modifiers": [
+            {
+              "type": "SCALING",
+              "scalingType": "TARGET_MISSING_HP",
+              "factor": [0.35, 0.45, 0.6]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "houndour",
+    "lineId": "houndour",
+    "name": "Houndour",
+    "cost": 2,
+    "role": "DAMAGE",
+    "maxHealth": [505, 909, 1666],
+    "maxMana": [60, 60, 60],
+    "attackDamage": [68, 122, 224],
+    "abilityPower": [0, 0, 0],
+    "defense": [19, 19, 19],
+    "attackSpeed": [0.72, 0.72, 0.72],
+    "range": [2, 2, 2],
+    "traits": [
+      "Dark",
+      "Fire"
+    ],
+    "ability": {
+      "name": "Ember",
+      "description": "Spits embers for $value damage and burn.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [220, 495, 1050],
+      "range": [2, 2, 3],
+      "modifiers": [
+        {
+          "type": "DOT",
+          "dotType": "BURN",
+          "damagePerTick": [28, 60, 120],
+          "durationSeconds": [3, 3, 4],
+          "tickIntervalMs": [1000, 1000, 1000]
+        }
+      ]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "houndour",
+        "name": "Houndour",
+        "role": "DAMAGE",
+        "traits": [
+          "Dark",
+          "Fire"
+        ],
+        "ability": {
+          "name": "Ember",
+          "description": "Spits embers for $value damage and burn.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [220, 495, 1050],
+          "range": [2, 2, 3],
+          "modifiers": [
+            {
+              "type": "DOT",
+              "dotType": "BURN",
+              "damagePerTick": [28, 60, 120],
+              "durationSeconds": [3, 3, 4],
+              "tickIntervalMs": [1000, 1000, 1000]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "houndoom",
+        "name": "Houndoom",
+        "role": "DAMAGE",
+        "traits": [
+          "Dark",
+          "Fire"
+        ],
+        "ability": {
+          "name": "Flamethrower",
+          "description": "Sweeps a line with fire for $value damage and burn.",
+          "type": "DAMAGE",
+          "pattern": "LINE",
+          "values": [136, 310, 656],
+          "range": [4, 4, 5],
+          "modifiers": [
+            {
+              "type": "DOT",
+              "dotType": "BURN",
+              "damagePerTick": [28, 60, 120],
+              "durationSeconds": [3, 4, 5],
+              "tickIntervalMs": [1000, 1000, 1000]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "houndoom",
+        "name": "Houndoom",
+        "role": "DAMAGE",
+        "traits": [
+          "Dark",
+          "Fire"
+        ],
+        "ability": {
+          "name": "Flamethrower",
+          "description": "Sweeps a line with fire for $value damage and burn.",
+          "type": "DAMAGE",
+          "pattern": "LINE",
+          "values": [136, 310, 656],
+          "range": [4, 4, 5],
+          "modifiers": [
+            {
+              "type": "DOT",
+              "dotType": "BURN",
+              "damagePerTick": [28, 60, 120],
+              "durationSeconds": [3, 4, 5],
+              "tickIntervalMs": [1000, 1000, 1000]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "swinub",
+    "lineId": "swinub",
+    "name": "Swinub",
+    "cost": 2,
+    "role": "TANK",
+    "maxHealth": [1030, 1854, 3399],
+    "maxMana": [50, 50, 50],
+    "attackDamage": [36, 65, 119],
+    "abilityPower": [0, 0, 0],
+    "defense": [54, 54, 54],
+    "attackSpeed": [0.62, 0.62, 0.62],
+    "range": [1, 1, 1],
+    "traits": [
+      "Ice",
+      "Ground"
+    ],
+    "ability": {
+      "name": "Powder Snow",
+      "description": "Blows powdery snow for $value damage.",
+      "type": "DAMAGE",
+      "pattern": "SURROUND",
+      "values": [64, 146, 275],
+      "range": [2, 2, 3]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "swinub",
+        "name": "Swinub",
+        "role": "TANK",
+        "traits": [
+          "Ice",
+          "Ground"
+        ],
+        "ability": {
+          "name": "Powder Snow",
+          "description": "Blows powdery snow for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SURROUND",
+          "values": [64, 146, 275],
+          "range": [2, 2, 3]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "piloswine",
+        "name": "Piloswine",
+        "role": "TANK",
+        "traits": [
+          "Ice",
+          "Ground"
+        ],
+        "ability": {
+          "name": "Ice Fang",
+          "description": "Bites with frozen fangs for $value damage and a stun.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [145, 327, 693],
+          "range": [1, 1, 2],
+          "modifiers": [
+            {
+              "type": "STUN",
+              "stunSeconds": [1, 1, 1]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "mamoswine",
+        "name": "Mamoswine",
+        "role": "TANK",
+        "traits": [
+          "Ice",
+          "Ground"
+        ],
+        "ability": {
+          "name": "Earthquake",
+          "description": "Shakes the ground for $value damage and knockback.",
+          "type": "DAMAGE",
+          "pattern": "SURROUND",
+          "values": [97, 219, 413],
+          "range": [2, 2, 3],
+          "modifiers": [
+            {
+              "type": "KNOCKBACK",
+              "cells": [1, 1, 1]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "snubbull",
+    "lineId": "snubbull",
+    "name": "Snubbull",
+    "cost": 2,
+    "role": "DAMAGE",
+    "maxHealth": [556, 1000, 1833],
+    "maxMana": [60, 60, 60],
+    "attackDamage": [68, 122, 224],
+    "abilityPower": [0, 0, 0],
+    "defense": [19, 19, 19],
+    "attackSpeed": [0.68, 0.68, 0.68],
+    "range": [1, 1, 1],
+    "traits": [
+      "Normal"
+    ],
+    "ability": {
+      "name": "Scary Face",
+      "description": "Glares and bites for $value damage and a short stun.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [220, 495, 1050],
+      "range": [1, 1, 2],
+      "modifiers": [
+        {
+          "type": "STUN",
+          "stunSeconds": [1, 1, 1]
+        }
+      ]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "snubbull",
+        "name": "Snubbull",
+        "role": "DAMAGE",
+        "traits": [
+          "Normal"
+        ],
+        "ability": {
+          "name": "Scary Face",
+          "description": "Glares and bites for $value damage and a short stun.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [220, 495, 1050],
+          "range": [1, 1, 2],
+          "modifiers": [
+            {
+              "type": "STUN",
+              "stunSeconds": [1, 1, 1]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "granbull",
+        "name": "Granbull",
+        "role": "DAMAGE",
+        "traits": [
+          "Normal"
+        ],
+        "ability": {
+          "name": "Crunch",
+          "description": "Crunches the target for $value damage and knockback.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [242, 544, 1155],
+          "range": [1, 1, 2],
+          "modifiers": [
+            {
+              "type": "KNOCKBACK",
+              "cells": [1, 1, 1]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "granbull",
+        "name": "Granbull",
+        "role": "DAMAGE",
+        "traits": [
+          "Normal"
+        ],
+        "ability": {
+          "name": "Crunch",
+          "description": "Crunches the target for $value damage and knockback.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [242, 544, 1155],
+          "range": [1, 1, 2],
+          "modifiers": [
+            {
+              "type": "KNOCKBACK",
+              "cells": [1, 1, 1]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "shroomish",
+    "lineId": "shroomish",
+    "name": "Shroomish",
+    "cost": 2,
+    "role": "SUPPORT",
+    "maxHealth": [620, 1116, 2046],
+    "maxMana": [60, 60, 60],
+    "attackDamage": [42, 76, 139],
+    "abilityPower": [0, 0, 0],
+    "defense": [25, 25, 25],
+    "attackSpeed": [0.7, 0.7, 0.7],
+    "range": [2, 2, 2],
+    "traits": [
+      "Grass"
+    ],
+    "ability": {
+      "name": "Spore",
+      "description": "Releases spores, putting the target to sleep for $value seconds.",
+      "type": "STUN",
+      "pattern": "SINGLE",
+      "values": [1, 1, 2],
+      "stunDurationSeconds": [2, 1, 2],
+      "range": [3, 3, 4]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "shroomish",
+        "name": "Shroomish",
+        "role": "SUPPORT",
+        "traits": [
+          "Grass"
+        ],
+        "ability": {
+          "name": "Spore",
+          "description": "Releases spores, putting the target to sleep for $value seconds.",
+          "type": "STUN",
+          "pattern": "SINGLE",
+          "values": [1, 1, 2],
+          "stunDurationSeconds": [2, 1, 2],
+          "range": [3, 3, 4]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "breloom",
+        "name": "Breloom",
+        "role": "DAMAGE",
+        "traits": [
+          "Grass",
+          "Fighting"
+        ],
+        "ability": {
+          "name": "Mach Punch",
+          "description": "Throws a lightning-fast punch for $value damage and a stun.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [220, 495, 1050],
+          "range": [1, 1, 2],
+          "modifiers": [
+            {
+              "type": "STUN",
+              "stunSeconds": [1, 1, 2]
+            }
+          ]
+        },
+        "range": [1, 1, 1],
+        "maxHealth": [505, 909, 1666],
+        "maxMana": [60, 60, 60],
+        "attackDamage": [68, 122, 224],
+        "defense": [19, 19, 19],
+        "attackSpeed": [0.72, 0.72, 0.72]
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "breloom",
+        "name": "Breloom",
+        "role": "DAMAGE",
+        "traits": [
+          "Grass",
+          "Fighting"
+        ],
+        "ability": {
+          "name": "Mach Punch",
+          "description": "Throws a lightning-fast punch for $value damage and a stun.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [220, 495, 1050],
+          "range": [1, 1, 2],
+          "modifiers": [
+            {
+              "type": "STUN",
+              "stunSeconds": [1, 1, 2]
+            }
+          ]
+        },
+        "range": [1, 1, 1],
+        "maxHealth": [505, 909, 1666],
+        "maxMana": [60, 60, 60],
+        "attackDamage": [68, 122, 224],
+        "defense": [19, 19, 19],
+        "attackSpeed": [0.72, 0.72, 0.72]
+      }
+    ]
+  },
+  {
+    "id": "makuhita",
+    "lineId": "makuhita",
+    "name": "Makuhita",
+    "cost": 2,
+    "role": "DAMAGE",
+    "maxHealth": [606, 1091, 2000],
+    "maxMana": [60, 60, 60],
+    "attackDamage": [68, 122, 224],
+    "abilityPower": [0, 0, 0],
+    "defense": [27, 27, 27],
+    "attackSpeed": [0.68, 0.68, 0.68],
+    "range": [1, 1, 1],
+    "traits": [
+      "Fighting"
+    ],
+    "ability": {
+      "name": "Arm Thrust",
+      "description": "Slaps rapidly for $value damage.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [220, 495, 1050],
+      "range": [1, 1, 2],
+      "modifiers": [
+        {
+          "type": "KNOCKBACK",
+          "cells": [1, 1, 1]
+        }
+      ]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "makuhita",
+        "name": "Makuhita",
+        "role": "DAMAGE",
+        "traits": [
+          "Fighting"
+        ],
+        "ability": {
+          "name": "Arm Thrust",
+          "description": "Slaps rapidly for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [220, 495, 1050],
+          "range": [1, 1, 2],
+          "modifiers": [
+            {
+              "type": "KNOCKBACK",
+              "cells": [1, 1, 1]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "hariyama",
+        "name": "Hariyama",
+        "role": "DAMAGE",
+        "traits": [
+          "Fighting"
+        ],
+        "ability": {
+          "name": "Force Palm",
+          "description": "Slams a palm strike for $value damage and stun.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [242, 544, 1155],
+          "range": [1, 1, 2],
+          "modifiers": [
+            {
+              "type": "STUN",
+              "stunSeconds": [1, 1, 1]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "hariyama",
+        "name": "Hariyama",
+        "role": "DAMAGE",
+        "traits": [
+          "Fighting"
+        ],
+        "ability": {
+          "name": "Force Palm",
+          "description": "Slams a palm strike for $value damage and stun.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [242, 544, 1155],
+          "range": [1, 1, 2],
+          "modifiers": [
+            {
+              "type": "STUN",
+              "stunSeconds": [1, 1, 1]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "aron",
+    "lineId": "aron",
+    "name": "Aron",
+    "cost": 2,
+    "role": "TANK",
+    "maxHealth": [1030, 1854, 3399],
+    "maxMana": [50, 50, 50],
+    "attackDamage": [36, 65, 119],
+    "abilityPower": [0, 0, 0],
+    "defense": [59, 59, 59],
+    "attackSpeed": [0.62, 0.62, 0.62],
+    "range": [1, 1, 1],
+    "traits": [
+      "Steel",
+      "Rock"
+    ],
+    "ability": {
+      "name": "Headbutt",
+      "description": "Rams the target for $value damage.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [145, 327, 693],
+      "range": [1, 1, 2]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "aron",
+        "name": "Aron",
+        "role": "TANK",
+        "traits": [
+          "Steel",
+          "Rock"
+        ],
+        "ability": {
+          "name": "Headbutt",
+          "description": "Rams the target for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [145, 327, 693],
+          "range": [1, 1, 2]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "lairon",
+        "name": "Lairon",
+        "role": "TANK",
+        "traits": [
+          "Steel",
+          "Rock"
+        ],
+        "ability": {
+          "name": "Iron Defense",
+          "description": "Hardens its armor, gaining $value shield.",
+          "type": "SHIELD",
+          "pattern": "SINGLE",
+          "values": [144, 268, 552],
+          "range": [1, 1, 1]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "aggron",
+        "name": "Aggron",
+        "role": "TANK",
+        "traits": [
+          "Steel",
+          "Rock"
+        ],
+        "ability": {
+          "name": "Heavy Slam",
+          "description": "Crashes down for $value damage and knockback.",
+          "type": "DAMAGE",
+          "pattern": "SURROUND",
+          "values": [97, 219, 413],
+          "range": [2, 2, 3],
+          "modifiers": [
+            {
+              "type": "KNOCKBACK",
+              "cells": [1, 1, 1]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "electrike",
+    "lineId": "electrike",
+    "name": "Electrike",
+    "cost": 2,
+    "role": "DAMAGE",
+    "maxHealth": [505, 909, 1666],
+    "maxMana": [60, 60, 60],
+    "attackDamage": [68, 122, 224],
+    "abilityPower": [0, 0, 0],
+    "defense": [19, 19, 19],
+    "attackSpeed": [0.78, 0.78, 0.78],
+    "range": [2, 2, 2],
+    "traits": [
+      "Electric"
+    ],
+    "ability": {
+      "name": "Spark",
+      "description": "Charges with sparks for $value damage.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [220, 495, 1050],
+      "range": [2, 2, 3]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "electrike",
+        "name": "Electrike",
+        "role": "DAMAGE",
+        "traits": [
+          "Electric"
+        ],
+        "ability": {
+          "name": "Spark",
+          "description": "Charges with sparks for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [220, 495, 1050],
+          "range": [2, 2, 3]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "manectric",
+        "name": "Manectric",
+        "role": "DAMAGE",
+        "traits": [
+          "Electric"
+        ],
+        "ability": {
+          "name": "Thunder",
+          "description": "Calls thunder around the target for $value damage and stun.",
+          "type": "DAMAGE",
+          "pattern": "SURROUND",
+          "values": [123, 278, 525],
+          "range": [2, 3, 3],
+          "targetLimit": [3, 3, 3],
+          "modifiers": [
+            {
+              "type": "STUN",
+              "stunSeconds": [1, 1, 1]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "manectric",
+        "name": "Manectric",
+        "role": "DAMAGE",
+        "traits": [
+          "Electric"
+        ],
+        "ability": {
+          "name": "Thunder",
+          "description": "Calls thunder around the target for $value damage and stun.",
+          "type": "DAMAGE",
+          "pattern": "SURROUND",
+          "values": [123, 278, 525],
+          "range": [2, 3, 3],
+          "targetLimit": [3, 3, 3],
+          "modifiers": [
+            {
+              "type": "STUN",
+              "stunSeconds": [1, 1, 1]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "spheal",
+    "lineId": "spheal",
+    "name": "Spheal",
+    "cost": 2,
+    "role": "TANK",
+    "maxHealth": [1030, 1854, 3399],
+    "maxMana": [50, 50, 50],
+    "attackDamage": [36, 65, 119],
+    "abilityPower": [0, 0, 0],
+    "defense": [54, 54, 54],
+    "attackSpeed": [0.62, 0.62, 0.62],
+    "range": [1, 1, 1],
+    "traits": [
+      "Ice",
+      "Water"
+    ],
+    "ability": {
+      "name": "Powder Snow",
+      "description": "Rolls in powdery snow for $value damage.",
+      "type": "DAMAGE",
+      "pattern": "SURROUND",
+      "values": [64, 146, 275],
+      "range": [2, 2, 3]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "spheal",
+        "name": "Spheal",
+        "role": "TANK",
+        "traits": [
+          "Ice",
+          "Water"
+        ],
+        "ability": {
+          "name": "Powder Snow",
+          "description": "Rolls in powdery snow for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SURROUND",
+          "values": [64, 146, 275],
+          "range": [2, 2, 3]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "sealeo",
+        "name": "Sealeo",
+        "role": "TANK",
+        "traits": [
+          "Ice",
+          "Water"
+        ],
+        "ability": {
+          "name": "Aurora Beam",
+          "description": "Fires a rainbow beam for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "LINE",
+          "values": [93, 211, 447],
+          "range": [3, 3, 4]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "walrein",
+        "name": "Walrein",
+        "role": "TANK",
+        "traits": [
+          "Ice",
+          "Water"
+        ],
+        "ability": {
+          "name": "Hail",
+          "description": "Summons a hailstorm for $value damage and stun.",
+          "type": "DAMAGE",
+          "pattern": "SURROUND",
+          "values": [87, 197, 371],
+          "range": [2, 3, 3],
+          "modifiers": [
+            {
+              "type": "STUN",
+              "stunSeconds": [1, 1, 1]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "snorunt",
+    "lineId": "snorunt",
+    "name": "Snorunt",
+    "cost": 2,
+    "role": "SUPPORT",
+    "maxHealth": [620, 1116, 2046],
+    "maxMana": [60, 60, 60],
+    "attackDamage": [42, 76, 139],
+    "abilityPower": [0, 0, 0],
+    "defense": [25, 25, 25],
+    "attackSpeed": [0.7, 0.7, 0.7],
+    "range": [3, 3, 3],
+    "traits": [
+      "Ice"
+    ],
+    "ability": {
+      "name": "Icy Wind",
+      "description": "Blows a chilling wind, stunning nearby enemies for $value seconds.",
+      "type": "STUN",
+      "pattern": "SURROUND",
+      "values": [1, 1, 2],
+      "stunDurationSeconds": [1.5, 1, 1.5],
+      "range": [3, 3, 4]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "snorunt",
+        "name": "Snorunt",
+        "role": "SUPPORT",
+        "traits": [
+          "Ice"
+        ],
+        "ability": {
+          "name": "Icy Wind",
+          "description": "Blows a chilling wind, stunning nearby enemies for $value seconds.",
+          "type": "STUN",
+          "pattern": "SURROUND",
+          "values": [1, 1, 2],
+          "stunDurationSeconds": [1.5, 1, 1.5],
+          "range": [3, 3, 4]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "glalie",
+        "name": "Glalie",
+        "role": "TANK",
+        "traits": [
+          "Ice"
+        ],
+        "ability": {
+          "name": "Hail",
+          "description": "Calls down hail around it for $value damage and stun.",
+          "type": "DAMAGE",
+          "pattern": "SURROUND",
+          "values": [45, 102, 192],
+          "range": [2, 2, 3],
+          "modifiers": [
+            {
+              "type": "STUN",
+              "stunSeconds": [1, 1, 1]
+            }
+          ]
+        },
+        "range": [1, 1, 1],
+        "branchId": "glalie",
+        "maxHealth": [1030, 1854, 3399],
+        "maxMana": [50, 50, 50],
+        "attackDamage": [36, 65, 119],
+        "defense": [54, 54, 54],
+        "attackSpeed": [0.62, 0.62, 0.62]
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "froslass",
+        "name": "Froslass",
+        "role": "DAMAGE",
+        "traits": [
+          "Ice",
+          "Ghost"
+        ],
+        "ability": {
+          "name": "Ominous Wind",
+          "description": "Sends a ghostly blizzard through a line for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "LINE",
+          "values": [143, 324, 688],
+          "range": [4, 5, 5],
+          "modifiers": [
+            {
+              "type": "EXECUTE",
+              "hpThreshold": [0.27, 0.33, 0.4],
+              "bonusDamageMultiplier": [0.3, 0.42, 0.6]
+            }
+          ]
+        },
+        "range": [3, 3, 3],
+        "branchId": "froslass",
+        "maxHealth": [505, 909, 1666],
+        "maxMana": [60, 60, 60],
+        "attackDamage": [68, 122, 224],
+        "defense": [19, 19, 19],
+        "attackSpeed": [0.76, 0.76, 0.76]
+      }
+    ]
+  },
+  {
+    "id": "phanpy",
+    "lineId": "phanpy",
+    "name": "Phanpy",
+    "cost": 2,
+    "role": "TANK",
+    "maxHealth": [1030, 1854, 3399],
+    "maxMana": [50, 50, 50],
+    "attackDamage": [36, 65, 119],
+    "abilityPower": [0, 0, 0],
+    "defense": [54, 54, 54],
+    "attackSpeed": [0.62, 0.62, 0.62],
+    "range": [1, 1, 1],
+    "traits": [
+      "Ground"
+    ],
+    "ability": {
+      "name": "Rollout",
+      "description": "Rolls into the target for $value damage.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [145, 327, 693],
+      "range": [1, 1, 2]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "phanpy",
+        "name": "Phanpy",
+        "role": "TANK",
+        "traits": [
+          "Ground"
+        ],
+        "ability": {
+          "name": "Rollout",
+          "description": "Rolls into the target for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [145, 327, 693],
+          "range": [1, 1, 2]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "donphan",
+        "name": "Donphan",
+        "role": "TANK",
+        "traits": [
+          "Ground"
+        ],
+        "ability": {
+          "name": "Rapid Spin",
+          "description": "Spins through a line for $value damage and knockback.",
+          "type": "DAMAGE",
+          "pattern": "LINE",
+          "values": [100, 227, 481],
+          "range": [3, 3, 4],
+          "modifiers": [
+            {
+              "type": "KNOCKBACK",
+              "cells": [1, 1, 1]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "donphan",
+        "name": "Donphan",
+        "role": "TANK",
+        "traits": [
+          "Ground"
+        ],
+        "ability": {
+          "name": "Rapid Spin",
+          "description": "Spins through a line for $value damage and knockback.",
+          "type": "DAMAGE",
+          "pattern": "LINE",
+          "values": [100, 227, 481],
+          "range": [3, 3, 4],
+          "modifiers": [
+            {
+              "type": "KNOCKBACK",
+              "cells": [1, 1, 1]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "eevee",
+    "lineId": "eevee",
+    "name": "Eevee",
+    "cost": 3,
+    "role": "DAMAGE",
+    "maxHealth": [690, 1242, 2277],
+    "maxMana": [70, 70, 70],
+    "attackDamage": [95, 171, 314],
+    "abilityPower": [0, 0, 0],
+    "defense": [26, 26, 26],
+    "attackSpeed": [0.73, 0.73, 0.73],
+    "range": [2, 2, 2],
+    "traits": [
+      "Normal"
+    ],
+    "ability": {
+      "name": "Swift",
+      "description": "Fires unerring stars for $value damage.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [240, 540, 1180],
+      "range": [2, 2, 3]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "eevee",
+        "name": "Eevee",
+        "role": "DAMAGE",
+        "traits": [
+          "Normal"
+        ],
+        "ability": {
+          "name": "Swift",
+          "description": "Fires unerring stars for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [240, 540, 1180],
+          "range": [2, 2, 3]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "vaporeon",
+        "name": "Vaporeon",
+        "role": "TANK",
+        "traits": [
+          "Water"
+        ],
+        "ability": {
+          "name": "Aqua Ring",
+          "description": "Surrounds itself in water, gaining $value shield.",
+          "type": "SHIELD",
+          "pattern": "SINGLE",
+          "values": [220, 406, 761],
+          "range": [1, 1, 1]
+        },
+        "range": [1, 1, 1],
+        "branchId": "vaporeon",
+        "maxHealth": [1312, 2362, 4331],
+        "maxMana": [65, 65, 65],
+        "attackDamage": [47, 85, 155],
+        "defense": [62, 62, 62],
+        "attackSpeed": [0.65, 0.65, 0.65]
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "jolteon",
+        "name": "Jolteon",
+        "role": "DAMAGE",
+        "traits": [
+          "Electric"
+        ],
+        "ability": {
+          "name": "Thunderbolt",
+          "description": "Fires a bolt of lightning for $value damage and a short stun.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [240, 540, 1180],
+          "range": [3, 3, 4],
+          "modifiers": [
+            {
+              "type": "STUN",
+              "stunSeconds": [1, 1, 1]
+            }
+          ]
+        },
+        "range": [3, 3, 3],
+        "branchId": "jolteon",
+        "maxHealth": [621, 1118, 2049],
+        "maxMana": [70, 70, 70],
+        "attackDamage": [81, 145, 266],
+        "defense": [26, 26, 26],
+        "attackSpeed": [0.88, 0.88, 0.88]
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "flareon",
+        "name": "Flareon",
+        "role": "DAMAGE",
+        "traits": [
+          "Fire"
+        ],
+        "ability": {
+          "name": "Flare Blitz",
+          "description": "Charges in a blaze for $value damage and burn.",
+          "type": "DAMAGE",
+          "pattern": "SURROUND",
+          "values": [139, 315, 662],
+          "range": [2, 2, 3],
+          "modifiers": [
+            {
+              "type": "DOT",
+              "dotType": "BURN",
+              "damagePerTick": [30, 65, 130],
+              "durationSeconds": [3, 3, 4],
+              "tickIntervalMs": [1000, 1000, 1000]
+            }
+          ]
+        },
+        "range": [1, 1, 1],
+        "branchId": "flareon",
+        "maxHealth": [759, 1366, 2505],
+        "maxMana": [70, 70, 70],
+        "attackDamage": [109, 197, 361],
+        "defense": [26, 26, 26],
+        "attackSpeed": [0.73, 0.73, 0.73]
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "espeon",
+        "name": "Espeon",
+        "role": "DAMAGE",
+        "traits": [
+          "Psychic"
+        ],
+        "ability": {
+          "name": "Psychic",
+          "description": "Blasts a line with psychic power for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "LINE",
+          "values": [161, 368, 793],
+          "range": [5, 5, 6],
+          "modifiers": [
+            {
+              "type": "SCALING",
+              "scalingType": "TARGET_MAX_HP_PERCENT",
+              "factor": [0.03, 0.04, 0.06]
+            }
+          ]
+        },
+        "range": [3, 3, 3],
+        "branchId": "espeon",
+        "maxHealth": [621, 1118, 2049],
+        "maxMana": [60, 60, 60],
+        "attackDamage": [95, 171, 314],
+        "defense": [26, 26, 26],
+        "attackSpeed": [0.73, 0.73, 0.73]
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "umbreon",
+        "name": "Umbreon",
+        "role": "TANK",
+        "traits": [
+          "Dark"
+        ],
+        "ability": {
+          "name": "Moonlight",
+          "description": "Bathes nearby allies in moonlight, healing them for $value.",
+          "type": "HEAL",
+          "pattern": "SURROUND",
+          "values": [158, 342, 774],
+          "range": [3, 3, 4]
+        },
+        "range": [1, 1, 1],
+        "branchId": "umbreon",
+        "maxHealth": [1250, 2250, 4125],
+        "maxMana": [65, 65, 65],
+        "attackDamage": [47, 85, 155],
+        "defense": [68, 68, 68],
+        "attackSpeed": [0.65, 0.65, 0.65]
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "leafeon",
+        "name": "Leafeon",
+        "role": "DAMAGE",
+        "traits": [
+          "Grass"
+        ],
+        "ability": {
+          "name": "Leaf Blade",
+          "description": "Slashes with a leaf blade for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [252, 567, 1239],
+          "range": [1, 1, 2],
+          "modifiers": [
+            {
+              "type": "EXECUTE",
+              "hpThreshold": [0.27, 0.33, 0.4],
+              "bonusDamageMultiplier": [0.3, 0.42, 0.6]
+            }
+          ]
+        },
+        "range": [1, 1, 1],
+        "branchId": "leafeon",
+        "maxHealth": [690, 1242, 2277],
+        "maxMana": [70, 70, 70],
+        "attackDamage": [105, 188, 345],
+        "defense": [26, 26, 26],
+        "attackSpeed": [0.73, 0.73, 0.73]
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "glaceon",
+        "name": "Glaceon",
+        "role": "SUPPORT",
+        "traits": [
+          "Ice"
+        ],
+        "ability": {
+          "name": "Blizzard",
+          "description": "Summons a blizzard, freezing nearby enemies for $value seconds.",
+          "type": "STUN",
+          "pattern": "SURROUND",
+          "values": [1, 1, 2],
+          "stunDurationSeconds": [1.5, 1.5, 2],
+          "range": [3, 3, 4]
+        },
+        "range": [3, 3, 3],
+        "branchId": "glaceon",
+        "maxHealth": [790, 1422, 2607],
+        "maxMana": [80, 80, 80],
+        "attackDamage": [46, 83, 152],
+        "defense": [35, 35, 35],
+        "attackSpeed": [0.68, 0.68, 0.68]
+      }
+    ]
+  },
+  {
+    "id": "ralts",
+    "lineId": "ralts",
+    "name": "Ralts",
+    "cost": 3,
+    "role": "SUPPORT",
+    "maxHealth": [790, 1422, 2607],
+    "maxMana": [80, 80, 80],
+    "attackDamage": [46, 83, 152],
+    "abilityPower": [0, 0, 0],
+    "defense": [35, 35, 35],
+    "attackSpeed": [0.68, 0.68, 0.68],
+    "range": [3, 3, 3],
+    "traits": [
+      "Psychic"
+    ],
+    "ability": {
+      "name": "Confusion",
+      "description": "Confuses the target, stunning it for $value seconds.",
+      "type": "STUN",
+      "pattern": "SINGLE",
+      "values": [1, 1, 2],
+      "stunDurationSeconds": [2, 2, 2],
+      "range": [3, 3, 4]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "ralts",
+        "name": "Ralts",
+        "role": "SUPPORT",
+        "traits": [
+          "Psychic"
+        ],
+        "ability": {
+          "name": "Confusion",
+          "description": "Confuses the target, stunning it for $value seconds.",
+          "type": "STUN",
+          "pattern": "SINGLE",
+          "values": [1, 1, 2],
+          "stunDurationSeconds": [2, 2, 2],
+          "range": [3, 3, 4]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "kirlia",
+        "name": "Kirlia",
+        "role": "SUPPORT",
+        "traits": [
+          "Psychic"
+        ],
+        "ability": {
+          "name": "Calm Mind",
+          "description": "Focuses nearby allies, raising their ATK by $value%.",
+          "type": "BUFF_ATK",
+          "pattern": "SURROUND",
+          "values": [15, 22, 36],
+          "range": [3, 3, 4]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "gardevoir",
+        "name": "Gardevoir",
+        "role": "SUPPORT",
+        "traits": [
+          "Psychic"
+        ],
+        "ability": {
+          "name": "Heal Pulse",
+          "description": "Emits a healing pulse that restores $value health to allies.",
+          "type": "HEAL",
+          "pattern": "SURROUND",
+          "values": [210, 456, 1032],
+          "range": [4, 4, 4]
+        },
+        "branchId": "gardevoir",
+        "maxHealth": [790, 1422, 2607],
+        "maxMana": [80, 80, 80],
+        "attackDamage": [46, 83, 152],
+        "defense": [35, 35, 35],
+        "attackSpeed": [0.68, 0.68, 0.68]
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "gallade",
+        "name": "Gallade",
+        "role": "DAMAGE",
+        "traits": [
+          "Psychic",
+          "Fighting"
+        ],
+        "ability": {
+          "name": "Psycho Cut",
+          "description": "Cuts through a line with psychic blades for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "LINE",
+          "values": [154, 352, 759],
+          "range": [3, 3, 4],
+          "modifiers": [
+            {
+              "type": "EXECUTE",
+              "hpThreshold": [0.27, 0.33, 0.4],
+              "bonusDamageMultiplier": [0.3, 0.42, 0.6]
+            }
+          ]
+        },
+        "range": [1, 1, 1],
+        "branchId": "gallade",
+        "maxHealth": [690, 1242, 2277],
+        "maxMana": [70, 70, 70],
+        "attackDamage": [105, 188, 345],
+        "defense": [26, 26, 26],
+        "attackSpeed": [0.73, 0.73, 0.73]
+      }
+    ]
+  },
+  {
+    "id": "larvitar",
+    "lineId": "larvitar",
+    "name": "Larvitar",
+    "cost": 3,
+    "role": "DAMAGE",
+    "maxHealth": [828, 1490, 2732],
+    "maxMana": [70, 70, 70],
+    "attackDamage": [95, 171, 314],
+    "abilityPower": [0, 0, 0],
+    "defense": [34, 34, 34],
+    "attackSpeed": [0.73, 0.73, 0.73],
+    "range": [1, 1, 1],
+    "traits": [
+      "Rock",
+      "Ground"
+    ],
+    "ability": {
+      "name": "Rock Slide",
+      "description": "Drops rocks on the target for $value damage.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [240, 540, 1180],
+      "range": [1, 1, 2]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "larvitar",
+        "name": "Larvitar",
+        "role": "DAMAGE",
+        "traits": [
+          "Rock",
+          "Ground"
+        ],
+        "ability": {
+          "name": "Rock Slide",
+          "description": "Drops rocks on the target for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [240, 540, 1180],
+          "range": [1, 1, 2]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "pupitar",
+        "name": "Pupitar",
+        "role": "TANK",
+        "traits": [
+          "Rock",
+          "Ground"
+        ],
+        "ability": {
+          "name": "Sandstorm",
+          "description": "Whips up a sandstorm for $value damage around it.",
+          "type": "DAMAGE",
+          "pattern": "SURROUND",
+          "values": [65, 149, 312],
+          "range": [2, 2, 3]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "tyranitar",
+        "name": "Tyranitar",
+        "role": "DAMAGE",
+        "traits": [
+          "Rock",
+          "Dark"
+        ],
+        "ability": {
+          "name": "Stone Edge",
+          "description": "Rakes stone edges through a line for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "LINE",
+          "values": [161, 368, 793],
+          "range": [3, 3, 4],
+          "modifiers": [
+            {
+              "type": "EXECUTE",
+              "hpThreshold": [0.3, 0.38, 0.48],
+              "bonusDamageMultiplier": [0.4, 0.6, 0.9]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "bagon",
+    "lineId": "bagon",
+    "name": "Bagon",
+    "cost": 3,
+    "role": "DAMAGE",
+    "maxHealth": [690, 1242, 2277],
+    "maxMana": [70, 70, 70],
+    "attackDamage": [95, 171, 314],
+    "abilityPower": [0, 0, 0],
+    "defense": [26, 26, 26],
+    "attackSpeed": [0.73, 0.73, 0.73],
+    "range": [1, 1, 1],
+    "traits": [
+      "Dragon"
+    ],
+    "ability": {
+      "name": "Headbutt",
+      "description": "Rams the target for $value damage.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [240, 540, 1180],
+      "range": [1, 1, 2]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "bagon",
+        "name": "Bagon",
+        "role": "DAMAGE",
+        "traits": [
+          "Dragon"
+        ],
+        "ability": {
+          "name": "Headbutt",
+          "description": "Rams the target for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [240, 540, 1180],
+          "range": [1, 1, 2]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "shelgon",
+        "name": "Shelgon",
+        "role": "TANK",
+        "traits": [
+          "Dragon"
+        ],
+        "ability": {
+          "name": "Protect",
+          "description": "Shields itself, gaining $value shield.",
+          "type": "SHIELD",
+          "pattern": "SINGLE",
+          "values": [169, 312, 585],
+          "range": [1, 1, 1]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "salamence",
+        "name": "Salamence",
+        "role": "DAMAGE",
+        "traits": [
+          "Dragon",
+          "Flying"
+        ],
+        "ability": {
+          "name": "Outrage",
+          "description": "Rampages around it for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SURROUND",
+          "values": [158, 360, 756],
+          "range": [2, 2, 3],
+          "modifiers": [
+            {
+              "type": "SCALING",
+              "scalingType": "CASTER_MISSING_HP",
+              "factor": [0.55, 0.75, 1.0]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "beldum",
+    "lineId": "beldum",
+    "name": "Beldum",
+    "cost": 3,
+    "role": "TANK",
+    "maxHealth": [1250, 2250, 4125],
+    "maxMana": [65, 65, 65],
+    "attackDamage": [47, 85, 155],
+    "abilityPower": [0, 0, 0],
+    "defense": [62, 62, 62],
+    "attackSpeed": [0.65, 0.65, 0.65],
+    "range": [1, 1, 1],
+    "traits": [
+      "Steel",
+      "Psychic"
+    ],
+    "ability": {
+      "name": "Take Down",
+      "description": "Slams the target for $value damage and knockback.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [158, 356, 779],
+      "range": [1, 1, 2],
+      "modifiers": [
+        {
+          "type": "KNOCKBACK",
+          "cells": [1, 1, 1]
+        }
+      ]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "beldum",
+        "name": "Beldum",
+        "role": "TANK",
+        "traits": [
+          "Steel",
+          "Psychic"
+        ],
+        "ability": {
+          "name": "Take Down",
+          "description": "Slams the target for $value damage and knockback.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [158, 356, 779],
+          "range": [1, 1, 2],
+          "modifiers": [
+            {
+              "type": "KNOCKBACK",
+              "cells": [1, 1, 1]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "metang",
+        "name": "Metang",
+        "role": "TANK",
+        "traits": [
+          "Steel",
+          "Psychic"
+        ],
+        "ability": {
+          "name": "Metal Claw",
+          "description": "Rakes with steel claws for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SURROUND",
+          "values": [87, 198, 416],
+          "range": [2, 2, 3]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "metagross",
+        "name": "Metagross",
+        "role": "TANK",
+        "traits": [
+          "Steel",
+          "Psychic"
+        ],
+        "ability": {
+          "name": "Meteor Mash",
+          "description": "Smashes down like a meteor for $value damage and stun.",
+          "type": "DAMAGE",
+          "pattern": "SURROUND",
+          "values": [109, 248, 520],
+          "range": [2, 2, 3],
+          "modifiers": [
+            {
+              "type": "STUN",
+              "stunSeconds": [1, 1, 1]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "trapinch",
+    "lineId": "trapinch",
+    "name": "Trapinch",
+    "cost": 3,
+    "role": "DAMAGE",
+    "maxHealth": [690, 1242, 2277],
+    "maxMana": [70, 70, 70],
+    "attackDamage": [95, 171, 314],
+    "abilityPower": [0, 0, 0],
+    "defense": [26, 26, 26],
+    "attackSpeed": [0.73, 0.73, 0.73],
+    "range": [3, 3, 3],
+    "traits": [
+      "Ground"
+    ],
+    "ability": {
+      "name": "Sand Tomb",
+      "description": "Traps the target in sand for $value damage over time.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [216, 486, 1062],
+      "range": [3, 3, 4],
+      "modifiers": [
+        {
+          "type": "DOT",
+          "dotType": "BURN",
+          "damagePerTick": [24, 52, 104],
+          "durationSeconds": [3, 3, 4],
+          "tickIntervalMs": [1000, 1000, 1000]
+        }
+      ]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "trapinch",
+        "name": "Trapinch",
+        "role": "DAMAGE",
+        "traits": [
+          "Ground"
+        ],
+        "ability": {
+          "name": "Sand Tomb",
+          "description": "Traps the target in sand for $value damage over time.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [216, 486, 1062],
+          "range": [3, 3, 4],
+          "modifiers": [
+            {
+              "type": "DOT",
+              "dotType": "BURN",
+              "damagePerTick": [24, 52, 104],
+              "durationSeconds": [3, 3, 4],
+              "tickIntervalMs": [1000, 1000, 1000]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "vibrava",
+        "name": "Vibrava",
+        "role": "DAMAGE",
+        "traits": [
+          "Ground",
+          "Dragon"
+        ],
+        "ability": {
+          "name": "Dragon Breath",
+          "description": "Breathes draconic fire through a line for $value damage and stun.",
+          "type": "DAMAGE",
+          "pattern": "LINE",
+          "values": [140, 320, 690],
+          "range": [5, 5, 6],
+          "modifiers": [
+            {
+              "type": "STUN",
+              "stunSeconds": [1, 1, 1]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "flygon",
+        "name": "Flygon",
+        "role": "DAMAGE",
+        "traits": [
+          "Ground",
+          "Dragon"
+        ],
+        "ability": {
+          "name": "Earth Power",
+          "description": "Makes the ground erupt for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "LINE",
+          "values": [161, 368, 793],
+          "range": [5, 5, 6],
+          "modifiers": [
+            {
+              "type": "KNOCKBACK",
+              "cells": [1, 1, 1]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "gligar",
+    "lineId": "gligar",
+    "name": "Gligar",
+    "cost": 3,
+    "role": "DAMAGE",
+    "maxHealth": [690, 1242, 2277],
+    "maxMana": [70, 70, 70],
+    "attackDamage": [95, 171, 314],
+    "abilityPower": [0, 0, 0],
+    "defense": [26, 26, 26],
+    "attackSpeed": [0.77, 0.77, 0.77],
+    "range": [1, 1, 1],
+    "traits": [
+      "Ground",
+      "Flying"
+    ],
+    "ability": {
+      "name": "Poison Jab",
+      "description": "Stings the target for $value damage and poison.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [240, 540, 1180],
+      "range": [1, 1, 2],
+      "modifiers": [
+        {
+          "type": "DOT",
+          "dotType": "POISON",
+          "damagePerTick": [30, 65, 130],
+          "durationSeconds": [3, 3, 4],
+          "tickIntervalMs": [1000, 1000, 1000]
+        }
+      ]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "gligar",
+        "name": "Gligar",
+        "role": "DAMAGE",
+        "traits": [
+          "Ground",
+          "Flying"
+        ],
+        "ability": {
+          "name": "Poison Jab",
+          "description": "Stings the target for $value damage and poison.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [240, 540, 1180],
+          "range": [1, 1, 2],
+          "modifiers": [
+            {
+              "type": "DOT",
+              "dotType": "POISON",
+              "damagePerTick": [30, 65, 130],
+              "durationSeconds": [3, 3, 4],
+              "tickIntervalMs": [1000, 1000, 1000]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "gliscor",
+        "name": "Gliscor",
+        "role": "DAMAGE",
+        "traits": [
+          "Ground",
+          "Flying"
+        ],
+        "ability": {
+          "name": "X-Scissor",
+          "description": "Cross-cuts the target for $value damage and poison.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [264, 594, 1298],
+          "range": [1, 1, 2],
+          "modifiers": [
+            {
+              "type": "DOT",
+              "dotType": "POISON",
+              "damagePerTick": [30, 65, 130],
+              "durationSeconds": [3, 3, 4],
+              "tickIntervalMs": [1000, 1000, 1000]
+            },
+            {
+              "type": "EXECUTE",
+              "hpThreshold": [0.27, 0.33, 0.4],
+              "bonusDamageMultiplier": [0.3, 0.42, 0.6]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "gliscor",
+        "name": "Gliscor",
+        "role": "DAMAGE",
+        "traits": [
+          "Ground",
+          "Flying"
+        ],
+        "ability": {
+          "name": "X-Scissor",
+          "description": "Cross-cuts the target for $value damage and poison.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [264, 594, 1298],
+          "range": [1, 1, 2],
+          "modifiers": [
+            {
+              "type": "DOT",
+              "dotType": "POISON",
+              "damagePerTick": [30, 65, 130],
+              "durationSeconds": [3, 3, 4],
+              "tickIntervalMs": [1000, 1000, 1000]
+            },
+            {
+              "type": "EXECUTE",
+              "hpThreshold": [0.27, 0.33, 0.4],
+              "bonusDamageMultiplier": [0.3, 0.42, 0.6]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "misdreavus",
+    "lineId": "misdreavus",
+    "name": "Misdreavus",
+    "cost": 3,
+    "role": "DAMAGE",
+    "maxHealth": [690, 1242, 2277],
+    "maxMana": [65, 65, 65],
+    "attackDamage": [95, 171, 314],
+    "abilityPower": [0, 0, 0],
+    "defense": [26, 26, 26],
+    "attackSpeed": [0.73, 0.73, 0.73],
+    "range": [3, 3, 3],
+    "traits": [
+      "Ghost"
+    ],
+    "ability": {
+      "name": "Shadow Ball",
+      "description": "Hurls a shadowy blob for $value damage.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [240, 540, 1180],
+      "range": [3, 3, 4]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "misdreavus",
+        "name": "Misdreavus",
+        "role": "DAMAGE",
+        "traits": [
+          "Ghost"
+        ],
+        "ability": {
+          "name": "Shadow Ball",
+          "description": "Hurls a shadowy blob for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [240, 540, 1180],
+          "range": [3, 3, 4]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "mismagius",
+        "name": "Mismagius",
+        "role": "DAMAGE",
+        "traits": [
+          "Ghost"
+        ],
+        "ability": {
+          "name": "Mystical Fire",
+          "description": "Casts spectral flames through a line for $value damage and burn.",
+          "type": "DAMAGE",
+          "pattern": "LINE",
+          "values": [154, 352, 759],
+          "range": [5, 5, 6],
+          "modifiers": [
+            {
+              "type": "DOT",
+              "dotType": "BURN",
+              "damagePerTick": [30, 65, 130],
+              "durationSeconds": [3, 3, 4],
+              "tickIntervalMs": [1000, 1000, 1000]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "mismagius",
+        "name": "Mismagius",
+        "role": "DAMAGE",
+        "traits": [
+          "Ghost"
+        ],
+        "ability": {
+          "name": "Mystical Fire",
+          "description": "Casts spectral flames through a line for $value damage and burn.",
+          "type": "DAMAGE",
+          "pattern": "LINE",
+          "values": [154, 352, 759],
+          "range": [5, 5, 6],
+          "modifiers": [
+            {
+              "type": "DOT",
+              "dotType": "BURN",
+              "damagePerTick": [30, 65, 130],
+              "durationSeconds": [3, 3, 4],
+              "tickIntervalMs": [1000, 1000, 1000]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "duskull",
+    "lineId": "duskull",
+    "name": "Duskull",
+    "cost": 3,
+    "role": "TANK",
+    "maxHealth": [1250, 2250, 4125],
+    "maxMana": [65, 65, 65],
+    "attackDamage": [47, 85, 155],
+    "abilityPower": [0, 0, 0],
+    "defense": [62, 62, 62],
+    "attackSpeed": [0.65, 0.65, 0.65],
+    "range": [1, 1, 1],
+    "traits": [
+      "Ghost"
+    ],
+    "ability": {
+      "name": "Night Shade",
+      "description": "Haunts the target for $value damage.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [158, 356, 779],
+      "range": [1, 1, 2]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "duskull",
+        "name": "Duskull",
+        "role": "TANK",
+        "traits": [
+          "Ghost"
+        ],
+        "ability": {
+          "name": "Night Shade",
+          "description": "Haunts the target for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [158, 356, 779],
+          "range": [1, 1, 2]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "dusclops",
+        "name": "Dusclops",
+        "role": "TANK",
+        "traits": [
+          "Ghost"
+        ],
+        "ability": {
+          "name": "Confuse Ray",
+          "description": "Confuses nearby enemies, stunning them for $value seconds.",
+          "type": "STUN",
+          "pattern": "SURROUND",
+          "values": [1, 1, 2],
+          "range": [2, 2, 3]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "dusknoir",
+        "name": "Dusknoir",
+        "role": "TANK",
+        "traits": [
+          "Ghost"
+        ],
+        "ability": {
+          "name": "Shadow Punch",
+          "description": "Throws an unavoidable shadow punch for $value damage and drains life.",
+          "type": "DAMAGE",
+          "pattern": "SURROUND",
+          "values": [109, 248, 520],
+          "range": [2, 2, 3],
+          "modifiers": [
+            {
+              "type": "LIFESTEAL",
+              "lifestealPercent": [0.35, 0.42, 0.52]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "carvanha",
+    "lineId": "carvanha",
+    "name": "Carvanha",
+    "cost": 3,
+    "role": "DAMAGE",
+    "maxHealth": [621, 1118, 2049],
+    "maxMana": [70, 70, 70],
+    "attackDamage": [95, 171, 314],
+    "abilityPower": [0, 0, 0],
+    "defense": [26, 26, 26],
+    "attackSpeed": [0.79, 0.79, 0.79],
+    "range": [1, 1, 1],
+    "traits": [
+      "Water",
+      "Dark"
+    ],
+    "ability": {
+      "name": "Bite",
+      "description": "Bites the target for $value damage.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [240, 540, 1180],
+      "range": [1, 1, 2],
+      "modifiers": [
+        {
+          "type": "LIFESTEAL",
+          "lifestealPercent": [0.35, 0.42, 0.52]
+        }
+      ]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "carvanha",
+        "name": "Carvanha",
+        "role": "DAMAGE",
+        "traits": [
+          "Water",
+          "Dark"
+        ],
+        "ability": {
+          "name": "Bite",
+          "description": "Bites the target for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [240, 540, 1180],
+          "range": [1, 1, 2],
+          "modifiers": [
+            {
+              "type": "LIFESTEAL",
+              "lifestealPercent": [0.35, 0.42, 0.52]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "sharpedo",
+        "name": "Sharpedo",
+        "role": "DAMAGE",
+        "traits": [
+          "Water",
+          "Dark"
+        ],
+        "ability": {
+          "name": "Crunch",
+          "description": "Tears into the target for $value damage, scaling with missing health.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [276, 621, 1357],
+          "range": [1, 1, 2],
+          "modifiers": [
+            {
+              "type": "SCALING",
+              "scalingType": "TARGET_MISSING_HP",
+              "factor": [0.35, 0.45, 0.6]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "sharpedo",
+        "name": "Sharpedo",
+        "role": "DAMAGE",
+        "traits": [
+          "Water",
+          "Dark"
+        ],
+        "ability": {
+          "name": "Crunch",
+          "description": "Tears into the target for $value damage, scaling with missing health.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [276, 621, 1357],
+          "range": [1, 1, 2],
+          "modifiers": [
+            {
+              "type": "SCALING",
+              "scalingType": "TARGET_MISSING_HP",
+              "factor": [0.35, 0.45, 0.6]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "swablu",
+    "lineId": "swablu",
+    "name": "Swablu",
+    "cost": 3,
+    "role": "SUPPORT",
+    "maxHealth": [790, 1422, 2607],
+    "maxMana": [80, 80, 80],
+    "attackDamage": [46, 83, 152],
+    "abilityPower": [0, 0, 0],
+    "defense": [35, 35, 35],
+    "attackSpeed": [0.68, 0.68, 0.68],
+    "range": [3, 3, 3],
+    "traits": [
+      "Normal",
+      "Flying"
+    ],
+    "ability": {
+      "name": "Sing",
+      "description": "Sings a lullaby, putting nearby enemies to sleep for $value seconds.",
+      "type": "STUN",
+      "pattern": "SURROUND",
+      "values": [1, 1, 2],
+      "stunDurationSeconds": [1.5, 1.5, 2],
+      "range": [3, 3, 4]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "swablu",
+        "name": "Swablu",
+        "role": "SUPPORT",
+        "traits": [
+          "Normal",
+          "Flying"
+        ],
+        "ability": {
+          "name": "Sing",
+          "description": "Sings a lullaby, putting nearby enemies to sleep for $value seconds.",
+          "type": "STUN",
+          "pattern": "SURROUND",
+          "values": [1, 1, 2],
+          "stunDurationSeconds": [1.5, 1.5, 2],
+          "range": [3, 3, 4]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "altaria",
+        "name": "Altaria",
+        "role": "SUPPORT",
+        "traits": [
+          "Dragon",
+          "Flying"
+        ],
+        "ability": {
+          "name": "Dragon Dance",
+          "description": "Leads a mystic dance that raises allied ATK by $value%.",
+          "type": "BUFF_ATK",
+          "pattern": "SURROUND",
+          "values": [16, 24, 40],
+          "range": [4, 4, 4]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "altaria",
+        "name": "Altaria",
+        "role": "SUPPORT",
+        "traits": [
+          "Dragon",
+          "Flying"
+        ],
+        "ability": {
+          "name": "Dragon Dance",
+          "description": "Leads a mystic dance that raises allied ATK by $value%.",
+          "type": "BUFF_ATK",
+          "pattern": "SURROUND",
+          "values": [16, 24, 40],
+          "range": [4, 4, 4]
+        }
+      }
+    ]
+  },
+  {
+    "id": "feebas",
+    "lineId": "feebas",
+    "name": "Feebas",
+    "cost": 3,
+    "role": "SUPPORT",
+    "maxHealth": [790, 1422, 2607],
+    "maxMana": [80, 80, 80],
+    "attackDamage": [46, 83, 152],
+    "abilityPower": [0, 0, 0],
+    "defense": [35, 35, 35],
+    "attackSpeed": [0.68, 0.68, 0.68],
+    "range": [3, 3, 3],
+    "traits": [
+      "Water"
+    ],
+    "ability": {
+      "name": "Flail",
+      "description": "Flails wildly for $value damage, scaling with its missing health.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [192, 432, 944],
+      "range": [3, 3, 4],
+      "modifiers": [
+        {
+          "type": "SCALING",
+          "scalingType": "CASTER_MISSING_HP",
+          "factor": [0.55, 0.75, 1.0]
+        }
+      ]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "feebas",
+        "name": "Feebas",
+        "role": "SUPPORT",
+        "traits": [
+          "Water"
+        ],
+        "ability": {
+          "name": "Flail",
+          "description": "Flails wildly for $value damage, scaling with its missing health.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [192, 432, 944],
+          "range": [3, 3, 4],
+          "modifiers": [
+            {
+              "type": "SCALING",
+              "scalingType": "CASTER_MISSING_HP",
+              "factor": [0.55, 0.75, 1.0]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "milotic",
+        "name": "Milotic",
+        "role": "SUPPORT",
+        "traits": [
+          "Water"
+        ],
+        "ability": {
+          "name": "Recover",
+          "description": "Restores $value health to nearby allies.",
+          "type": "HEAL",
+          "pattern": "SURROUND",
+          "values": [201, 437, 989],
+          "range": [4, 4, 4]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "milotic",
+        "name": "Milotic",
+        "role": "SUPPORT",
+        "traits": [
+          "Water"
+        ],
+        "ability": {
+          "name": "Recover",
+          "description": "Restores $value health to nearby allies.",
+          "type": "HEAL",
+          "pattern": "SURROUND",
+          "values": [201, 437, 989],
+          "range": [4, 4, 4]
+        }
+      }
+    ]
+  },
+  {
+    "id": "slakoth",
+    "lineId": "slakoth",
+    "name": "Slakoth",
+    "cost": 3,
+    "role": "DAMAGE",
+    "maxHealth": [793, 1428, 2619],
+    "maxMana": [80, 80, 80],
+    "attackDamage": [105, 188, 345],
+    "abilityPower": [0, 0, 0],
+    "defense": [26, 26, 26],
+    "attackSpeed": [0.67, 0.67, 0.67],
+    "range": [1, 1, 1],
+    "traits": [
+      "Normal"
+    ],
+    "ability": {
+      "name": "Yawn",
+      "description": "Yawns, then bonks the target for $value damage and a stun.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [240, 540, 1180],
+      "range": [1, 1, 2],
+      "modifiers": [
+        {
+          "type": "STUN",
+          "stunSeconds": [1, 1, 1]
+        }
+      ]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "slakoth",
+        "name": "Slakoth",
+        "role": "DAMAGE",
+        "traits": [
+          "Normal"
+        ],
+        "ability": {
+          "name": "Yawn",
+          "description": "Yawns, then bonks the target for $value damage and a stun.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [240, 540, 1180],
+          "range": [1, 1, 2],
+          "modifiers": [
+            {
+              "type": "STUN",
+              "stunSeconds": [1, 1, 1]
+            }
+          ]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "vigoroth",
+        "name": "Vigoroth",
+        "role": "DAMAGE",
+        "traits": [
+          "Normal"
+        ],
+        "ability": {
+          "name": "Fury Swipes",
+          "description": "Swipes frantically around it for $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SURROUND",
+          "values": [139, 315, 662],
+          "range": [2, 2, 3]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "slaking",
+        "name": "Slaking",
+        "role": "DAMAGE",
+        "traits": [
+          "Normal"
+        ],
+        "ability": {
+          "name": "Giga Impact",
+          "description": "Unleashes a colossal blow for $value damage and knockback.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [312, 702, 1534],
+          "range": [1, 1, 2],
+          "modifiers": [
+            {
+              "type": "KNOCKBACK",
+              "cells": [1, 2, 2]
+            },
+            {
+              "type": "SCALING",
+              "scalingType": "TARGET_MAX_HP_PERCENT",
+              "factor": [0.03, 0.04, 0.06]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "scizor",
+    "lineId": "scizor",
+    "name": "Scizor",
+    "cost": 4,
+    "role": "DAMAGE",
+    "maxHealth": [800, 1440, 2592],
+    "maxMana": [75, 75, 75],
+    "attackDamage": [104, 187, 337],
+    "abilityPower": [0, 0, 0],
+    "defense": [32, 32, 32],
+    "attackSpeed": [0.78, 0.78, 0.78],
+    "range": [1, 1, 1],
+    "traits": [
+      "Bug",
+      "Steel"
+    ],
+    "ability": {
+      "name": "Bullet Punch",
+      "description": "Punches at bullet speed for $value damage and execute pressure.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [247, 556, 1176],
+      "range": [1, 1, 2],
+      "modifiers": [
+        {
+          "type": "EXECUTE",
+          "hpThreshold": [0.3, 0.36, 0.45],
+          "bonusDamageMultiplier": [0.28, 0.42, 0.62]
+        }
+      ]
+    }
+  },
+  {
+    "id": "heracross",
+    "lineId": "heracross",
+    "name": "Heracross",
+    "cost": 4,
+    "role": "DAMAGE",
+    "maxHealth": [800, 1440, 2592],
+    "maxMana": [75, 75, 75],
+    "attackDamage": [104, 187, 337],
+    "abilityPower": [0, 0, 0],
+    "defense": [27, 27, 27],
+    "attackSpeed": [0.78, 0.78, 0.78],
+    "range": [1, 1, 1],
+    "traits": [
+      "Bug",
+      "Fighting"
+    ],
+    "ability": {
+      "name": "Megahorn",
+      "description": "Charges through a line horn-first for $value damage and knockback.",
+      "type": "DAMAGE",
+      "pattern": "LINE",
+      "values": [180, 400, 830],
+      "range": [3, 4, 5],
+      "modifiers": [
+        {
+          "type": "KNOCKBACK",
+          "cells": [1, 1, 1]
+        }
+      ]
+    }
+  },
+  {
+    "id": "skarmory",
+    "lineId": "skarmory",
+    "name": "Skarmory",
+    "cost": 4,
+    "role": "TANK",
+    "maxHealth": [1425, 2565, 4617],
+    "maxMana": [70, 70, 70],
+    "attackDamage": [55, 99, 178],
+    "abilityPower": [0, 0, 0],
+    "defense": [81, 81, 81],
+    "attackSpeed": [0.67, 0.67, 0.67],
+    "range": [1, 1, 1],
+    "traits": [
+      "Steel",
+      "Flying"
+    ],
+    "ability": {
+      "name": "Spikes",
+      "description": "Scatters steel spikes around it for $value damage.",
+      "type": "DAMAGE",
+      "pattern": "SURROUND",
+      "values": [70, 161, 337],
+      "range": [2, 2, 3],
+      "modifiers": [
+        {
+          "type": "DOT",
+          "dotType": "BURN",
+          "damagePerTick": [19, 38, 77],
+          "durationSeconds": [3, 3, 4],
+          "tickIntervalMs": [1000, 1000, 1000]
+        }
+      ]
+    }
+  },
+  {
+    "id": "steelix",
+    "lineId": "steelix",
+    "name": "Steelix",
+    "cost": 4,
+    "role": "TANK",
+    "maxHealth": [1500, 2700, 4860],
+    "maxMana": [70, 70, 70],
+    "attackDamage": [55, 99, 178],
+    "abilityPower": [0, 0, 0],
+    "defense": [85, 85, 85],
+    "attackSpeed": [0.67, 0.67, 0.67],
+    "range": [1, 1, 1],
+    "traits": [
+      "Steel",
+      "Ground"
+    ],
+    "ability": {
+      "name": "Iron Tail",
+      "description": "Slams its iron tail for $value damage and stun.",
+      "type": "DAMAGE",
+      "pattern": "SURROUND",
+      "values": [70, 161, 337],
+      "range": [2, 2, 3],
+      "modifiers": [
+        {
+          "type": "STUN",
+          "stunSeconds": [1, 1, 1]
+        }
+      ]
+    }
+  },
+  {
+    "id": "blissey",
+    "lineId": "blissey",
+    "name": "Blissey",
+    "cost": 4,
+    "role": "SUPPORT",
+    "maxHealth": [1287, 2317, 4170],
+    "maxMana": [80, 80, 80],
+    "attackDamage": [55, 99, 178],
+    "abilityPower": [0, 0, 0],
+    "defense": [26, 26, 26],
+    "attackSpeed": [0.7, 0.7, 0.7],
+    "range": [2, 2, 2],
+    "traits": [
+      "Normal"
+    ],
+    "ability": {
+      "name": "Soft-Boiled",
+      "description": "Shares a soothing egg, healing nearby allies for $value.",
+      "type": "HEAL",
+      "pattern": "SURROUND",
+      "values": [213, 471, 1058],
+      "range": [4, 4, 4]
+    }
+  },
+  {
+    "id": "wobbuffet",
+    "lineId": "wobbuffet",
+    "name": "Wobbuffet",
+    "cost": 4,
+    "role": "TANK",
+    "maxHealth": [1650, 2970, 5346],
+    "maxMana": [70, 70, 70],
+    "attackDamage": [55, 99, 178],
+    "abilityPower": [0, 0, 0],
+    "defense": [67, 67, 67],
+    "attackSpeed": [0.67, 0.67, 0.67],
+    "range": [1, 1, 1],
+    "traits": [
+      "Psychic"
+    ],
+    "ability": {
+      "name": "Counter",
+      "description": "Retaliates against nearby enemies for $value damage, scaling with its missing health.",
+      "type": "DAMAGE",
+      "pattern": "SURROUND",
+      "values": [79, 181, 379],
+      "range": [2, 2, 3],
+      "modifiers": [
+        {
+          "type": "SCALING",
+          "scalingType": "CASTER_MISSING_HP",
+          "factor": [0.7, 0.95, 1.25]
+        }
+      ]
+    }
+  },
+  {
+    "id": "miltank",
+    "lineId": "miltank",
+    "name": "Miltank",
+    "cost": 4,
+    "role": "SUPPORT",
+    "maxHealth": [1089, 1960, 3528],
+    "maxMana": [80, 80, 80],
+    "attackDamage": [55, 99, 178],
+    "abilityPower": [0, 0, 0],
+    "defense": [44, 44, 44],
+    "attackSpeed": [0.7, 0.7, 0.7],
+    "range": [1, 1, 1],
+    "traits": [
+      "Normal"
+    ],
+    "ability": {
+      "name": "Milk Drink",
+      "description": "Shares fresh milk, healing the weakest ally for $value.",
+      "type": "HEAL",
+      "pattern": "SINGLE",
+      "values": [231, 512, 1150],
+      "range": [4, 4, 4]
+    }
+  },
+  {
+    "id": "absol",
+    "lineId": "absol",
+    "name": "Absol",
+    "cost": 4,
+    "role": "DAMAGE",
+    "maxHealth": [800, 1440, 2592],
+    "maxMana": [75, 75, 75],
+    "attackDamage": [104, 187, 337],
+    "abilityPower": [0, 0, 0],
+    "defense": [27, 27, 27],
+    "attackSpeed": [0.78, 0.78, 0.78],
+    "range": [2, 2, 2],
+    "traits": [
+      "Dark"
+    ],
+    "ability": {
+      "name": "Razor Wind",
+      "description": "Sends a slicing wind through a line for $value damage.",
+      "type": "DAMAGE",
+      "pattern": "LINE",
+      "values": [180, 400, 830],
+      "range": [4, 4, 5],
+      "modifiers": [
+        {
+          "type": "EXECUTE",
+          "hpThreshold": [0.25, 0.3, 0.35],
+          "bonusDamageMultiplier": [0.25, 0.35, 0.5]
+        }
+      ]
+    }
+  },
+  {
+    "id": "sableye",
+    "lineId": "sableye",
+    "name": "Sableye",
+    "cost": 4,
+    "role": "SUPPORT",
+    "maxHealth": [990, 1782, 3208],
+    "maxMana": [80, 80, 80],
+    "attackDamage": [55, 99, 178],
+    "abilityPower": [0, 0, 0],
+    "defense": [44, 44, 44],
+    "attackSpeed": [0.7, 0.7, 0.7],
+    "range": [2, 2, 2],
+    "traits": [
+      "Dark",
+      "Ghost"
+    ],
+    "ability": {
+      "name": "Confuse Ray",
+      "description": "Flashes gem light, stunning nearby enemies for $value seconds.",
+      "type": "STUN",
+      "pattern": "SURROUND",
+      "values": [1, 1, 2],
+      "stunDurationSeconds": [1.5, 2, 2],
+      "range": [3, 3, 4]
+    }
+  },
+  {
+    "id": "mawile",
+    "lineId": "mawile",
+    "name": "Mawile",
+    "cost": 4,
+    "role": "SUPPORT",
+    "maxHealth": [990, 1782, 3208],
+    "maxMana": [80, 80, 80],
+    "attackDamage": [55, 99, 178],
+    "abilityPower": [0, 0, 0],
+    "defense": [44, 44, 44],
+    "attackSpeed": [0.7, 0.7, 0.7],
+    "range": [1, 1, 1],
+    "traits": [
+      "Steel"
+    ],
+    "ability": {
+      "name": "Fake Tears",
+      "description": "Feigns tears, lowering nearby enemy DEF by $value.",
+      "type": "DEBUFF_DEF",
+      "pattern": "SURROUND",
+      "values": [14, 28, 45],
+      "range": [2, 3, 3]
+    }
+  },
+  {
+    "id": "torkoal",
+    "lineId": "torkoal",
+    "name": "Torkoal",
+    "cost": 4,
+    "role": "TANK",
+    "maxHealth": [1500, 2700, 4860],
+    "maxMana": [70, 70, 70],
+    "attackDamage": [55, 99, 178],
+    "abilityPower": [0, 0, 0],
+    "defense": [74, 74, 74],
+    "attackSpeed": [0.67, 0.67, 0.67],
+    "range": [1, 1, 1],
+    "traits": [
+      "Fire"
+    ],
+    "ability": {
+      "name": "Heat Wave",
+      "description": "Exhales a scorching wave for $value damage and burn.",
+      "type": "DAMAGE",
+      "pattern": "SURROUND",
+      "values": [75, 171, 358],
+      "range": [2, 2, 3],
+      "modifiers": [
+        {
+          "type": "DOT",
+          "dotType": "BURN",
+          "damagePerTick": [28, 58, 115],
+          "durationSeconds": [3, 3, 4],
+          "tickIntervalMs": [1000, 1000, 1000]
+        }
+      ]
+    }
+  },
+  {
+    "id": "castform",
+    "lineId": "castform",
+    "name": "Castform",
+    "cost": 4,
+    "role": "DAMAGE",
+    "maxHealth": [760, 1368, 2462],
+    "maxMana": [75, 75, 75],
+    "attackDamage": [104, 187, 337],
+    "abilityPower": [0, 0, 0],
+    "defense": [27, 27, 27],
+    "attackSpeed": [0.78, 0.78, 0.78],
+    "range": [3, 3, 3],
+    "traits": [
+      "Normal"
+    ],
+    "ability": {
+      "name": "Weather Ball",
+      "description": "Hurls a ball of weather energy for $value damage.",
+      "type": "DAMAGE",
+      "pattern": "LINE",
+      "values": [180, 400, 830],
+      "range": [4, 4, 5],
+      "modifiers": [
+        {
+          "type": "SCALING",
+          "scalingType": "TARGET_MAX_HP_PERCENT",
+          "factor": [0.03, 0.04, 0.06]
+        }
+      ]
+    }
+  },
+  {
+    "id": "zangoose",
+    "lineId": "zangoose",
+    "name": "Zangoose",
+    "cost": 4,
+    "role": "DAMAGE",
+    "maxHealth": [800, 1440, 2592],
+    "maxMana": [75, 75, 75],
+    "attackDamage": [104, 187, 337],
+    "abilityPower": [0, 0, 0],
+    "defense": [27, 27, 27],
+    "attackSpeed": [0.82, 0.82, 0.82],
+    "range": [1, 1, 1],
+    "traits": [
+      "Normal"
+    ],
+    "ability": {
+      "name": "Crush Claw",
+      "description": "Slashes with sharp claws for $value damage and knockback.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [258, 583, 1232],
+      "range": [1, 1, 1],
+      "modifiers": [
+        {
+          "type": "KNOCKBACK",
+          "cells": [1, 2, 2]
+        }
+      ]
+    }
+  },
+  {
+    "id": "seviper",
+    "lineId": "seviper",
+    "name": "Seviper",
+    "cost": 4,
+    "role": "DAMAGE",
+    "maxHealth": [800, 1440, 2592],
+    "maxMana": [75, 75, 75],
+    "attackDamage": [104, 187, 337],
+    "abilityPower": [0, 0, 0],
+    "defense": [27, 27, 27],
+    "attackSpeed": [0.78, 0.78, 0.78],
+    "range": [1, 1, 1],
+    "traits": [
+      "Poison"
+    ],
+    "ability": {
+      "name": "Poison Tail",
+      "description": "Lashes its venomous tail for $value damage and poison.",
+      "type": "DAMAGE",
+      "pattern": "SURROUND",
+      "values": [160, 365, 765],
+      "range": [1, 2, 2],
+      "modifiers": [
+        {
+          "type": "DOT",
+          "dotType": "POISON",
+          "damagePerTick": [31, 64, 128],
+          "durationSeconds": [3, 4, 5],
+          "tickIntervalMs": [1000, 1000, 1000]
+        },
+        {
+          "type": "STUN",
+          "stunSeconds": [1, 1, 1]
+        }
+      ]
+    }
+  },
+  {
+    "id": "lugia",
+    "lineId": "lugia",
+    "name": "Lugia",
+    "cost": 5,
+    "role": "TANK",
+    "maxHealth": [1950, 3510, 6318],
+    "maxMana": [75, 75, 75],
+    "attackDamage": [72, 130, 233],
+    "abilityPower": [0, 0, 0],
+    "defense": [88, 88, 88],
+    "attackSpeed": [0.72, 0.72, 0.72],
+    "range": [1, 1, 1],
+    "traits": [
+      "Psychic",
+      "Flying"
+    ],
+    "ability": {
+      "name": "Aeroblast",
+      "description": "Fires a vortex of air through a line for $value damage and knockback.",
+      "type": "DAMAGE",
+      "pattern": "LINE",
+      "values": [95, 219, 437],
+      "range": [3, 4, 5],
+      "modifiers": [
+        {
+          "type": "KNOCKBACK",
+          "cells": [1, 1, 1]
+        }
+      ]
+    }
+  },
+  {
+    "id": "ho_oh",
+    "lineId": "ho_oh",
+    "name": "Ho-Oh",
+    "cost": 5,
+    "role": "DAMAGE",
+    "maxHealth": [1080, 1944, 3499],
+    "maxMana": [85, 85, 85],
+    "attackDamage": [137, 247, 444],
+    "abilityPower": [0, 0, 0],
+    "defense": [39, 39, 39],
+    "attackSpeed": [0.84, 0.84, 0.84],
+    "range": [3, 3, 3],
+    "traits": [
+      "Fire",
+      "Flying"
+    ],
+    "ability": {
+      "name": "Sacred Fire",
+      "description": "Engulfs the area in sacred flames for $value damage and burn.",
+      "type": "DAMAGE",
+      "pattern": "SURROUND",
+      "values": [172, 402, 828],
+      "range": [3, 3, 4],
+      "modifiers": [
+        {
+          "type": "DOT",
+          "dotType": "BURN",
+          "damagePerTick": [37, 78, 158],
+          "durationSeconds": [4, 5, 6],
+          "tickIntervalMs": [1000, 1000, 1000]
+        }
+      ]
+    }
+  },
+  {
+    "id": "raikou",
+    "lineId": "raikou",
+    "name": "Raikou",
+    "cost": 5,
+    "role": "DAMAGE",
+    "maxHealth": [1080, 1944, 3499],
+    "maxMana": [85, 85, 85],
+    "attackDamage": [137, 247, 444],
+    "abilityPower": [0, 0, 0],
+    "defense": [39, 39, 39],
+    "attackSpeed": [0.88, 0.88, 0.88],
+    "range": [3, 3, 3],
+    "traits": [
+      "Electric"
+    ],
+    "ability": {
+      "name": "Thunder",
+      "description": "Calls a thunderstorm for $value damage and stun.",
+      "type": "DAMAGE",
+      "pattern": "SURROUND",
+      "values": [135, 315, 648],
+      "range": [3, 3, 4],
+      "modifiers": [
+        {
+          "type": "STUN",
+          "stunSeconds": [1, 1, 1]
+        }
+      ]
+    }
+  },
+  {
+    "id": "entei",
+    "lineId": "entei",
+    "name": "Entei",
+    "cost": 5,
+    "role": "DAMAGE",
+    "maxHealth": [1242, 2236, 4024],
+    "maxMana": [85, 85, 85],
+    "attackDamage": [137, 247, 444],
+    "abilityPower": [0, 0, 0],
+    "defense": [47, 47, 47],
+    "attackSpeed": [0.84, 0.84, 0.84],
+    "range": [1, 1, 1],
+    "traits": [
+      "Fire"
+    ],
+    "ability": {
+      "name": "Eruption",
+      "description": "Erupts in a volcanic blast for $value damage, burn, and knockback.",
+      "type": "DAMAGE",
+      "pattern": "SURROUND",
+      "values": [165, 385, 792],
+      "range": [2, 2, 3],
+      "modifiers": [
+        {
+          "type": "DOT",
+          "dotType": "BURN",
+          "damagePerTick": [37, 78, 158],
+          "durationSeconds": [3, 3, 4],
+          "tickIntervalMs": [1000, 1000, 1000]
+        },
+        {
+          "type": "KNOCKBACK",
+          "cells": [1, 1, 1]
+        }
+      ]
+    }
+  },
+  {
+    "id": "suicune",
+    "lineId": "suicune",
+    "name": "Suicune",
+    "cost": 5,
+    "role": "SUPPORT",
+    "maxHealth": [1420, 2556, 4601],
+    "maxMana": [90, 90, 90],
+    "attackDamage": [87, 157, 282],
+    "abilityPower": [0, 0, 0],
+    "defense": [60, 60, 60],
+    "attackSpeed": [0.8, 0.8, 0.8],
+    "range": [3, 3, 3],
+    "traits": [
+      "Water"
+    ],
+    "ability": {
+      "name": "Mist",
+      "description": "Shrouds allies in purifying mist, shielding them for $value.",
+      "type": "SHIELD",
+      "pattern": "SURROUND",
+      "values": [165, 352, 616],
+      "range": [4, 4, 4]
+    }
+  },
+  {
+    "id": "kyogre",
+    "lineId": "kyogre",
+    "name": "Kyogre",
+    "cost": 5,
+    "role": "DAMAGE",
+    "maxHealth": [1080, 1944, 3499],
+    "maxMana": [85, 85, 85],
+    "attackDamage": [137, 247, 444],
+    "abilityPower": [0, 0, 0],
+    "defense": [39, 39, 39],
+    "attackSpeed": [0.84, 0.84, 0.84],
+    "range": [3, 3, 3],
+    "traits": [
+      "Water"
+    ],
+    "ability": {
+      "name": "Origin Pulse",
+      "description": "Unleashes a wave of primal water through a line for $value damage.",
+      "type": "DAMAGE",
+      "pattern": "LINE",
+      "values": [230, 530, 1060],
+      "range": [4, 5, 6],
+      "modifiers": [
+        {
+          "type": "SCALING",
+          "scalingType": "TARGET_MAX_HP_PERCENT",
+          "factor": [0.04, 0.055, 0.075]
+        }
+      ]
+    }
+  },
+  {
+    "id": "groudon",
+    "lineId": "groudon",
+    "name": "Groudon",
+    "cost": 5,
+    "role": "TANK",
+    "maxHealth": [1950, 3510, 6318],
+    "maxMana": [75, 75, 75],
+    "attackDamage": [72, 130, 233],
+    "abilityPower": [0, 0, 0],
+    "defense": [88, 88, 88],
+    "attackSpeed": [0.72, 0.72, 0.72],
+    "range": [1, 1, 1],
+    "traits": [
+      "Ground"
+    ],
+    "ability": {
+      "name": "Precipice Blades",
+      "description": "Raises jagged blades of stone for $value damage and knockback.",
+      "type": "DAMAGE",
+      "pattern": "SURROUND",
+      "values": [70, 164, 337],
+      "range": [2, 2, 3],
+      "modifiers": [
+        {
+          "type": "KNOCKBACK",
+          "cells": [1, 1, 1]
+        }
+      ]
+    }
+  },
+  {
+    "id": "rayquaza",
+    "lineId": "rayquaza",
+    "name": "Rayquaza",
+    "cost": 5,
+    "role": "DAMAGE",
+    "maxHealth": [1080, 1944, 3499],
+    "maxMana": [85, 85, 85],
+    "attackDamage": [137, 247, 444],
+    "abilityPower": [0, 0, 0],
+    "defense": [39, 39, 39],
+    "attackSpeed": [0.84, 0.84, 0.84],
+    "range": [2, 2, 2],
+    "traits": [
+      "Dragon",
+      "Flying"
+    ],
+    "ability": {
+      "name": "Dragon Ascent",
+      "description": "Dives from the sky through a line for $value damage.",
+      "type": "DAMAGE",
+      "pattern": "LINE",
+      "values": [242, 556, 1113],
+      "range": [4, 5, 6],
+      "modifiers": [
+        {
+          "type": "EXECUTE",
+          "hpThreshold": [0.3, 0.38, 0.48],
+          "bonusDamageMultiplier": [0.4, 0.6, 0.9]
+        }
+      ]
+    }
+  },
+  {
+    "id": "latios",
+    "lineId": "latios",
+    "name": "Latios",
+    "cost": 5,
+    "role": "SUPPORT",
+    "maxHealth": [1420, 2556, 4601],
+    "maxMana": [90, 90, 90],
+    "attackDamage": [87, 157, 282],
+    "abilityPower": [0, 0, 0],
+    "defense": [60, 60, 60],
+    "attackSpeed": [0.8, 0.8, 0.8],
+    "range": [3, 3, 3],
+    "traits": [
+      "Dragon",
+      "Psychic"
+    ],
+    "ability": {
+      "name": "Luster Purge",
+      "description": "Fires a cleansing beam that lowers enemy DEF in a line by $value.",
+      "type": "DEBUFF_DEF",
+      "pattern": "LINE",
+      "values": [18, 35, 55],
+      "range": [4, 5, 5]
+    }
+  }
+]

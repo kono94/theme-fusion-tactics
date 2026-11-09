@@ -1039,6 +1039,17 @@ body {
     --room-accent-contrast: #0b1120;
     --room-avatar: #f97316;
 }
+
+.app-container.theme-pokemongen23 {
+    --app-bg: radial-gradient(circle at 30% 0%, #0f5e55 0%, #0a2a2f 38%, #0b1120 70%);
+    --app-fg: #f8fafc;
+    --room-bg: radial-gradient(circle at 30% 0%, #0f5e55 0%, #0a2a2f 38%, #0b1120 70%);
+    --room-fg: #f8fafc;
+    --room-muted: #b5e4d8;
+    --room-accent: #facc15;
+    --room-accent-contrast: #0b1120;
+    --room-avatar: #cbd5e1;
+}
 </style>
 
 <style scoped>

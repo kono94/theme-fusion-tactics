@@ -343,14 +343,127 @@ def focus():
     return s
 
 
+# ---------------- Pokemon Gen 2/3 ----------------
+
+YELLOW = ramp('#4a3a05', '#94740c', '#e0b81c', '#f8dc4a', '#fff6b8')
+CREAM = ramp('#5b4630', '#a68a5c', '#e2cc98', '#f6e8c4', '#fffaea')
+
+
+def leftovers():
+    s = Sprite()
+    s.part(poly([(16, 6), (17, 1)], 2), WOOD, shade='flat')
+    s.part(poly([(18, 4), (23, 1), (27, 3), (22, 6)]), GREEN)
+    s.part(union(ellipse((6, 5, 26, 14)), rect((8, 9, 24, 12))), RED)
+    s.part(poly([(10, 12), (22, 12), (19, 17), (19, 20), (22, 24), (10, 24), (13, 20), (13, 17)]), CREAM)
+    s.part(union(ellipse((6, 21, 26, 30)), rect((8, 22, 24, 25))), RED)
+    s.dot(WOOD[0], (15, 17), (17, 17), (16, 20))
+    s.dot(RED[4], (9, 7), (10, 6), (8, 23))
+    return s
+
+
+def focus_band():
+    s = Sprite()
+    s.part(poly([(2, 14), (10, 11), (22, 11), (30, 14), (30, 19), (22, 16), (10, 16), (2, 19)]), WHITE)
+    s.part(ellipse((11, 9, 21, 19)), WHITE)
+    s.part(ellipse((13, 11, 19, 17)), RED)
+    s.dot(RED[4], (14, 12))
+    s.part(poly([(25, 17), (22, 29), (26, 27), (28, 18)]), WHITE)
+    s.part(poly([(27, 17), (31, 27), (31, 23), (29, 16)]), WHITE)
+    s.part(poly([(3, 15), (9, 13)], 1), RED, shade='flat', seam=False)
+    s.part(poly([(23, 13), (29, 15)], 1), RED, shade='flat', seam=False)
+    return s
+
+
+def kings_rock():
+    s = Sprite()
+    s.part(poly([(4, 10), (10, 17), (16, 5), (22, 17), (28, 10), (26, 25), (6, 25)]), GOLD)
+    s.part(rect((5, 23, 27, 28)), GOLD, shade='vertical')
+    s.part(ellipse((14, 15, 18, 19)), RED)
+    s.part(ellipse((8, 19, 11, 22)), BLUE)
+    s.part(ellipse((21, 19, 24, 22)), BLUE)
+    for x, y in ((4, 8), (16, 3), (28, 8)):
+        s.part(ellipse((x - 2, y - 2, x + 2, y + 2)), WHITE)
+    s.dot(GOLD[0], (9, 25), (13, 25), (19, 25), (23, 25))
+    return s
+
+
+def shell_bell():
+    s = Sprite()
+    s.part(poly([(16, 6), (16, 1)], 2), LEATHER, shade='flat')
+    s.part(ellipse((13, 0, 19, 5)), LEATHER)
+    s.part(poly([(16, 4), (24, 9), (27, 20), (30, 25), (2, 25), (5, 20), (8, 9)]), PINK)
+    for x in (10, 16, 22):
+        s.part(poly([(16, 6), (x, 24)], 1), PINK[:2] * 2 + PINK[1:2], shade='flat', seam=False)
+    s.part(rect((3, 24, 29, 27)), CREAM, shade='vertical')
+    s.part(ellipse((13, 26, 19, 31)), GOLD)
+    s.dot(PINK[4], (10, 11), (11, 10), (9, 13))
+    return s
+
+
+def sitrus_berry():
+    s = Sprite()
+    s.part(ellipse((4, 8, 28, 30)), YELLOW)
+    s.part(poly([(16, 9), (10, 2), (14, 3), (16, 6), (18, 3), (22, 2)]), GREEN)
+    s.part(poly([(16, 9), (6, 7), (10, 5)]), GREEN)
+    s.part(poly([(16, 9), (26, 7), (22, 5)]), GREEN)
+    s.dot(YELLOW[0], (11, 17), (20, 15), (15, 23), (22, 22), (9, 23), (17, 13))
+    s.dot(YELLOW[4], (9, 12), (8, 13), (10, 11))
+    return s
+
+
+def lum_berry():
+    s = Sprite()
+    s.part(ellipse((5, 7, 27, 29)), GREEN)
+    s.part(poly([(16, 8), (14, 2)], 2), WOOD, shade='flat')
+    s.part(poly([(15, 4), (20, 0), (26, 2), (20, 6)]), GREEN)
+    s.part(ellipse((12, 6, 20, 10)), ramp('#1a1208', '#3a2a14', '#5a4020', '#7a5a2c', '#9a7a40'))
+    for x, y in ((10, 15), (20, 13), (13, 22), (22, 21), (16, 17)):
+        s.part(ellipse((x - 1, y - 1, x + 1, y + 1)), CREAM, shade='flat', seam=False)
+    s.dot(GREEN[4], (9, 11), (8, 12), (10, 10))
+    return s
+
+
+def quick_claw():
+    s = Sprite()
+    s.part(poly([(8, 28), (6, 20), (8, 12), (13, 6), (20, 2), (27, 1), (22, 5), (17, 11), (15, 18), (16, 26)]), BLUE)
+    s.part(poly([(20, 2), (27, 1), (22, 5)]), CYAN, seam=False)
+    s.part(poly([(5, 25), (19, 25), (19, 30), (5, 30)]), GOLD)
+    s.part(ellipse((10, 25, 14, 29)), RED)
+    s.dot(BLUE[4], (10, 13), (11, 11), (9, 15), (13, 9))
+    s.part(poly([(22, 14), (29, 12)], 1), WHITE, shade='flat', seam=False)
+    s.part(poly([(21, 19), (30, 18)], 1), WHITE, shade='flat', seam=False)
+    return s
+
+
+def choice_band():
+    s = Sprite()
+    s.part(ellipse((3, 6, 27, 24)), ORANGE)
+    for x in range(N):
+        for y in range(N):
+            if (x - 15) ** 2 / 64 + (y - 15) ** 2 / 25 <= 1:
+                s.px.pop((x, y), None)
+                s.owner.pop((x, y), None)
+    s.part(rect((12, 19, 19, 25)), GOLD)
+    s.part(rect((14, 21, 17, 23)), ORANGE, shade='flat')
+    s.part(poly([(22, 19), (27, 30), (30, 27), (26, 18)]), ORANGE)
+    s.part(poly([(24, 18), (31, 22), (31, 18), (27, 16)]), ORANGE)
+    s.dot(ORANGE[4], (6, 10), (7, 9), (5, 12))
+    return s
+
+
 ICONS = {
     'onepiece': {'coat': coat, 'axe': axe, 'armor': armor, 'boots': boots, 'crest': crest, 'kit': kit, 'flag': flag, 'log': log},
     'pokemon': {'charm': charm, 'band': band, 'plate': plate, 'scarf': scarf, 'lens': lens, 'harness': harness, 'ribbon': ribbon, 'focus': focus},
+    'pokemongen23': {
+        'leftovers': leftovers, 'focus_band': focus_band, 'kings_rock': kings_rock, 'shell_bell': shell_bell,
+        'sitrus_berry': sitrus_berry, 'lum_berry': lum_berry, 'quick_claw': quick_claw, 'choice_band': choice_band,
+    },
 }
 
 
 def main(out_dir, sheet_path):
-    sheet = Image.new('RGBA', (8 * 136, 4 * 136), (0, 0, 0, 255))
+    columns = max(len(icons) for icons in ICONS.values())
+    sheet = Image.new('RGBA', (columns * 136, len(ICONS) * 2 * 136), (0, 0, 0, 255))
     for row, (mode, icons) in enumerate(ICONS.items()):
         for col, (name, build) in enumerate(icons.items()):
             image = build().render()

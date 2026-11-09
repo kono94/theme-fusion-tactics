@@ -498,6 +498,22 @@ function selectMode(mode: GameMode) {
     content: '';
 }
 
+.motif-pokemongen23 {
+    overflow: hidden;
+    border-color: #2dd4bf;
+    background: linear-gradient(135deg, #facc15 0 44%, #064e3b 44% 56%, #cbd5e1 56%);
+    color: #064e3b;
+}
+
+.motif-pokemongen23::after {
+    width: 18px;
+    height: 18px;
+    border: 4px solid #064e3b;
+    border-radius: 50%;
+    background: #ecfdf5;
+    content: '';
+}
+
 .rule-control {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 10px;

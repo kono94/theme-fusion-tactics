@@ -120,6 +120,43 @@ const version160Commits = [
       <section class="release-section">
         <div class="release-header">
           <p class="eyebrow">Latest</p>
+          <h2>Version X.X.X</h2>
+          <p>Journey to Johto and Hoenn in the new Pokemon Gen 2/3 mode.</p>
+        </div>
+        <div class="release-grid">
+          <div class="release-features">
+            <div class="feature-note">
+              <h3>Pokemon Gen 2/3</h3>
+              <p>
+                The host can pick Pokemon Gen 2/3 in the lobby. Build teams from 66 Johto and Hoenn
+                lines, from Chikorita, Treecko and Mudkip up to Lugia, Ho-Oh, Kyogre, Groudon and
+                Rayquaza, using their original Gen 2/3 typings, each with new pixel-art portraits.
+              </p>
+            </div>
+            <div class="feature-note">
+              <h3>The Dark Type</h3>
+              <p>
+                Dark Pokemon fight dirty when cornered: while a unit is below half health, its basic
+                attacks hit harder, and the bonus grows with every Dark Pokemon on your board. In
+                this mode, Steel Pokemon reduce the damage your whole team takes.
+              </p>
+            </div>
+            <div class="feature-note">
+              <h3>Choose Your Evolution</h3>
+              <p>
+                Some Pokemon evolve the way you choose. Upgrade Eevee to 2 stars to pick one of
+                seven Eeveelutions, Ralts to 3 stars for Gardevoir or Gallade, and Wurmple or
+                Snorunt to 2 stars for their two paths. Click the Evolve badge to see every option
+                with its role, types and move. If you don't choose before combat starts, the best
+                fit for your team is picked for you.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="release-section">
+        <div class="release-header">
+          <p class="eyebrow">Previous</p>
           <h2>Version 3.0.3</h2>
           <p>TFT returns to browser play on hosted servers.</p>
         </div>
@@ -147,10 +184,10 @@ const version160Commits = [
             <div class="feature-note">
               <h3>Standalone Preview</h3>
               <p>
-                Download the Windows or macOS preview and launch TFT from its application icon.
-                Play One Piece or Pokemon against bots in your browser without a hosted server.
-                Java and all game artwork and fonts are included.
-                A dedicated TFT app icon helps you spot the game in your Dock or taskbar.
+                Download the Windows or macOS preview and launch TFT from its application icon. Play
+                One Piece or Pokemon against bots in your browser without a hosted server. Java and
+                all game artwork and fonts are included. A dedicated TFT app icon helps you spot the
+                game in your Dock or taskbar.
               </p>
             </div>
             <div class="feature-note">

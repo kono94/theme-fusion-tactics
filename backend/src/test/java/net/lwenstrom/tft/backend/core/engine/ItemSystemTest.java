@@ -38,6 +38,24 @@ class ItemSystemTest {
 
         assertEquals(8, loader.getItems(GameMode.ONEPIECE).size());
         assertEquals(8, loader.getItems(GameMode.POKEMON).size());
+        assertEquals(8, loader.getItems(GameMode.POKEMON_GEN23).size());
+        assertEquals(
+                List.of(
+                        "Leftovers",
+                        "Focus Band",
+                        "King's Rock",
+                        "Shell Bell",
+                        "Sitrus Berry",
+                        "Lum Berry",
+                        "Quick Claw",
+                        "Choice Band"),
+                loader.getItems(GameMode.POKEMON_GEN23).stream()
+                        .map(ItemDefinition::name)
+                        .toList());
+        assertTrue(loader.getItems(GameMode.POKEMON_GEN23).stream()
+                .allMatch(item -> item.id().startsWith("pokemongen23_")
+                        && item.icon().startsWith("/assets/items/pokemongen23/")
+                        && !item.statBonuses().isEmpty()));
         assertNotEquals(
                 loader.getItems(GameMode.ONEPIECE).getFirst().name(),
                 loader.getItems(GameMode.POKEMON).getFirst().name());
@@ -77,7 +95,7 @@ class ItemSystemTest {
         var mapper = JsonMapper.builder().build();
         var registry = new GameModeRegistry(TestHelpers.allModeProviders(mapper));
         var loader = new DataLoader(registry, mapper);
-        for (var mode : List.of(GameMode.ONEPIECE, GameMode.POKEMON)) {
+        for (var mode : GameMode.values()) {
             var room = new GameRoom(
                     "item-" + mode,
                     loader,

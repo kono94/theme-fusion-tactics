@@ -24,6 +24,7 @@ class DataLoaderAugmentTest {
 
         validate(dataLoader, GameMode.ONEPIECE);
         validate(dataLoader, GameMode.POKEMON);
+        validate(dataLoader, GameMode.POKEMON_GEN23);
     }
 
     private void validate(DataLoader dataLoader, GameMode mode) {

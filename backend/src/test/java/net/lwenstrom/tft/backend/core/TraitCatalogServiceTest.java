@@ -120,6 +120,29 @@ class TraitCatalogServiceTest {
         assertEquals(List.of("wurmple"), definitionIds(roster.get("bug")));
     }
 
+    @Test
+    void gen23EeveeAppearsUnderEveryBranchType() {
+        var traits = service.getTraits(GameMode.POKEMON_GEN23).stream()
+                .collect(Collectors.toMap(TraitCatalogEntry::id, entry -> entry.units()));
+        var expected = Map.of(
+                "normal", "eevee",
+                "water", "vaporeon",
+                "electric", "jolteon",
+                "fire", "flareon",
+                "psychic", "espeon",
+                "dark", "umbreon",
+                "grass", "leafeon",
+                "ice", "glaceon");
+
+        expected.forEach((traitId, definitionId) -> {
+            var eeveeLine = traits.get(traitId).stream()
+                    .filter(unit -> unit.lineId().equals("eevee"))
+                    .toList();
+            assertEquals(1, eeveeLine.size(), traitId + " should list the Eevee line once");
+            assertEquals(definitionId, eeveeLine.getFirst().definitionId());
+        });
+    }
+
     private static List<String> definitionIds(List<TraitRosterUnit> units) {
         return units.stream().map(TraitRosterUnit::definitionId).toList();
     }

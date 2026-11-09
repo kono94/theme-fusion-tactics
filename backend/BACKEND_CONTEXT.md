@@ -65,7 +65,7 @@ BackendApplication
 ```
 
 Core code does not import a franchise package. `GameModeProvider` supplies resource paths, trait registration, optional
-affinity data. Bot strategies are shared across modes. One Piece and Pokemon are provider/data configurations.
+affinity data. Bot strategies are shared across modes. One Piece, Pokemon and Pokemon Gen 2/3 are provider/data configurations.
 
 ## 4. Ownership and concurrency
 
@@ -122,7 +122,7 @@ tanks/melee in front with ranged units behind. The existing human-only emergency
 
 ## 6. Modes and data loading
 
-`GameModeRegistry` discovers all `GameModeProvider` beans. Production registers both modes, and new rooms begin in
+`GameModeRegistry` discovers all `GameModeProvider` beans. Production registers all three modes (One Piece, Pokemon, Pokemon Gen 2/3; `GameMode` constant order is the lobby order), and new rooms begin in
 One Piece mode. The host can change the room mode only while it is in `LOBBY`; deployment does not select or restrict the
 mode. Focused tests that register only one provider use that available provider as their initial mode.
 
@@ -130,6 +130,7 @@ mode. Focused tests that register only one provider use that available provider 
 |---|---|---|---|---|---|---|
 | One Piece | `units_onepiece.json` | `traits_onepiece.json` | `augments_onepiece.json` | `items_onepiece.json` | `match_rules_common.json` + `match_rules_onepiece.json` | neutral |
 | Pokemon | `units_pokemon.json` | `traits_pokemon.json` | `augments_pokemon.json` | `items_pokemon.json` | `match_rules_common.json` + `match_rules_pokemon.json` | `affinities_pokemon.json` |
+| Pokemon Gen 2/3 (`pokemongen23`) | `units_pokemongen23.json` | `traits_pokemongen23.json` | `augments_pokemongen23.json` | `items_pokemongen23.json` | `match_rules_common.json` + `match_rules_pokemongen23.json` | `affinities_pokemongen23.json` (17 types, no Fairy) |
 
 `DataLoader.loadData()` preloads every registered mode at startup. Missing resources, malformed JSON, duplicate unit IDs,
 or an empty required units/traits/augments/items dataset fail startup. Item `statBonuses` keys are the `ItemStat` enum, so an
@@ -459,7 +460,7 @@ Important regression coverage includes:
   available;
 - augment offers are read on the actual round-3 boundary;
 - final-tick damage/death events reach the result;
-- One Piece and Pokemon are registered in shared simulation fixtures;
+- every mode is registered in shared simulation fixtures via `TestHelpers.allModeProviders`;
 - admin login can be disabled safely and tokens are revocable/rate-limited.
 
 Expensive reports remain opt-in:

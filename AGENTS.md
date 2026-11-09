@@ -73,7 +73,7 @@
 ## 4. Game Mechanics Constraints
 - **Grid**: Each player plans on a 9×3 board; combat uses a 9×6 arena. MOVE uses x `0-8`, board y `0-2`, and y `-1` with x as the bench slot. Distance rules use Manhattan/Chebyshev distance as appropriate.
 - **Combat**: Simplified Auto-Battler mechanics (Move to nearest -> Attack).
-- **Themes**: One Piece is the initial room mode; the host can select One Piece or Pokemon during `LOBBY`. Do not add deployment-time mode selection or hardcode franchise behavior into the core.
+- **Themes**: One Piece is the initial room mode; the host can select One Piece, Pokemon or Pokemon Gen 2/3 during `LOBBY`. Do not add deployment-time mode selection or hardcode franchise behavior into the core.
 
 ## 5. Misc
 - In unit JSON files, keep arrays of exactly three numeric values on one line.

@@ -1,0 +1,25 @@
+{
+  "defaultMultiplier": 1.0,
+  "strongMultiplier": 1.2,
+  "resistedMultiplier": 0.8,
+  "elements": ["normal", "fire", "water", "grass", "electric", "ice", "fighting", "poison", "ground", "flying", "psychic", "bug", "rock", "ghost", "dragon", "dark", "steel"],
+  "relationships": [
+    { "attacking": "normal", "strongAgainst": [], "resistedBy": ["rock", "steel", "ghost"] },
+    { "attacking": "fire", "strongAgainst": ["grass", "ice", "bug", "steel"], "resistedBy": ["fire", "water", "rock", "dragon"] },
+    { "attacking": "water", "strongAgainst": ["fire", "ground", "rock"], "resistedBy": ["water", "grass", "dragon"] },
+    { "attacking": "grass", "strongAgainst": ["water", "ground", "rock"], "resistedBy": ["fire", "grass", "poison", "flying", "bug", "dragon", "steel"] },
+    { "attacking": "electric", "strongAgainst": ["water", "flying"], "resistedBy": ["electric", "grass", "dragon", "ground"] },
+    { "attacking": "ice", "strongAgainst": ["grass", "ground", "flying", "dragon"], "resistedBy": ["fire", "water", "ice", "steel"] },
+    { "attacking": "fighting", "strongAgainst": ["normal", "ice", "rock", "dark", "steel"], "resistedBy": ["poison", "flying", "psychic", "bug", "ghost"] },
+    { "attacking": "poison", "strongAgainst": ["grass"], "resistedBy": ["poison", "ground", "rock", "ghost", "steel"] },
+    { "attacking": "ground", "strongAgainst": ["fire", "electric", "poison", "rock", "steel"], "resistedBy": ["grass", "bug", "flying"] },
+    { "attacking": "flying", "strongAgainst": ["grass", "fighting", "bug"], "resistedBy": ["electric", "rock", "steel"] },
+    { "attacking": "psychic", "strongAgainst": ["fighting", "poison"], "resistedBy": ["psychic", "steel", "dark"] },
+    { "attacking": "bug", "strongAgainst": ["grass", "psychic", "dark"], "resistedBy": ["fire", "fighting", "poison", "flying", "ghost", "steel"] },
+    { "attacking": "rock", "strongAgainst": ["fire", "ice", "flying", "bug"], "resistedBy": ["fighting", "ground", "steel"] },
+    { "attacking": "ghost", "strongAgainst": ["psychic", "ghost"], "resistedBy": ["normal", "dark", "steel"] },
+    { "attacking": "dragon", "strongAgainst": ["dragon"], "resistedBy": ["steel"] },
+    { "attacking": "dark", "strongAgainst": ["psychic", "ghost"], "resistedBy": ["fighting", "dark", "steel"] },
+    { "attacking": "steel", "strongAgainst": ["ice", "rock"], "resistedBy": ["fire", "water", "electric", "steel"] }
+  ]
+}

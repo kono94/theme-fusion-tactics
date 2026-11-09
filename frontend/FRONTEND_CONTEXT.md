@@ -13,7 +13,7 @@ The frontend is a rendering and command client for the backend-authoritative gam
 as visible units, trait counts, animation parameters, and labels. It must not decide whether a purchase, movement,
 upgrade, augment, or combat result is valid.
 
-The application supports One Piece and Pokemon rooms. The host can change mode while the room is in `LOBBY`.
+The application supports One Piece, Pokemon and Pokemon Gen 2/3 (`pokemongen23`) rooms. The host can change mode while the room is in `LOBBY`.
 
 ## 2. Stack
 
@@ -170,7 +170,7 @@ interface GameState {
   matchups: Record<string, string>
   recentEvents: CombatEvent[]
   damageLog: Record<string, DamageEntry>
-  gameMode: 'onepiece' | 'pokemon'
+  gameMode: 'onepiece' | 'pokemon' | 'pokemongen23'
   planningTimerPaused: boolean
   planningReadyPlayerId: string | null
   planningPauseReason: 'AUGMENT_SELECTION' | 'SOLO_READY' | null
@@ -221,7 +221,7 @@ pending board units when combat starts.
 - Marks the current user by player ID, not name.
 - Lets every player copy a `#/join/{roomId}` invite. Recipients with a valid remembered name join automatically after
   the WebSocket connects; new visitors confirm their name first.
-- Shows backend-configured mode choices in stable One Piece/Pokemon order.
+- Shows backend-configured mode choices in stable metadata order (One Piece, Pokemon, Pokemon Gen 2/3).
 - Shows a second panel for the Match Rule (Random, None, and the rules passed in `matchRules`), read-only for non-hosts, with
   the selected rule's description. `App.vue` fetches `/api/match-rules?mode=` when the room mode changes.
 - Emits mode selection, rule selection, start, and leave; it does not publish STOMP directly.
@@ -290,6 +290,8 @@ Unit portrait paths:
 
 - One Piece: `/assets/units/onepiece/{definitionId}.png`
 - Pokemon: `/assets/units/pokemon/{definitionId}.png`
+- Pokemon Gen 2/3: `/assets/units/pokemongen23/{definitionId}.png` (temporary placeholders rendered by
+  `scripts/generate_placeholder_portraits.py` until the real sprites from the batch prompts in that folder are cut in)
 
 Pixel-art item PNGs, rendered by `scripts/generate_item_icons.py`, are under `/assets/items/{mode}/{iconName}.png`; backend item definitions provide the
 exact path. The 3D combat view shows equipped icons on its unit labels; item hover details stay in the classic UI.

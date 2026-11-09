@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import net.lwenstrom.tft.backend.core.model.GameMode;
@@ -32,6 +31,11 @@ class DataLoaderMatchRuleTest {
                 dataLoader.getMatchRules(GameMode.POKEMON).stream()
                         .map(MatchRuleDefinition::id)
                         .collect(Collectors.toSet()));
+        assertEquals(
+                ids(COMMON_RULE_IDS, "type-master"),
+                dataLoader.getMatchRules(GameMode.POKEMON_GEN23).stream()
+                        .map(MatchRuleDefinition::id)
+                        .collect(Collectors.toSet()));
     }
 
     @Test
@@ -39,7 +43,7 @@ class DataLoaderMatchRuleTest {
         var dataLoader = createDataLoader();
         var frontendPublic = Path.of("..", "frontend", "public");
 
-        for (var mode : List.of(GameMode.ONEPIECE, GameMode.POKEMON)) {
+        for (var mode : GameMode.values()) {
             dataLoader.getMatchRules(mode).forEach(rule -> assertIconExists(frontendPublic, rule.icon()));
             dataLoader.getAugments(mode).forEach(augment -> assertIconExists(frontendPublic, augment.image()));
         }

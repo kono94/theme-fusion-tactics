@@ -41,6 +41,19 @@ export const GAME_MODE_METADATA: Record<GameMode, GameModeMetadata> = {
         arenas: ['stadium', 'rock-gym'],
         order: 2,
     },
+    pokemongen23: {
+        id: 'pokemongen23',
+        label: 'Pokemon Gen 2/3',
+        shortLabel: 'Gen 2/3',
+        lobbyCaption: 'Explore Johto and Hoenn with branching evolutions',
+        documentTitle: 'Theme Fusion Tactics — Pokemon Gen 2/3',
+        favicon: '/pokeball.png',
+        unitAssetFolder: 'pokemongen23',
+        themeClass: 'theme-pokemongen23',
+        galleryPath: '#/ultimate-gallery/pokemongen23',
+        arenas: ['stadium', 'rock-gym'],
+        order: 3,
+    },
 }
 
 const SUPPORTED_GAME_MODES = Object.keys(GAME_MODE_METADATA) as GameMode[]

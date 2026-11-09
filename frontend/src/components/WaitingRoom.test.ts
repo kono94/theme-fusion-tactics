@@ -97,11 +97,17 @@ describe('WaitingRoom mode selection', () => {
         })
 
         const modeButtons = wrapper.findAll(modeOptionSelector)
-        expect(modeButtons.map((button) => button.find('span.mode-name').text())).toEqual(['One Piece', 'Pokemon'])
+        expect(modeButtons.map((button) => button.find('span.mode-name').text())).toEqual([
+            'One Piece',
+            'Pokemon',
+            'Pokemon Gen 2/3',
+        ])
         expect(modeButtons.map((button) => button.find('span.mode-caption').text())).toEqual([
             'Set sail with legendary pirates',
             'Build a team of iconic trainers',
+            'Explore Johto and Hoenn with branching evolutions',
         ])
+        expect(modeButtons[2].find('.mode-motif').classes()).toContain('motif-pokemongen23')
     })
 
     it('keeps mode choices visible but disabled for non-hosts', () => {

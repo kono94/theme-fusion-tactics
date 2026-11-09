@@ -1,0 +1,831 @@
+[
+    {
+        "id": "normal",
+        "name": "Normal",
+        "type": "type",
+        "targetScope": "TEAM",
+        "description": "Normal Pokemon rally the entire team.",
+        "iconColor": "#a8a29e",
+        "effectType": "ATK_BUFF",
+        "effects": [
+            {
+                "minUnits": 1,
+                "description": "+2% ATK",
+                "style": "bronze",
+                "values": {
+                    "atkBuff": 0.02
+                }
+            },
+            {
+                "minUnits": 2,
+                "description": "+7% ATK",
+                "style": "silver",
+                "values": {
+                    "atkBuff": 0.07
+                }
+            },
+            {
+                "minUnits": 3,
+                "description": "+14% ATK",
+                "style": "gold",
+                "values": {
+                    "atkBuff": 0.14
+                }
+            },
+            {
+                "minUnits": 4,
+                "description": "+19% ATK",
+                "style": "gold",
+                "values": {
+                    "atkBuff": 0.19
+                }
+            },
+            {
+                "minUnits": 5,
+                "description": "+23% ATK",
+                "style": "gold",
+                "values": {
+                    "atkBuff": 0.23
+                }
+            },
+            {
+                "minUnits": 6,
+                "description": "+28% ATK",
+                "style": "gold",
+                "values": {
+                    "atkBuff": 0.28
+                }
+            },
+            {
+                "minUnits": 7,
+                "description": "+34% ATK",
+                "style": "prismatic",
+                "values": {
+                    "atkBuff": 0.34
+                }
+            },
+            {
+                "minUnits": 8,
+                "description": "+40% ATK",
+                "style": "prismatic",
+                "values": {
+                    "atkBuff": 0.4
+                }
+            }
+        ]
+    },
+    {
+        "id": "fire",
+        "name": "Fire",
+        "type": "type",
+        "targetScope": "TEAM",
+        "description": "Fire Pokemon empower team ability damage.",
+        "iconColor": "#f97316",
+        "effectType": "ABILITY_DAMAGE",
+        "effects": [
+            {
+                "minUnits": 1,
+                "description": "+4% Ability Damage",
+                "style": "bronze",
+                "values": {
+                    "abilityDamage": 0.04
+                }
+            },
+            {
+                "minUnits": 2,
+                "description": "+14% Ability Damage",
+                "style": "silver",
+                "values": {
+                    "abilityDamage": 0.14
+                }
+            },
+            {
+                "minUnits": 3,
+                "description": "+22% Ability Damage",
+                "style": "gold",
+                "values": {
+                    "abilityDamage": 0.22
+                }
+            },
+            {
+                "minUnits": 4,
+                "description": "+28% Ability Damage",
+                "style": "gold",
+                "values": {
+                    "abilityDamage": 0.28
+                }
+            },
+            {
+                "minUnits": 5,
+                "description": "+34% Ability Damage",
+                "style": "prismatic",
+                "values": {
+                    "abilityDamage": 0.34
+                }
+            }
+        ]
+    },
+    {
+        "id": "water",
+        "name": "Water",
+        "type": "type",
+        "targetScope": "TEAM",
+        "description": "Water Pokemon help the team gain mana faster.",
+        "iconColor": "#3b82f6",
+        "effectType": "MANA_GAIN",
+        "effects": [
+            {
+                "minUnits": 1,
+                "description": "+15% Mana Gain",
+                "style": "bronze",
+                "values": {
+                    "manaGain": 0.15
+                }
+            },
+            {
+                "minUnits": 2,
+                "description": "+40% Mana Gain",
+                "style": "silver",
+                "values": {
+                    "manaGain": 0.4
+                }
+            },
+            {
+                "minUnits": 3,
+                "description": "+65% Mana Gain",
+                "style": "gold",
+                "values": {
+                    "manaGain": 0.65
+                }
+            },
+            {
+                "minUnits": 4,
+                "description": "+78% Mana Gain",
+                "style": "gold",
+                "values": {
+                    "manaGain": 0.78
+                }
+            },
+            {
+                "minUnits": 5,
+                "description": "+92% Mana Gain",
+                "style": "gold",
+                "values": {
+                    "manaGain": 0.92
+                }
+            },
+            {
+                "minUnits": 6,
+                "description": "+103% Mana Gain",
+                "style": "gold",
+                "values": {
+                    "manaGain": 1.03
+                }
+            },
+            {
+                "minUnits": 7,
+                "description": "+114% Mana Gain",
+                "style": "prismatic",
+                "values": {
+                    "manaGain": 1.14
+                }
+            },
+            {
+                "minUnits": 8,
+                "description": "+125% Mana Gain",
+                "style": "prismatic",
+                "values": {
+                    "manaGain": 1.25
+                }
+            }
+        ]
+    },
+    {
+        "id": "grass",
+        "name": "Grass",
+        "type": "type",
+        "targetScope": "TEAM",
+        "description": "Grass Pokemon toughen the whole team.",
+        "iconColor": "#22c55e",
+        "effectType": "HP",
+        "effects": [
+            {
+                "minUnits": 1,
+                "description": "+100 HP",
+                "style": "bronze",
+                "values": {
+                    "hp": 100
+                }
+            },
+            {
+                "minUnits": 2,
+                "description": "+300 HP",
+                "style": "silver",
+                "values": {
+                    "hp": 300
+                }
+            },
+            {
+                "minUnits": 3,
+                "description": "+500 HP",
+                "style": "gold",
+                "values": {
+                    "hp": 500
+                }
+            },
+            {
+                "minUnits": 4,
+                "description": "+650 HP",
+                "style": "prismatic",
+                "values": {
+                    "hp": 650
+                }
+            }
+        ]
+    },
+    {
+        "id": "electric",
+        "name": "Electric",
+        "type": "type",
+        "targetScope": "TEAM",
+        "description": "Electric Pokemon accelerate team attacks.",
+        "iconColor": "#facc15",
+        "effectType": "AS",
+        "effects": [
+            {
+                "minUnits": 1,
+                "description": "+4% AS",
+                "style": "bronze",
+                "values": {
+                    "as": 0.04
+                }
+            },
+            {
+                "minUnits": 2,
+                "description": "+12% AS",
+                "style": "silver",
+                "values": {
+                    "as": 0.12
+                }
+            },
+            {
+                "minUnits": 3,
+                "description": "+20% AS",
+                "style": "gold",
+                "values": {
+                    "as": 0.2
+                }
+            }
+        ]
+    },
+    {
+        "id": "psychic",
+        "name": "Psychic",
+        "type": "type",
+        "targetScope": "TEAM",
+        "description": "Psychic Pokemon give the team opening mana based on each unit's max mana.",
+        "iconColor": "#a855f7",
+        "effectType": "START_MANA_PERCENT",
+        "effects": [
+            {
+                "minUnits": 1,
+                "description": "+4% Max Mana at start",
+                "style": "bronze",
+                "values": {
+                    "manaPercent": 0.04
+                }
+            },
+            {
+                "minUnits": 2,
+                "description": "+14% Max Mana at start",
+                "style": "silver",
+                "values": {
+                    "manaPercent": 0.14
+                }
+            },
+            {
+                "minUnits": 3,
+                "description": "+24% Max Mana at start",
+                "style": "gold",
+                "values": {
+                    "manaPercent": 0.24
+                }
+            },
+            {
+                "minUnits": 4,
+                "description": "+30% Max Mana at start",
+                "style": "gold",
+                "values": {
+                    "manaPercent": 0.3
+                }
+            },
+            {
+                "minUnits": 5,
+                "description": "+36% Max Mana at start",
+                "style": "prismatic",
+                "values": {
+                    "manaPercent": 0.36
+                }
+            }
+        ]
+    },
+    {
+        "id": "ground",
+        "name": "Ground",
+        "type": "type",
+        "targetScope": "TEAM",
+        "description": "Ground Pokemon reinforce the whole team's defenses.",
+        "iconColor": "#a16207",
+        "effectType": "DEFENSE",
+        "effects": [
+            {
+                "minUnits": 1,
+                "description": "+5 DEF",
+                "style": "bronze",
+                "values": {
+                    "defense": 5
+                }
+            },
+            {
+                "minUnits": 2,
+                "description": "+12 DEF",
+                "style": "silver",
+                "values": {
+                    "defense": 12
+                }
+            },
+            {
+                "minUnits": 3,
+                "description": "+20 DEF",
+                "style": "gold",
+                "values": {
+                    "defense": 20
+                }
+            },
+            {
+                "minUnits": 4,
+                "description": "+28 DEF",
+                "style": "gold",
+                "values": {
+                    "defense": 28
+                }
+            },
+            {
+                "minUnits": 5,
+                "description": "+35 DEF",
+                "style": "prismatic",
+                "values": {
+                    "defense": 35
+                }
+            }
+        ]
+    },
+    {
+        "id": "rock",
+        "name": "Rock",
+        "type": "type",
+        "targetScope": "TEAM",
+        "description": "Rock Pokemon reinforce the whole team's defenses.",
+        "iconColor": "#78716c",
+        "effectType": "DEFENSE",
+        "effects": [
+            {
+                "minUnits": 1,
+                "description": "+5 DEF",
+                "style": "bronze",
+                "values": {
+                    "defense": 5
+                }
+            },
+            {
+                "minUnits": 2,
+                "description": "+18 DEF",
+                "style": "silver",
+                "values": {
+                    "defense": 18
+                }
+            }
+        ]
+    },
+    {
+        "id": "flying",
+        "name": "Flying",
+        "type": "type",
+        "targetScope": "TEAM",
+        "description": "Flying Pokemon help wounded allies attack faster.",
+        "iconColor": "#38bdf8",
+        "effectType": "LOW_HP_AS",
+        "effects": [
+            {
+                "minUnits": 1,
+                "description": "+3% AS below 50% HP",
+                "style": "bronze",
+                "values": {
+                    "as": 0.03,
+                    "hpThreshold": 0.5
+                }
+            },
+            {
+                "minUnits": 2,
+                "description": "+10% AS below 50% HP",
+                "style": "silver",
+                "values": {
+                    "as": 0.1,
+                    "hpThreshold": 0.5
+                }
+            },
+            {
+                "minUnits": 3,
+                "description": "+20% AS below 50% HP",
+                "style": "gold",
+                "values": {
+                    "as": 0.2,
+                    "hpThreshold": 0.5
+                }
+            },
+            {
+                "minUnits": 4,
+                "description": "+26% AS below 50% HP",
+                "style": "gold",
+                "values": {
+                    "as": 0.26,
+                    "hpThreshold": 0.5
+                }
+            },
+            {
+                "minUnits": 5,
+                "description": "+31% AS below 50% HP",
+                "style": "gold",
+                "values": {
+                    "as": 0.31,
+                    "hpThreshold": 0.5
+                }
+            },
+            {
+                "minUnits": 6,
+                "description": "+37% AS below 50% HP",
+                "style": "gold",
+                "values": {
+                    "as": 0.37,
+                    "hpThreshold": 0.5
+                }
+            },
+            {
+                "minUnits": 7,
+                "description": "+43% AS below 50% HP",
+                "style": "prismatic",
+                "values": {
+                    "as": 0.43,
+                    "hpThreshold": 0.5
+                }
+            },
+            {
+                "minUnits": 8,
+                "description": "+50% AS below 50% HP",
+                "style": "prismatic",
+                "values": {
+                    "as": 0.5,
+                    "hpThreshold": 0.5
+                }
+            }
+        ]
+    },
+    {
+        "id": "poison",
+        "name": "Poison",
+        "type": "type",
+        "targetScope": "TEAM",
+        "description": "Poison Pokemon make team attacks apply poison damage over time.",
+        "iconColor": "#7c3aed",
+        "effectType": "ON_HIT_DOT",
+        "effects": [
+            {
+                "minUnits": 1,
+                "description": "3s DoT: 5% ATK per tick",
+                "style": "bronze",
+                "values": {
+                    "damageRatio": 0.05,
+                    "durationMs": 3000,
+                    "tickIntervalMs": 1000
+                }
+            },
+            {
+                "minUnits": 2,
+                "description": "3s DoT: 12% ATK per tick",
+                "style": "silver",
+                "values": {
+                    "damageRatio": 0.12,
+                    "durationMs": 3000,
+                    "tickIntervalMs": 1000
+                }
+            }
+        ]
+    },
+    {
+        "id": "bug",
+        "name": "Bug",
+        "type": "type",
+        "targetScope": "TEAM",
+        "description": "Bug Pokemon give the team chances to strike again.",
+        "iconColor": "#84cc16",
+        "effectType": "EXTRA_ATTACK_CHANCE",
+        "effects": [
+            {
+                "minUnits": 1,
+                "description": "5% extra attack",
+                "style": "bronze",
+                "values": {
+                    "chance": 0.05
+                }
+            },
+            {
+                "minUnits": 2,
+                "description": "14% extra attack",
+                "style": "silver",
+                "values": {
+                    "chance": 0.14
+                }
+            },
+            {
+                "minUnits": 3,
+                "description": "24% extra attack",
+                "style": "gold",
+                "values": {
+                    "chance": 0.24
+                }
+            }
+        ]
+    },
+    {
+        "id": "fighting",
+        "name": "Fighting",
+        "type": "type",
+        "targetScope": "TEAM",
+        "description": "Fighting Pokemon boost team attack damage.",
+        "iconColor": "#dc2626",
+        "effectType": "ATK_BUFF",
+        "effects": [
+            {
+                "minUnits": 1,
+                "description": "+5% ATK",
+                "style": "bronze",
+                "values": {
+                    "atkBuff": 0.05
+                }
+            },
+            {
+                "minUnits": 2,
+                "description": "+15% ATK",
+                "style": "silver",
+                "values": {
+                    "atkBuff": 0.15
+                }
+            },
+            {
+                "minUnits": 3,
+                "description": "+25% ATK",
+                "style": "gold",
+                "values": {
+                    "atkBuff": 0.25
+                }
+            },
+            {
+                "minUnits": 4,
+                "description": "+33% ATK",
+                "style": "prismatic",
+                "values": {
+                    "atkBuff": 0.33
+                }
+            }
+        ]
+    },
+    {
+        "id": "ice",
+        "name": "Ice",
+        "type": "type",
+        "targetScope": "TEAM",
+        "description": "Ice Pokemon reinforce the whole team's defenses.",
+        "iconColor": "#67e8f9",
+        "effectType": "DEFENSE",
+        "effects": [
+            {
+                "minUnits": 1,
+                "description": "+5 DEF",
+                "style": "bronze",
+                "values": {
+                    "defense": 5
+                }
+            },
+            {
+                "minUnits": 2,
+                "description": "+14 DEF",
+                "style": "silver",
+                "values": {
+                    "defense": 14
+                }
+            },
+            {
+                "minUnits": 3,
+                "description": "+25 DEF",
+                "style": "gold",
+                "values": {
+                    "defense": 25
+                }
+            },
+            {
+                "minUnits": 4,
+                "description": "+34 DEF",
+                "style": "prismatic",
+                "values": {
+                    "defense": 34
+                }
+            }
+        ]
+    },
+    {
+        "id": "dragon",
+        "name": "Dragon",
+        "type": "type",
+        "targetScope": "TEAM",
+        "description": "Dragon Pokemon empower team abilities.",
+        "iconColor": "#6366f1",
+        "effectType": "ABILITY_DAMAGE",
+        "effects": [
+            {
+                "minUnits": 1,
+                "description": "+8% Ability Damage",
+                "style": "bronze",
+                "values": {
+                    "abilityDamage": 0.08
+                }
+            },
+            {
+                "minUnits": 2,
+                "description": "+18% Ability Damage",
+                "style": "silver",
+                "values": {
+                    "abilityDamage": 0.18
+                }
+            },
+            {
+                "minUnits": 3,
+                "description": "+26% Ability Damage",
+                "style": "gold",
+                "values": {
+                    "abilityDamage": 0.26
+                }
+            },
+            {
+                "minUnits": 4,
+                "description": "+34% Ability Damage",
+                "style": "prismatic",
+                "values": {
+                    "abilityDamage": 0.34
+                }
+            }
+        ]
+    },
+    {
+        "id": "ghost",
+        "name": "Ghost",
+        "type": "type",
+        "targetScope": "TEAM",
+        "description": "Ghost Pokemon let the team heal from basic attack damage.",
+        "iconColor": "#4c1d95",
+        "effectType": "LIFESTEAL",
+        "effects": [
+            {
+                "minUnits": 1,
+                "description": "6% Lifesteal",
+                "style": "bronze",
+                "values": {
+                    "lifesteal": 0.06
+                }
+            },
+            {
+                "minUnits": 2,
+                "description": "14% Lifesteal",
+                "style": "silver",
+                "values": {
+                    "lifesteal": 0.14
+                }
+            },
+            {
+                "minUnits": 3,
+                "description": "22% Lifesteal",
+                "style": "gold",
+                "values": {
+                    "lifesteal": 0.22
+                }
+            }
+        ]
+    },
+    {
+        "id": "steel",
+        "name": "Steel",
+        "type": "type",
+        "targetScope": "TEAM",
+        "description": "Steel Pokemon armor the whole team against incoming damage.",
+        "iconColor": "#94a3b8",
+        "effectType": "DAMAGE_REDUCTION",
+        "effects": [
+            {
+                "minUnits": 1,
+                "description": "-5% damage taken",
+                "style": "bronze",
+                "values": {
+                    "damageReduction": 5
+                }
+            },
+            {
+                "minUnits": 2,
+                "description": "-12% damage taken",
+                "style": "silver",
+                "values": {
+                    "damageReduction": 12
+                }
+            },
+            {
+                "minUnits": 3,
+                "description": "-20% damage taken",
+                "style": "gold",
+                "values": {
+                    "damageReduction": 20
+                }
+            },
+            {
+                "minUnits": 4,
+                "description": "-30% damage taken",
+                "style": "prismatic",
+                "values": {
+                    "damageReduction": 30
+                }
+            }
+        ]
+    },
+    {
+        "id": "dark",
+        "name": "Dark",
+        "type": "type",
+        "targetScope": "TEAM",
+        "description": "Dark Pokemon fight dirty when cornered: team basic attacks hit harder while the attacker is below half health.",
+        "iconColor": "#57534e",
+        "effectType": "LOW_HP_DAMAGE",
+        "effects": [
+            {
+                "minUnits": 1,
+                "description": "+6% attack damage below 50% HP",
+                "style": "bronze",
+                "values": {
+                    "damageBonus": 0.06,
+                    "hpThreshold": 0.5
+                }
+            },
+            {
+                "minUnits": 2,
+                "description": "+14% attack damage below 50% HP",
+                "style": "silver",
+                "values": {
+                    "damageBonus": 0.14,
+                    "hpThreshold": 0.5
+                }
+            },
+            {
+                "minUnits": 3,
+                "description": "+24% attack damage below 50% HP",
+                "style": "gold",
+                "values": {
+                    "damageBonus": 0.24,
+                    "hpThreshold": 0.5
+                }
+            },
+            {
+                "minUnits": 4,
+                "description": "+32% attack damage below 50% HP",
+                "style": "gold",
+                "values": {
+                    "damageBonus": 0.32,
+                    "hpThreshold": 0.5
+                }
+            },
+            {
+                "minUnits": 5,
+                "description": "+40% attack damage below 50% HP",
+                "style": "prismatic",
+                "values": {
+                    "damageBonus": 0.4,
+                    "hpThreshold": 0.5
+                }
+            },
+            {
+                "minUnits": 6,
+                "description": "+50% attack damage below 50% HP",
+                "style": "prismatic",
+                "values": {
+                    "damageBonus": 0.5,
+                    "hpThreshold": 0.5
+                }
+            }
+        ]
+    }
+]

@@ -136,7 +136,10 @@ class BranchingEvolutionDefinitionTest {
         var dataLoader = new DataLoader(new GameModeRegistry(TestHelpers.allModeProviders(jsonMapper)), jsonMapper);
         for (var mode : GameMode.values()) {
             for (var unit : dataLoader.getAllUnits(mode)) {
-                assertEquals(-1, unit.branchPoint());
+                if (mode == GameMode.POKEMON_GEN23 && unit.branchPoint() > 0) {
+                    continue;
+                }
+                assertEquals(-1, unit.branchPoint(), unit.id());
                 for (var star = 1; star <= 3; star++) {
                     var level = star;
                     var exact = unit.forms().stream()

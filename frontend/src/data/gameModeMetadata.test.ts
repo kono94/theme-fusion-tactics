@@ -8,8 +8,8 @@ import {
 } from './gameModeMetadata'
 
 describe('game mode metadata', () => {
-    it('describes both modes in lobby order', () => {
-        expect(sortGameModes(['pokemon', 'onepiece'])).toEqual(['onepiece', 'pokemon'])
+    it('describes every mode in lobby order', () => {
+        expect(sortGameModes(['pokemongen23', 'pokemon', 'onepiece'])).toEqual(['onepiece', 'pokemon', 'pokemongen23'])
         expect(getGameModeMetadata('onepiece')).toMatchObject({
             label: 'One Piece',
             lobbyCaption: 'Set sail with legendary pirates',
@@ -30,10 +30,22 @@ describe('game mode metadata', () => {
             galleryPath: '#/ultimate-gallery/pokemon',
             order: 2,
         })
+        expect(getGameModeMetadata('pokemongen23')).toMatchObject({
+            label: 'Pokemon Gen 2/3',
+            shortLabel: 'Gen 2/3',
+            lobbyCaption: 'Explore Johto and Hoenn with branching evolutions',
+            documentTitle: 'Theme Fusion Tactics — Pokemon Gen 2/3',
+            favicon: '/pokeball.png',
+            unitAssetFolder: 'pokemongen23',
+            themeClass: 'theme-pokemongen23',
+            galleryPath: '#/ultimate-gallery/pokemongen23',
+            arenas: ['stadium', 'rock-gym'],
+            order: 3,
+        })
     })
 
     it('lists every supported mode in lobby order', () => {
-        expect(allGameModes()).toEqual(['onepiece', 'pokemon'])
+        expect(allGameModes()).toEqual(['onepiece', 'pokemon', 'pokemongen23'])
         expect(allGameModes().every(isGameMode)).toBe(true)
         expect(isGameMode('retired-mode')).toBe(false)
     })
@@ -41,6 +53,7 @@ describe('game mode metadata', () => {
     it('accepts only exact gallery routes for supported modes', () => {
         expect(parseGalleryModeHash('#/ultimate-gallery/onepiece')).toBe('onepiece')
         expect(parseGalleryModeHash('#/ultimate-gallery/pokemon')).toBe('pokemon')
+        expect(parseGalleryModeHash('#/ultimate-gallery/pokemongen23')).toBe('pokemongen23')
         expect(parseGalleryModeHash('#/ultimate-gallery/retired-mode')).toBeNull()
         expect(parseGalleryModeHash('#/ultimate-gallery/unknown')).toBeNull()
         expect(parseGalleryModeHash('#/ultimate-gallery/pokemon/extra')).toBeNull()

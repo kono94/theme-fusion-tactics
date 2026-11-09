@@ -1,0 +1,238 @@
+[
+  {
+    "id": "ranged-tempo",
+    "name": "Long-Range Tempo",
+    "effectType": "TEAM_ATTACK_SPEED_PER_RANGED_UNIT",
+    "values": [
+      3,
+      5,
+      8
+    ],
+    "descriptions": [
+      "Your team gains 3% Attack Speed for each ranged unit on your board.",
+      "Your team gains 5% Attack Speed for each ranged unit on your board.",
+      "Your team gains 8% Attack Speed for each ranged unit on your board."
+    ],
+    "image": "/assets/augments/ranged-tempo.png"
+  },
+  {
+    "id": "guarded-formation",
+    "name": "Protective Formation",
+    "effectType": "TEAM_DAMAGE_REDUCTION",
+    "values": [
+      5,
+      10,
+      15
+    ],
+    "descriptions": [
+      "Your team takes 5% reduced damage.",
+      "Your team takes 10% reduced damage.",
+      "Your team takes 15% reduced damage."
+    ],
+    "image": "/assets/augments/guarded-formation.png"
+  },
+  {
+    "id": "snowball-strike",
+    "name": "Momentum Strike",
+    "effectType": "TEAM_ATTACK_DAMAGE_ON_KILL",
+    "values": [
+      6,
+      10,
+      15
+    ],
+    "descriptions": [
+      "When one of your units gets a kill, your team gains 6 Attack Damage for the rest of combat.",
+      "When one of your units gets a kill, your team gains 10 Attack Damage for the rest of combat.",
+      "When one of your units gets a kill, your team gains 15 Attack Damage for the rest of combat."
+    ],
+    "image": "/assets/augments/snowball-strike.png"
+  },
+  {
+    "id": "treasure-cache",
+    "name": "Prize Cache",
+    "effectType": "GOLD",
+    "values": [
+      10,
+      16,
+      24
+    ],
+    "descriptions": [
+      "Gain 10 gold.",
+      "Gain 16 gold.",
+      "Gain 24 gold."
+    ],
+    "image": "/assets/augments/treasure-cache.png"
+  },
+  {
+    "id": "training-arc",
+    "name": "Training Boost",
+    "effectType": "XP",
+    "values": [
+      8,
+      16,
+      24
+    ],
+    "descriptions": [
+      "Gain 8 XP.",
+      "Gain 16 XP.",
+      "Gain 24 XP."
+    ],
+    "image": "/assets/augments/training-arc.png"
+  },
+  {
+    "id": "battle-standard",
+    "name": "Sturdy Team",
+    "effectType": "TEAM_MAX_HEALTH",
+    "values": [
+      120,
+      220,
+      360
+    ],
+    "descriptions": [
+      "Your team gains 120 Health.",
+      "Your team gains 220 Health.",
+      "Your team gains 360 Health."
+    ],
+    "image": "/assets/augments/battle-standard.png"
+  },
+  {
+    "id": "sharpened-blades",
+    "name": "Power Training",
+    "effectType": "TEAM_ATTACK_DAMAGE",
+    "values": [
+      6,
+      10,
+      15
+    ],
+    "descriptions": [
+      "Your team gains 6 Attack Damage.",
+      "Your team gains 10 Attack Damage.",
+      "Your team gains 15 Attack Damage."
+    ],
+    "image": "/assets/augments/sharpened-blades.png"
+  },
+  {
+    "id": "focused-haki",
+    "name": "Special Focus",
+    "effectType": "TEAM_ABILITY_POWER",
+    "values": [
+      10,
+      18,
+      30
+    ],
+    "descriptions": [
+      "Your team’s damaging abilities deal 10% more damage.",
+      "Your team’s damaging abilities deal 18% more damage.",
+      "Your team’s damaging abilities deal 30% more damage."
+    ],
+    "image": "/assets/augments/focused-haki.png"
+  },
+  {
+    "id": "iron-line",
+    "name": "Hardened Shell",
+    "effectType": "TEAM_DEFENSE",
+    "values": [8, 14, 22],
+    "descriptions": [
+      "Your team gains 8 DEF.",
+      "Your team gains 14 DEF.",
+      "Your team gains 22 DEF."
+    ],
+    "image": "/assets/augments/iron-line.png"
+  },
+  {
+    "id": "close-quarters",
+    "name": "Brawler Instinct",
+    "effectType": "MELEE_LIFESTEAL",
+    "values": [
+      12,
+      20,
+      30
+    ],
+    "descriptions": [
+      "Melee units gain 12% Lifesteal.",
+      "Melee units gain 20% Lifesteal.",
+      "Melee units gain 30% Lifesteal."
+    ],
+    "image": "/assets/augments/close-quarters.png"
+  },
+  {
+    "id": "backline-barrage",
+    "name": "Backline Blast",
+    "effectType": "RANGED_ATTACK_DAMAGE",
+    "values": [
+      7,
+      11,
+      16
+    ],
+    "descriptions": [
+      "Ranged units gain 7 Attack Damage.",
+      "Ranged units gain 11 Attack Damage.",
+      "Ranged units gain 16 Attack Damage."
+    ],
+    "image": "/assets/augments/backline-barrage.png"
+  },
+  {
+    "id": "quick-study",
+    "name": "Fast Charge",
+    "effectType": "TEAM_MANA_GAIN",
+    "values": [
+      15,
+      25,
+      40
+    ],
+    "descriptions": [
+      "Your team gains 15% more mana from attacks.",
+      "Your team gains 25% more mana from attacks.",
+      "Your team gains 40% more mana from attacks."
+    ],
+    "image": "/assets/augments/quick-study.png"
+  },
+  {
+    "id": "opening-burst",
+    "name": "Opening Move",
+    "effectType": "TEAM_STARTING_MANA",
+    "values": [
+      10,
+      15,
+      20
+    ],
+    "descriptions": [
+      "Your team starts combat with 10 additional mana.",
+      "Your team starts combat with 15 additional mana.",
+      "Your team starts combat with 20 additional mana."
+    ],
+    "image": "/assets/augments/opening-burst.png"
+  },
+  {
+    "id": "clean-bench",
+    "name": "Organized Box",
+    "effectType": "GOLD_PER_EMPTY_BENCH_SLOT",
+    "values": [
+      1,
+      2,
+      3
+    ],
+    "descriptions": [
+      "Gain 1 gold for each empty bench slot.",
+      "Gain 2 gold for each empty bench slot.",
+      "Gain 3 gold for each empty bench slot."
+    ],
+    "image": "/assets/augments/clean-bench.png"
+  },
+  {
+    "id": "first-guard",
+    "name": "Starter Barrier",
+    "effectType": "TEAM_STARTING_SHIELD",
+    "values": [
+      125,
+      225,
+      375
+    ],
+    "descriptions": [
+      "Your team starts combat with a 125 shield.",
+      "Your team starts combat with a 225 shield.",
+      "Your team starts combat with a 375 shield."
+    ],
+    "image": "/assets/augments/first-guard.png"
+  }
+]

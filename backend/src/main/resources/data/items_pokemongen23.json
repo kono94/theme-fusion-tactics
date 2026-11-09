@@ -1,0 +1,78 @@
+[
+  {
+    "id": "pokemongen23_leftovers",
+    "name": "Leftovers",
+    "description": "+40% max HP",
+    "icon": "/assets/items/pokemongen23/leftovers.png",
+    "statBonuses": {
+      "MAX_HEALTH_PERCENT": 40
+    }
+  },
+  {
+    "id": "pokemongen23_focus_band",
+    "name": "Focus Band",
+    "description": "+50 DEF",
+    "icon": "/assets/items/pokemongen23/focus_band.png",
+    "statBonuses": {
+      "DEFENSE_FLAT": 50
+    }
+  },
+  {
+    "id": "pokemongen23_kings_rock",
+    "name": "King's Rock",
+    "description": "+35% ATK",
+    "icon": "/assets/items/pokemongen23/kings_rock.png",
+    "statBonuses": {
+      "ATTACK_DAMAGE_PERCENT": 35
+    }
+  },
+  {
+    "id": "pokemongen23_shell_bell",
+    "name": "Shell Bell",
+    "description": "+30% attack speed, +15% ability damage",
+    "icon": "/assets/items/pokemongen23/shell_bell.png",
+    "statBonuses": {
+      "ATTACK_SPEED_PERCENT": 30,
+      "ABILITY_DAMAGE_PERCENT": 15
+    }
+  },
+  {
+    "id": "pokemongen23_sitrus_berry",
+    "name": "Sitrus Berry",
+    "description": "+25% max HP, +20% ability damage",
+    "icon": "/assets/items/pokemongen23/sitrus_berry.png",
+    "statBonuses": {
+      "MAX_HEALTH_PERCENT": 25,
+      "ABILITY_DAMAGE_PERCENT": 20
+    }
+  },
+  {
+    "id": "pokemongen23_lum_berry",
+    "name": "Lum Berry",
+    "description": "+15% max HP, +25 DEF",
+    "icon": "/assets/items/pokemongen23/lum_berry.png",
+    "statBonuses": {
+      "MAX_HEALTH_PERCENT": 15,
+      "DEFENSE_FLAT": 25
+    }
+  },
+  {
+    "id": "pokemongen23_quick_claw",
+    "name": "Quick Claw",
+    "description": "+25% attack speed, +10% ATK",
+    "icon": "/assets/items/pokemongen23/quick_claw.png",
+    "statBonuses": {
+      "ATTACK_SPEED_PERCENT": 25,
+      "ATTACK_DAMAGE_PERCENT": 10
+    }
+  },
+  {
+    "id": "pokemongen23_choice_band",
+    "name": "Choice Band",
+    "description": "+60% ATK",
+    "icon": "/assets/items/pokemongen23/choice_band.png",
+    "statBonuses": {
+      "ATTACK_DAMAGE_PERCENT": 60
+    }
+  }
+]

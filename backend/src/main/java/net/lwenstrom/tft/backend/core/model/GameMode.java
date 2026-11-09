@@ -6,7 +6,8 @@ import java.util.Arrays;
 
 public enum GameMode {
     ONEPIECE("onepiece"),
-    POKEMON("pokemon");
+    POKEMON("pokemon"),
+    POKEMON_GEN23("pokemongen23");
 
     private final String value;
 
