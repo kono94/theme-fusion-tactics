@@ -705,6 +705,9 @@ public class GameRoom {
             }
 
             log.info("Starting PLANNING phase. Restoring units.");
+            // Restoring units clears trait values, so Navigator gold must be rolled first.
+            var navigatorGold =
+                    players.values().stream().collect(Collectors.toMap(Player::getId, this::rollNavigatorGold));
             combatSystem.endCombat(players.values());
 
             players.values().forEach(p -> {
@@ -716,12 +719,7 @@ public class GameRoom {
             players.values().forEach(p -> {
                 p.gainGold(GameConstants.BASE_INCOME + Math.min(p.getGold() / 10, GameConstants.MAX_INTEREST));
 
-                // Navigator trait gold
-                int navGold = p.getBoardUnits().stream()
-                        .filter(u -> u.getGoldBonusMax() > 0)
-                        .mapToInt(u -> u.getGoldBonusMin()
-                                + randomProvider.nextInt(u.getGoldBonusMax() - u.getGoldBonusMin() + 1))
-                        .sum();
+                int navGold = navigatorGold.getOrDefault(p.getId(), 0);
                 if (navGold > 0) {
                     p.gainGold(navGold);
                     log.info("Player {} gained {} bonus gold from Navigators", p.getName(), navGold);
@@ -1123,6 +1121,14 @@ public class GameRoom {
             case 4 -> 2;
             default -> 1;
         };
+    }
+
+    private int rollNavigatorGold(Player player) {
+        return player.getBoardUnits().stream()
+                .filter(u -> u.getGoldBonusMax() > 0)
+                .mapToInt(u ->
+                        u.getGoldBonusMin() + randomProvider.nextInt(u.getGoldBonusMax() - u.getGoldBonusMin() + 1))
+                .sum();
     }
 
     private int rollLootGoldAmount() {

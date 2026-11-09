@@ -202,6 +202,14 @@ const version160Commits = [
                 this mode, Steel Pokemon reduce the damage your whole team takes.
               </p>
             </div>
+            <div class="feature-note">
+              <h3>Navigator Gold Fixed</h3>
+              <p>
+                In One Piece, Navigators now pay out their 1-3 bonus gold at the start of each
+                planning phase. Previously the bonus was lost after combat and never reached your
+                gold.
+              </p>
+            </div>
           </div>
         </div>
       </section>

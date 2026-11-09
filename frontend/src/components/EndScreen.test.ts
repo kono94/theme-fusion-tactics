@@ -3,6 +3,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { PlayerState } from '../types'
 import EndScreen from './EndScreen.vue'
 
+const formatStat = (value: number) => new Intl.NumberFormat().format(value)
+
 afterEach(() => {
   vi.useRealTimers()
 })
@@ -22,8 +24,8 @@ function player(overrides: Partial<PlayerState> = {}): PlayerState {
     board: [],
     shop: [],
     lootOrbs: [],
-        inventory: [],
-        statPreviews: {},
+    inventory: [],
+    statPreviews: {},
     augmentChoices: [],
     selectedAugments: [],
     isGhost: false,
@@ -67,11 +69,11 @@ describe('EndScreen match summary', () => {
 
     expect(wrapper.get('.match-record').text()).toContain('2W')
     expect(wrapper.get('.match-record').text()).toContain('1L')
-    expect(wrapper.get('.match-summary__totals').text()).toContain('12,345')
-    expect(wrapper.get('.match-summary__totals').text()).toContain('7,654')
+    expect(wrapper.get('.match-summary__totals').text()).toContain(formatStat(12345))
+    expect(wrapper.get('.match-summary__totals').text()).toContain(formatStat(7654))
     expect(wrapper.get('.unit-totals__table').text()).toContain('Hero')
-    expect(wrapper.get('.unit-totals__table').text()).toContain('9,876')
-    expect(wrapper.get('.unit-totals__table').text()).toContain('4,321')
+    expect(wrapper.get('.unit-totals__table').text()).toContain(formatStat(9876))
+    expect(wrapper.get('.unit-totals__table').text()).toContain(formatStat(4321))
     expect(wrapper.findAll('.round-result').map((result) => result.text())).toEqual([
       'R1W',
       'R2L',
@@ -109,8 +111,8 @@ describe('EndScreen match summary', () => {
     await wrapper.findAll('.end-screen__player')[0].trigger('click')
 
     expect(wrapper.get('#match-summary-title').text()).toBe("Rival's Match Summary")
-    expect(wrapper.get('.match-summary__totals').text()).toContain('22,000')
-        expect(wrapper.find('.unit-totals__empty').exists()).toBe(true)
+    expect(wrapper.get('.match-summary__totals').text()).toContain(formatStat(22000))
+    expect(wrapper.find('.unit-totals__empty').exists()).toBe(true)
 
     wrapper.unmount()
   })
