@@ -1,7 +1,7 @@
 import * as THREE from 'three'
-import { extend } from '../kit/pokemonTier45'
 import {
   bodyAt,
+  extend,
   fistMesh,
   flat,
   fx,
@@ -16,6 +16,7 @@ import {
   at,
   burst,
   flare,
+  type FxContext,
   glow,
   ground,
   orbMesh,
@@ -26,7 +27,6 @@ import {
   slashArc,
 } from '../primitives'
 import type { AttackChoreography, AttackSet } from '../types'
-import type { FxContext } from '../primitives'
 import type { UnitView } from '../../unitView'
 
 const STANDARD = 'standard' as const

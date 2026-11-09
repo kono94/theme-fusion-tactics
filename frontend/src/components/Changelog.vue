@@ -131,6 +131,8 @@ const version160Commits = [
                 The host can pick Pokemon Gen 2/3 in the lobby. Build teams from 66 Johto and Hoenn
                 lines, from Chikorita, Treecko and Mudkip up to Lugia, Ho-Oh, Kyogre, Groudon and
                 Rayquaza, using their original Gen 2/3 typings, each with new pixel-art portraits.
+                In the 3D battle view every Gen 2/3 Pokemon unleashes its own signature ultimate,
+                and matches are fought at the new Bell Tower and Sea Route arenas.
               </p>
             </div>
             <div class="feature-note">

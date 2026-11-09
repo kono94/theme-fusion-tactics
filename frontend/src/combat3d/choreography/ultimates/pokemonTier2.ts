@@ -9,6 +9,7 @@ import {
   cloud,
   crouch,
   flare,
+  type FxContext,
   glow,
   ground,
   halo,
@@ -31,9 +32,9 @@ import {
   starGeometry,
   trail,
   vortex,
-  type FxContext,
 } from '../primitives'
 import {
+  above,
   alliesAround,
   beyond,
   billboard,
@@ -48,9 +49,10 @@ import {
   fadeInOut,
   fangs,
   fistMesh,
+  flameMesh,
+  flames,
   flat,
   flatDirection,
-  flames,
   flinch,
   flinchAlong,
   fx,
@@ -60,29 +62,22 @@ import {
   motionScale,
   noteGeometry,
   phase,
+  type PositionAt,
   pulse,
+  rush,
   setOpacity,
   shell,
+  speedStreaks,
   standard,
   starPower,
   statArrows,
   stream,
-  zap,
-  zzz,
-  above,
-} from '../kit/shared'
-import {
-  batWings,
-  flameMesh,
-  jaggedStone,
-  kitsuneTails,
-  rush,
-  sheath,
-  speedStreaks,
   thickBolt,
   waveWall,
-  type PositionAt,
-} from '../kit/pokemonTier2'
+  zap,
+  zzz,
+} from '../kit/shared'
+import { batWings, jaggedStone, kitsuneTails, sheath } from '../kit/pokemonTier2'
 import type { Choreography, UltimateSet } from '../types'
 
 const YELLOW = '#facc15'

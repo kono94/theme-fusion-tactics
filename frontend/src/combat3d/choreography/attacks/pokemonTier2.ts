@@ -10,8 +10,16 @@ import {
   slashArc,
   starGeometry,
 } from '../primitives'
-import { billboard, debris, fadeInOut, fangs, fx, heartGeometry, zap } from '../kit/shared'
-import { flameMesh } from '../kit/pokemonTier2'
+import {
+  billboard,
+  debris,
+  fadeInOut,
+  fangs,
+  flameMesh,
+  fx,
+  heartGeometry,
+  zap,
+} from '../kit/shared'
 import type { AttackChoreography, AttackSet } from '../types'
 
 const cheekSpark =

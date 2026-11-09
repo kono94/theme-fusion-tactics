@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import type { RenderEffectPriority } from '../../../animations/renderPolicy'
 import { easeInOut, type UnitView } from '../../unitView'
-import { glow, later, type ColorInput, type FxContext } from '../primitives'
+import { type ColorInput, type FxContext, glow, later, leafMesh } from '../primitives'
 
 export type PointSource = THREE.Vector3 | (() => THREE.Vector3)
 
@@ -1574,3 +1574,1944 @@ export function driftMotes(ctx: FxContext, center: PointSource, options: MoteOpt
     options.priority ?? 'ability',
   )
 }
+
+export interface BloomOptions {
+  petal: ColorInput
+  spot?: ColorInput
+  center?: ColorInput
+  petals?: number
+  size?: number
+  height?: number
+  delay?: number
+  duration?: number
+}
+
+// A flower that unfolds above a unit's head (Venusaur's back flower, Vileplume's petals).
+export function bloom(ctx: FxContext, view: UnitView, options: BloomOptions): void {
+  const count = options.petals ?? 5
+  const size = options.size ?? 0.35
+  const group = new THREE.Group()
+  const petals: THREE.Object3D[] = []
+  for (let index = 0; index < count; index++) {
+    const pivot = new THREE.Group()
+    pivot.rotation.y = (index / count) * Math.PI * 2
+    const petal = leafMesh(options.petal, size)
+    petal.geometry.rotateX(Math.PI / 2).translate(0, size, 0)
+    if (options.spot) {
+      const spot = new THREE.Mesh(
+        new THREE.CircleGeometry(size * 0.18, 10),
+        standard(options.spot, { opacity: 1, roughness: 0.6 }),
+      )
+      spot.position.set(0, size * 1.1, 0.01)
+      petal.add(spot)
+    }
+    pivot.add(petal)
+    petals.push(petal)
+    group.add(pivot)
+  }
+  const heart = new THREE.Mesh(
+    new THREE.SphereGeometry(size * 0.3, 12, 8),
+    glow(options.center ?? '#fde047', 0.9),
+  )
+  group.add(heart)
+  fx(ctx, options.delay ?? 0, options.duration ?? 1000, group, (p) => {
+    group.position
+      .copy(view.root.position)
+      .setY(view.height + (options.height ?? 0.1) + view.pose.lift)
+    const open = easeInOut(Math.min(1, p / 0.35))
+    const close = p > 0.8 ? (p - 0.8) / 0.2 : 0
+    petals.forEach((petal) => {
+      petal.rotation.x = -(Math.PI / 2) * (0.1 + open * 0.75) * (1 - close)
+    })
+    group.rotation.y = p * 1.2
+    group.scale.setScalar(Math.max(0.01, (0.3 + open * 0.7) * (1 - close)))
+  })
+}
+
+export interface PowderOptions {
+  color: ColorInput
+  count?: number
+  radius?: number
+  height?: number
+  size?: number
+  delay?: number
+  duration?: number
+  swirl?: number
+}
+
+// Powder that drifts down from above in a slow swirling spiral onto an area.
+export function powderFall(ctx: FxContext, center: PointSource, options: PowderOptions): void {
+  const count = Math.max(6, Math.round((options.count ?? 40) * ctx.particleScale))
+  const radius = options.radius ?? 1
+  const height = options.height ?? 2
+  const seeds = Array.from({ length: count }, () => ({
+    angle: Math.random() * Math.PI * 2,
+    radius: Math.sqrt(Math.random()) * radius,
+    start: Math.random() * 0.35,
+    speed: 0.7 + Math.random() * 0.5,
+  }))
+  const positions = new Float32Array(count * 3)
+  const geometry = new THREE.BufferGeometry()
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+  const material = new THREE.PointsMaterial({
+    color: options.color,
+    size: options.size ?? 0.12,
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+  })
+  const points = new THREE.Points(geometry, material)
+  points.frustumCulled = false
+  const origin = new THREE.Vector3()
+  let resolved = false
+  fx(ctx, options.delay ?? 0, options.duration ?? 1000, points, (p) => {
+    if (!resolved) {
+      origin.copy(resolvePoint(center))
+      resolved = true
+    }
+    seeds.forEach((seed, index) => {
+      const local = Math.min(1, Math.max(0, (p - seed.start) / (1 - seed.start)) * seed.speed)
+      const angle = seed.angle + local * (options.swirl ?? 3)
+      const r = seed.radius * (0.6 + local * 0.4)
+      positions[index * 3] = origin.x + Math.cos(angle) * r
+      positions[index * 3 + 1] = p < seed.start ? HIDDEN_Y : 0.1 + height * (1 - local)
+      positions[index * 3 + 2] = origin.z + Math.sin(angle) * r
+    })
+    geometry.attributes.position.needsUpdate = true
+    material.opacity = fadeInOut(p, 0.1, 0.3)
+  })
+}
+
+export const SIDE = new THREE.Vector3()
+
+export const LIFT = new THREE.Vector3()
+
+// Perpendicular basis around a travel direction, for placing things around a jet or a drain path.
+export function basis(direction: THREE.Vector3): void {
+  SIDE.crossVectors(direction, UP)
+  if (SIDE.lengthSq() < 1e-4) SIDE.set(1, 0, 0)
+  SIDE.normalize()
+  LIFT.crossVectors(SIDE, direction).normalize()
+}
+
+export function liquid(color: ColorInput, opacity: number): THREE.MeshStandardMaterial {
+  const material = standard(color, {
+    opacity,
+    roughness: 0.04,
+    metalness: 0.25,
+    emissive: new THREE.Color(color).multiplyScalar(0.45),
+  })
+  material.transparent = true
+  material.depthWrite = false
+  return material
+}
+
+export function sprayPoints(count: number, color: ColorInput, size: number) {
+  const positions = new Float32Array(count * 3).fill(HIDDEN_Y)
+  const geometry = new THREE.BufferGeometry()
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+  const material = new THREE.PointsMaterial({
+    color,
+    size,
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+  })
+  const points = new THREE.Points(geometry, material)
+  points.frustumCulled = false
+  return { points, positions, geometry, material }
+}
+
+export function colorPoints(count: number, size: number) {
+  const positions = new Float32Array(count * 3).fill(HIDDEN_Y)
+  const colors = new Float32Array(count * 3)
+  const geometry = new THREE.BufferGeometry()
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
+  const material = new THREE.PointsMaterial({
+    size,
+    vertexColors: true,
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+  })
+  const points = new THREE.Points(geometry, material)
+  points.frustumCulled = false
+  return { points, positions, colors, geometry, material }
+}
+
+export const phaseOf = (p: number, start: number, end: number): number =>
+  Math.min(1, Math.max(0, (p - start) / (end - start)))
+
+export const easeOutCubic = (p: number): number => 1 - (1 - p) ** 3
+
+export interface JetOptions {
+  color?: ColorInput
+  core?: ColorInput
+  foam?: ColorInput
+  radius?: number
+  flare?: number
+  rings?: number
+  spray?: number
+  grow?: number
+  delay?: number
+  duration?: number
+  priority?: RenderEffectPriority
+}
+
+// Pressurised water jet: a glossy rippling water column with a bright inner core, pressure rings racing down its
+// length, a round water head on the front while it extends, and droplets peeling off the sides under gravity.
+export function waterJet(
+  ctx: FxContext,
+  from: PointSource,
+  to: PointSource,
+  options: JetOptions = {},
+): void {
+  const radius = options.radius ?? 0.08
+  const grow = options.grow ?? 0.25
+  const color = options.color ?? '#38bdf8'
+  const foam = options.foam ?? '#bae6fd'
+  const root = new THREE.Group()
+  const jet = new THREE.Group()
+  const shaft = new THREE.Group()
+  root.add(jet)
+  jet.add(shaft)
+  const bodyGeometry = new THREE.CylinderGeometry(
+    radius,
+    radius * (options.flare ?? 1.4),
+    1,
+    14,
+    10,
+    true,
+  ).translate(0, 0.5, 0)
+  const base = Float32Array.from(bodyGeometry.attributes.position.array as Float32Array)
+  const angles = Array.from({ length: base.length / 3 }, (_, index) =>
+    Math.atan2(base[index * 3 + 2], base[index * 3]),
+  )
+  shaft.add(
+    new THREE.Mesh(bodyGeometry, liquid(color, 0.62)),
+    new THREE.Mesh(
+      new THREE.CylinderGeometry(radius * 0.42, radius * 0.6, 1, 10, 1, true).translate(0, 0.5, 0),
+      glow(options.core ?? '#7dd3fc', 0.6),
+    ),
+    new THREE.Mesh(
+      new THREE.CylinderGeometry(radius * 1.35, radius * 1.9, 1, 14, 1, true).translate(0, 0.5, 0),
+      glow(color, 0.16),
+    ),
+  )
+  const head = new THREE.Mesh(new THREE.SphereGeometry(radius * 1.6, 14, 10), liquid(color, 0.75))
+  head.add(new THREE.Mesh(new THREE.SphereGeometry(radius * 2.3, 12, 8), glow(foam, 0.28)))
+  jet.add(head)
+  const rings = Array.from({ length: options.rings ?? 3 }, () => {
+    const ring = new THREE.Mesh(
+      new THREE.TorusGeometry(radius * 1.45, radius * 0.26, 6, 20),
+      glow(foam, 0.5),
+    )
+    ring.rotation.x = Math.PI / 2
+    jet.add(ring)
+    return ring
+  })
+  const sprayCount = Math.max(4, Math.round((options.spray ?? 24) * ctx.particleScale))
+  const spray = sprayPoints(sprayCount, foam, 0.07)
+  root.add(spray.points)
+  const seeds = Array.from({ length: sprayCount }, () => ({
+    launch: Math.random() * 0.8,
+    along: 0.15 + Math.random() * 0.85,
+    angle: Math.random() * Math.PI * 2,
+    speed: 0.5 + Math.random() * 0.9,
+  }))
+  const start = new THREE.Vector3()
+  const end = new THREE.Vector3()
+  const direction = new THREE.Vector3()
+  const cursor = new THREE.Vector3()
+  const duration = options.duration ?? 600
+  fx(
+    ctx,
+    options.delay ?? 0,
+    duration,
+    root,
+    (p, now) => {
+      start.copy(resolvePoint(from))
+      end.copy(resolvePoint(to))
+      direction.subVectors(end, start)
+      const full = Math.max(0.01, direction.length())
+      direction.divideScalar(full)
+      basis(direction)
+      const front = easeOutCubic(phaseOf(p, 0, grow))
+      const length = Math.max(0.01, full * front)
+      jet.position.copy(start)
+      jet.quaternion.setFromUnitVectors(UP, direction)
+      const thickness =
+        (0.55 + 0.45 * front) * (1 - 0.85 * phaseOf(p, 0.72, 1)) * (1 + 0.07 * Math.sin(now * 0.07))
+      shaft.scale.set(thickness, length, thickness)
+      const array = bodyGeometry.attributes.position.array as Float32Array
+      for (let index = 0; index < angles.length; index++) {
+        const y = base[index * 3 + 1]
+        const ripple =
+          1 +
+          0.16 * Math.sin(y * 22 - now * 0.05 + angles[index] * 2) +
+          0.07 * Math.sin(y * 47 - now * 0.09)
+        array[index * 3] = base[index * 3] * ripple
+        array[index * 3 + 2] = base[index * 3 + 2] * ripple
+      }
+      bodyGeometry.attributes.position.needsUpdate = true
+      head.visible = p < grow + 0.08
+      head.position.set(0, length, 0)
+      head.scale.setScalar(thickness * (1 + 0.15 * Math.sin(now * 0.05)))
+      const fade = 1 - phaseOf(p, 0.8, 1)
+      setOpacity(shaft, fade)
+      setOpacity(head, fade)
+      rings.forEach((ring, index) => {
+        const t = (p * 2.6 + index / rings.length) % 1
+        ring.position.y = t * length
+        ring.scale.setScalar(thickness * (0.8 + t * 0.9))
+        ;(ring.material as THREE.MeshBasicMaterial).opacity = 0.5 * (1 - t) * fade
+      })
+      seeds.forEach((seed, index) => {
+        const local = (p - seed.launch) / 0.3
+        if (local < 0 || local > 1 || seed.along > front) {
+          spray.positions[index * 3 + 1] = HIDDEN_Y
+          return
+        }
+        const time = (local * 0.3 * duration) / 1000
+        cursor
+          .copy(start)
+          .addScaledVector(direction, full * seed.along + time * 1.2)
+          .addScaledVector(SIDE, Math.cos(seed.angle) * (radius + seed.speed * time))
+          .addScaledVector(LIFT, Math.sin(seed.angle) * (radius + seed.speed * time))
+        cursor.y -= 4.5 * time * time
+        spray.positions.set([cursor.x, cursor.y, cursor.z], index * 3)
+      })
+      spray.geometry.attributes.position.needsUpdate = true
+      spray.material.opacity = fade
+    },
+    options.priority ?? 'ability',
+  )
+}
+
+export interface SplashOptions {
+  color?: ColorInput
+  foam?: ColorInput
+  radius?: number
+  height?: number
+  tips?: number
+  delay?: number
+  duration?: number
+  priority?: RenderEffectPriority
+}
+
+// Splash crown on the floor: a glossy flared water wall with a lobed rim, droplets flung off each lobe that arc
+// out and fall, fine mist and an expanding ripple ring.
+export function splashCrown(ctx: FxContext, point: PointSource, options: SplashOptions = {}): void {
+  const radius = options.radius ?? 0.35
+  const height = options.height ?? 0.5
+  const color = options.color ?? '#38bdf8'
+  const foam = options.foam ?? '#bae6fd'
+  const lobes = Math.max(5, Math.round((options.tips ?? 10) * Math.max(0.6, ctx.particleScale)))
+  const duration = options.duration ?? 800
+  const group = new THREE.Group()
+  const crown = new THREE.Group()
+  const sheetGeometry = new THREE.CylinderGeometry(1, 0.55, 1, 30, 3, true).translate(0, 0.5, 0)
+  const sheetPositions = sheetGeometry.attributes.position
+  for (let index = 0; index < sheetPositions.count; index++) {
+    if (sheetPositions.getY(index) < 0.99) continue
+    const angle = Math.atan2(sheetPositions.getZ(index), sheetPositions.getX(index))
+    sheetPositions.setY(index, 1 + 0.35 * Math.max(0, Math.cos(angle * lobes)))
+  }
+  crown.add(
+    new THREE.Mesh(sheetGeometry, liquid(color, 0.5)),
+    new THREE.Mesh(sheetGeometry.clone().scale(1.04, 1, 1.04), glow(foam, 0.2)),
+  )
+  group.add(crown)
+  const drops = Array.from({ length: lobes }, (_, index) => {
+    const size = 0.03 + Math.random() * 0.025
+    const drop = new THREE.Mesh(new THREE.SphereGeometry(size, 8, 6), liquid(color, 0.9))
+    drop.add(new THREE.Mesh(new THREE.SphereGeometry(size * 1.8, 8, 6), glow(foam, 0.35)))
+    group.add(drop)
+    const rise = height * (0.9 + Math.random() * 0.7)
+    return {
+      drop,
+      angle: (index / lobes) * Math.PI * 2,
+      out: radius * (1.2 + Math.random() * 1.4),
+      up: Math.sqrt(2 * 9 * rise),
+    }
+  })
+  const ripple = new THREE.Mesh(new THREE.RingGeometry(0.86, 1, 40), glow(color, 0.7))
+  ripple.rotation.x = -Math.PI / 2
+  group.add(ripple)
+  const mistCount = Math.max(4, Math.round(16 * ctx.particleScale))
+  const mist = sprayPoints(mistCount, foam, 0.06)
+  group.add(mist.points)
+  const mistSeeds = Array.from({ length: mistCount }, () => ({
+    angle: Math.random() * Math.PI * 2,
+    out: 0.4 + Math.random() * 0.9,
+    up: 1.5 + Math.random() * 2,
+  }))
+  let resolved = false
+  fx(
+    ctx,
+    options.delay ?? 0,
+    duration,
+    group,
+    (p) => {
+      if (!resolved) {
+        const origin = resolvePoint(point)
+        group.position.set(origin.x, Math.max(0.04, origin.y), origin.z)
+        resolved = true
+      }
+      const time = (p * duration) / 1000
+      const rise = p < 0.3 ? easeOutCubic(p / 0.3) : 1 - phaseOf(p, 0.3, 0.8) ** 2
+      const spread = radius * (0.45 + 0.75 * easeOutCubic(phaseOf(p, 0, 0.6)))
+      crown.scale.set(spread, Math.max(0.001, height * rise), spread)
+      crown.rotation.y = p * 0.6
+      setOpacity(crown, 1 - phaseOf(p, 0.5, 0.85))
+      drops.forEach(({ drop, angle, out, up }) => {
+        const y = up * time - 9 * time * time
+        drop.visible = y > -0.02
+        drop.position.set(
+          Math.cos(angle) * (radius * 0.6 + out * time),
+          y,
+          Math.sin(angle) * (radius * 0.6 + out * time),
+        )
+        drop.scale.set(1, 1 + Math.min(1.2, Math.abs(up - 18 * time) * 0.25), 1)
+      })
+      ripple.scale.setScalar(0.3 + easeOutCubic(p) * radius * 3)
+      ;(ripple.material as THREE.MeshBasicMaterial).opacity = 0.7 * (1 - p)
+      mistSeeds.forEach((seed, index) => {
+        const y = seed.up * time * 0.6 - 3 * time * time
+        mist.positions.set(
+          [
+            Math.cos(seed.angle) * seed.out * time,
+            Math.max(0, y),
+            Math.sin(seed.angle) * seed.out * time,
+          ],
+          index * 3,
+        )
+      })
+      mist.geometry.attributes.position.needsUpdate = true
+      mist.material.opacity = 0.7 * (1 - p)
+    },
+    options.priority ?? 'ability',
+  )
+}
+
+export interface TorrentOptions {
+  radius?: number
+  puffs?: number
+  delay?: number
+  duration?: number
+  priority?: RenderEffectPriority
+}
+
+export const FLAME_RAMP = ['#fcd34d', '#f97316', '#dc2626', '#44120a'].map(
+  (hex) => new THREE.Color(hex),
+)
+
+export function rampColor(t: number, out: THREE.Color): THREE.Color {
+  const scaled = Math.min(FLAME_RAMP.length - 1.001, Math.max(0, t) * (FLAME_RAMP.length - 1))
+  const index = Math.floor(scaled)
+  return out.copy(FLAME_RAMP[index]).lerp(FLAME_RAMP[index + 1], scaled - index)
+}
+
+// Roaring flame torrent: nested additive cones (red sheath, orange body, golden core) whose surfaces churn with
+// scrolling turbulence, billowing fireballs that swell and cool from gold to deep red along the flow, and dark
+// smoke curling off the far end.
+export function flameTorrent(
+  ctx: FxContext,
+  from: PointSource,
+  to: PointSource,
+  options: TorrentOptions = {},
+): void {
+  const radius = options.radius ?? 0.7
+  const root = new THREE.Group()
+  const jet = new THREE.Group()
+  root.add(jet)
+  // The outer sheath is unlit but not additive so the torrent has a solid red-orange body; only the inner two
+  // layers add light, which keeps the core warm gold instead of washing out to white.
+  const layers = [
+    { color: '#c2410c', width: 1, opacity: 0.4, speed: 0.035, amp: 0.24, additive: false },
+    { color: '#f97316', width: 0.68, opacity: 0.4, speed: 0.05, amp: 0.18, additive: true },
+    { color: '#f59e0b', width: 0.36, opacity: 0.45, speed: 0.075, amp: 0.13, additive: true },
+  ].map((layer, index) => {
+    const geometry = new THREE.ConeGeometry(1, 1, 18, 12, true)
+      .rotateX(Math.PI)
+      .translate(0, 0.5, 0)
+    const base = Float32Array.from(geometry.attributes.position.array as Float32Array)
+    jet.add(
+      new THREE.Mesh(
+        geometry,
+        layer.additive ? glow(layer.color, layer.opacity) : flat(layer.color, layer.opacity),
+      ),
+    )
+    return { ...layer, geometry, base, seed: index * 1.7 }
+  })
+  const puffCount = Math.max(6, Math.round((options.puffs ?? 18) * ctx.particleScale))
+  const puffs = Array.from({ length: puffCount }, (_, index) => {
+    const material = flat('#fbbf24', 0.5)
+    const mesh = new THREE.Mesh(new THREE.IcosahedronGeometry(1, 1), material)
+    mesh.rotation.set(Math.random() * 3, Math.random() * 3, 0)
+    root.add(mesh)
+    return {
+      mesh,
+      material,
+      offset: index / puffCount,
+      angle: Math.random() * Math.PI * 2,
+      wander: 0.3 + Math.random() * 0.7,
+      size: 0.7 + Math.random() * 0.6,
+    }
+  })
+  const smoke = Array.from({ length: 6 }, (_, index) => {
+    const material = new THREE.MeshBasicMaterial({
+      color: '#292524',
+      transparent: true,
+      opacity: 0,
+      depthWrite: false,
+    })
+    const mesh = new THREE.Mesh(new THREE.IcosahedronGeometry(1, 1), material)
+    root.add(mesh)
+    return { mesh, material, offset: index / 6, along: 0.55 + Math.random() * 0.45 }
+  })
+  const start = new THREE.Vector3()
+  const end = new THREE.Vector3()
+  const direction = new THREE.Vector3()
+  const tint = new THREE.Color()
+  fx(
+    ctx,
+    options.delay ?? 0,
+    options.duration ?? 900,
+    root,
+    (p, now) => {
+      start.copy(resolvePoint(from))
+      end.copy(resolvePoint(to))
+      direction.subVectors(end, start)
+      const full = Math.max(0.01, direction.length())
+      direction.divideScalar(full)
+      basis(direction)
+      const front = easeOutCubic(phaseOf(p, 0, 0.18))
+      const envelope = front * (1 - phaseOf(p, 0.8, 1))
+      const length = Math.max(0.01, full * front)
+      jet.position.copy(start)
+      jet.quaternion.setFromUnitVectors(UP, direction)
+      const roar = 1 + 0.08 * Math.sin(now * 0.04) + 0.05 * Math.sin(now * 0.11)
+      jet.scale.set(
+        radius * roar * (0.4 + 0.6 * envelope),
+        length,
+        radius * roar * (0.4 + 0.6 * envelope),
+      )
+      layers.forEach((layer) => {
+        const array = layer.geometry.attributes.position.array as Float32Array
+        for (let index = 0; index < array.length / 3; index++) {
+          const x = layer.base[index * 3]
+          const y = layer.base[index * 3 + 1]
+          const z = layer.base[index * 3 + 2]
+          const angle = Math.atan2(z, x)
+          const churn =
+            1 +
+            layer.amp * Math.sin(y * 14 - now * layer.speed + angle * 3 + layer.seed) +
+            layer.amp * 0.5 * Math.sin(y * 31 - now * layer.speed * 1.7 + angle * 5 - layer.seed)
+          array[index * 3] = x * layer.width * churn + Math.sin(y * 6 - now * 0.02) * 0.08 * y
+          array[index * 3 + 1] = y
+          array[index * 3 + 2] = z * layer.width * churn
+        }
+        layer.geometry.attributes.position.needsUpdate = true
+      })
+      setOpacity(jet, envelope)
+      puffs.forEach((puff) => {
+        const t = (p * 2.4 + puff.offset) % 1
+        const visible = t <= front && p < 0.92
+        puff.mesh.visible = visible
+        if (!visible) return
+        const wander = t * radius * 0.55 * puff.wander
+        puff.mesh.position
+          .copy(start)
+          .addScaledVector(direction, t * full)
+          .addScaledVector(SIDE, Math.cos(puff.angle + t * 5) * wander)
+          .addScaledVector(LIFT, Math.sin(puff.angle + t * 5) * wander + t * t * 0.3)
+        puff.mesh.scale.setScalar((0.06 + t * radius * 0.42) * puff.size)
+        puff.mesh.rotation.z += 0.05
+        puff.material.color.copy(rampColor(t * 1.1, tint))
+        puff.material.opacity = 0.5 * (1 - t * t) * envelope
+      })
+      smoke.forEach((puff) => {
+        const t = (p * 1.3 + puff.offset) % 1
+        puff.mesh.position
+          .copy(start)
+          .addScaledVector(direction, full * puff.along)
+          .addScaledVector(SIDE, Math.sin(puff.offset * 9 + t * 3) * 0.2)
+        puff.mesh.position.y += 0.3 + t * 0.9
+        puff.mesh.scale.setScalar(0.12 + t * 0.3)
+        puff.material.opacity = 0.32 * Math.sin(Math.PI * t) * envelope
+      })
+    },
+    options.priority ?? 'ability',
+  )
+}
+
+// Heat shimmer: faint wavering lines of hot air hanging above and beside a flame's path.
+export function heatShimmer(
+  ctx: FxContext,
+  from: PointSource,
+  to: PointSource,
+  options: { color?: ColorInput; delay?: number; duration?: number } = {},
+): void {
+  const segments = 28
+  const group = new THREE.Group()
+  const strands = Array.from({ length: 6 }, (_, index) => {
+    const positions = new Float32Array((segments + 1) * 3)
+    const geometry = new THREE.BufferGeometry()
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+    const line = new THREE.Line(
+      geometry,
+      new THREE.LineBasicMaterial({
+        color: options.color ?? '#fdba74',
+        transparent: true,
+        opacity: 0.3,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+      }),
+    )
+    line.frustumCulled = false
+    group.add(line)
+    return {
+      positions,
+      geometry,
+      height: 0.35 + (index % 3) * 0.28,
+      side: (index < 3 ? -1 : 1) * (0.15 + Math.random() * 0.3),
+      seed: Math.random() * 10,
+    }
+  })
+  const start = new THREE.Vector3()
+  const end = new THREE.Vector3()
+  const direction = new THREE.Vector3()
+  const cursor = new THREE.Vector3()
+  fx(ctx, options.delay ?? 0, options.duration ?? 1000, group, (p, now) => {
+    start.copy(resolvePoint(from))
+    end.copy(resolvePoint(to))
+    direction.subVectors(end, start)
+    const full = direction.length()
+    direction.normalize()
+    basis(direction)
+    strands.forEach((strand) => {
+      for (let index = 0; index <= segments; index++) {
+        const t = 0.1 + (index / segments) * 0.9
+        cursor
+          .copy(start)
+          .addScaledVector(direction, t * full)
+          .addScaledVector(
+            SIDE,
+            strand.side * (0.5 + t) + Math.sin(t * 13 + now * 0.015 + strand.seed) * 0.06,
+          )
+        cursor.y +=
+          strand.height * t + Math.sin(t * 21 - now * 0.022 + strand.seed) * 0.05 + p * 0.25
+        strand.positions.set([cursor.x, cursor.y, cursor.z], index * 3)
+      }
+      strand.geometry.attributes.position.needsUpdate = true
+    })
+    setOpacity(group, fadeInOut(p, 0.15, 0.4))
+  })
+}
+
+// Glowing embers scattered along a path that drift upward and flicker out slowly.
+export function embers(
+  ctx: FxContext,
+  from: PointSource,
+  to: PointSource,
+  options: { count?: number; spread?: number; delay?: number; duration?: number } = {},
+): void {
+  const count = Math.max(6, Math.round((options.count ?? 36) * ctx.particleScale))
+  const spread = options.spread ?? 0.5
+  const cloud = colorPoints(count, 0.075)
+  const palette = ['#fbbf24', '#f97316', '#fde68a', '#ef4444'].map((hex) => new THREE.Color(hex))
+  const seeds = Array.from({ length: count }, (_, index) => ({
+    along: 0.12 + Math.random() * 0.95,
+    side: (Math.random() - 0.5) * 2 * spread,
+    launch: Math.random() * 0.5,
+    rise: 0.6 + Math.random() * 1.1,
+    seed: Math.random() * 10,
+    color: palette[index % palette.length],
+  }))
+  const start = new THREE.Vector3()
+  const end = new THREE.Vector3()
+  const direction = new THREE.Vector3()
+  const cursor = new THREE.Vector3()
+  const side = new THREE.Vector3()
+  let resolved = false
+  fx(ctx, options.delay ?? 0, options.duration ?? 1400, cloud.points, (p, now) => {
+    if (!resolved) {
+      start.copy(resolvePoint(from))
+      end.copy(resolvePoint(to))
+      direction.subVectors(end, start)
+      basis(direction.clone().normalize())
+      side.copy(SIDE)
+      resolved = true
+    }
+    seeds.forEach((seed, index) => {
+      const local = (p - seed.launch) / (1 - seed.launch)
+      if (local < 0) return
+      cursor
+        .copy(start)
+        .addScaledVector(direction, seed.along)
+        .addScaledVector(side, seed.side + Math.sin(local * 6 + seed.seed) * 0.12)
+      cursor.y = Math.max(0.1, cursor.y - 0.2) + local * seed.rise
+      cloud.positions.set([cursor.x, cursor.y, cursor.z], index * 3)
+      const flicker =
+        (0.55 + 0.45 * Math.sin(now * 0.025 + seed.seed * 7)) * (1 - local) * Math.min(1, local * 8)
+      cloud.colors.set(
+        [seed.color.r * flicker, seed.color.g * flicker, seed.color.b * flicker],
+        index * 3,
+      )
+    })
+    cloud.geometry.attributes.position.needsUpdate = true
+    cloud.geometry.attributes.color.needsUpdate = true
+  })
+}
+
+// Burnt ground along a flame's path: ragged dark blotches with smouldering orange rims that cool off.
+export function scorchTrail(
+  ctx: FxContext,
+  from: PointSource,
+  to: PointSource,
+  options: { width?: number; count?: number; delay?: number; duration?: number } = {},
+): void {
+  const count = options.count ?? 7
+  const width = options.width ?? 0.4
+  const group = new THREE.Group()
+  const ragged = (geometry: THREE.BufferGeometry, seed: number) => {
+    const position = geometry.attributes.position
+    for (let index = 0; index < position.count; index++) {
+      const x = position.getX(index)
+      const y = position.getY(index)
+      const length = Math.hypot(x, y)
+      if (length < 0.5) continue
+      const angle = Math.atan2(y, x)
+      const scale = 1 + 0.22 * Math.sin(angle * 5 + seed) + 0.12 * Math.sin(angle * 11 + seed * 2)
+      position.setXY(index, x * scale, y * scale)
+    }
+    return geometry.rotateX(-Math.PI / 2)
+  }
+  const blotches = Array.from({ length: count }, (_, index) => {
+    const seed = Math.random() * 10
+    const holder = new THREE.Group()
+    holder.add(
+      new THREE.Mesh(
+        ragged(new THREE.CircleGeometry(1, 22), seed),
+        new THREE.MeshBasicMaterial({
+          color: '#1c1917',
+          transparent: true,
+          opacity: 0.55,
+          depthWrite: false,
+        }),
+      ),
+    )
+    const rim = new THREE.Mesh(
+      ragged(new THREE.RingGeometry(0.72, 1, 22), seed),
+      glow('#ea580c', 0.75),
+    )
+    rim.position.y = 0.005
+    holder.add(rim)
+    group.add(holder)
+    return {
+      holder,
+      rim,
+      t: (index + 0.5) / count,
+      size: width * (0.55 + Math.random() * 0.5),
+      side: (Math.random() - 0.5) * width * 0.8,
+    }
+  })
+  const start = new THREE.Vector3()
+  const end = new THREE.Vector3()
+  const direction = new THREE.Vector3()
+  let resolved = false
+  fx(ctx, options.delay ?? 0, options.duration ?? 1600, group, (p) => {
+    if (!resolved) {
+      start.copy(resolvePoint(from)).setY(0.075)
+      end.copy(resolvePoint(to)).setY(0.075)
+      direction.subVectors(end, start)
+      basis(direction.clone().normalize())
+      blotches.forEach((blotch) => {
+        blotch.holder.position
+          .copy(start)
+          .addScaledVector(direction, blotch.t)
+          .addScaledVector(SIDE, blotch.side)
+        blotch.holder.rotation.y = Math.random() * Math.PI
+      })
+      resolved = true
+    }
+    blotches.forEach((blotch) => {
+      const appear = easeOutCubic(phaseOf(p, blotch.t * 0.2, blotch.t * 0.2 + 0.1))
+      blotch.holder.scale.setScalar(Math.max(0.001, blotch.size * appear))
+      setOpacity(blotch.holder, 1 - phaseOf(p, 0.65, 1))
+      ;(blotch.rim.material as THREE.MeshBasicMaterial).opacity =
+        0.75 * appear * (1 - phaseOf(p, 0.2, 0.7)) * (0.8 + 0.2 * Math.sin(p * 40 + blotch.t * 9))
+    })
+  })
+}
+
+export interface DrainOptions {
+  count?: number
+  travel?: number
+  turns?: number
+  delay?: number
+  duration?: number
+}
+
+// Life drain: motes with short comet tails spiral along a helix from `from` to `to`, arching over the gap.
+export function lifeDrain(
+  ctx: FxContext,
+  from: PointSource,
+  to: PointSource,
+  options: DrainOptions = {},
+): void {
+  const count = Math.max(8, Math.round((options.count ?? 24) * ctx.particleScale))
+  const travel = options.travel ?? 0.45
+  const turns = options.turns ?? 2
+  const tail = 3
+  const cloud = colorPoints(count * tail, 0.08)
+  const palette = ['#4ade80', '#bef264', '#86efac', '#22c55e'].map((hex) => new THREE.Color(hex))
+  const seeds = Array.from({ length: count }, (_, index) => ({
+    launch: (index / count) * (1 - travel),
+    angle: Math.random() * Math.PI * 2,
+    radius: 0.18 + Math.random() * 0.16,
+    color: palette[index % palette.length],
+  }))
+  const start = new THREE.Vector3()
+  const end = new THREE.Vector3()
+  const direction = new THREE.Vector3()
+  const cursor = new THREE.Vector3()
+  fx(ctx, options.delay ?? 0, options.duration ?? 1000, cloud.points, (p) => {
+    start.copy(resolvePoint(from))
+    end.copy(resolvePoint(to))
+    basis(direction.subVectors(end, start).normalize())
+    seeds.forEach((seed, index) => {
+      for (let step = 0; step < tail; step++) {
+        const offset = (index * tail + step) * 3
+        const k = (p - seed.launch) / travel - step * 0.05
+        if (k < 0 || k > 1) {
+          cloud.positions[offset + 1] = HIDDEN_Y
+          continue
+        }
+        const eased = easeInOut(k)
+        const r = seed.radius * Math.sin(Math.PI * k) + 0.03
+        const a = seed.angle + k * turns * Math.PI * 2
+        cursor
+          .lerpVectors(start, end, eased)
+          .addScaledVector(SIDE, Math.cos(a) * r)
+          .addScaledVector(LIFT, Math.sin(a) * r)
+        cursor.y += Math.sin(Math.PI * eased) * 0.55
+        cloud.positions.set([cursor.x, cursor.y, cursor.z], offset)
+        const brightness = (1 - step * 0.35) * Math.min(1, k * 6) * (1 - phaseOf(k, 0.85, 1) * 0.6)
+        cloud.colors.set(
+          [seed.color.r * brightness, seed.color.g * brightness, seed.color.b * brightness],
+          offset,
+        )
+      }
+    })
+    cloud.geometry.attributes.position.needsUpdate = true
+    cloud.geometry.attributes.color.needsUpdate = true
+  })
+}
+
+export type PositionAt = (now: number, out: THREE.Vector3) => THREE.Vector3
+
+export const fadeTail = (p: number, from = 0.7): number =>
+  p < from ? 1 : 1 - (p - from) / (1 - from)
+
+export interface RushOptions {
+  delay?: number
+  duration: number
+  reach?: number
+  hold?: number
+  outEnd?: number
+  lift?: number
+  priority?: RenderEffectPriority
+}
+
+// Like `dash`, but returns a sampler of the body position so props (water sheath, flame wheel, horn, boulder)
+// stay glued to the rushing Pokemon regardless of effect update order.
+export function rush(
+  ctx: FxContext,
+  source: UnitView,
+  target: UnitView,
+  options: RushOptions,
+): PositionAt {
+  const delay = options.delay ?? 0
+  const start = ctx.now + delay
+  const travel = new THREE.Vector3().subVectors(target.root.position, source.root.position).setY(0)
+  const ranged = source.unit.range > 1 ? 0.35 / Math.max(0.35, travel.length()) : Infinity
+  const reach = Math.min(ranged, (options.reach ?? 0.8) * (ctx.reducedMotion ? 0.3 : 1))
+  const outEnd = options.outEnd ?? 0.3
+  const backStart = outEnd + (options.hold ?? 0.25)
+  const amount = (p: number) =>
+    p < outEnd
+      ? easeInOut(p / outEnd)
+      : p < backStart
+        ? 1
+        : 1 - easeInOut((p - backStart) / Math.max(0.01, 1 - backStart))
+  const lift = options.lift ?? 0
+  fx(
+    ctx,
+    delay,
+    options.duration,
+    undefined,
+    (p) => {
+      source.pose.offset.addScaledVector(travel, amount(p) * reach)
+      source.pose.lift += Math.sin(Math.PI * p) * lift
+    },
+    options.priority,
+  )
+  return (now, out) => {
+    const p = clamp01((now - start) / options.duration)
+    return out
+      .copy(source.root.position)
+      .addScaledVector(travel, amount(p) * reach)
+      .setY(source.height * 0.55 + Math.sin(Math.PI * p) * lift)
+  }
+}
+
+export interface BoltOptions {
+  color: ColorInput
+  core?: ColorInput
+  width?: number
+  segments?: number
+  jitter?: number
+  delay?: number
+  duration?: number
+}
+
+// Raichu's Thunder: a thick jagged bolt of cylinder links whose kinks re-randomise so it crackles.
+export function thickBolt(
+  ctx: FxContext,
+  from: PointSource,
+  to: PointSource,
+  options: BoltOptions,
+): void {
+  const segments = options.segments ?? 7
+  const width = options.width ?? 0.08
+  const jitter = options.jitter ?? 0.5
+  const group = new THREE.Group()
+  const links: THREE.Mesh[] = []
+  for (let index = 0; index < segments; index++) {
+    const link = new THREE.Mesh(
+      new THREE.CylinderGeometry(width, width, 1, 6, 1, true),
+      glow(options.color),
+    )
+    link.add(
+      new THREE.Mesh(
+        new THREE.CylinderGeometry(width * 0.4, width * 0.4, 1, 6, 1, true),
+        glow(options.core ?? '#ffffff'),
+      ),
+    )
+    links.push(link)
+    group.add(link)
+  }
+  const nodes = Array.from({ length: segments + 1 }, () => new THREE.Vector3())
+  const a = new THREE.Vector3()
+  const b = new THREE.Vector3()
+  const up = new THREE.Vector3(0, 1, 0)
+  const dir = new THREE.Vector3()
+  let last = -1
+  fx(ctx, options.delay ?? 0, options.duration ?? 320, group, (p, now) => {
+    if (now - last > 55) {
+      last = now
+      a.copy(resolvePoint(from))
+      b.copy(resolvePoint(to))
+      nodes.forEach((node, index) => {
+        const wobble = index === 0 || index === segments ? 0 : jitter
+        node.lerpVectors(a, b, index / segments)
+        node.x += (Math.random() - 0.5) * wobble
+        node.z += (Math.random() - 0.5) * wobble
+      })
+      links.forEach((link, index) => {
+        const start = nodes[index]
+        const end = nodes[index + 1]
+        link.position.lerpVectors(start, end, 0.5)
+        link.quaternion.setFromUnitVectors(up, dir.subVectors(end, start).normalize())
+        link.scale.set(1, Math.max(0.01, start.distanceTo(end)), 1)
+      })
+    }
+    setOpacity(group, fadeTail(p, 0.55) * (0.75 + 0.25 * Math.sin(now * 0.08)))
+  })
+}
+
+export function flameMesh(
+  color: ColorInput,
+  core: ColorInput = '#fff7d6',
+  size = 0.2,
+): THREE.Group {
+  const group = new THREE.Group()
+  const body = new THREE.Mesh(new THREE.SphereGeometry(0.5, 12, 8), glow(color, 0.85))
+  const tongue = new THREE.Mesh(new THREE.ConeGeometry(0.48, 1.3, 12, 1, true), glow(color, 0.75))
+  tongue.position.y = 0.62
+  const heart = new THREE.Mesh(new THREE.SphereGeometry(0.26, 10, 8), glow(core))
+  heart.position.y = 0.05
+  group.add(body, tongue, heart)
+  group.scale.setScalar(size)
+  return group
+}
+
+export interface StreakOptions {
+  color: ColorInput
+  count?: number
+  spread?: number
+  delay?: number
+  duration?: number
+  thickness?: number
+  priority?: RenderEffectPriority
+}
+
+// Point-to-point speed lines that zip along a path with staggered starts (for moves where the user vanishes).
+export function speedStreaks(
+  ctx: FxContext,
+  from: PointSource,
+  to: PointSource,
+  options: StreakOptions,
+): void {
+  const count = Math.max(3, scaledCount(ctx, options.count ?? 10))
+  const spread = options.spread ?? 0.5
+  const thickness = options.thickness ?? 0.02
+  const group = new THREE.Group()
+  const lines = Array.from({ length: count }, (_, index) => {
+    const mesh = new THREE.Mesh(
+      new THREE.BoxGeometry(thickness, thickness, 1),
+      glow(index % 3 === 0 ? '#ffffff' : options.color, 0.9),
+    )
+    group.add(mesh)
+    return {
+      mesh,
+      lateral: new THREE.Vector3((Math.random() - 0.5) * spread, (Math.random() - 0.5) * spread, 0),
+      offset: Math.random() * 0.35,
+      length: 0.6 + Math.random() * 0.9,
+    }
+  })
+  const a = new THREE.Vector3()
+  const b = new THREE.Vector3()
+  let resolved = false
+  fx(
+    ctx,
+    options.delay ?? 0,
+    options.duration ?? 320,
+    group,
+    (p) => {
+      if (!resolved) {
+        a.copy(resolvePoint(from))
+        b.copy(resolvePoint(to))
+        group.position.copy(a)
+        group.lookAt(b)
+        resolved = true
+      }
+      const distance = a.distanceTo(b)
+      lines.forEach((line) => {
+        const local = clamp01((p - line.offset) / 0.6)
+        const length = Math.max(0.01, line.length * Math.sin(Math.PI * local))
+        line.mesh.position.copy(line.lateral)
+        line.mesh.position.z = local * distance - length / 2
+        line.mesh.scale.z = length
+      })
+      setOpacity(group, 1 - p * 0.5)
+    },
+    options.priority,
+  )
+}
+
+export interface WaveOptions {
+  color: ColorInput
+  crest?: ColorInput
+  radius?: number
+  height?: number
+  delay?: number
+  duration?: number
+}
+
+// Sludge Wave: an expanding ring wall with a lumpy crest.
+export function waveWall(ctx: FxContext, point: PointSource, options: WaveOptions): void {
+  const height = options.height ?? 0.8
+  const geometry = new THREE.CylinderGeometry(1, 1.08, height, 40, 1, true).translate(
+    0,
+    height / 2,
+    0,
+  )
+  const positions = geometry.attributes.position
+  for (let index = 0; index < positions.count; index++) {
+    if (positions.getY(index) > height / 2) {
+      const angle = Math.atan2(positions.getZ(index), positions.getX(index))
+      positions.setY(index, height * (0.75 + 0.25 * Math.sin(angle * 7)))
+    }
+  }
+  const wall = new THREE.Mesh(geometry, glow(options.color, 0.6))
+  const crest = new THREE.Mesh(
+    new THREE.TorusGeometry(1, 0.07, 6, 40),
+    glow(options.crest ?? '#ffffff', 0.8),
+  )
+  crest.rotation.x = Math.PI / 2
+  crest.position.y = height * 0.85
+  const group = new THREE.Group()
+  group.add(wall, crest)
+  const radius = options.radius ?? 2
+  let resolved = false
+  fx(ctx, options.delay ?? 0, options.duration ?? 700, group, (p) => {
+    if (!resolved) {
+      const center = resolvePoint(point)
+      group.position.set(center.x, 0, center.z)
+      resolved = true
+    }
+    const spread = 0.15 + easeInOut(p) * radius
+    group.scale.set(spread, Math.sin(Math.PI * Math.min(1, p * 1.3)) + 0.05, spread)
+    setOpacity(group, 1 - p * p)
+  })
+}
+
+export const lit = (color: ColorInput, emissiveIntensity = 0.25, roughness = 0.5) =>
+  standard(color, { emissive: color, emissiveIntensity, roughness })
+
+export interface JabOptions {
+  color: ColorInput
+  delay?: number
+  duration?: number
+  size?: number
+  side?: number
+  height?: number
+  priority?: RenderEffectPriority
+}
+
+// Doduo-line peck: a beak that stabs from beside the caster's body into the target and retracts.
+export function beakJab(
+  ctx: FxContext,
+  source: UnitView,
+  target: UnitView,
+  options: JabOptions,
+): void {
+  const size = options.size ?? 0.09
+  const group = new THREE.Group()
+  const beak = new THREE.Mesh(
+    new THREE.ConeGeometry(size, size * 4, 8).rotateX(Math.PI / 2),
+    lit(options.color, 0.35, 0.4),
+  )
+  const glint = new THREE.Mesh(
+    new THREE.ConeGeometry(size * 0.4, size * 2, 6).rotateX(Math.PI / 2),
+    glow('#ffffff', 0.8),
+  )
+  glint.position.z = size * 1.2
+  group.add(beak, glint)
+  const from = new THREE.Vector3()
+  const to = new THREE.Vector3()
+  const side = new THREE.Vector3()
+  fx(
+    ctx,
+    options.delay ?? 0,
+    options.duration ?? 200,
+    group,
+    (p) => {
+      bodyPoint(source, options.height ?? 0.7, from)
+      target.focusPoint(to, 0.6)
+      side
+        .subVectors(to, from)
+        .setY(0)
+        .cross(UP)
+        .normalize()
+        .multiplyScalar(options.side ?? 0)
+      from.add(side)
+      const reach = p < 0.5 ? easeInOut(p / 0.5) : 1 - easeInOut((p - 0.5) / 0.5)
+      group.position.lerpVectors(from, to, reach * 0.92)
+      group.lookAt(to)
+    },
+    options.priority ?? 'ability',
+  )
+}
+
+// Grimer/Muk sludge: a lumpy, glossy blob (callers may stud it with junk for Gunk Shot).
+export function makeGlob(color: ColorInput, size: number, lumpiness = 0.3): THREE.Mesh {
+  const geometry = new THREE.IcosahedronGeometry(size, 1)
+  const position = geometry.attributes.position
+  const vertex = new THREE.Vector3()
+  for (let index = 0; index < position.count; index++) {
+    vertex.fromBufferAttribute(position, index)
+    const noise =
+      1 +
+      (Math.sin(vertex.x * 17 + vertex.y * 11) * 0.5 + Math.cos(vertex.z * 13) * 0.5) * lumpiness
+    vertex.multiplyScalar(noise)
+    position.setXYZ(index, vertex.x, vertex.y, vertex.z)
+  }
+  geometry.computeVertexNormals()
+  return new THREE.Mesh(geometry, lit(color, 0.3, 0.25))
+}
+
+export interface PuddleOptions {
+  color: ColorInput
+  radius?: number
+  delay?: number
+  duration?: number
+  bubbles?: ColorInput
+  priority?: RenderEffectPriority
+}
+
+// Acid / sludge pool that spreads on the floor, fizzes, then dries up.
+export function puddle(ctx: FxContext, point: PointSource, options: PuddleOptions): void {
+  const radius = options.radius ?? 0.6
+  const group = new THREE.Group()
+  const disc = new THREE.Mesh(new THREE.CircleGeometry(1, 24), glow(options.color, 0.6))
+  disc.rotation.x = -Math.PI / 2
+  group.add(disc)
+  const count = scaledCount(ctx, 10)
+  const positions = new Float32Array(count * 3)
+  const geometry = new THREE.BufferGeometry()
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+  const material = new THREE.PointsMaterial({
+    color: options.bubbles ?? options.color,
+    size: 0.12,
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+  })
+  const fizz = new THREE.Points(geometry, material)
+  fizz.frustumCulled = false
+  group.add(fizz)
+  const seeds = Array.from({ length: count }, () => ({
+    angle: Math.random() * Math.PI * 2,
+    distance: Math.random(),
+    offset: Math.random(),
+  }))
+  let resolved = false
+  fx(
+    ctx,
+    options.delay ?? 0,
+    options.duration ?? 900,
+    group,
+    (p) => {
+      if (!resolved) {
+        const center = resolvePoint(point)
+        group.position.set(center.x, 0.09, center.z)
+        resolved = true
+      }
+      disc.scale.setScalar(
+        Math.max(0.01, radius * easeInOut(phase(p, 0, 0.3)) * (1 + 0.06 * Math.sin(p * 30))),
+      )
+      ;(disc.material as THREE.MeshBasicMaterial).opacity = 0.6 * (1 - phase(p, 0.6, 1))
+      seeds.forEach((seed, index) => {
+        const local = (p * 2 + seed.offset) % 1
+        positions[index * 3] = Math.cos(seed.angle) * seed.distance * radius
+        positions[index * 3 + 1] = local * 0.45
+        positions[index * 3 + 2] = Math.sin(seed.angle) * seed.distance * radius
+      })
+      geometry.attributes.position.needsUpdate = true
+      material.opacity = 1 - p
+    },
+    options.priority ?? 'ability',
+  )
+}
+
+export interface ExtendOptions {
+  color: ColorInput
+  tip: THREE.Object3D
+  delay?: number
+  duration?: number
+  thickness?: number
+  side?: number
+  rise?: number
+  material?: THREE.Material
+  // Reach (0..1) over the effect's progress; defaults to a snappy out-and-back.
+  profile?: (p: number) => number
+  priority?: RenderEffectPriority
+}
+
+// A limb, tongue or leg that shoots from the caster's current pose to the target with a custom tip;
+// unlike stretchLimb it takes any tip mesh, a reach profile (for holds) and a render priority.
+export function extend(
+  ctx: FxContext,
+  source: UnitView,
+  target: UnitView,
+  options: ExtendOptions,
+): void {
+  const thickness = options.thickness ?? 0.07
+  const group = new THREE.Group()
+  const arm = new THREE.Mesh(
+    new THREE.CylinderGeometry(thickness, thickness, 1, 8, 1, true),
+    options.material ?? standard(options.color, { roughness: 0.5, flatShading: true }),
+  )
+  group.add(arm, options.tip)
+  const from = new THREE.Vector3()
+  const to = new THREE.Vector3()
+  const tip = new THREE.Vector3()
+  const side = new THREE.Vector3()
+  const up = new THREE.Vector3(0, 1, 0)
+  const axis = new THREE.Vector3()
+  fx(
+    ctx,
+    options.delay ?? 0,
+    options.duration ?? 240,
+    group,
+    (p) => {
+      source.focusPoint(from, 0.55).add(source.pose.offset)
+      from.y += source.pose.lift + (options.rise ?? 0)
+      target.focusPoint(to, 0.5)
+      side
+        .subVectors(to, from)
+        .cross(up)
+        .normalize()
+        .multiplyScalar(options.side ?? 0)
+      from.add(side)
+      const reach = options.profile
+        ? options.profile(p)
+        : p < 0.45
+          ? 1 - (1 - p / 0.45) ** 3
+          : 1 - (p - 0.45) / 0.55
+      tip.lerpVectors(from, to, reach)
+      const length = Math.max(0.01, from.distanceTo(tip))
+      arm.position.lerpVectors(from, tip, 0.5)
+      axis.subVectors(tip, from).normalize()
+      arm.quaternion.setFromUnitVectors(up, axis)
+      arm.scale.set(1, length, 1)
+      options.tip.position.copy(tip)
+      options.tip.quaternion.setFromUnitVectors(up, axis)
+    },
+    options.priority,
+  )
+}
+
+export const scratchA = new THREE.Vector3()
+
+export const scratchB = new THREE.Vector3()
+
+export const scratchSide = new THREE.Vector3()
+
+export const scratchColor = new THREE.Color()
+
+export function cameraAxes(
+  ctx: FxContext,
+  right: THREE.Vector3,
+  up: THREE.Vector3,
+  forward: THREE.Vector3,
+): void {
+  right.set(1, 0, 0).applyQuaternion(ctx.camera.quaternion)
+  up.set(0, 1, 0).applyQuaternion(ctx.camera.quaternion)
+  forward.set(0, 0, -1).applyQuaternion(ctx.camera.quaternion)
+}
+
+export type FeatherStyle = 'crystal' | 'spike' | 'flame'
+
+export function featherShape(style: FeatherStyle, length: number, width: number): THREE.Shape {
+  const shape = new THREE.Shape()
+  const w = width / 2
+  shape.moveTo(0, 0)
+  if (style === 'crystal') {
+    shape.lineTo(w, length * 0.32)
+    shape.lineTo(w * 0.35, length * 0.86)
+    shape.lineTo(0, length)
+    shape.lineTo(-w * 0.35, length * 0.86)
+    shape.lineTo(-w, length * 0.32)
+  } else if (style === 'spike') {
+    shape.lineTo(w * 1.1, length * 0.26)
+    shape.lineTo(w * 0.3, length * 0.34)
+    shape.lineTo(w * 0.9, length * 0.62)
+    shape.lineTo(w * 0.1, length * 0.66)
+    shape.lineTo(0, length)
+    shape.lineTo(-w * 0.55, length * 0.58)
+    shape.lineTo(-w * 0.15, length * 0.54)
+    shape.lineTo(-w * 0.9, length * 0.22)
+  } else {
+    shape.bezierCurveTo(w * 1.4, length * 0.2, w * 0.9, length * 0.62, w * 0.15, length)
+    shape.quadraticCurveTo(0, length * 0.8, -w * 0.3, length * 0.86)
+    shape.bezierCurveTo(-w * 0.2, length * 0.6, -w * 1.2, length * 0.35, 0, 0)
+  }
+  shape.closePath()
+  return shape
+}
+
+export interface LegendaryWingOptions {
+  style: FeatherStyle
+  color: ColorInput
+  core: ColorInput
+  accent?: ColorInput
+  span?: number
+  feathers?: number
+  heightFactor?: number
+  flapRate?: number
+  flapAmount?: number
+  // Phase window of one powerful downbeat that throws the attack.
+  thrust?: [number, number]
+  delay?: number
+  duration?: number
+}
+
+// Two fanned wings of layered feathers (colored halo, bright inner vane, covert row) spread behind the portrait.
+export function legendaryWings(
+  ctx: FxContext,
+  view: UnitView,
+  options: LegendaryWingOptions,
+): void {
+  const span = options.span ?? 1.2
+  const count = options.feathers ?? 8
+  const duration = options.duration ?? 1500
+  const halo = glow(options.color, 0.5)
+  const core = glow(options.core, 0.65)
+  const accent = glow(options.accent ?? options.core, 0.5)
+  const group = new THREE.Group()
+  const feathers: { feather: THREE.Object3D; base: number; seed: number }[] = []
+  const wings = [1, -1].map((side) => {
+    const wing = new THREE.Group()
+    for (let index = 0; index < count; index++) {
+      const t = index / (count - 1)
+      const length = span * (0.55 + 0.45 * Math.sin(Math.PI * (0.25 + 0.6 * t)))
+      const width = span * (options.style === 'spike' ? 0.28 : 0.2)
+      const feather = new THREE.Group()
+      const vane = new THREE.Mesh(
+        new THREE.ShapeGeometry(featherShape(options.style, length, width)),
+        halo,
+      )
+      const inner = new THREE.Mesh(
+        new THREE.ShapeGeometry(featherShape(options.style, length * 0.82, width * 0.36)),
+        core,
+      )
+      inner.position.z = 0.01
+      feather.add(vane, inner)
+      const base = -(0.2 + t * 1.65)
+      feather.rotation.z = base
+      wing.add(feather)
+      feathers.push({ feather, base, seed: Math.random() * 10 })
+    }
+    const coverts = Math.ceil(count / 2)
+    for (let index = 0; index < coverts; index++) {
+      const t = index / Math.max(1, coverts - 1)
+      const covert = new THREE.Mesh(
+        new THREE.ShapeGeometry(featherShape(options.style, span * 0.42, span * 0.17)),
+        accent,
+      )
+      covert.position.set(span * 0.06, span * 0.03, 0.02)
+      covert.rotation.z = -(0.35 + t * 1.3)
+      wing.add(covert)
+    }
+    group.add(wing)
+    return { wing, side }
+  })
+  const rate = options.flapRate ?? 1.2
+  const amount = options.flapAmount ?? 0.2
+  const position = new THREE.Vector3()
+  const back = new THREE.Vector3()
+  let lastCrackle = -1
+  fx(ctx, options.delay ?? 0, duration, group, (p, now) => {
+    bodyPoint(view, options.heightFactor ?? 0.62, position)
+    back.set(0, 0, -1).applyQuaternion(ctx.camera.quaternion).multiplyScalar(0.14)
+    group.position.copy(position).add(back)
+    group.quaternion.copy(ctx.camera.quaternion)
+    const open = easeOut(phase(p, 0, 0.2)) * (1 - easeInOut(phase(p, 0.84, 1)))
+    const seconds = (p * duration) / 1000
+    const flap = Math.sin(seconds * Math.PI * 2 * rate) * amount * (ctx.reducedMotion ? 0.3 : 1)
+    const thrust = options.thrust
+      ? Math.sin(Math.PI * phase(p, options.thrust[0], options.thrust[1])) * 0.7
+      : 0
+    const size = 0.25 + 0.75 * open
+    wings.forEach(({ wing, side }) => {
+      wing.position.x = side * 0.14
+      wing.rotation.z = (1 - open) * 0.9 + flap - thrust
+      wing.scale.set(side * size, size, size)
+    })
+    const crackle = options.style === 'spike' && now - lastCrackle > 50
+    if (crackle) lastCrackle = now
+    feathers.forEach(({ feather, base, seed }) => {
+      if (options.style === 'crystal') {
+        feather.scale.setScalar(1 + 0.04 * Math.sin(now * 0.004 + seed))
+      } else if (options.style === 'flame') {
+        feather.scale.y = 0.85 + 0.18 * Math.sin(now * 0.03 + seed) + 0.07 * Math.sin(now * 0.07)
+        feather.rotation.z = base + 0.07 * Math.sin(now * 0.02 + seed)
+      } else if (crackle) {
+        feather.scale.y = 0.88 + Math.random() * 0.26
+        feather.rotation.z = base + (Math.random() - 0.5) * 0.12
+      }
+    })
+    const shimmer =
+      options.style === 'spike'
+        ? crackle
+          ? 0.55 + Math.random() * 0.45
+          : 1
+        : 0.8 + 0.2 * Math.sin(now * 0.012)
+    halo.opacity = 0.5 * open * (options.style === 'spike' ? shimmer : 1)
+    core.opacity = 0.65 * open * (options.style === 'spike' ? 1 : shimmer)
+    accent.opacity = 0.5 * open
+  })
+}
+
+export function ribbonMesh(segments: number): THREE.Mesh {
+  const geometry = new THREE.BufferGeometry()
+  const vertices = (segments + 1) * 2
+  geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices * 3), 3))
+  geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(vertices * 3), 3))
+  const index: number[] = []
+  for (let segment = 0; segment < segments; segment++) {
+    const a = segment * 2
+    index.push(a, a + 1, a + 2, a + 1, a + 3, a + 2)
+  }
+  geometry.setIndex(index)
+  const mesh = new THREE.Mesh(
+    geometry,
+    new THREE.MeshBasicMaterial({
+      vertexColors: true,
+      transparent: true,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending,
+    }),
+  )
+  mesh.frustumCulled = false
+  return mesh
+}
+
+// Rewrites a camera-facing strip along `points` (segments + 1 of them); additive, so darker color = more transparent.
+export function writeRibbon(
+  mesh: THREE.Mesh,
+  points: THREE.Vector3[],
+  viewDirection: THREE.Vector3,
+  width: (t: number) => number,
+  color: (t: number, out: THREE.Color) => void,
+): void {
+  const position = mesh.geometry.attributes.position as THREE.BufferAttribute
+  const colors = mesh.geometry.attributes.color as THREE.BufferAttribute
+  const last = points.length - 1
+  points.forEach((point, index) => {
+    const t = index / last
+    scratchA.copy(points[Math.min(last, index + 1)]).sub(points[Math.max(0, index - 1)])
+    scratchSide.crossVectors(scratchA, viewDirection)
+    if (scratchSide.lengthSq() < 1e-8) scratchSide.set(0, 1, 0)
+    scratchSide.normalize().multiplyScalar(width(t) / 2)
+    scratchB.copy(point).add(scratchSide)
+    position.setXYZ(index * 2, scratchB.x, scratchB.y, scratchB.z)
+    scratchB.copy(point).sub(scratchSide)
+    position.setXYZ(index * 2 + 1, scratchB.x, scratchB.y, scratchB.z)
+    color(t, scratchColor)
+    colors.setXYZ(index * 2, scratchColor.r, scratchColor.g, scratchColor.b)
+    colors.setXYZ(index * 2 + 1, scratchColor.r, scratchColor.g, scratchColor.b)
+  })
+  position.needsUpdate = true
+  colors.needsUpdate = true
+}
+
+export interface TailRibbonOptions {
+  from: ColorInput
+  to: ColorInput
+  count?: number
+  length?: number
+  width?: number
+  // Distance along the camera's right axis between the outermost ribbon roots.
+  spread?: number
+  droop?: number
+  heightFactor?: number
+  delay?: number
+  duration?: number
+}
+
+// Long gradient streamers that ripple away behind a hovering unit: tail plumes, fire trails off wingtips.
+export function tailRibbons(ctx: FxContext, view: UnitView, options: TailRibbonOptions): void {
+  const segments = 22
+  const count = options.count ?? 3
+  const length = options.length ?? 1.6
+  const width = options.width ?? 0.16
+  const spread = options.spread ?? 0.2
+  const droop = options.droop ?? 0.5
+  const group = new THREE.Group()
+  const ribbons = Array.from({ length: count }, () => {
+    const mesh = ribbonMesh(segments)
+    group.add(mesh)
+    return mesh
+  })
+  const points = Array.from({ length: segments + 1 }, () => new THREE.Vector3())
+  const anchor = new THREE.Vector3()
+  const right = new THREE.Vector3()
+  const up = new THREE.Vector3()
+  const forward = new THREE.Vector3()
+  const start = new THREE.Color(options.from)
+  const end = new THREE.Color(options.to)
+  const wave = ctx.reducedMotion ? 0.4 : 1
+  fx(ctx, options.delay ?? 0, options.duration ?? 1400, group, (p, now) => {
+    bodyPoint(view, options.heightFactor ?? 0.45, anchor)
+    cameraAxes(ctx, right, up, forward)
+    const grow = easeOut(phase(p, 0, 0.3))
+    const fade = 1 - phase(p, 0.72, 1)
+    ribbons.forEach((mesh, ribbon) => {
+      const side = count === 1 ? 0 : (ribbon / (count - 1)) * 2 - 1
+      points.forEach((point, index) => {
+        const t = index / segments
+        const reach = length * t * grow
+        point
+          .copy(anchor)
+          .addScaledVector(right, side * (spread / 2 + reach * 0.5))
+          .addScaledVector(
+            up,
+            -reach * droop + Math.sin(t * 5 - now * 0.006 + ribbon * 1.7) * 0.16 * t * wave,
+          )
+          .addScaledVector(forward, reach * 0.4)
+          .addScaledVector(right, Math.cos(t * 4 - now * 0.005 + ribbon) * 0.1 * t * wave)
+      })
+      writeRibbon(
+        mesh,
+        points,
+        forward,
+        (t) => width * (1 - t * 0.8) * (0.5 + 0.5 * grow),
+        (t, out) => {
+          out
+            .copy(start)
+            .lerp(end, t)
+            .multiplyScalar((1 - t) ** 0.7 * fade)
+        },
+      )
+    })
+  })
+}
+
+// Six-armed snowflake with two pairs of side branches per arm, in the XY plane.
+export function snowflakeGeometry(size: number): THREE.BufferGeometry {
+  const vertices: number[] = []
+  const rhombus = (ax: number, ay: number, bx: number, by: number, width: number) => {
+    const mx = (ax + bx) / 2
+    const my = (ay + by) / 2
+    const length = Math.hypot(bx - ax, by - ay) || 1
+    const px = (-(by - ay) / length) * width
+    const py = ((bx - ax) / length) * width
+    vertices.push(ax, ay, 0, mx + px, my + py, 0, bx, by, 0)
+    vertices.push(ax, ay, 0, bx, by, 0, mx - px, my - py, 0)
+  }
+  for (let arm = 0; arm < 6; arm++) {
+    const angle = (arm / 6) * Math.PI * 2
+    const cos = Math.cos(angle)
+    const sin = Math.sin(angle)
+    rhombus(0, 0, cos * size, sin * size, size * 0.09)
+    ;[
+      [0.45, 0.32],
+      [0.7, 0.22],
+    ].forEach(([along, branch]) => {
+      const x = cos * size * along
+      const y = sin * size * along
+      for (const turn of [0.9, -0.9]) {
+        rhombus(
+          x,
+          y,
+          x + Math.cos(angle + turn) * size * branch,
+          y + Math.sin(angle + turn) * size * branch,
+          size * 0.045,
+        )
+      }
+    })
+  }
+  const geometry = new THREE.BufferGeometry()
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3))
+  return geometry
+}
+
+export interface BoltPath {
+  points: THREE.Vector3[]
+  width: number
+}
+
+// Camera-facing quads along each path; unused slots collapse to zero-area triangles.
+export function writeBoltQuads(
+  array: Float32Array,
+  paths: BoltPath[],
+  visible: number[],
+  scale: number,
+  viewDirection: THREE.Vector3,
+): void {
+  array.fill(0)
+  let offset = 0
+  paths.forEach((path, pathIndex) => {
+    const count = path.points.length - 1
+    for (let segment = 0; segment < count; segment++, offset += 18) {
+      if (segment >= visible[pathIndex]) continue
+      const a = path.points[segment]
+      const b = path.points[segment + 1]
+      const width = path.width * scale * (1 - (segment / count) * 0.45)
+      scratchSide.subVectors(b, a).cross(viewDirection)
+      if (scratchSide.lengthSq() < 1e-8) scratchSide.set(1, 0, 0)
+      scratchSide.normalize().multiplyScalar(width / 2)
+      const sx = scratchSide.x
+      const sy = scratchSide.y
+      const sz = scratchSide.z
+      array.set(
+        [
+          a.x + sx,
+          a.y + sy,
+          a.z + sz,
+          a.x - sx,
+          a.y - sy,
+          a.z - sz,
+          b.x + sx,
+          b.y + sy,
+          b.z + sz,
+          b.x + sx,
+          b.y + sy,
+          b.z + sz,
+          a.x - sx,
+          a.y - sy,
+          a.z - sz,
+          b.x - sx,
+          b.y - sy,
+          b.z - sz,
+        ],
+        offset,
+      )
+    }
+  })
+}
+
+export function boltGroup(quads: number, color: ColorInput, core: ColorInput) {
+  const halo = new Float32Array(quads * 18)
+  const inner = new Float32Array(quads * 18)
+  const haloGeometry = new THREE.BufferGeometry()
+  haloGeometry.setAttribute('position', new THREE.BufferAttribute(halo, 3))
+  const innerGeometry = new THREE.BufferGeometry()
+  innerGeometry.setAttribute('position', new THREE.BufferAttribute(inner, 3))
+  const haloMaterial = glow(color, 0.7)
+  const innerMaterial = glow(core, 0.9)
+  const haloMesh = new THREE.Mesh(haloGeometry, haloMaterial)
+  const innerMesh = new THREE.Mesh(innerGeometry, innerMaterial)
+  haloMesh.frustumCulled = false
+  innerMesh.frustumCulled = false
+  innerMesh.renderOrder = 1
+  const group = new THREE.Group()
+  group.add(haloMesh, innerMesh)
+  const refresh = (paths: BoltPath[], visible: number[], viewDirection: THREE.Vector3) => {
+    writeBoltQuads(halo, paths, visible, 1, viewDirection)
+    writeBoltQuads(inner, paths, visible, 0.3, viewDirection)
+    haloGeometry.attributes.position.needsUpdate = true
+    innerGeometry.attributes.position.needsUpdate = true
+  }
+  return { group, haloMaterial, innerMaterial, refresh }
+}
+
+export interface ForkedBoltOptions {
+  color: ColorInput
+  core?: ColorInput
+  width?: number
+  segments?: number
+  branches?: number
+  jitter?: number
+  // Phase by which the bolt has fully forked down from `from` to `to`.
+  reveal?: number
+  delay?: number
+  duration?: number
+  priority?: RenderEffectPriority
+}
+
+// A thick, branching lightning bolt that forks down its path, re-jitters, and flickers out.
+export function forkedBolt(
+  ctx: FxContext,
+  from: PointSource,
+  to: PointSource,
+  options: ForkedBoltOptions,
+): void {
+  const segments = options.segments ?? 10
+  const branchCount = options.branches ?? 3
+  const branchSegments = 4
+  const jitter = options.jitter ?? 0.3
+  const reveal = options.reveal ?? 0.12
+  const width = options.width ?? 0.12
+  const { group, haloMaterial, innerMaterial, refresh } = boltGroup(
+    segments + branchCount * branchSegments,
+    options.color,
+    options.core ?? '#fef9c3',
+  )
+  const main: BoltPath = {
+    points: Array.from({ length: segments + 1 }, () => new THREE.Vector3()),
+    width,
+  }
+  const branches = Array.from({ length: branchCount }, () => ({
+    path: {
+      points: Array.from({ length: branchSegments + 1 }, () => new THREE.Vector3()),
+      width: width * 0.55,
+    },
+    root: 0,
+    direction: new THREE.Vector3(),
+    length: 0,
+  }))
+  const offsets = Array.from({ length: segments + 1 }, () => new THREE.Vector3())
+  const start = new THREE.Vector3()
+  const end = new THREE.Vector3()
+  const along = new THREE.Vector3()
+  const viewDirection = new THREE.Vector3()
+  const paths = [main, ...branches.map((branch) => branch.path)]
+  const visible = paths.map(() => 0)
+  const seed = Math.random() * 10
+  let lastJitter = -1
+  fx(
+    ctx,
+    options.delay ?? 0,
+    options.duration ?? 320,
+    group,
+    (p, now) => {
+      start.copy(resolvePoint(from))
+      end.copy(resolvePoint(to))
+      along.subVectors(end, start)
+      const distance = along.length()
+      if (now - lastJitter > 55) {
+        lastJitter = now
+        offsets.forEach((offset) =>
+          offset.set(Math.random() - 0.5, (Math.random() - 0.5) * 0.4, Math.random() - 0.5),
+        )
+        branches.forEach((branch) => {
+          branch.root = 2 + Math.floor(Math.random() * Math.max(1, segments - 4))
+          branch.direction
+            .copy(along)
+            .normalize()
+            .add(
+              scratchA
+                .set(Math.random() - 0.5, -Math.random() * 0.3, Math.random() - 0.5)
+                .multiplyScalar(1.6),
+            )
+            .normalize()
+          branch.length = distance * (0.18 + Math.random() * 0.2)
+        })
+      }
+      main.points.forEach((point, index) => {
+        const t = index / segments
+        const wobble = index === 0 || index === segments ? 0 : jitter
+        point.lerpVectors(start, end, t).addScaledVector(offsets[index], wobble)
+      })
+      branches.forEach((branch) => {
+        const root = main.points[branch.root]
+        branch.path.points.forEach((point, index) => {
+          const t = index / branchSegments
+          point.copy(root).addScaledVector(branch.direction, branch.length * t)
+          if (index > 0)
+            point.addScaledVector(offsets[(branch.root + index) % offsets.length], jitter * 0.5)
+        })
+      })
+      const shown = Math.ceil(segments * clamp01(p / reveal))
+      visible[0] = shown
+      branches.forEach((branch, index) => {
+        visible[index + 1] =
+          shown > branch.root ? Math.min(branchSegments, (shown - branch.root) * 2) : 0
+      })
+      viewDirection.set(0, 0, -1).applyQuaternion(ctx.camera.quaternion)
+      refresh(paths, visible, viewDirection)
+      const flicker = p < reveal + 0.1 ? 1 : Math.sin(now * 0.09 + seed) > -0.2 ? 1 : 0.45
+      const fade = (1 - phase(p, 0.55, 1)) * flicker
+      haloMaterial.opacity = 0.7 * fade
+      innerMaterial.opacity = 0.9 * fade
+    },
+    options.priority ?? 'ability',
+  )
+}
+
+export interface GroundArcOptions {
+  color: ColorInput
+  core?: ColorInput
+  radius?: number
+  arcs?: number
+  delay?: number
+  duration?: number
+}
+
+// Static electricity crawling over the floor: short jagged arcs that hop around a glowing patch.
+export function groundArcs(ctx: FxContext, center: PointSource, options: GroundArcOptions): void {
+  const arcs = options.arcs ?? 4
+  const radius = options.radius ?? 0.6
+  const pieces = 5
+  const { group, haloMaterial, innerMaterial, refresh } = boltGroup(
+    arcs * pieces,
+    options.color,
+    options.core ?? '#fef9c3',
+  )
+  const patch = new THREE.Mesh(new THREE.CircleGeometry(radius, 32), glow(options.color, 0.16))
+  patch.rotation.x = -Math.PI / 2
+  group.add(patch)
+  const paths: BoltPath[] = Array.from({ length: arcs }, () => ({
+    points: Array.from({ length: pieces + 1 }, () => new THREE.Vector3()),
+    width: 0.06,
+  }))
+  const visible = paths.map(() => pieces)
+  const origin = new THREE.Vector3()
+  const viewDirection = new THREE.Vector3()
+  let lastHop = -1
+  fx(ctx, options.delay ?? 0, options.duration ?? 900, group, (p, now) => {
+    origin.copy(resolvePoint(center)).setY(0)
+    patch.position.set(origin.x, 0.06, origin.z)
+    if (now - lastHop > 80) {
+      lastHop = now
+      paths.forEach((path, index) => {
+        if (lastHop > 0 && Math.random() < 0.4) return
+        visible[index] = Math.random() < 0.75 ? pieces : 0
+        const angle = Math.random() * Math.PI * 2
+        const distance = Math.random() * radius * 0.8
+        const heading = Math.random() * Math.PI * 2
+        const length = 0.3 + Math.random() * 0.4
+        path.points.forEach((point, piece) => {
+          const t = piece / pieces
+          const wobble = piece === 0 || piece === pieces ? 0 : 0.09
+          point.set(
+            origin.x +
+              Math.cos(angle) * distance +
+              Math.cos(heading) * length * t +
+              (Math.random() - 0.5) * wobble,
+            0.08 + Math.random() * 0.06,
+            origin.z +
+              Math.sin(angle) * distance +
+              Math.sin(heading) * length * t +
+              (Math.random() - 0.5) * wobble,
+          )
+        })
+      })
+    }
+    viewDirection.set(0, 0, -1).applyQuaternion(ctx.camera.quaternion)
+    refresh(paths, visible, viewDirection)
+    const fade = fadeInOut(p, 0.08, 0.35)
+    haloMaterial.opacity = 0.7 * fade
+    innerMaterial.opacity = 0.9 * fade
+    setOpacity(patch, fade * (0.7 + 0.3 * Math.sin(now * 0.03)))
+  })
+}
+
+// Flat ring whose vertex colors run through `colors` around the circumference (rotate it to make the band flow).
+export function spectrumRing(
+  inner: number,
+  outer: number,
+  colors: ColorInput[],
+  opacity = 0.6,
+): THREE.Mesh {
+  const geometry = new THREE.RingGeometry(inner, outer, 64, 1)
+  const position = geometry.attributes.position
+  const palette = colors.map((color) => new THREE.Color(color))
+  const tint = new THREE.Color()
+  const vertexColors = new Float32Array(position.count * 3)
+  for (let index = 0; index < position.count; index++) {
+    const around =
+      ((Math.atan2(position.getY(index), position.getX(index)) / (Math.PI * 2) + 1) % 1) *
+      palette.length
+    const from = Math.floor(around) % palette.length
+    tint.copy(palette[from]).lerp(palette[(from + 1) % palette.length], around - Math.floor(around))
+    vertexColors.set([tint.r, tint.g, tint.b], index * 3)
+  }
+  geometry.setAttribute('color', new THREE.BufferAttribute(vertexColors, 3))
+  const material = glow('#ffffff', opacity)
+  material.vertexColors = true
+  return new THREE.Mesh(geometry, material)
+}
+
+// Psystrike crystal: a faceted, lit spike along +z with a faint colored sheath.
+export function crystalShard(length: number, body: ColorInput, sheath: ColorInput): THREE.Group {
+  const group = new THREE.Group()
+  group.add(
+    new THREE.Mesh(
+      new THREE.OctahedronGeometry(1, 0).scale(length * 0.14, length * 0.14, length * 0.5),
+      standard(body, {
+        roughness: 0.15,
+        metalness: 0.35,
+        flatShading: true,
+        emissive: body,
+        emissiveIntensity: 0.45,
+        opacity: 0.92,
+      }),
+    ),
+    new THREE.Mesh(
+      new THREE.OctahedronGeometry(1, 0).scale(length * 0.22, length * 0.22, length * 0.6),
+      glow(sheath, 0.3),
+    ),
+  )
+  return group
+}
+
+// Teardrop in the XY plane with its point at +y: dew drops and petals.
+export function teardropGeometry(width: number, length: number): THREE.ShapeGeometry {
+  const shape = new THREE.Shape()
+  shape.moveTo(0, 0)
+  shape.bezierCurveTo(width, length * 0.2, width * 0.8, length * 0.75, 0, length)
+  shape.bezierCurveTo(-width * 0.8, length * 0.75, -width, length * 0.2, 0, 0)
+  return new THREE.ShapeGeometry(shape, 10)
+}
+
+export const tint = new THREE.Color()

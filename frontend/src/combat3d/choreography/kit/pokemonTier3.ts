@@ -1,25 +1,10 @@
 import * as THREE from 'three'
 import type { RenderEffectPriority } from '../../../animations/renderPolicy'
 import { easeInOut, type UnitView } from '../../unitView'
-import { glow, orbit, ringMesh, type ColorInput, type FxContext } from '../primitives'
-import {
-  billboard,
-  bodyPoint,
-  fadeInOut,
-  fx,
-  phase,
-  resolvePoint,
-  scaledCount,
-  setOpacity,
-  standard,
-  tube,
-  type PointSource,
-} from './shared'
+import { type ColorInput, type FxContext, orbit, ringMesh } from '../primitives'
+import { billboard, bodyPoint, fadeInOut, fx, lit, phase, setOpacity, tube } from './shared'
 
 const UP = new THREE.Vector3(0, 1, 0)
-
-export const lit = (color: ColorInput, emissiveIntensity = 0.25, roughness = 0.5) =>
-  standard(color, { emissive: color, emissiveIntensity, roughness })
 
 export interface VineOptions {
   color: ColorInput
@@ -137,142 +122,6 @@ export function pincerSnap(ctx: FxContext, target: UnitView, options: SnapOption
       pincer.setOpen(Math.max(0, open) * (1 + 0.04 * Math.sin(now * 0.08)))
       pincer.group.scale.setScalar(0.6 + 0.4 * phase(p, 0, 0.2))
       setOpacity(pincer.group, 1 - phase(p, 0.85, 1))
-    },
-    options.priority ?? 'ability',
-  )
-}
-
-export interface JabOptions {
-  color: ColorInput
-  delay?: number
-  duration?: number
-  size?: number
-  side?: number
-  height?: number
-  priority?: RenderEffectPriority
-}
-
-// Doduo-line peck: a beak that stabs from beside the caster's body into the target and retracts.
-export function beakJab(
-  ctx: FxContext,
-  source: UnitView,
-  target: UnitView,
-  options: JabOptions,
-): void {
-  const size = options.size ?? 0.09
-  const group = new THREE.Group()
-  const beak = new THREE.Mesh(
-    new THREE.ConeGeometry(size, size * 4, 8).rotateX(Math.PI / 2),
-    lit(options.color, 0.35, 0.4),
-  )
-  const glint = new THREE.Mesh(
-    new THREE.ConeGeometry(size * 0.4, size * 2, 6).rotateX(Math.PI / 2),
-    glow('#ffffff', 0.8),
-  )
-  glint.position.z = size * 1.2
-  group.add(beak, glint)
-  const from = new THREE.Vector3()
-  const to = new THREE.Vector3()
-  const side = new THREE.Vector3()
-  fx(
-    ctx,
-    options.delay ?? 0,
-    options.duration ?? 200,
-    group,
-    (p) => {
-      bodyPoint(source, options.height ?? 0.7, from)
-      target.focusPoint(to, 0.6)
-      side
-        .subVectors(to, from)
-        .setY(0)
-        .cross(UP)
-        .normalize()
-        .multiplyScalar(options.side ?? 0)
-      from.add(side)
-      const reach = p < 0.5 ? easeInOut(p / 0.5) : 1 - easeInOut((p - 0.5) / 0.5)
-      group.position.lerpVectors(from, to, reach * 0.92)
-      group.lookAt(to)
-    },
-    options.priority ?? 'ability',
-  )
-}
-
-// Grimer/Muk sludge: a lumpy, glossy blob (callers may stud it with junk for Gunk Shot).
-export function makeGlob(color: ColorInput, size: number, lumpiness = 0.3): THREE.Mesh {
-  const geometry = new THREE.IcosahedronGeometry(size, 1)
-  const position = geometry.attributes.position
-  const vertex = new THREE.Vector3()
-  for (let index = 0; index < position.count; index++) {
-    vertex.fromBufferAttribute(position, index)
-    const noise =
-      1 +
-      (Math.sin(vertex.x * 17 + vertex.y * 11) * 0.5 + Math.cos(vertex.z * 13) * 0.5) * lumpiness
-    vertex.multiplyScalar(noise)
-    position.setXYZ(index, vertex.x, vertex.y, vertex.z)
-  }
-  geometry.computeVertexNormals()
-  return new THREE.Mesh(geometry, lit(color, 0.3, 0.25))
-}
-
-export interface PuddleOptions {
-  color: ColorInput
-  radius?: number
-  delay?: number
-  duration?: number
-  bubbles?: ColorInput
-  priority?: RenderEffectPriority
-}
-
-// Acid / sludge pool that spreads on the floor, fizzes, then dries up.
-export function puddle(ctx: FxContext, point: PointSource, options: PuddleOptions): void {
-  const radius = options.radius ?? 0.6
-  const group = new THREE.Group()
-  const disc = new THREE.Mesh(new THREE.CircleGeometry(1, 24), glow(options.color, 0.6))
-  disc.rotation.x = -Math.PI / 2
-  group.add(disc)
-  const count = scaledCount(ctx, 10)
-  const positions = new Float32Array(count * 3)
-  const geometry = new THREE.BufferGeometry()
-  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-  const material = new THREE.PointsMaterial({
-    color: options.bubbles ?? options.color,
-    size: 0.12,
-    transparent: true,
-    depthWrite: false,
-    blending: THREE.AdditiveBlending,
-  })
-  const fizz = new THREE.Points(geometry, material)
-  fizz.frustumCulled = false
-  group.add(fizz)
-  const seeds = Array.from({ length: count }, () => ({
-    angle: Math.random() * Math.PI * 2,
-    distance: Math.random(),
-    offset: Math.random(),
-  }))
-  let resolved = false
-  fx(
-    ctx,
-    options.delay ?? 0,
-    options.duration ?? 900,
-    group,
-    (p) => {
-      if (!resolved) {
-        const center = resolvePoint(point)
-        group.position.set(center.x, 0.09, center.z)
-        resolved = true
-      }
-      disc.scale.setScalar(
-        Math.max(0.01, radius * easeInOut(phase(p, 0, 0.3)) * (1 + 0.06 * Math.sin(p * 30))),
-      )
-      ;(disc.material as THREE.MeshBasicMaterial).opacity = 0.6 * (1 - phase(p, 0.6, 1))
-      seeds.forEach((seed, index) => {
-        const local = (p * 2 + seed.offset) % 1
-        positions[index * 3] = Math.cos(seed.angle) * seed.distance * radius
-        positions[index * 3 + 1] = local * 0.45
-        positions[index * 3 + 2] = Math.sin(seed.angle) * seed.distance * radius
-      })
-      geometry.attributes.position.needsUpdate = true
-      material.opacity = 1 - p
     },
     options.priority ?? 'ability',
   )

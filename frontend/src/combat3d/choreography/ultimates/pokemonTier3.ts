@@ -1,29 +1,27 @@
 import * as THREE from 'three'
 import { easeInOut, type UnitView } from '../../unitView'
-import {
-  beakJab,
-  lit,
-  makeGlob,
-  makePincer,
-  pincerSnap,
-  puddle,
-  ringCage,
-  vine,
-} from '../kit/pokemonTier3'
+import { makePincer, pincerSnap, ringCage, vine } from '../kit/pokemonTier3'
 import {
   ahead,
   alliesAround,
+  beakJab,
   beyond,
   billboard,
-  hexagonGeometry,
+  bubbles,
   enemiesAround,
   enemiesInLine,
   fistMesh,
   flatDirection,
   flinch,
   fx,
+  hexagonGeometry,
+  lit,
+  makeGlob,
+  motionLines,
   noteGeometry,
+  offsetPoint,
   phase,
+  puddle,
   pulse,
   rayBeam,
   setOpacity,
@@ -32,9 +30,6 @@ import {
   squash,
   statArrows,
   stream,
-  bubbles,
-  motionLines,
-  offsetPoint,
 } from '../kit/shared'
 import {
   at,
@@ -42,9 +37,11 @@ import {
   burst,
   cameraPunch,
   chargeOrb,
+  type ColorInput,
   crescentMesh,
   crouch,
   dash,
+  type FxContext,
   glow,
   ground,
   leap,
@@ -60,8 +57,6 @@ import {
   slashArc,
   spin,
   trail,
-  type ColorInput,
-  type FxContext,
 } from '../primitives'
 import type { Choreography, UltimateSet } from '../types'
 

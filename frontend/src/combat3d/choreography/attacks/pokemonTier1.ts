@@ -1,12 +1,24 @@
 import * as THREE from 'three'
 import type { UnitView } from '../../unitView'
-import { bubbleVolley, drill, splashCrown, waterJet } from '../kit/pokemonTier1'
-import { above, ahead, bodyAt, bubbles, fangs, fistMesh, standard, tube } from '../kit/shared'
+import { bubbleVolley, drill } from '../kit/pokemonTier1'
+import {
+  above,
+  ahead,
+  bodyAt,
+  bubbles,
+  fangs,
+  fistMesh,
+  splashCrown,
+  standard,
+  tube,
+  waterJet,
+} from '../kit/shared'
 import {
   at,
   burst,
   crescentMesh,
   flare,
+  type FxContext,
   glow,
   ground,
   leafMesh,
@@ -14,7 +26,6 @@ import {
   prop,
   shockwave,
   slashArc,
-  type FxContext,
 } from '../primitives'
 import type { AttackChoreography, AttackSet } from '../types'
 

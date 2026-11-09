@@ -361,7 +361,10 @@ after a `combat-view-fallback`. Planning always stays on the 2D board.
 - `choreography/`, `CombatEffectsCanvas.vue`, and `UltimateGallery.vue` are listed in the root `.ignore` so repo-wide
   searches skip them; search them explicitly by path for animation work (see `AGENTS.md` section 8).
 - `combat3d/registry.test.ts` requires a signature ultimate and auto-attack for every One Piece unit and a signature
-  ultimate for every Pokemon form/move. Adding a unit or move to the backend data means adding its choreography.
+  ultimate for every Gen 1 and Gen 2/3 Pokemon form/move. Adding a unit or move to the backend data means adding its
+  choreography. Gen 2/3 signatures live in the `gen23Tier1`, `gen23Tier2`, `gen23Tier3` and `gen23Tier45` sets (with
+  matching `kit/` files; only the Tier 3 and Tier 4/5 sets add signature auto-attacks), keyed `definitionId:Ability`.
+  `combat3d/signatureSets.test.ts` rejects keys that appear in more than one set.
 - `arenas/` holds procedural stages that use no downloaded assets. Mode metadata lists arena ids per mode, and
   `utils/arenaSelection.ts` picks one from `roomId`. In development `?arena=<id>` forces a stage.
 

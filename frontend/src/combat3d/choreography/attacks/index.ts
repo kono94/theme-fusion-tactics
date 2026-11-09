@@ -1,5 +1,7 @@
 import type { AttackSet } from '../types'
 import { BEASTS_BIG_MOM_ATTACKS } from './beastsBigMom'
+import { GEN23_TIER3_ATTACKS } from './gen23Tier3'
+import { GEN23_TIER45_ATTACKS } from './gen23Tier45'
 import { MARINES_WARLORDS_ATTACKS } from './marinesWarlords'
 import { POKEMON_TIER_1_ATTACKS } from './pokemonTier1'
 import { POKEMON_TIER_2_ATTACKS } from './pokemonTier2'
@@ -17,6 +19,11 @@ export const SIGNATURE_ATTACK_SETS: Record<string, AttackSet> = {
   pokemonTier2: POKEMON_TIER_2_ATTACKS,
   pokemonTier3: POKEMON_TIER_3_ATTACKS,
   pokemonTier45: POKEMON_TIER_4_5_ATTACKS,
+  gen23Tier3: GEN23_TIER3_ATTACKS,
+  gen23Tier45: GEN23_TIER45_ATTACKS,
 }
 
-export const SIGNATURE_ATTACKS: AttackSet = Object.assign({}, ...Object.values(SIGNATURE_ATTACK_SETS))
+export const SIGNATURE_ATTACKS: AttackSet = Object.assign(
+  {},
+  ...Object.values(SIGNATURE_ATTACK_SETS),
+)

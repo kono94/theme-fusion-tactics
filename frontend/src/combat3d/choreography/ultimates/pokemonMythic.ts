@@ -1,15 +1,12 @@
 import * as THREE from 'three'
 import { easeInOut, type UnitView } from '../../unitView'
 import {
-  PASTEL_SPECTRUM,
   animateBarrier,
-  crystalShard,
   dewDrop,
   gengarShade,
   hexBarrier,
   iridescent,
-  spectrumRing,
-  teardropGeometry,
+  PASTEL_SPECTRUM,
 } from '../kit/pokemonMythic'
 import {
   above,
@@ -19,6 +16,8 @@ import {
   bodyPoint,
   cameraYaw,
   clamp01,
+  crystalShard,
+  driftMotes,
   easeIn,
   easeOut,
   enemiesInLine,
@@ -36,14 +35,15 @@ import {
   scaledCount,
   setOpacity,
   shiver,
+  spectrumRing,
   squash,
   standard,
   starPower,
   stream,
+  teardropGeometry,
   tube,
   zap,
   zzz,
-  driftMotes,
 } from '../kit/shared'
 import {
   at,
@@ -53,6 +53,7 @@ import {
   chargeOrb,
   cloud,
   flare,
+  type FxContext,
   glow,
   ground,
   halo,
@@ -64,7 +65,6 @@ import {
   spikes,
   starGeometry,
   vortex,
-  type FxContext,
 } from '../primitives'
 import type { Choreography, UltimateSet } from '../types'
 

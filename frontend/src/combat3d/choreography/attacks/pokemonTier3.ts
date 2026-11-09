@@ -1,6 +1,6 @@
 import * as THREE from 'three'
-import { beakJab, lit, makeGlob, pincerSnap, vine } from '../kit/pokemonTier3'
-import { ahead } from '../kit/shared'
+import { pincerSnap, vine } from '../kit/pokemonTier3'
+import { ahead, beakJab, lit, makeGlob } from '../kit/shared'
 import { at, burst, glow, prop, slashArc } from '../primitives'
 import type { AttackChoreography, AttackSet } from '../types'
 

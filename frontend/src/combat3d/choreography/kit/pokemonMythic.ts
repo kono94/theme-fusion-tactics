@@ -1,6 +1,6 @@
 import * as THREE from 'three'
-import { glow, starGeometry, type ColorInput } from '../primitives'
-import { easeOut, flat, phase, pulse, standard, hexagonGeometry } from './shared'
+import { type ColorInput, glow, starGeometry } from '../primitives'
+import { easeOut, flat, hexagonGeometry, phase, pulse, standard, tint } from './shared'
 
 export const PASTEL_SPECTRUM = [
   '#f9a8d4',
@@ -15,64 +15,6 @@ export const PASTEL_SPECTRUM = [
 // Hue drifting through cyan, lavender and pink, like a soap film or thin glass.
 export function iridescent(out: THREE.Color, t: number, lightness = 0.68): THREE.Color {
   return out.setHSL(0.5 + 0.42 * (0.5 + 0.5 * Math.sin(t)), 0.8, lightness)
-}
-
-// Flat ring whose vertex colors run through `colors` around the circumference (rotate it to make the band flow).
-export function spectrumRing(
-  inner: number,
-  outer: number,
-  colors: ColorInput[],
-  opacity = 0.6,
-): THREE.Mesh {
-  const geometry = new THREE.RingGeometry(inner, outer, 64, 1)
-  const position = geometry.attributes.position
-  const palette = colors.map((color) => new THREE.Color(color))
-  const tint = new THREE.Color()
-  const vertexColors = new Float32Array(position.count * 3)
-  for (let index = 0; index < position.count; index++) {
-    const around =
-      ((Math.atan2(position.getY(index), position.getX(index)) / (Math.PI * 2) + 1) % 1) *
-      palette.length
-    const from = Math.floor(around) % palette.length
-    tint.copy(palette[from]).lerp(palette[(from + 1) % palette.length], around - Math.floor(around))
-    vertexColors.set([tint.r, tint.g, tint.b], index * 3)
-  }
-  geometry.setAttribute('color', new THREE.BufferAttribute(vertexColors, 3))
-  const material = glow('#ffffff', opacity)
-  material.vertexColors = true
-  return new THREE.Mesh(geometry, material)
-}
-
-// Psystrike crystal: a faceted, lit spike along +z with a faint colored sheath.
-export function crystalShard(length: number, body: ColorInput, sheath: ColorInput): THREE.Group {
-  const group = new THREE.Group()
-  group.add(
-    new THREE.Mesh(
-      new THREE.OctahedronGeometry(1, 0).scale(length * 0.14, length * 0.14, length * 0.5),
-      standard(body, {
-        roughness: 0.15,
-        metalness: 0.35,
-        flatShading: true,
-        emissive: body,
-        emissiveIntensity: 0.45,
-        opacity: 0.92,
-      }),
-    ),
-    new THREE.Mesh(
-      new THREE.OctahedronGeometry(1, 0).scale(length * 0.22, length * 0.22, length * 0.6),
-      glow(sheath, 0.3),
-    ),
-  )
-  return group
-}
-
-// Teardrop in the XY plane with its point at +y: dew drops and petals.
-export function teardropGeometry(width: number, length: number): THREE.ShapeGeometry {
-  const shape = new THREE.Shape()
-  shape.moveTo(0, 0)
-  shape.bezierCurveTo(width, length * 0.2, width * 0.8, length * 0.75, 0, length)
-  shape.bezierCurveTo(-width * 0.8, length * 0.75, -width, length * 0.2, 0, 0)
-  return new THREE.ShapeGeometry(shape, 10)
 }
 
 // A glassy dew drop (round belly, pointed top) with a small colored glint.
@@ -254,8 +196,6 @@ export function hexBarrier(cellRadius: number): HexBarrier {
   group.add(streak)
   return { group, cells, glints, streak }
 }
-
-const tint = new THREE.Color()
 
 // Assembles the barrier cell by cell, then runs an iridescent rim shimmer, one light sweep and soft glints.
 export function animateBarrier(barrier: HexBarrier, p: number, now: number): void {
