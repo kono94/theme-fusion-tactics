@@ -323,7 +323,9 @@ are scoped. `AGENTS.md` must remain aligned with this and should not describe Ta
 `data/animationConfig.ts` owns the shared One Piece/Pokemon attack and ability lookup tables. Animation identity comes
 from the stable mode and unit definition ID, never from a display name.
 
-`utils/combatAnimationConfig.ts` resolves the shared animation configuration for live units.
+`utils/combatAnimationConfig.ts` resolves the shared animation configuration for live units. The Pokemon type style
+comes from the explicit Gen 1 id map, then the per-unit tables, then the unit's first trait that names a Pokemon type,
+so new Pokemon modes get type colors, auto-attacks and element fallbacks without per-id entries.
 
 `animations/renderPolicy.ts` reduces particle density and expensive effects for crowded batches and reduced-motion
 users. `CombatEffectsCanvas.vue` is the live layered renderer.

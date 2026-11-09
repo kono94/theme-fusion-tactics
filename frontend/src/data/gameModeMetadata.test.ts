@@ -39,7 +39,7 @@ describe('game mode metadata', () => {
             unitAssetFolder: 'pokemongen23',
             themeClass: 'theme-pokemongen23',
             galleryPath: '#/ultimate-gallery/pokemongen23',
-            arenas: ['stadium', 'rock-gym'],
+            arenas: ['bell-tower', 'sea-route'],
             order: 3,
         })
     })

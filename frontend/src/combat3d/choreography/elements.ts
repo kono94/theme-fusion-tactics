@@ -881,6 +881,129 @@ const steelField: Choreography = (ctx, { source, target, primary, secondary, sha
   return impact
 }
 
+// Dark: a black crescent wave with a violet rim, then raking claw marks out of a pooled shadow.
+function voidCrescent(rim: string): THREE.Group {
+  const group = new THREE.Group()
+  const shadow = new THREE.Mesh(
+    new THREE.RingGeometry(0.2, 0.36, 28, 1, 0, Math.PI),
+    new THREE.MeshBasicMaterial({
+      color: '#0d0716',
+      transparent: true,
+      opacity: 0.85,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+    }),
+  )
+  const edge = crescentMesh(rim, 0.4)
+  ;(edge.material as THREE.MeshBasicMaterial).opacity = 0.6
+  edge.position.z = -0.01
+  group.add(shadow, edge)
+  return group
+}
+
+function clawShape(): THREE.ShapeGeometry {
+  const shape = new THREE.Shape()
+  shape.moveTo(0, 0.42)
+  shape.quadraticCurveTo(0.05, 0, 0, -0.42)
+  shape.quadraticCurveTo(-0.02, 0, 0, 0.42)
+  return new THREE.ShapeGeometry(shape, 8)
+}
+
+function clawRake(
+  ctx: FxContext,
+  target: UnitView,
+  color: string,
+  accent: string,
+  delay: number,
+  angle: number,
+): void {
+  const group = new THREE.Group()
+  const marks = [-1, 0, 1].map((offset) => {
+    const mark = new THREE.Mesh(clawShape(), glow(offset === 0 ? accent : color, 0.85))
+    mark.position.set(offset * 0.15, Math.abs(offset) * -0.04, 0)
+    return mark
+  })
+  group.add(...marks)
+  const position = new THREE.Vector3()
+  ctx.effects.add({
+    start: ctx.now + delay,
+    duration: 340,
+    object: group,
+    priority: 'ability',
+    update: (p) => {
+      group.position.copy(target.focusPoint(position, 0.55))
+      group.quaternion.copy(ctx.camera.quaternion)
+      group.rotateZ(angle)
+      group.scale.set(1, Math.min(1, 0.2 + p * 4), 1)
+      marks.forEach((mark) => {
+        ;(mark.material as THREE.MeshBasicMaterial).opacity = 0.85 * (1 - p * p)
+      })
+    },
+  })
+}
+
+const darkCrescent: Choreography = (
+  ctx,
+  { source, target, primary, secondary, shake: strength },
+) => {
+  crouch(ctx, source, { duration: 220 })
+  cloud(ctx, ground(source), {
+    color: '#0d0716',
+    count: 5,
+    radius: 0.45,
+    size: 0.28,
+    opacity: 0.5,
+    duration: 700,
+    rise: 0.1,
+  })
+  cloud(ctx, ground(target), {
+    color: '#0b0612',
+    count: 7,
+    radius: 0.75,
+    size: 0.32,
+    opacity: 0.6,
+    delay: 120,
+    duration: 1200,
+    rise: 0.15,
+  })
+  for (let index = 0; index < 2; index++) {
+    prop(ctx, source, target, {
+      build: () => voidCrescent(primary),
+      delay: 160 + index * 90,
+      duration: 340,
+      arc: 0.15,
+      offset: new THREE.Vector3(0, (index - 0.5) * 0.2, 0),
+      spin: (index ? -1 : 1) * 0.6,
+      grow: 0.5,
+      fadeOut: 0.2,
+    })
+  }
+  dash(ctx, source, target, { delay: 260, duration: 620, hold: 0.25, through: true })
+  const impact = 520
+  clawRake(ctx, target, primary, secondary, impact, 0.5)
+  clawRake(ctx, target, primary, secondary, impact + 110, -0.6)
+  flare(ctx, at(target), {
+    color: primary,
+    core: secondary,
+    size: 0.5,
+    rays: 3,
+    delay: impact + 110,
+    duration: 240,
+  })
+  burst(ctx, at(target), {
+    color: primary,
+    count: 18,
+    delay: impact + 110,
+    speed: 1.8,
+    gravity: 1.2,
+  })
+  burst(ctx, at(target), { color: secondary, count: 6, delay: impact + 140, speed: 1.2 })
+  shockwave(ctx, ground(target), { color: primary, delay: impact + 110, radius: 1.3 })
+  flinch(ctx, nearbyEnemies(ctx, source, target, 1.3, 3), impact + 160, 50)
+  shake(ctx, strength, impact + 110)
+  return impact
+}
+
 export const ELEMENT_ULTIMATES: Partial<Record<AbilityEffectStyle, Choreography>> = {
   POKEMON_GRASS_BLOOM: grassBloom,
   POKEMON_FIRE_STREAM: fireStream,
@@ -897,4 +1020,5 @@ export const ELEMENT_ULTIMATES: Partial<Record<AbilityEffectStyle, Choreography>
   POKEMON_FIGHTING_COMBO: fightingCombo,
   POKEMON_FLYING_GUST: flyingGust,
   POKEMON_STEEL_FIELD: steelField,
+  POKEMON_DARK_CRESCENT: darkCrescent,
 }

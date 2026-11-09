@@ -51,7 +51,7 @@ export const GAME_MODE_METADATA: Record<GameMode, GameModeMetadata> = {
         unitAssetFolder: 'pokemongen23',
         themeClass: 'theme-pokemongen23',
         galleryPath: '#/ultimate-gallery/pokemongen23',
-        arenas: ['stadium', 'rock-gym'],
+        arenas: ['bell-tower', 'sea-route'],
         order: 3,
     },
 }

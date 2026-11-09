@@ -1,10 +1,10 @@
 import { getAbilityConfig, getAttackConfig } from '../data/animationConfig'
 import type { GameUnit } from '../types'
 
-export const resolveAttackConfig = (unit: Pick<GameUnit, 'definitionId' | 'traits'>) => {
-    return getAttackConfig(unit.definitionId)
-}
+type AnimatedUnit = Pick<GameUnit, 'definitionId' | 'traits'>
 
-export const resolveAbilityConfig = (unit: Pick<GameUnit, 'definitionId' | 'traits'>) => {
-    return getAbilityConfig(unit.definitionId)
-}
+export const resolveAttackConfig = (unit: AnimatedUnit) =>
+    getAttackConfig(unit.definitionId, unit.traits ?? [])
+
+export const resolveAbilityConfig = (unit: AnimatedUnit) =>
+    getAbilityConfig(unit.definitionId, unit.traits ?? [])

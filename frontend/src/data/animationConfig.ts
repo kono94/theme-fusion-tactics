@@ -108,6 +108,7 @@ export type AbilityEffectStyle =
     | 'POKEMON_FIGHTING_COMBO'
     | 'POKEMON_FLYING_GUST'
     | 'POKEMON_STEEL_FIELD'
+    | 'POKEMON_DARK_CRESCENT'
 
 export interface AbilityAnimationConfig {
     color: string
@@ -518,6 +519,7 @@ const POKEMON_ATTACK_BY_STYLE: Record<string, AttackAnimationConfig> = {
     fighting: { type: 'forcePalm', color: '#dc2626', secondaryColor: '#fecaca', particles: 20 },
     dragon: { type: 'dragonSpark', color: '#6366f1', secondaryColor: '#c7d2fe', particles: 22 },
     steel: { type: 'metalSpark', color: '#94a3b8', secondaryColor: '#e2e8f0', particles: 18 },
+    dark: { type: 'shadowOrb', color: '#5b21b6', secondaryColor: '#be123c', particles: 18 },
     normal: { type: 'punch', color: '#a8a29e', secondaryColor: '#fafaf9', particles: 16 }
 }
 
@@ -556,42 +558,44 @@ const POKEMON_ULTIMATE_STYLE_BY_ATTACK_STYLE: Record<keyof typeof POKEMON_ATTACK
     fighting: 'POKEMON_FIGHTING_COMBO',
     dragon: 'POKEMON_DRAGON_BEAM',
     steel: 'POKEMON_STEEL_FIELD',
+    dark: 'POKEMON_DARK_CRESCENT',
     normal: 'POKEMON_NORMAL_RALLY'
 }
 
-function getPokemonAttackStyle(definitionId: string): keyof typeof POKEMON_ATTACK_BY_STYLE | undefined {
-    return POKEMON_STYLE_BY_ID[definitionId]
+const EMPHASIZED_POKEMON = new Set([
+    'charizard', 'blastoise', 'venusaur', 'dragonite', 'articuno', 'zapdos', 'moltres', 'mewtwo', 'mew', 'snorlax', 'gengar', 'alakazam',
+    'lugia', 'ho_oh', 'raikou', 'entei', 'suicune', 'kyogre', 'groudon', 'rayquaza', 'latios', 'tyranitar', 'metagross', 'salamence'
+])
+
+// Lookup order: explicit Gen 1 id map, then the per-unit tables (One Piece and hand-tuned units), then the first
+// trait that names a Pokemon type, so new Pokemon modes get type styling without per-id entries.
+export function resolvePokemonStyle(definitionId: string, traits: readonly string[] = []): string | undefined {
+    const explicit = POKEMON_STYLE_BY_ID[definitionId]
+    if (explicit) return explicit
+    if (Object.hasOwn(ATTACK_ANIMATIONS, definitionId) || Object.hasOwn(ABILITY_ANIMATIONS, definitionId)) return undefined
+    return traits.map((trait) => trait.toLowerCase()).find((trait) => Object.hasOwn(POKEMON_ATTACK_BY_STYLE, trait))
 }
 
-function getLegacyAttackConfig(definitionId: string): AttackAnimationConfig {
-    const pokemonStyle = getPokemonAttackStyle(definitionId)
+export function getAttackConfig(definitionId: string, traits: readonly string[] = []): AttackAnimationConfig {
+    const pokemonStyle = resolvePokemonStyle(definitionId, traits)
     if (pokemonStyle) return POKEMON_ATTACK_BY_STYLE[pokemonStyle]
     return ATTACK_ANIMATIONS[definitionId] ?? ATTACK_ANIMATIONS['_default']
 }
 
-function getLegacyAbilityConfig(definitionId: string): AbilityAnimationConfig {
-    const baseConfig = ABILITY_ANIMATIONS[definitionId] ?? ABILITY_ANIMATIONS['_default']
-    const pokemonStyle = getPokemonAttackStyle(definitionId)
-    if (!pokemonStyle) return baseConfig
+export function getAbilityConfig(definitionId: string, traits: readonly string[] = []): AbilityAnimationConfig {
+    const pokemonStyle = resolvePokemonStyle(definitionId, traits)
+    const explicit = ABILITY_ANIMATIONS[definitionId]
+    if (!pokemonStyle) return explicit ?? ABILITY_ANIMATIONS['_default']
 
-    const style = POKEMON_ULTIMATE_STYLE_BY_ATTACK_STYLE[pokemonStyle]
-    const emphasis = ['charizard', 'blastoise', 'venusaur', 'dragonite', 'articuno', 'zapdos', 'moltres', 'mewtwo', 'mew', 'snorlax', 'gengar', 'alakazam'].includes(definitionId)
-        ? 1.22
-        : 1.08
+    const palette = POKEMON_ATTACK_BY_STYLE[pokemonStyle]
+    const baseConfig: AbilityAnimationConfig = explicit ?? { color: palette.color, secondaryColor: palette.secondaryColor }
+    const emphasis = EMPHASIZED_POKEMON.has(definitionId) ? 1.22 : 1.08
 
     return {
         ...baseConfig,
         signature: undefined,
-        effectStyle: style,
+        effectStyle: POKEMON_ULTIMATE_STYLE_BY_ATTACK_STYLE[pokemonStyle],
         screenShake: Math.max(baseConfig.screenShake ?? 0, pokemonStyle === 'normal' || pokemonStyle === 'psychic' ? 2 : 4),
         particleScale: (baseConfig.particleScale ?? 1) * emphasis
     }
-}
-
-export function getAttackConfig(definitionId: string): AttackAnimationConfig {
-    return getLegacyAttackConfig(definitionId)
-}
-
-export function getAbilityConfig(definitionId: string): AbilityAnimationConfig {
-    return getLegacyAbilityConfig(definitionId)
 }

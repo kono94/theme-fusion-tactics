@@ -1562,6 +1562,9 @@ function drawPokemonUltimate(effect: EffectInstance, t: number, scale: number) {
     case 'POKEMON_STEEL_FIELD':
       drawPokemonSteel(effect, t, scale)
       break
+    case 'POKEMON_DARK_CRESCENT':
+      drawPokemonDark(effect, t, scale)
+      break
     case 'POKEMON_NORMAL_RALLY':
     default:
       drawPokemonNormal(effect, t, scale)
@@ -1881,6 +1884,35 @@ function drawPokemonSteel(effect: EffectInstance, t: number, scale: number) {
     const angle = (Math.PI * 2 * i) / 6 + t
     drawRockShard(end.x + Math.cos(angle) * 50 * scale, end.y + Math.sin(angle) * 34 * scale, angle, 20 * scale, i % 2 ? secondary : color, 0.68 * (1 - t * 0.2))
   }
+}
+
+function drawPokemonDark(effect: EffectInstance, t: number, scale: number) {
+  if (!ctx) return
+  const { start, end, ability } = effect.event
+  const color = ability?.color ?? '#5b21b6'
+  const secondary = ability?.secondaryColor ?? '#be123c'
+  glowCircle(end.x, end.y, (46 + 30 * t) * scale, '#0d0716', 0.5 * (1 - t * 0.4))
+  for (let i = 0; i < 2; i += 1) {
+    const local = Math.max(0, Math.min(1, (t - i * 0.12) / 0.5))
+    if (local <= 0 || local >= 1) continue
+    const p = pointOnLine(start, end, easeOutCubic(local))
+    drawArcWave(p.x, p.y, (14 + 10 * local) * scale, color, 0.7 * (1 - local * 0.3))
+  }
+  if (t < 0.5) return
+  const rake = (t - 0.5) / 0.5
+  const angle = Math.atan2(end.y - start.y, end.x - start.x) + Math.PI / 2 + 0.5
+  for (let i = -1; i <= 1; i += 1) {
+    const ox = Math.cos(angle + Math.PI / 2) * i * 11 * scale
+    const oy = Math.sin(angle + Math.PI / 2) * i * 11 * scale
+    const half = 30 * scale * Math.min(1, rake * 3)
+    ctx.strokeStyle = withAlpha(i === 0 ? secondary : color, 0.8 * (1 - rake))
+    ctx.lineWidth = 4 * scale
+    ctx.beginPath()
+    ctx.moveTo(end.x + ox - Math.cos(angle) * half, end.y + oy - Math.sin(angle) * half)
+    ctx.lineTo(end.x + ox + Math.cos(angle) * half, end.y + oy + Math.sin(angle) * half)
+    ctx.stroke()
+  }
+  drawImpactRing(end.x, end.y, (16 + 36 * rake) * scale, color, 0.6 * (1 - rake))
 }
 
 function drawPokemonNormal(effect: EffectInstance, t: number, scale: number) {

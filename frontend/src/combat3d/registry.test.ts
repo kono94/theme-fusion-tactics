@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import onePieceUnits from '../../../backend/src/main/resources/data/units_onepiece.json'
 import pokemonUnits from '../../../backend/src/main/resources/data/units_pokemon.json'
+import pokemonGen23Units from '../../../backend/src/main/resources/data/units_pokemongen23.json'
 import { getAbilityConfig, getAttackConfig } from '../data/animationConfig'
 import { getArena, isArenaId } from './arenas'
 import {
@@ -19,16 +20,23 @@ interface RawAbility {
 interface RawUnit {
   id: string
   cost: number
+  traits?: string[]
   ability: RawAbility
-  forms?: { definitionId: string; ability?: RawAbility | null }[]
+  forms?: { definitionId: string; traits?: string[]; ability?: RawAbility | null }[]
 }
 
-const unitFor = (definitionId: string, abilityName: string | null = null) =>
+interface PokemonMove {
+  definitionId: string
+  abilityName: string
+  traits: string[]
+}
+
+const unitFor = (definitionId: string, abilityName: string | null = null, traits: string[] = []) =>
   ({
     definitionId,
     abilityName,
-    ability: getAbilityConfig(definitionId),
-    attack: getAttackConfig(definitionId),
+    ability: getAbilityConfig(definitionId, traits),
+    attack: getAttackConfig(definitionId, traits),
   }) as CombatUnit3d
 
 const ONE_PIECE_SETS: Record<string, string[]> = {
@@ -54,14 +62,15 @@ const POKEMON_SETS: Record<string, (cost: number) => boolean> = {
   pokemonTier45: (cost) => cost >= 4,
 }
 
-function pokemonMoves(filter: (cost: number) => boolean): { definitionId: string; abilityName: string }[] {
-  const moves = new Map<string, { definitionId: string; abilityName: string }>()
-  for (const unit of pokemonUnits as RawUnit[]) {
+function pokemonMoves(units: RawUnit[], filter: (cost: number) => boolean = () => true): PokemonMove[] {
+  const moves = new Map<string, PokemonMove>()
+  for (const unit of units) {
     if (!filter(unit.cost)) continue
     const forms = unit.forms?.length ? unit.forms : [{ definitionId: unit.id, ability: unit.ability }]
     for (const form of forms) {
       const abilityName = (form.ability ?? unit.ability).name
-      moves.set(`${form.definitionId}:${abilityName}`, { definitionId: form.definitionId, abilityName })
+      const traits = ('traits' in form ? form.traits : undefined) ?? unit.traits ?? []
+      moves.set(`${form.definitionId}:${abilityName}`, { definitionId: form.definitionId, abilityName, traits })
     }
   }
   return [...moves.values()]
@@ -82,7 +91,7 @@ describe('3D choreography registry', () => {
   })
 
   describe.each(Object.entries(POKEMON_SETS))('Pokemon set %s', (_set, filter) => {
-    const moves = pokemonMoves(filter)
+    const moves = pokemonMoves(pokemonUnits as RawUnit[], filter)
     it.each(moves.map((move) => [`${move.definitionId}:${move.abilityName}`, move] as const))(
       '%s has a signature ultimate',
       (_key, move) => {
@@ -99,6 +108,21 @@ describe('3D choreography registry', () => {
         expect(choreographies.size, definitionId).toBe(abilities.length)
       }
     })
+  })
+
+  describe('Pokemon Gen 2/3', () => {
+    const moves = pokemonMoves(pokemonGen23Units as RawUnit[])
+    const generic = resolveUltimate(unitFor('unknown_unit'))
+
+    // Until the signature sets land, every move must at least reach its type fallback instead of the generic one.
+    it.each(moves.map((move) => [`${move.definitionId}:${move.abilityName}`, move] as const))(
+      '%s resolves to a non-generic ultimate',
+      (_key, move) => {
+        const unit = unitFor(move.definitionId, move.abilityName, move.traits)
+        expect(unit.ability.effectStyle, move.definitionId).toMatch(/^POKEMON_/)
+        expect(resolveUltimate(unit)).not.toBe(generic)
+      },
+    )
   })
 
   it('falls back to generic choreographies for unknown units', () => {

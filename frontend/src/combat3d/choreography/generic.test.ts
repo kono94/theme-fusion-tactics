@@ -58,6 +58,7 @@ const POKEMON_STYLES: AbilityEffectStyle[] = [
   'POKEMON_FIGHTING_COMBO',
   'POKEMON_FLYING_GUST',
   'POKEMON_STEEL_FIELD',
+  'POKEMON_DARK_CRESCENT',
 ]
 
 interface Options {

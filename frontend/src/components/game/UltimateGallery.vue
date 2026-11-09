@@ -98,11 +98,11 @@ function galleryKey(unit: UltimateGalleryUnit | undefined) {
 }
 
 function resolveAbilityConfig(unit: UltimateGalleryUnit) {
-    return getAbilityConfig(unit.id)
+    return getAbilityConfig(unit.id, unit.traits)
 }
 
 function resolveAttackConfig(unit: UltimateGalleryUnit) {
-    return getAttackConfig(unit.id)
+    return getAttackConfig(unit.id, unit.traits)
 }
 
 function createDummyUnit(name: string, id: string, cost: number): UltimateGalleryUnit {
@@ -401,7 +401,7 @@ onUnmounted(() => {
       >
         <img :src="getUnitIconPath(unit.id, galleryMode)" :alt="unit.name" draggable="false">
         <span class="roster-name">{{ unit.name }}</span>
-        <span class="roster-meta">{{ getAbilityConfig(unit.id).signature || unit.abilityName }} · {{ unit.cost }}g</span>
+        <span class="roster-meta">{{ getAbilityConfig(unit.id, unit.traits).signature || unit.abilityName }} · {{ unit.cost }}g</span>
       </button>
     </section>
   </main>
