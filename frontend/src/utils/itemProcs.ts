@@ -21,14 +21,16 @@ export function resolveItemProc(
   const itemName = event.skillName
   if (!itemName) return null
   if (event.type === 'ITEM') {
+    const unitId = event.targetId || event.sourceId
+    if (!unitId) return null
     return {
-      unitId: event.targetId || event.sourceId,
+      unitId,
       itemName,
       text: `${itemName}!`,
       repeating: false,
     }
   }
-  if (event.type === 'HEAL' && itemNamesFor(event.sourceId)?.includes(itemName)) {
+  if (event.type === 'HEAL' && event.sourceId && itemNamesFor(event.sourceId)?.includes(itemName)) {
     return { unitId: event.sourceId, itemName, text: `${itemName}!`, repeating: true }
   }
   return null

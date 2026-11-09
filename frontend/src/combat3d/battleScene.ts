@@ -4,6 +4,7 @@ import { getAnimationRenderPolicy } from '../animations/renderPolicy'
 import { getArena, type ArenaHandle } from './arenas'
 import { playAttack, playHeal, playShield, playUltimate } from './choreography/registry'
 import { abilityTick } from './choreography/attacks/generic'
+import { WeatherLayer } from './choreography/weather'
 import {
   at,
   burst,
@@ -18,6 +19,7 @@ import type { CombatEvent3d, CombatUnit3d } from './types'
 import { UnitView, disposePortraitTextures, portraitTexture } from './unitView'
 import { TEAM_COLORS } from '../utils/colorUtils'
 import { createItemProcThrottle, resolveItemProc } from '../utils/itemProcs'
+import { fieldConditionVisual } from '../utils/fieldConditions'
 
 const MAX_EFFECTS = 90
 const CROWDED_UNITS = 12
@@ -48,6 +50,7 @@ export class BattleScene {
   private disposed = false
   private now = 0
   private readonly shouldShowItemProc = createItemProcThrottle()
+  private readonly weather: WeatherLayer
 
   constructor(
     private readonly host: HTMLElement,
@@ -77,6 +80,7 @@ export class BattleScene {
     this.renderer.domElement.addEventListener('dblclick', this.resetCamera)
     this.renderer.domElement.title = 'Drag to rotate, scroll to zoom, double-click to reset'
     this.effects = new EffectSystem(this.scene, MAX_EFFECTS)
+    this.weather = new WeatherLayer(this.scene, options.reducedMotion)
 
     this.scene.add(this.arenaRoot)
     this.arena = getArena(options.arenaId).build(this.scene, this.arenaRoot)
@@ -116,6 +120,10 @@ export class BattleScene {
     }
   }
 
+  setFieldCondition(conditionId: string | null): void {
+    this.weather.set(fieldConditionVisual(conditionId))
+  }
+
   dispose(): void {
     this.disposed = true
     cancelAnimationFrame(this.frameHandle)
@@ -125,6 +133,7 @@ export class BattleScene {
     this.controls.removeEventListener('start', this.handleCameraStart)
     this.controls.dispose()
     this.effects.clear()
+    this.weather.dispose()
     this.views.forEach((view) => view.dispose())
     this.views.clear()
     disposeObject(this.scene)
@@ -202,8 +211,8 @@ export class BattleScene {
   }
 
   private handleEvent(ctx: FxContext, event: CombatEvent3d): void {
-    const target = this.views.get(event.targetId)
-    const source = this.views.get(event.sourceId) ?? target
+    const target = event.targetId ? this.views.get(event.targetId) : undefined
+    const source = (event.sourceId ? this.views.get(event.sourceId) : undefined) ?? target
     if (!source) return
 
     this.showItemProc(event)
@@ -258,6 +267,10 @@ export class BattleScene {
         this.floatText(shieldTarget, `+${event.value}`, 'shield', 150)
         return
       }
+      case 'FIELD_DAMAGE': {
+        if (target && event.value > 0) this.floatText(target, `-${event.value}`, 'field-damage')
+        return
+      }
       case 'DEATH': {
         const victim = target ?? source
         this.playKnockout(ctx, victim)
@@ -303,7 +316,7 @@ export class BattleScene {
   private floatText(
     view: UnitView,
     text: string,
-    kind: FloatKind | 'item-proc',
+    kind: FloatKind | 'item-proc' | 'field-damage',
     delayMs = 0,
   ): void {
     const element = document.createElement('div')
@@ -334,6 +347,7 @@ export class BattleScene {
       }
     }
     this.arena.update(this.now)
+    this.weather.update(this.now)
     this.rig.crowded = this.aliveCount() >= CROWDED_UNITS
     this.controls.update()
     this.rig.base.copy(this.camera.position)

@@ -15,6 +15,7 @@ from generate_item_icons import (
 )
 
 YELLOW = [hexc(v) for v in ('#3a2a00', '#b88a00', '#f5c400', '#ffe84a', '#fffbd0')]
+CREAM = [hexc(v) for v in ('#5b4630', '#a68a5c', '#e2cc98', '#f6e8c4', '#fffaea')]
 
 
 def star_points(cx, cy, outer, inner, tips):
@@ -293,6 +294,72 @@ def type_master():
     return s
 
 
+def cloud(s, x, y, colors):
+    s.part(union(ellipse((x, y + 4, x + 12, y + 14)), ellipse((x + 6, y, x + 20, y + 13)),
+                 ellipse((x + 13, y + 5, x + 24, y + 14)), rect((x + 5, y + 8, x + 20, y + 14))), colors)
+
+
+def raindrop(s, x, y, colors):
+    s.part(poly([(x + 1, y), (x + 3, y + 4), (x + 1, y + 6), (x - 1, y + 4)]), colors, seam=False)
+
+
+def weather_front():
+    s = Sprite()
+    s.part(poly(star_points(22, 9, 9, 5, 10)), YELLOW)
+    s.part(ellipse((17, 4, 27, 14)), ORANGE)
+    cloud(s, 2, 8, WHITE)
+    for x, y in ((6, 24), (13, 25), (20, 24)):
+        raindrop(s, x, y, BLUE)
+    return s
+
+
+# ---------------- Field conditions ----------------
+
+def rain_condition():
+    s = Sprite()
+    cloud(s, 4, 3, STEEL)
+    for x, y in ((7, 20), (14, 22), (21, 20), (10, 26), (18, 27)):
+        raindrop(s, x, y, BLUE)
+    return s
+
+
+def sun_condition():
+    s = Sprite()
+    s.part(poly(star_points(16, 16, 15, 9, 12)), ORANGE)
+    s.part(ellipse((8, 8, 24, 24)), YELLOW)
+    s.dot(YELLOW[4], (12, 12), (13, 11), (12, 13))
+    return s
+
+
+def sandstorm_condition():
+    s = Sprite()
+    s.part(poly([(3, 8), (9, 5), (15, 8), (21, 5), (27, 8), (30, 6)], 2), PAPER, shade='flat')
+    s.part(poly([(2, 16), (8, 13), (14, 16), (20, 13), (26, 16), (30, 14)], 2), CREAM, shade='flat')
+    s.part(poly([(4, 24), (10, 21), (16, 24), (22, 21), (28, 24)], 2), PAPER, shade='flat')
+    s.part(ellipse((20, 24, 27, 31)), STONE, seam=False)
+    s.part(ellipse((4, 26, 9, 31)), LEATHER, seam=False)
+    s.dot(CREAM[4], (6, 11), (18, 10), (25, 19), (11, 19), (28, 28))
+    return s
+
+
+def hail_condition():
+    s = Sprite()
+    cloud(s, 4, 3, STEEL)
+    for x, y in ((7, 20), (15, 23), (23, 20), (11, 27)):
+        s.part(ellipse((x, y, x + 4, y + 4)), CYAN, seam=False)
+        s.dot(WHITE[4], (x + 1, y + 1))
+    return s
+
+
+def clear_condition():
+    s = Sprite()
+    s.part(ellipse((2, 2, 30, 30)), BLUE)
+    s.part(ellipse((5, 5, 27, 27)), CYAN, shade='flat')
+    s.part(poly(star_points(16, 16, 9, 5, 8)), YELLOW, seam=False)
+    s.part(ellipse((12, 12, 20, 20)), GOLD)
+    return s
+
+
 def random_rule():
     s = Sprite()
     s.part(ellipse((2, 2, 30, 30)), PURPLE)
@@ -339,11 +406,20 @@ MATCH_RULES = {
     'head-start': head_start,
     'bounty-hunt': bounty_hunt,
     'type-master': type_master,
+    'weather-front': weather_front,
     'random': random_rule,
     'none': none_rule,
 }
 
-ICONS = {'augments': AUGMENTS, 'match-rules': MATCH_RULES}
+FIELD_CONDITIONS = {
+    'rain': rain_condition,
+    'sun': sun_condition,
+    'sandstorm': sandstorm_condition,
+    'hail': hail_condition,
+    'clear': clear_condition,
+}
+
+ICONS = {'augments': AUGMENTS, 'match-rules': MATCH_RULES, 'field-conditions': FIELD_CONDITIONS}
 
 
 def main(out_dir, sheet_path):

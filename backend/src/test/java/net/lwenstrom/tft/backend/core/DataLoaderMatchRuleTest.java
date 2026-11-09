@@ -32,7 +32,7 @@ class DataLoaderMatchRuleTest {
                         .map(MatchRuleDefinition::id)
                         .collect(Collectors.toSet()));
         assertEquals(
-                ids(COMMON_RULE_IDS, "type-master"),
+                ids(COMMON_RULE_IDS, "type-master", "weather-front"),
                 dataLoader.getMatchRules(GameMode.POKEMON_GEN23).stream()
                         .map(MatchRuleDefinition::id)
                         .collect(Collectors.toSet()));
@@ -46,6 +46,9 @@ class DataLoaderMatchRuleTest {
         for (var mode : GameMode.values()) {
             dataLoader.getMatchRules(mode).forEach(rule -> assertIconExists(frontendPublic, rule.icon()));
             dataLoader.getAugments(mode).forEach(augment -> assertIconExists(frontendPublic, augment.image()));
+            dataLoader
+                    .getFieldConditions(mode)
+                    .forEach(condition -> assertIconExists(frontendPublic, condition.icon()));
         }
     }
 
@@ -54,7 +57,7 @@ class DataLoaderMatchRuleTest {
         assertTrue(Files.exists(frontendPublic.resolve(icon.substring(1))), "Missing icon file " + icon);
     }
 
-    private static Set<String> ids(Set<String> common, String themed) {
+    private static Set<String> ids(Set<String> common, String... themed) {
         return java.util.stream.Stream.concat(common.stream(), java.util.stream.Stream.of(themed))
                 .collect(Collectors.toSet());
     }

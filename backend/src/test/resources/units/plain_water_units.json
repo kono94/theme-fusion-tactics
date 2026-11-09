@@ -1,0 +1,26 @@
+[
+  {
+    "id": "lotad_test",
+    "name": "Lotad",
+    "cost": 1,
+    "role": "SUPPORT",
+    "maxHealth": [500, 900, 1600],
+    "maxMana": [50, 50, 50],
+    "attackDamage": [40, 70, 130],
+    "abilityPower": [0, 0, 0],
+    "defense": [20, 20, 20],
+    "attackSpeed": [0.7, 0.7, 0.7],
+    "range": [2, 2, 2],
+    "traits": [
+      "Water"
+    ],
+    "ability": {
+      "name": "Splash",
+      "description": "Splashes for $value.",
+      "type": "BUFF_SPD",
+      "pattern": "SURROUND",
+      "values": [10, 15, 20],
+      "range": [2, 2, 2]
+    }
+  }
+]

@@ -34,5 +34,7 @@ public interface AbilityCaster {
         default void onShielding(String unitId, String unitName, String targetId, int shielding) {}
 
         default void onSkill(String unitId, String unitName, String targetId, int value) {}
+
+        default void onFieldCondition(GameUnit source, String conditionId, int durationSeconds, boolean extendActive) {}
     }
 }

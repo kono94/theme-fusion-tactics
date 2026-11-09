@@ -2,6 +2,7 @@
 import { computed, defineAsyncComponent, ref, watch, onUnmounted, onMounted } from 'vue'
 import CombatEffectsCanvas from './game/CombatEffectsCanvas.vue'
 import EvolveBadge from './EvolveBadge.vue'
+import FieldConditionOverlay from './game/FieldConditionOverlay.vue'
 import { resolveAbilityConfig, resolveAttackConfig } from '../utils/combatAnimationConfig'
 import type { EmergencyDropPayload, GameState, GameUnit, GamePhase, RenderedUnit, RenderedOrb, PlayerState, DisplayedUnit, CombatEvent, SelectedAugment } from '../types'
 import type { NormalizedCombatVisualEvent } from '../types/combatEffects'
@@ -16,6 +17,7 @@ import type { CombatViewSetting } from '../utils/clientSettings'
 import { pickArenaId, readArenaOverride } from '../utils/arenaSelection'
 import { getGameModeMetadata, isGameMode } from '../data/gameModeMetadata'
 import { canChooseEvolution, type EvolutionChoiceContext } from '../utils/evolution'
+import { fieldDamageLabel, isFieldEvent, viewedFieldConditionId } from '../utils/fieldConditions'
 
 // Three.js is only downloaded by players who enable the 3D battle view.
 const CombatView3d = defineAsyncComponent(() => import('../combat3d/CombatView3d.vue'))
@@ -68,6 +70,7 @@ function reportInvalidCoordinate(unit: GameUnit, phase: BoardProjectionPhase) {
 }
 
 const currentViewedPlayerId = computed(() => props.viewedPlayerId || props.actingPlayerId)
+const fieldConditionId = computed(() => viewedFieldConditionId(props.state, currentViewedPlayerId.value))
 const isHomeView = computed(() => !!props.actingPlayerId && currentViewedPlayerId.value === props.actingPlayerId)
 const evolutionContext = computed((): EvolutionChoiceContext => ({
     phase: props.state?.phase,
@@ -558,6 +561,7 @@ interface FloatingText {
 }
 const castingAnimations = ref<FloatingText[]>([])
 const floatingHeals = ref<FloatingText[]>([])
+const floatingFieldDamage = ref<FloatingText[]>([])
 const itemProcLabels = ref<FloatingText[]>([])
 let shouldShowItemProc = createItemProcThrottle()
 const transientAnimationTimers = ref<number[]>([])
@@ -583,6 +587,7 @@ function clearCombatVisualState() {
     castingUnits.value = new Set()
     castingAnimations.value = []
     floatingHeals.value = []
+    floatingFieldDamage.value = []
     itemProcLabels.value = []
     shouldShowItemProc = createItemProcThrottle()
     transientAnimationTimers.value.forEach(timer => clearTimeout(timer))
@@ -616,7 +621,8 @@ const unitsById = computed(() => {
     return map
 })
 
-function lookupUnit(unitId: string): RenderedUnit | DisplayedUnit | undefined {
+function lookupUnit(unitId: string | null | undefined): RenderedUnit | DisplayedUnit | undefined {
+    if (!unitId) return undefined
     return unitsById.value.get(unitId) || dyingUnitData.value.get(unitId) || prevUnitsMap.value.get(unitId)
 }
 
@@ -655,8 +661,8 @@ function normalizeCombatEvent(
         id: nextVisualEventId++,
         timestamp: event.timestamp,
         type: event.type,
-        sourceId: event.sourceId,
-        targetId: event.targetId,
+        sourceId: event.sourceId ?? source.id,
+        targetId: event.targetId ?? target.id,
         value: event.value,
         skillName: event.skillName,
         source: source as RenderedUnit,
@@ -693,6 +699,22 @@ function showItemProcLabel(label: ItemProcLabel) {
     }, 1200)
 }
 
+function showFieldDamage(event: CombatEvent) {
+    const label = fieldDamageLabel(event)
+    const target = lookupUnit(event.targetId)
+    if (!label || !target) return
+    const labelId = nextVisualEventId++
+    floatingFieldDamage.value.push({
+        id: labelId,
+        x: target.visualX * CELL_SIZE.value + CELL_SIZE.value / 2,
+        y: target.visualY * CELL_SIZE.value + 14,
+        text: label
+    })
+    scheduleTransientAnimationCleanup(() => {
+        floatingFieldDamage.value = floatingFieldDamage.value.filter((item) => item.id !== labelId)
+    }, 900)
+}
+
 function isHealingCombatEvent(event: CombatEvent, source: RenderedUnit | DisplayedUnit): boolean {
     return event.type === 'HEAL' || event.value < 0 || source.ability?.type === 'HEAL'
 }
@@ -703,6 +725,11 @@ watch(() => props.state?.recentEvents, (newEvents) => {
     const fresh = takeNewCombatEvents(newEvents, lastProcessedEventTime.value)
 
     fresh.events.forEach((event: CombatEvent) => {
+        // Field events are weather, not attacks: they never reach the attack/ability animation pipeline.
+        if (isFieldEvent(event)) {
+            showFieldDamage(event)
+            return
+        }
 
         const targetFromEvent = lookupUnit(event.targetId)
         const source = lookupUnit(event.sourceId) || targetFromEvent
@@ -965,6 +992,7 @@ const onOrbClick = (orbId: string) => {
                 :units="renderedUnits"
                 :events="props.state?.recentEvents"
                 :arena-id="combatArenaId"
+                :field-condition-id="fieldConditionId"
                 @fallback="emit('combat-view-fallback')"
             />
         </div>
@@ -1105,6 +1133,7 @@ const onOrbClick = (orbId: string) => {
 
                 </div>
             </div>
+            <FieldConditionOverlay v-if="!show3dCombat && fieldConditionId" :condition-id="fieldConditionId" />
         </div>
 
         <!-- Player Names Overlay -->
@@ -1155,6 +1184,12 @@ const onOrbClick = (orbId: string) => {
                   class="item-proc-label"
                   :style="{ left: label.x + 'px', top: label.y + 'px' }">
                   {{ label.text }}
+             </div>
+
+             <div v-for="chip in floatingFieldDamage" :key="chip.id"
+                  class="floating-text field-damage"
+                  :style="{ left: chip.x + 'px', top: chip.y + 'px' }">
+                  {{ chip.text }}
              </div>
 
              <!-- Heal Floating Text -->
@@ -1929,6 +1964,12 @@ const onOrbClick = (orbId: string) => {
 .floating-text.heal {
     color: #22c55e; /* Green */
     font-size: 16px;
+}
+
+.floating-text.field-damage {
+    color: #fcd9a8;
+    font-size: 11px;
+    font-weight: 600;
 }
 
 .unit.atk-buffed {

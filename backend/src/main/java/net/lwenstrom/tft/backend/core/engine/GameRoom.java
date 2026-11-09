@@ -25,6 +25,8 @@ import net.lwenstrom.tft.backend.core.model.ActiveMatchRule;
 import net.lwenstrom.tft.backend.core.model.AugmentTier;
 import net.lwenstrom.tft.backend.core.model.BotPersonality;
 import net.lwenstrom.tft.backend.core.model.EmergencyDropPayload;
+import net.lwenstrom.tft.backend.core.model.FieldConditionDefinition;
+import net.lwenstrom.tft.backend.core.model.FieldConditionView;
 import net.lwenstrom.tft.backend.core.model.GameAction;
 import net.lwenstrom.tft.backend.core.model.GameMode;
 import net.lwenstrom.tft.backend.core.model.GamePhase;
@@ -75,6 +77,7 @@ public class GameRoom {
     private boolean matchCompletedRecorded;
     private AugmentManager augmentManager;
     private MatchRuleManager matchRuleManager;
+    private CombatSystem.RoundFieldCondition roundFieldCondition;
     private final List<GameState.CombatEvent> lastTickEvents = new ArrayList<>();
     private final Map<String, CombatSystem.DamageEntry> currentRoundDamageLog = new ConcurrentHashMap<>();
     private final List<PendingEmergencyDrop> pendingEmergencyDrops = new ArrayList<>();
@@ -228,6 +231,8 @@ public class GameRoom {
 
         traitManager.replaceEffects(traitDefinitions);
         combatSystem.configureAffinity(affinityConfig);
+        combatSystem.configureFieldConditions(dataLoader.getFieldConditions(mode));
+        roundFieldCondition = null;
         gameMode = mode;
         augmentManager = newAugmentManager;
         matchRuleManager = newMatchRuleManager;
@@ -739,6 +744,7 @@ public class GameRoom {
             players.values().stream()
                     .filter(Player::isBot)
                     .forEach(player -> botController.plan(player, round, augmentManager));
+            rollFieldForecast();
         }
 
         if (phase == GamePhase.COMBAT) {
@@ -786,14 +792,49 @@ public class GameRoom {
             }
 
             combatSystem.clearDamageLog();
+            combatSystem.resetFieldConditions();
             activeCombats.forEach(combat -> {
                 combatSystem.startCombat(combat);
                 augmentManager.applyCombatEffects(combat);
                 combat.forEach(player -> matchRuleManager.applyCombatEffects(player.getBoardUnits()));
+                combatSystem.beginFieldConditions(combat, roundFieldCondition);
             });
         }
 
         updateGameState(currentPhaseDuration);
+    }
+
+    private void rollFieldForecast() {
+        roundFieldCondition = matchRuleManager
+                .randomFieldConditionDurationSeconds()
+                .flatMap(durationSeconds -> {
+                    var selectable = dataLoader.getFieldConditions(gameMode).stream()
+                            .filter(FieldConditionDefinition::selectableByRule)
+                            .toList();
+                    return selectable.isEmpty()
+                            ? Optional.<CombatSystem.RoundFieldCondition>empty()
+                            : Optional.of(new CombatSystem.RoundFieldCondition(
+                                    selectable.get(randomProvider.nextInt(selectable.size())), durationSeconds));
+                })
+                .orElse(null);
+    }
+
+    private FieldConditionView fieldForecastView() {
+        if (phase != GamePhase.PLANNING || roundFieldCondition == null) {
+            return null;
+        }
+        var durationSeconds = roundFieldCondition.durationSeconds();
+        return roundFieldCondition.condition().toView(durationSeconds > 0 ? durationSeconds * 1000L : null);
+    }
+
+    private Map<String, FieldConditionView> fieldConditionViews() {
+        var views = new HashMap<String, FieldConditionView>();
+        for (var combat : activeCombats) {
+            for (var player : combat) {
+                combatSystem.fieldConditionView(player.getId()).ifPresent(view -> views.put(player.getId(), view));
+            }
+        }
+        return views;
     }
 
     private void updateGameState(long timeLeft) {
@@ -837,7 +878,9 @@ public class GameRoom {
                 matchRuleManager.activeRule().orElse(null),
                 GameConstants.BASE_INCOME,
                 GameConstants.MAX_INTEREST,
-                matchRuleManager.rerollCost());
+                matchRuleManager.rerollCost(),
+                fieldConditionViews(),
+                fieldForecastView());
     }
 
     private Map<String, UnitStats> buildStatPreviews(Player player) {
@@ -1101,6 +1144,7 @@ public class GameRoom {
 
     private void handleCombatEnd(boolean isTimeout, CombatSystem.CombatResult result, List<Player> participants) {
         var outcome = determineCombatOutcome(isTimeout, result, participants);
+        combatSystem.endFieldConditions(participants);
 
         if (!outcome.isDraw() && outcome.loser() != null) {
             applyDamageToLoser(outcome.winner(), outcome.loser());

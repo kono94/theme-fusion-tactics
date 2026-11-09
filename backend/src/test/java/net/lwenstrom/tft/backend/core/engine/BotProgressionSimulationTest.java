@@ -60,6 +60,7 @@ class BotProgressionSimulationTest {
                 new DefaultAbilityCaster(),
                 random,
                 loader.getAffinityConfig(mode));
+        combat.configureFieldConditions(loader.getFieldConditions(mode));
         var report = new ArrayList<String>();
         var totalGrantedGold = GameConstants.STARTING_GOLD;
         for (var round = 1; round <= 25; round++) {
@@ -101,6 +102,7 @@ class BotProgressionSimulationTest {
             }
             var participants = round % 2 == 0 ? List.of(bot, baseline) : List.of(baseline, bot);
             combat.startCombat(participants);
+            combat.beginFieldConditions(participants, null);
             var outcome = "draw";
             for (var tick = 0; tick < 320; tick++) {
                 var result = combat.simulateTick(participants, clock.currentTimeMillis());

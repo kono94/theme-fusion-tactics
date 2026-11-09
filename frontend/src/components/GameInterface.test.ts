@@ -106,6 +106,8 @@ function gameState(phase: GamePhase, health: number, place: number): GameState {
         baseIncome: 5,
         maxInterest: 5,
         rerollCost: 2,
+        fieldConditions: {},
+        fieldForecast: null,
     }
 }
 
@@ -342,6 +344,39 @@ describe('GameInterface match rules and economy', () => {
         expect(badge.get('img').attributes('src')).toBe('/assets/match-rules/volatile.png')
         expect(badge.element.parentElement).toBe(wrapper.get('.room-details').element)
         wrapper.unmount()
+    })
+
+    it('shows the weather forecast in planning and the viewed active weather in combat', () => {
+        const rain = {
+            id: 'rain',
+            name: 'Rain',
+            description: 'Water damage +25%.',
+            icon: '/assets/field-conditions/rain.png',
+            remainingMs: 3100,
+        }
+        const planning = gameState('PLANNING', 100, 1)
+        planning.fieldForecast = { ...rain, remainingMs: null }
+        const forecast = mount(GameInterface, {
+            props: { state: planning, currentPlayerId: 'player-1' },
+            global: { stubs: childStubs },
+        })
+        const forecastChip = forecast.get('[data-testid="field-condition-chip"]')
+        expect(forecastChip.text()).toContain('Forecast')
+        expect(forecastChip.text()).toContain('Rain')
+        expect(forecastChip.element.parentElement).toBe(forecast.get('.room-details').element)
+        forecast.unmount()
+
+        const combat = gameState('COMBAT', 100, 1)
+        combat.fieldConditions = { 'player-1': rain }
+        const active = mount(GameInterface, {
+            props: { state: combat, currentPlayerId: 'player-1' },
+            global: { stubs: childStubs },
+        })
+        const activeChip = active.get('[data-testid="field-condition-chip"]')
+        expect(activeChip.text()).not.toContain('Forecast')
+        expect(activeChip.text()).toContain('4s')
+        expect(activeChip.get('[role="tooltip"]').text()).toBe('Water damage +25%.')
+        active.unmount()
     })
 
     it('hides the rule badge when no rule is active', () => {

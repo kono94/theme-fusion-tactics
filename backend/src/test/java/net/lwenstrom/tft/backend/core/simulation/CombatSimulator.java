@@ -49,12 +49,14 @@ public class CombatSimulator {
                     new DefaultAbilityCaster(),
                     randomProvider,
                     dataLoader.getAffinityConfig(request.mode()));
+            combatSystem.configureFieldConditions(dataLoader.getFieldConditions(request.mode()));
             var boardOne = createPlayer(request.boardOne(), request, randomProvider);
             var boardTwo = createPlayer(request.boardTwo(), request, randomProvider);
 
             combatSystem.startCombat(List.of(boardOne, boardTwo));
             applyAugments(request.boardOne(), boardOne, request, randomProvider);
             applyAugments(request.boardTwo(), boardTwo, request, randomProvider);
+            combatSystem.beginFieldConditions(List.of(boardOne, boardTwo), null);
 
             CombatSystem.CombatResult result = null;
             var elapsed = 0L;

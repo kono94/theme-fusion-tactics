@@ -13,7 +13,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(value = ExecuteModifier.class, name = "EXECUTE"),
     @JsonSubTypes.Type(value = StunModifier.class, name = "STUN"),
     @JsonSubTypes.Type(value = KnockbackModifier.class, name = "KNOCKBACK"),
-    @JsonSubTypes.Type(value = DotModifier.class, name = "DOT")
+    @JsonSubTypes.Type(value = DotModifier.class, name = "DOT"),
+    @JsonSubTypes.Type(value = FieldConditionModifier.class, name = "FIELD_CONDITION")
 })
 public sealed interface AbilityModifier
         permits ScalingModifier,
@@ -22,4 +23,5 @@ public sealed interface AbilityModifier
                 ExecuteModifier,
                 StunModifier,
                 KnockbackModifier,
-                DotModifier {}
+                DotModifier,
+                FieldConditionModifier {}

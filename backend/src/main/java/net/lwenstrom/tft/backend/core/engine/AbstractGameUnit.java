@@ -12,6 +12,7 @@ import net.lwenstrom.tft.backend.core.model.AbilityDefinition;
 import net.lwenstrom.tft.backend.core.model.CombatModifiers;
 import net.lwenstrom.tft.backend.core.model.DotEffect;
 import net.lwenstrom.tft.backend.core.model.EvolutionOption;
+import net.lwenstrom.tft.backend.core.model.FieldConditionStart;
 import net.lwenstrom.tft.backend.core.model.GameItem;
 import net.lwenstrom.tft.backend.core.model.GameUnit;
 import net.lwenstrom.tft.backend.core.model.UnitRole;
@@ -102,6 +103,7 @@ public abstract class AbstractGameUnit implements GameUnit {
     private float lowHpAsThreshold = 0.0f;
     private boolean shieldOnDeath = false;
     private CombatModifiers combatModifiers = CombatModifiers.none();
+    private FieldConditionStart startCondition;
 
     // Musician state
     private long buffExpirationTime = 0;
@@ -171,6 +173,7 @@ public abstract class AbstractGameUnit implements GameUnit {
                 new HashSet<>(form.traits()),
                 form.branchId(),
                 evolutionOptions);
+        this.startCondition = form.startCondition();
     }
 
     protected AbstractGameUnit(AbstractGameUnit other) {
@@ -258,6 +261,7 @@ public abstract class AbstractGameUnit implements GameUnit {
         this.temporaryDefenseBuff = other.temporaryDefenseBuff;
         this.temporaryDefenseShred = other.temporaryDefenseShred;
         this.combatModifiers = other.combatModifiers.copy();
+        this.startCondition = other.startCondition;
     }
 
     // ========== GETTERS ==========
@@ -903,6 +907,12 @@ public abstract class AbstractGameUnit implements GameUnit {
     @Override
     public void setTeamAttackDamageOnKill(int bonus) {
         this.teamAttackDamageOnKill = bonus;
+    }
+
+    @Override
+    @JsonIgnore
+    public FieldConditionStart getStartCondition() {
+        return startCondition;
     }
 
     @Override

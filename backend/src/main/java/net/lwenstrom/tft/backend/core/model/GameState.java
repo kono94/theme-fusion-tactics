@@ -26,7 +26,59 @@ public record GameState(
         ActiveMatchRule activeMatchRule,
         int baseIncome,
         int maxInterest,
-        int rerollCost) {
+        int rerollCost,
+        Map<String, FieldConditionView> fieldConditions,
+        FieldConditionView fieldForecast) {
+
+    public GameState {
+        fieldConditions = fieldConditions == null ? Map.of() : Map.copyOf(fieldConditions);
+    }
+
+    public GameState(
+            String roomId,
+            String hostId,
+            GamePhase phase,
+            long round,
+            long timeRemainingMs,
+            long totalPhaseDuration,
+            Map<String, PlayerState> players,
+            Map<String, String> matchups,
+            List<CombatEvent> recentEvents,
+            Map<String, CombatSystem.DamageEntry> damageLog,
+            GameMode gameMode,
+            boolean planningTimerPaused,
+            String planningReadyPlayerId,
+            PlanningPauseReason planningPauseReason,
+            int itemSlotsPerUnit,
+            String matchRuleSelection,
+            ActiveMatchRule activeMatchRule,
+            int baseIncome,
+            int maxInterest,
+            int rerollCost) {
+        this(
+                roomId,
+                hostId,
+                phase,
+                round,
+                timeRemainingMs,
+                totalPhaseDuration,
+                players,
+                matchups,
+                recentEvents,
+                damageLog,
+                gameMode,
+                planningTimerPaused,
+                planningReadyPlayerId,
+                planningPauseReason,
+                itemSlotsPerUnit,
+                matchRuleSelection,
+                activeMatchRule,
+                baseIncome,
+                maxInterest,
+                rerollCost,
+                Map.of(),
+                null);
+    }
 
     public GameState(
             String roomId,
@@ -163,7 +215,7 @@ public record GameState(
 
     public record CombatEvent(
             long timestamp,
-            String type, // DAMAGE, SKILL, DEATH, HEAL, SHIELD, ITEM
+            String type, // DAMAGE, SKILL, DEATH, HEAL, SHIELD, ITEM, FIELD, FIELD_DAMAGE
             String sourceId,
             String targetId,
             int value,

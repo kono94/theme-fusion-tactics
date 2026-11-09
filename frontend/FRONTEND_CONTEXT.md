@@ -180,8 +180,13 @@ interface GameState {
   baseIncome: number
   maxInterest: number
   rerollCost: number
+  fieldConditions: Record<string, FieldConditionView> // player id -> active condition of their pairing
+  fieldForecast: FieldConditionView | null // Weather Front roll, planning only
 }
 ```
+
+`FieldConditionView` is `{ id, name, description, icon, remainingMs: number | null }`; null `remainingMs` means the
+condition lasts the whole combat. Condition ids come from mode data.
 
 The backend currently emits `SOLO_READY` or null; `AUGMENT_SELECTION` remains in the union for compatibility but augment
 offers do not pause the timer. Unanswered offers are auto-selected when combat begins.
@@ -196,8 +201,12 @@ backend to the earliest form that carries the trait. `TraitSidebar` renders thos
 the representative with the viewed player's live board form when it contributes, and leaves bench or inactive forms
 gray.
 
-Current combat event types are `DAMAGE`, `SKILL`, `DEATH`, `HEAL`, `SHIELD`, and `ITEM`. Events contain only timestamp,
-type, source ID, target ID, value, and optional skill name. `ITEM` is a held-item proc whose skill name is the item name;
+Current combat event types are `DAMAGE`, `SKILL`, `DEATH`, `HEAL`, `SHIELD`, `ITEM`, `FIELD`, and `FIELD_DAMAGE`. Events
+contain only timestamp, type, nullable source ID, nullable target ID, value, and optional skill name. `FIELD` marks a
+field condition starting (skill name = condition id; source/target = setter or null for the match rule) and
+`FIELD_DAMAGE` is periodic weather damage (source = target = damaged unit). `utils/fieldConditions.ts` keeps both out of
+the attack/ability pipeline: weather visuals follow `fieldConditions` state, and `FIELD_DAMAGE` only floats a small
+damage number on the target in 2D and 3D. `ITEM` is a held-item proc whose skill name is the item name;
 item heals arrive as `HEAL` with the item name. `utils/itemProcs.ts` resolves both into a short floating item label
 (2D in `GameCanvas`, 3D in `battleScene.ts`), throttling repeating heal procs per unit and item. Do not add cast/status/zone/coordinate assumptions without first
 extending the backend record.
@@ -242,7 +251,9 @@ pending board units when combat starts.
   `UnitTooltip` shows a "Choose an evolution" hint for pending units.
 - Resolves hovered units from the latest snapshot. Planning board tooltips use backend projected item/trait/augment
   stats, bench tooltips use item-only stats, and combat tooltips show live stats.
-- Shows the active Match Rule beside the room code in a compact top bar. Up to five small coin markers to the left of
+- Shows the active Match Rule beside the room code in a compact top bar, followed by `game/FieldConditionChip.vue`:
+  the viewed player's active field condition (icon, name, remaining seconds, description tooltip) during combat and the
+  Weather Front forecast during planning (`fieldConditionChip` in `utils/fieldConditions.ts`). Up to five small coin markers to the left of
   gold show interest (`calculateInterest` with the server's `maxInterest`). Hovering or focusing gold shows projected
   next-round income as server-provided base income plus current interest. Reroll enablement, the button label, and the
   `R` shortcut use `state.rerollCost`.
@@ -265,8 +276,11 @@ the safety boundary.
 - Displays item rewards and equipped icons on unit tiles; planning units accept item drops.
 - Normalizes backend events into `NormalizedCombatVisualEvent` objects consumed by `CombatEffectsCanvas`.
 - Preserves short-lived previous/dying unit state so final events can animate after a unit leaves the snapshot.
+- During classic combat, mounts `game/FieldConditionOverlay.vue` over the board for the viewed pairing's condition:
+  CSS-only, low-opacity particles (rain streaks, warm motes, drifting sand, hail) with a static faint tint and no motion
+  under `prefers-reduced-motion`. It never changes lighting or uses glow.
 - When the effective combat view is `3d` and the phase is `COMBAT`, mounts the lazy `combat3d/CombatView3d.vue` over
-  the board and skips `CombatEffectsCanvas`. It emits `combat-view-fallback` when WebGL is missing or the context is lost.
+  the board (passing `fieldConditionId`) and skips `CombatEffectsCanvas` and the 2D weather overlay. It emits `combat-view-fallback` when WebGL is missing or the context is lost.
 
 ### Player navigation and reports
 
@@ -328,6 +342,10 @@ after a `combat-view-fallback`. Planning always stays on the 2D board.
   `utils/combatView.ts`, and never replays events that were already present when it mounted.
 - `battleScene.ts` owns the renderer, portrait billboards (`unitView.ts`), effect budget (`effects.ts`, using
   `renderPolicy`), camera shake/punch, and screen flashes. It respects `prefersReducedMotion()`.
+- `choreography/weather.ts` is the persistent weather particle layer (`WeatherLayer`), owned by `battleScene.ts` outside
+  the effect budget. `CombatView3d` forwards `fieldConditionId` to `BattleScene.setFieldCondition`, which swaps one
+  `Points` (or rain `LineSegments`) object with its own geometry and normal-blended, low-opacity material; reduced motion
+  uses fewer, slower particles. No lighting, tone mapping or post-processing changes.
 - `choreography/registry.ts` resolves ultimates and auto-attacks signature-first: `definitionId:Ability Name` (for
   Pokemon forms that change moves by star level), then `definitionId`. Signatures live in per-roster sets under
   `choreography/ultimates/` and `choreography/attacks/` (aggregated by each folder's `index.ts`). Reusable effects

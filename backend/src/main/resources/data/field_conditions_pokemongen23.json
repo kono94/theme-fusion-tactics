@@ -1,0 +1,46 @@
+[
+  {
+    "id": "rain",
+    "name": "Rain",
+    "description": "Water damage +25%, Fire damage -25%. Water units gain 15% attack speed.",
+    "icon": "/assets/field-conditions/rain.png",
+    "elementDamageMultipliers": { "Water": 1.25, "Fire": 0.75 },
+    "traitAttackSpeedBonus": { "Water": 0.15 },
+    "selectableByRule": true
+  },
+  {
+    "id": "sun",
+    "name": "Harsh Sunlight",
+    "description": "Fire damage +25%, Water damage -25%. Grass units gain 15% attack speed.",
+    "icon": "/assets/field-conditions/sun.png",
+    "elementDamageMultipliers": { "Fire": 1.25, "Water": 0.75 },
+    "traitAttackSpeedBonus": { "Grass": 0.15 },
+    "selectableByRule": true
+  },
+  {
+    "id": "sandstorm",
+    "name": "Sandstorm",
+    "description": "Units that are not Rock, Ground or Steel lose 3% max HP every second. Rock units gain 15 defense.",
+    "icon": "/assets/field-conditions/sandstorm.png",
+    "periodicDamage": { "maxHealthPercent": 3, "intervalMs": 1000, "immuneTraits": ["Rock", "Ground", "Steel"] },
+    "traitDefenseBonus": { "Rock": 15 },
+    "selectableByRule": true
+  },
+  {
+    "id": "hail",
+    "name": "Hail",
+    "description": "Units that are not Ice lose 3% max HP every second. Ice units gain 15 defense.",
+    "icon": "/assets/field-conditions/hail.png",
+    "periodicDamage": { "maxHealthPercent": 3, "intervalMs": 1000, "immuneTraits": ["Ice"] },
+    "traitDefenseBonus": { "Ice": 15 },
+    "selectableByRule": true
+  },
+  {
+    "id": "clear",
+    "name": "Clear Skies",
+    "description": "Clears the active weather.",
+    "icon": "/assets/field-conditions/clear.png",
+    "selectableByRule": false,
+    "clearsField": true
+  }
+]

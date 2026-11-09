@@ -3,7 +3,9 @@ package net.lwenstrom.tft.backend.core.combat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import net.lwenstrom.tft.backend.core.model.FieldConditionDefinition;
 import net.lwenstrom.tft.backend.test.MockUnit;
 import org.junit.jupiter.api.Test;
 
@@ -54,5 +56,41 @@ class DamageResolverTest {
         var neutral = new DamageResolver(ElementalAffinityConfig.neutral());
 
         assertEquals(100, neutral.apply(attacker, defender, 100));
+    }
+
+    @Test
+    void fieldConditionScalesTheBestAttackingElementAgainstEachTarget() {
+        var tracker = new FieldConditionTracker();
+        var weatherResolver = new DamageResolver(AFFINITY, tracker);
+        var state = tracker.open(List.of("one", "two"));
+        var attacker = MockUnit.create("attacker", "one").withTraits(Set.of("Water", "Ice"));
+        var grass = MockUnit.create("grass", "two").withTraits(Set.of("grass"));
+        var fire = MockUnit.create("fire", "two").withTraits(Set.of("fire"));
+        var neutral = MockUnit.create("neutral", "two").withTraits(Set.of("Pirate"));
+
+        state.start(condition("sun", Map.of("Fire", 1.25, "Water", 0.75)), 0, 0);
+        assertEquals(120, weatherResolver.apply(attacker, grass, 100));
+        assertEquals(90, weatherResolver.apply(attacker, fire, 100));
+
+        state.start(condition("rain", Map.of("water", 1.25, "fire", 0.75)), 0, 0);
+        assertEquals(150, weatherResolver.apply(attacker, fire, 100));
+        assertEquals(125, weatherResolver.apply(attacker, neutral, 100));
+    }
+
+    @Test
+    void fieldConditionOnlyAffectsUnitsOfItsPairing() {
+        var tracker = new FieldConditionTracker();
+        var weatherResolver = new DamageResolver(AFFINITY, tracker);
+        tracker.open(List.of("one", "two")).start(condition("rain", Map.of("water", 1.25)), 0, 0);
+        var insidePairing = MockUnit.create("inside", "one").withTraits(Set.of("water"));
+        var otherPairing = MockUnit.create("outside", "three").withTraits(Set.of("water"));
+        var target = MockUnit.create("target", "four").withTraits(Set.of("Pirate"));
+
+        assertEquals(125, weatherResolver.apply(insidePairing, target, 100));
+        assertEquals(100, weatherResolver.apply(otherPairing, target, 100));
+    }
+
+    private static FieldConditionDefinition condition(String id, Map<String, Double> multipliers) {
+        return new FieldConditionDefinition(id, id, id, "/icon.png", multipliers, null, null, null, true, false);
     }
 }

@@ -1168,11 +1168,18 @@
         ],
         "ability": {
           "name": "Rain Dance",
-          "description": "Summons a downpour that speeds up nearby allies by $value%.",
+          "description": "Summons a downpour that speeds up nearby allies by $value% and starts Rain.",
           "type": "BUFF_SPD",
           "pattern": "SURROUND",
           "values": [13, 19, 28],
-          "range": [4, 4, 4]
+          "range": [4, 4, 4],
+          "modifiers": [
+            {
+              "type": "FIELD_CONDITION",
+              "conditionId": "rain",
+              "durationSeconds": [6, 8, 10]
+            }
+          ]
         }
       },
       {
@@ -1186,11 +1193,18 @@
         ],
         "ability": {
           "name": "Rain Dance",
-          "description": "Summons a downpour that speeds up nearby allies by $value%.",
+          "description": "Summons a downpour that speeds up nearby allies by $value% and starts Rain.",
           "type": "BUFF_SPD",
           "pattern": "SURROUND",
           "values": [13, 19, 28],
-          "range": [4, 4, 4]
+          "range": [4, 4, 4],
+          "modifiers": [
+            {
+              "type": "FIELD_CONDITION",
+              "conditionId": "rain",
+              "durationSeconds": [6, 8, 10]
+            }
+          ]
         }
       }
     ]
@@ -2733,7 +2747,7 @@
         ],
         "ability": {
           "name": "Hail",
-          "description": "Summons a hailstorm for $value damage and stun.",
+          "description": "Summons a hailstorm for $value damage and stun, and starts Hail.",
           "type": "DAMAGE",
           "pattern": "SURROUND",
           "values": [87, 197, 371],
@@ -2742,6 +2756,11 @@
             {
               "type": "STUN",
               "stunSeconds": [1, 1, 1]
+            },
+            {
+              "type": "FIELD_CONDITION",
+              "conditionId": "hail",
+              "durationSeconds": [6, 8, 10]
             }
           ]
         }
@@ -2802,7 +2821,7 @@
         ],
         "ability": {
           "name": "Hail",
-          "description": "Calls down hail around it for $value damage and stun.",
+          "description": "Calls down hail around it for $value damage and stun, and starts Hail.",
           "type": "DAMAGE",
           "pattern": "SURROUND",
           "values": [45, 102, 192],
@@ -2811,6 +2830,11 @@
             {
               "type": "STUN",
               "stunSeconds": [1, 1, 1]
+            },
+            {
+              "type": "FIELD_CONDITION",
+              "conditionId": "hail",
+              "durationSeconds": [6, 8, 10]
             }
           ]
         },
@@ -3373,6 +3397,7 @@
         "definitionId": "tyranitar",
         "name": "Tyranitar",
         "role": "DAMAGE",
+        "startCondition": { "conditionId": "sandstorm", "durationSeconds": 0 },
         "traits": [
           "Rock",
           "Dark"
@@ -4695,6 +4720,7 @@
     "defense": [74, 74, 74],
     "attackSpeed": [0.67, 0.67, 0.67],
     "range": [1, 1, 1],
+    "startCondition": { "conditionId": "sun", "durationSeconds": 0 },
     "traits": [
       "Fire"
     ],
@@ -4734,7 +4760,7 @@
     ],
     "ability": {
       "name": "Weather Ball",
-      "description": "Hurls a ball of weather energy for $value damage.",
+      "description": "Hurls a ball of weather energy for $value damage. Extends the active weather, or starts Rain if there is none.",
       "type": "DAMAGE",
       "pattern": "LINE",
       "values": [180, 400, 830],
@@ -4744,6 +4770,12 @@
           "type": "SCALING",
           "scalingType": "TARGET_MAX_HP_PERCENT",
           "factor": [0.03, 0.04, 0.06]
+        },
+        {
+          "type": "FIELD_CONDITION",
+          "conditionId": "rain",
+          "durationSeconds": [6, 8, 10],
+          "extendActive": true
         }
       ]
     }
@@ -4991,6 +5023,7 @@
     "defense": [39, 39, 39],
     "attackSpeed": [0.84, 0.84, 0.84],
     "range": [3, 3, 3],
+    "startCondition": { "conditionId": "rain", "durationSeconds": 0 },
     "traits": [
       "Water"
     ],
@@ -5023,6 +5056,7 @@
     "defense": [88, 88, 88],
     "attackSpeed": [0.72, 0.72, 0.72],
     "range": [1, 1, 1],
+    "startCondition": { "conditionId": "sun", "durationSeconds": 0 },
     "traits": [
       "Ground"
     ],
@@ -5060,7 +5094,7 @@
     ],
     "ability": {
       "name": "Dragon Ascent",
-      "description": "Dives from the sky through a line for $value damage.",
+      "description": "Dives from the sky through a line for $value damage and clears the weather.",
       "type": "DAMAGE",
       "pattern": "LINE",
       "values": [242, 556, 1113],
@@ -5070,6 +5104,11 @@
           "type": "EXECUTE",
           "hpThreshold": [0.3, 0.38, 0.48],
           "bonusDamageMultiplier": [0.4, 0.6, 0.9]
+        },
+        {
+          "type": "FIELD_CONDITION",
+          "conditionId": "clear",
+          "durationSeconds": [0, 0, 0]
         }
       ]
     }

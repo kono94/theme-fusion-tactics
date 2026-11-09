@@ -338,6 +338,11 @@ public interface GameUnit {
     default void setTeamAttackDamageOnKill(int bonus) {}
 
     @JsonIgnore
+    default FieldConditionStart getStartCondition() {
+        return null;
+    }
+
+    @JsonIgnore
     default CombatModifiers getCombatModifiers() {
         return CombatModifiers.none();
     }

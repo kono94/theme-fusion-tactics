@@ -6,5 +6,13 @@
     "icon": "/assets/match-rules/type-master.png",
     "effectType": "AFFINITY_STRENGTH",
     "values": [2]
+  },
+  {
+    "id": "weather-front",
+    "name": "Weather Front",
+    "description": "Every fight starts in random weather: Rain, Harsh Sunlight, Sandstorm or Hail. The planning bar shows the forecast. Units that set their own weather replace it.",
+    "icon": "/assets/match-rules/weather-front.png",
+    "effectType": "RANDOM_FIELD_CONDITION",
+    "values": [0]
   }
 ]

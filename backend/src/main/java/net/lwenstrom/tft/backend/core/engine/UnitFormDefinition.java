@@ -2,6 +2,7 @@ package net.lwenstrom.tft.backend.core.engine;
 
 import java.util.List;
 import net.lwenstrom.tft.backend.core.model.AbilityDefinition;
+import net.lwenstrom.tft.backend.core.model.FieldConditionStart;
 import net.lwenstrom.tft.backend.core.model.UnitRole;
 
 public record UnitFormDefinition(
@@ -17,7 +18,39 @@ public record UnitFormDefinition(
         List<Integer> maxMana,
         List<Integer> attackDamage,
         List<Integer> defense,
-        List<Float> attackSpeed) {
+        List<Float> attackSpeed,
+        FieldConditionStart startCondition) {
+
+    public UnitFormDefinition(
+            int starLevel,
+            String definitionId,
+            String name,
+            UnitRole role,
+            List<String> traits,
+            List<Integer> range,
+            AbilityDefinition ability,
+            String branchId,
+            List<Integer> maxHealth,
+            List<Integer> maxMana,
+            List<Integer> attackDamage,
+            List<Integer> defense,
+            List<Float> attackSpeed) {
+        this(
+                starLevel,
+                definitionId,
+                name,
+                role,
+                traits,
+                range,
+                ability,
+                branchId,
+                maxHealth,
+                maxMana,
+                attackDamage,
+                defense,
+                attackSpeed,
+                null);
+    }
 
     public UnitFormDefinition(
             int starLevel,

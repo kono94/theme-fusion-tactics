@@ -11,9 +11,9 @@ vi.mock('../combat3d/CombatView3d.vue', () => ({
     __esModule: true,
     default: {
         name: 'CombatView3d',
-        props: ['units', 'events', 'arenaId'],
+        props: ['units', 'events', 'arenaId', 'fieldConditionId'],
         emits: ['fallback'],
-        template: '<div class="combat-3d-stub" :data-arena="arenaId" :data-units="units.length" @click="$emit(\'fallback\')"></div>',
+        template: '<div class="combat-3d-stub" :data-arena="arenaId" :data-units="units.length" :data-field="fieldConditionId" @click="$emit(\'fallback\')"></div>',
     },
 }))
 
@@ -123,6 +123,8 @@ function state(phase: GameState['phase']): GameState {
         baseIncome: 5,
         maxInterest: 5,
         rerollCost: 2,
+        fieldConditions: {},
+        fieldForecast: null,
     }
 }
 
@@ -230,6 +232,64 @@ describe('GameCanvas held item procs', () => {
             "King's Rock!",
             'Leftovers!',
         ])
+        wrapper.unmount()
+    })
+})
+
+describe('GameCanvas field conditions', () => {
+    const rain = {
+        id: 'rain',
+        name: 'Rain',
+        description: 'Water damage +25%.',
+        icon: '/assets/field-conditions/rain.png',
+        remainingMs: null,
+    }
+
+    beforeEach(() => {
+        vi.stubGlobal('ResizeObserver', class {
+            observe() {}
+            disconnect() {}
+        })
+    })
+
+    it('overlays the viewed pairing weather and shows field damage without an attack', async () => {
+        const game = { ...state('COMBAT'), fieldConditions: { me: rain, opponent: rain } }
+        const wrapper = mount(GameCanvas, {
+            props: { state: game, actingPlayerId: 'me', viewedPlayerId: 'me' },
+            global: { stubs: { CombatEffectsCanvas: true } },
+        })
+        expect(wrapper.get('[data-testid="field-condition-overlay"]').classes()).toContain('field-rain')
+
+        await wrapper.setProps({
+            state: {
+                ...game,
+                recentEvents: [
+                    { timestamp: 100, type: 'FIELD', sourceId: null, targetId: null, value: 0, skillName: 'rain' },
+                    { timestamp: 100, type: 'FIELD_DAMAGE', sourceId: 'fighter', targetId: 'fighter', value: 30, skillName: 'sandstorm' },
+                ],
+            },
+        })
+
+        expect(wrapper.findAll('.floating-text.field-damage').map((label) => label.text())).toEqual(['-30'])
+        expect(wrapper.findComponent({ name: 'CombatEffectsCanvas' }).props('events')).toEqual([])
+        expect(wrapper.find('.unit.attacking-lunge').exists()).toBe(false)
+        wrapper.unmount()
+    })
+
+    it('passes the viewed condition to the 3D view and hides the 2D overlay there', async () => {
+        const wrapper = mount(GameCanvas, {
+            props: {
+                state: { ...state('COMBAT'), fieldConditions: { me: rain } },
+                actingPlayerId: 'me',
+                viewedPlayerId: 'me',
+                combatView: '3d',
+            },
+            global: { stubs: { CombatEffectsCanvas: true } },
+        })
+        await flushPromises()
+
+        expect(wrapper.get('.combat-3d-stub').attributes('data-field')).toBe('rain')
+        expect(wrapper.find('[data-testid="field-condition-overlay"]').exists()).toBe(false)
         wrapper.unmount()
     })
 })

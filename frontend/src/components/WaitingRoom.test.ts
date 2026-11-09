@@ -59,6 +59,8 @@ function gameState(gameMode: GameState['gameMode'] = 'pokemon'): GameState {
         baseIncome: 5,
         maxInterest: 5,
         rerollCost: 2,
+        fieldConditions: {},
+        fieldForecast: null,
     }
 }
 
@@ -105,7 +107,7 @@ describe('WaitingRoom mode selection', () => {
         expect(modeButtons.map((button) => button.find('span.mode-caption').text())).toEqual([
             'Set sail with legendary pirates',
             'Build a team of iconic trainers',
-            'Explore Johto and Hoenn with branching evolutions',
+            'Johto & Hoenn: weather, held items and branching evolutions',
         ])
         expect(modeButtons[2].find('.mode-motif').classes()).toContain('motif-pokemongen23')
     })

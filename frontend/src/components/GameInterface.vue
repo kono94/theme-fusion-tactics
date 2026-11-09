@@ -13,6 +13,7 @@ import SettingsPanel from './SettingsPanel.vue'
 import ItemInventory from './ItemInventory.vue'
 import ItemTooltip from './game/ItemTooltip.vue'
 import DamageReport from './game/DamageReport.vue'
+import FieldConditionChip from './game/FieldConditionChip.vue'
 import type {
   AugmentOffer,
   EmergencyDropPayload,
@@ -34,6 +35,7 @@ import { setUnitDragPreview } from '../utils/dragPreview'
 import { calculateInterest, calculateSellRefund } from '../utils/economy'
 import { SHOP_ODDS } from '../data/shopOdds'
 import { getGameModeMetadata } from '../data/gameModeMetadata'
+import { fieldConditionChip } from '../utils/fieldConditions'
 import type { ClientSettings, CombatViewSetting } from '../utils/clientSettings'
 
 const props = defineProps<{
@@ -97,6 +99,8 @@ const hoveredTraitId = ref<string | null>(null)
 const effectiveViewedPlayerId = computed(() => {
   return viewedPlayerId.value || myPlayer.value?.playerId
 })
+
+const fieldChip = computed(() => fieldConditionChip(props.state, effectiveViewedPlayerId.value))
 
 const damageReportOpponentId = computed(() =>
   effectiveViewedPlayerId.value ? props.state?.matchups[effectiveViewedPlayerId.value] : undefined,
@@ -810,6 +814,11 @@ watch(
                 <span class="rule-badge-name">{{ state.activeMatchRule.name }}</span>
                 <span class="rule-tooltip" role="tooltip">{{ state.activeMatchRule.description }}</span>
               </div>
+              <FieldConditionChip
+                v-if="fieldChip"
+                :condition="fieldChip.condition"
+                :forecast="fieldChip.forecast"
+              />
               <button
                 v-if="myPlayer && state.phase !== 'END'"
                 class="abandon-game-btn"

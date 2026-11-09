@@ -201,6 +201,15 @@ export interface ActiveMatchRule {
   icon: string
 }
 
+// Mode-defined combat weather. remainingMs is null when the condition lasts the whole combat.
+export interface FieldConditionView {
+  id: string
+  name: string
+  description: string
+  icon: string
+  remainingMs: number | null
+}
+
 export type LootType = 'GOLD' | 'UNIT' | 'ITEM'
 
 export interface LootOrb {
@@ -298,12 +307,25 @@ export interface PlayerState {
 // Events
 // ============================================================================
 
+export type CombatEventType =
+  | 'DAMAGE'
+  | 'SKILL'
+  | 'DEATH'
+  | 'HEAL'
+  | 'SHIELD'
+  | 'ITEM'
+  | 'FIELD'
+  | 'FIELD_DAMAGE'
+
 export interface CombatEvent {
   timestamp: number
   // ITEM: a held-item proc that is not a heal; skillName is the item name.
-  type: 'DAMAGE' | 'SKILL' | 'DEATH' | 'HEAL' | 'SHIELD' | 'ITEM'
-  sourceId: string
-  targetId: string
+  // FIELD: a field condition started; skillName is the condition id, value its duration in ms (0 = whole
+  // combat), sourceId/targetId the setting unit or null when a match rule set it.
+  // FIELD_DAMAGE: unmitigated periodic field damage; sourceId equals targetId and skillName is the condition id.
+  type: CombatEventType
+  sourceId: string | null
+  targetId: string | null
   value: number
   skillName?: string
 }
@@ -359,6 +381,10 @@ export interface GameState {
   baseIncome: number
   maxInterest: number
   rerollCost: number
+  // Active field condition per player id of each running pairing (both players share one condition).
+  fieldConditions: Record<string, FieldConditionView>
+  // The condition the match rule rolled for the upcoming combat; only set during planning.
+  fieldForecast: FieldConditionView | null
 }
 
 // ============================================================================

@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -15,11 +16,16 @@ import net.lwenstrom.tft.backend.core.combat.ElementalAffinityLoader;
 import net.lwenstrom.tft.backend.core.engine.MatchRuleManager;
 import net.lwenstrom.tft.backend.core.engine.TraitManager;
 import net.lwenstrom.tft.backend.core.engine.UnitDefinition;
+import net.lwenstrom.tft.backend.core.model.AbilityDefinition;
 import net.lwenstrom.tft.backend.core.model.AugmentDefinition;
+import net.lwenstrom.tft.backend.core.model.FieldConditionDefinition;
+import net.lwenstrom.tft.backend.core.model.FieldConditionModifier;
+import net.lwenstrom.tft.backend.core.model.FieldConditionStart;
 import net.lwenstrom.tft.backend.core.model.GameMode;
 import net.lwenstrom.tft.backend.core.model.ItemDefinition;
 import net.lwenstrom.tft.backend.core.model.ItemEffectType;
 import net.lwenstrom.tft.backend.core.model.MatchRuleDefinition;
+import net.lwenstrom.tft.backend.core.model.MatchRuleEffectType;
 import net.lwenstrom.tft.backend.core.model.TraitDefinition;
 import net.lwenstrom.tft.backend.core.model.TraitMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +64,7 @@ public class DataLoader {
 
     private final Map<GameMode, ModeData> modeDataCache = new ConcurrentHashMap<>();
     private final Map<GameMode, List<MatchRuleDefinition>> matchRuleCache = new ConcurrentHashMap<>();
+    private final Map<GameMode, List<FieldConditionDefinition>> fieldConditionCache = new ConcurrentHashMap<>();
 
     @PostConstruct
     public void loadData() {
@@ -82,7 +89,110 @@ public class DataLoader {
             throw new IllegalStateException("Incomplete data for game mode: " + mode);
         }
         validateTraitReferences(mode, units.values(), traits);
+        var fieldConditions = getFieldConditions(mode);
+        validateFieldConditionReferences(mode, units.values(), fieldConditions);
+        validateFieldConditionTraits(mode, fieldConditions, traits);
         return new ModeData(units, traits, augments, items);
+    }
+
+    private List<FieldConditionDefinition> loadFieldConditions(String path) {
+        try (var inputStream = getClass().getResourceAsStream(path)) {
+            if (inputStream == null) {
+                return List.of();
+            }
+            List<FieldConditionDefinition> conditions = jsonMapper.readValue(inputStream, new TypeReference<>() {});
+            var ids = new HashSet<String>();
+            for (var condition : conditions) {
+                condition.validate();
+                if (!ids.add(condition.id())) {
+                    throw new IllegalStateException("Duplicate field condition id " + condition.id());
+                }
+            }
+            log.info("Loaded {} field conditions from {}", conditions.size(), path);
+            return List.copyOf(conditions);
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to load field condition data: " + path, e);
+        }
+    }
+
+    private static void validateFieldConditionReferences(
+            GameMode mode, Collection<UnitDefinition> units, List<FieldConditionDefinition> conditions) {
+        var ids = conditions.stream().map(FieldConditionDefinition::id).collect(Collectors.toSet());
+        for (var unit : units) {
+            validateStartCondition(mode, unit, unit.startCondition(), ids);
+            validateAbilityFieldConditions(mode, unit, unit.ability(), ids);
+            for (var form : unit.forms()) {
+                validateStartCondition(mode, unit, form.startCondition(), ids);
+                validateAbilityFieldConditions(mode, unit, form.ability(), ids);
+            }
+        }
+    }
+
+    private static void validateFieldConditionTraits(
+            GameMode mode, List<FieldConditionDefinition> conditions, List<TraitDefinition> traits) {
+        var traitIds = traits.stream()
+                .map(trait -> TraitManager.normalizeTraitId(trait.id()))
+                .collect(Collectors.toSet());
+        for (var condition : conditions) {
+            var references = new ArrayList<String>();
+            references.addAll(condition.elementDamageMultipliers().keySet());
+            references.addAll(condition.traitAttackSpeedBonus().keySet());
+            references.addAll(condition.traitDefenseBonus().keySet());
+            if (condition.periodicDamage() != null) {
+                references.addAll(condition.periodicDamage().immuneTraits());
+            }
+            for (var trait : references) {
+                if (!traitIds.contains(TraitManager.normalizeTraitId(trait))) {
+                    throw new IllegalStateException("Field condition " + condition.id() + " references unknown trait "
+                            + trait + " in mode " + mode);
+                }
+            }
+        }
+    }
+
+    private static void validateStartCondition(
+            GameMode mode, UnitDefinition unit, FieldConditionStart start, Set<String> ids) {
+        if (start == null) {
+            return;
+        }
+        requireFieldCondition(mode, unit, start.conditionId(), ids);
+        if (start.durationSeconds() < 0) {
+            throw new IllegalStateException("Unit " + unit.id() + " has a negative start condition duration");
+        }
+    }
+
+    private static void validateAbilityFieldConditions(
+            GameMode mode, UnitDefinition unit, AbilityDefinition ability, Set<String> ids) {
+        if (ability == null) {
+            return;
+        }
+        for (var modifier : ability.modifiers()) {
+            if (modifier instanceof FieldConditionModifier fieldConditionModifier) {
+                requireFieldCondition(mode, unit, fieldConditionModifier.conditionId(), ids);
+                var durations = fieldConditionModifier.durationSeconds();
+                if (durations == null
+                        || durations.size() != 3
+                        || durations.stream().anyMatch(value -> value == null || value < 0)) {
+                    throw new IllegalStateException("Ability " + ability.name() + " of unit " + unit.id()
+                            + " needs three non-negative field condition durations");
+                }
+            }
+        }
+    }
+
+    private static void requireFieldCondition(GameMode mode, UnitDefinition unit, String conditionId, Set<String> ids) {
+        if (!ids.contains(conditionId)) {
+            throw new IllegalStateException(
+                    "Unit " + unit.id() + " references unknown field condition " + conditionId + " in mode " + mode);
+        }
+    }
+
+    public List<FieldConditionDefinition> getFieldConditions(GameMode mode) {
+        return fieldConditionCache.computeIfAbsent(
+                mode,
+                key -> gameModeRegistry.getAvailableModes().contains(key)
+                        ? loadFieldConditions(gameModeRegistry.getProvider(key).getFieldConditionsPath())
+                        : List.of());
     }
 
     public ElementalAffinityConfig getAffinityConfig(GameMode mode) {
@@ -315,8 +425,21 @@ public class DataLoader {
             if (!ids.add(rule.id())) {
                 throw new IllegalStateException("Duplicate match rule id " + rule.id() + " for mode " + mode);
             }
+            if (rule.effectType() == MatchRuleEffectType.RANDOM_FIELD_CONDITION) {
+                validateFieldConditionRule(mode, rule);
+            }
         });
         return List.copyOf(rules);
+    }
+
+    private void validateFieldConditionRule(GameMode mode, MatchRuleDefinition rule) {
+        if (rule.value(0) < 0) {
+            throw new IllegalStateException("Match rule " + rule.id() + " needs a non-negative duration");
+        }
+        if (getFieldConditions(mode).stream().noneMatch(FieldConditionDefinition::selectableByRule)) {
+            throw new IllegalStateException(
+                    "Match rule " + rule.id() + " needs a field condition selectable by rule in mode " + mode);
+        }
     }
 
     private List<MatchRuleDefinition> loadMatchRules(String path, boolean required) {

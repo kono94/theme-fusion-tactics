@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.function.Function;
 import net.lwenstrom.tft.backend.core.model.AbilityDefinition;
 import net.lwenstrom.tft.backend.core.model.EvolutionOption;
+import net.lwenstrom.tft.backend.core.model.FieldConditionStart;
 import net.lwenstrom.tft.backend.core.model.UnitRole;
 
 public record UnitDefinition(
@@ -29,7 +30,45 @@ public record UnitDefinition(
         String lineId,
 
         @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-        List<UnitFormDefinition> forms) {
+        List<UnitFormDefinition> forms,
+
+        @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+        FieldConditionStart startCondition) {
+
+    public UnitDefinition(
+            String id,
+            String name,
+            int cost,
+            UnitRole role,
+            List<Integer> maxHealth,
+            List<Integer> maxMana,
+            List<Integer> attackDamage,
+            List<Integer> abilityPower,
+            List<Integer> defense,
+            List<Float> attackSpeed,
+            List<Integer> range,
+            List<String> traits,
+            AbilityDefinition ability,
+            String lineId,
+            List<UnitFormDefinition> forms) {
+        this(
+                id,
+                name,
+                cost,
+                role,
+                maxHealth,
+                maxMana,
+                attackDamage,
+                abilityPower,
+                defense,
+                attackSpeed,
+                range,
+                traits,
+                ability,
+                lineId,
+                forms,
+                null);
+    }
 
     public UnitDefinition(
             String id,
@@ -59,6 +98,7 @@ public record UnitDefinition(
                 range,
                 traits,
                 ability,
+                null,
                 null,
                 null);
     }
@@ -97,7 +137,8 @@ public record UnitDefinition(
                 valueAt(formValues(form, UnitFormDefinition::attackDamage, attackDamage), star),
                 valueAt(abilityPower, star),
                 valueAt(formValues(form, UnitFormDefinition::defense, defense), star),
-                valueAt(formValues(form, UnitFormDefinition::attackSpeed, attackSpeed), star));
+                valueAt(formValues(form, UnitFormDefinition::attackSpeed, attackSpeed), star),
+                form != null && form.startCondition() != null ? form.startCondition() : startCondition);
     }
 
     public List<String> variantsAt(int star) {

@@ -26,6 +26,10 @@ public interface GameModeProvider {
         return dataPath("match_rules");
     }
 
+    default String getFieldConditionsPath() {
+        return dataPath("field_conditions");
+    }
+
     default Optional<String> getAffinitiesPath() {
         return Optional.empty();
     }

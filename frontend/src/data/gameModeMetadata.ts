@@ -45,7 +45,7 @@ export const GAME_MODE_METADATA: Record<GameMode, GameModeMetadata> = {
         id: 'pokemongen23',
         label: 'Pokemon Gen 2/3',
         shortLabel: 'Gen 2/3',
-        lobbyCaption: 'Explore Johto and Hoenn with branching evolutions',
+        lobbyCaption: 'Johto & Hoenn: weather, held items and branching evolutions',
         documentTitle: 'Theme Fusion Tactics — Pokemon Gen 2/3',
         favicon: '/pokeball.png',
         unitAssetFolder: 'pokemongen23',

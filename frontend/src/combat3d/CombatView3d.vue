@@ -11,6 +11,7 @@ const props = defineProps<{
   units: RenderedUnit[]
   events: CombatEvent[] | null | undefined
   arenaId: string
+  fieldConditionId?: string | null
 }>()
 
 const emit = defineEmits<{
@@ -42,7 +43,13 @@ onMounted(() => {
   // Switching views mid-combat must not replay the events the other view already showed.
   lastEventTimestamp = latestCombatEventTimestamp(props.events)
   scene.sync(props.units.map(toCombatUnit3d))
+  scene.setFieldCondition(props.fieldConditionId ?? null)
 })
+
+watch(
+  () => props.fieldConditionId,
+  (conditionId) => scene?.setFieldCondition(conditionId ?? null),
+)
 
 watch(
   () => props.units,
@@ -202,6 +209,12 @@ onBeforeUnmount(() => {
 
 .overlay :deep(.float-text.shield) {
   color: #cfe6ff;
+}
+
+.overlay :deep(.float-text.field-damage) {
+  color: #fcd9a8;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .overlay :deep(.float-text.item-proc) {

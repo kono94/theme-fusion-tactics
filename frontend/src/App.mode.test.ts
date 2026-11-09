@@ -70,6 +70,8 @@ function roomState(gameMode: GameState['gameMode']): GameState {
         baseIncome: 5,
         maxInterest: 5,
         rerollCost: 2,
+        fieldConditions: {},
+        fieldForecast: null,
     }
 }
 

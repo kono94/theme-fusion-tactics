@@ -163,6 +163,29 @@ const version160Commits = [
                 name pops up over the unit when it triggers.
               </p>
             </div>
+            <div class="feature-note">
+              <h3>Weather</h3>
+              <p>
+                Fights in Pokemon Gen 2/3 can change with the weather. Kyogre brings Rain, Groudon
+                and Torkoal bring Harsh Sunlight, and 3-star Tyranitar brings a Sandstorm for the
+                whole fight; if both boards bring weather, the more expensive unit wins. Pelipper's
+                Rain Dance and Glalie's and Walrein's Hail start weather for a few seconds, Castform's
+                Weather Ball extends the current weather (or starts Rain), and Rayquaza's Dragon
+                Ascent clears it.
+              </p>
+              <p>
+                Rain boosts Water damage by 25%, weakens Fire damage by 25% and speeds up Water
+                Pokemon. Harsh Sunlight does the opposite and speeds up Grass Pokemon. Sandstorm and
+                Hail chip 3% max HP every second from everyone except Rock, Ground and Steel or Ice
+                Pokemon, and give Rock or Ice Pokemon extra defense. The current weather shows next to
+                the match rule at the top of the screen, and on the board as falling rain, drifting
+                sand, hail or warm sunlight.
+              </p>
+              <p>
+                New match rule <strong>Weather Front</strong>: every fight starts in random weather,
+                shown as a forecast during planning. Units that bring their own weather replace it.
+              </p>
+            </div>
           </div>
         </div>
       </section>

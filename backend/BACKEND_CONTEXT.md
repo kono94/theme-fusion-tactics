@@ -126,11 +126,11 @@ tanks/melee in front with ranged units behind. The existing human-only emergency
 One Piece mode. The host can change the room mode only while it is in `LOBBY`; deployment does not select or restrict the
 mode. Focused tests that register only one provider use that available provider as their initial mode.
 
-| Mode | Units | Traits | Augments | Items | Match rules | Affinities |
-|---|---|---|---|---|---|---|
-| One Piece | `units_onepiece.json` | `traits_onepiece.json` | `augments_onepiece.json` | `items_onepiece.json` | `match_rules_common.json` + `match_rules_onepiece.json` | neutral |
-| Pokemon | `units_pokemon.json` | `traits_pokemon.json` | `augments_pokemon.json` | `items_pokemon.json` | `match_rules_common.json` + `match_rules_pokemon.json` | `affinities_pokemon.json` |
-| Pokemon Gen 2/3 (`pokemongen23`) | `units_pokemongen23.json` | `traits_pokemongen23.json` | `augments_pokemongen23.json` | `items_pokemongen23.json` | `match_rules_common.json` + `match_rules_pokemongen23.json` | `affinities_pokemongen23.json` (17 types, no Fairy) |
+| Mode | Units | Traits | Augments | Items | Match rules | Affinities | Field conditions |
+|---|---|---|---|---|---|---|---|
+| One Piece | `units_onepiece.json` | `traits_onepiece.json` | `augments_onepiece.json` | `items_onepiece.json` | `match_rules_common.json` + `match_rules_onepiece.json` | neutral | none |
+| Pokemon | `units_pokemon.json` | `traits_pokemon.json` | `augments_pokemon.json` | `items_pokemon.json` | `match_rules_common.json` + `match_rules_pokemon.json` | `affinities_pokemon.json` | none |
+| Pokemon Gen 2/3 (`pokemongen23`) | `units_pokemongen23.json` | `traits_pokemongen23.json` | `augments_pokemongen23.json` | `items_pokemongen23.json` | `match_rules_common.json` + `match_rules_pokemongen23.json` | `affinities_pokemongen23.json` (17 types, no Fairy) | `field_conditions_pokemongen23.json` |
 
 `DataLoader.loadData()` preloads every registered mode at startup. Missing resources, malformed JSON, duplicate unit IDs,
 or an empty required units/traits/augments/items dataset fail startup.
@@ -177,7 +177,7 @@ chosen branch among the merged copies, else stay pending. The room resolves ever
 bench units during planning. `DataLoader` fails fast when the branch point is below 2★, it has fewer than two branches,
 an unbranched form sits at or above it, a higher form uses an undeclared branch, a branched form lacks its own
 `definitionId` or `name`, a per-form stat array does not have three values, or two forms share a star and branch.
-Shop `UnitDefinition`s read `forms` from JSON but never serialize them. Trait rosters list a line under each trait at the earliest star
+Shop `UnitDefinition`s read `forms` (and `startCondition`) from JSON but never serialize them. Trait rosters list a line under each trait at the earliest star
 where any branch carries it.
 
 ## 7. Transport and identity
@@ -261,6 +261,16 @@ For `MOVE`, `targetX` is `0-8`. A `targetY` of `0-2` selects a planning-board ro
 | `/topic/room/{id}/event` | `RoomEvent<CombatResultPayload>` or `RoomEvent<EmergencyDropPayload>` |
 | `/user/queue/room-result` | Private `RoomRequestResult` |
 
+Field conditions ("weather") are optional per mode: `GameModeProvider.getFieldConditionsPath()` defaults to
+`/data/field_conditions_<mode>.json`, a missing file means no conditions, and malformed data fails startup.
+`FieldConditionDefinition` is `{id, name, description, icon, elementDamageMultipliers, periodicDamage{maxHealthPercent,
+intervalMs, immuneTraits} | null, traitAttackSpeedBonus, traitDefenseBonus, selectableByRule, clearsField}`; a
+`clearsField` condition has no effects and removes the active one. Units and forms may declare
+`startCondition {conditionId, durationSeconds}` (0 = whole combat), which flows through `ResolvedForm` onto the unit, and
+any ability may carry a `FIELD_CONDITION {conditionId, durationSeconds[3], extendActive}` modifier. `DataLoader` fails
+startup when a start setter, ability modifier or condition trait key names an unknown condition or trait, when modifier
+durations are not three non-negative values, or when a `RANDOM_FIELD_CONDITION` rule has no selectable condition.
+
 ## 8. State contract
 
 `GameState` contains:
@@ -269,12 +279,16 @@ For `MOVE`, `targetX` is `0-8`. A `targetY` of `0-2` selects a planning-board ro
 roomId, hostId, phase, round, timeRemainingMs, totalPhaseDuration,
 players, matchups, recentEvents, damageLog, gameMode,
 planningTimerPaused, planningReadyPlayerId, planningPauseReason, itemSlotsPerUnit,
-matchRuleSelection, activeMatchRule, baseIncome, maxInterest, rerollCost
+matchRuleSelection, activeMatchRule, baseIncome, maxInterest, rerollCost,
+fieldConditions, fieldForecast
 ```
 
 `matchRuleSelection` is the lobby choice (`RANDOM`, `NONE`, or a rule id); `activeMatchRule` (`id, name, description, icon`)
 is null until a match starts with a rule. `baseIncome` and `maxInterest` let clients preview round income without hardcoding
-constants, and `rerollCost` reflects the active rule.
+constants, and `rerollCost` reflects the active rule. `fieldConditions` maps the player ID of every player in a running
+pairing (ghost IDs included) to the active `FieldConditionView {id, name, description, icon, remainingMs}`; both players
+of a pairing share the entry, `remainingMs` is null for a whole-combat condition, and the map is empty when no condition
+is active. `fieldForecast` is the Weather Front roll for the upcoming combat and is only set during `PLANNING`.
 
 `hostId` is null before the first player or after the final lobby player leaves. `players` is keyed by player ID.
 
@@ -297,7 +311,7 @@ capacity. Sales return equipment to inventory, and upgrades fill the survivor's 
 Held item effects are generic engine hooks (only Pokemon Gen 2/3 items use them today). Each unit owns a
 `CombatModifiers` holder with source-isolated slots: `items` (a `HeldItemState` built by `ItemStatApplier` at combat
 start, with its charges and procs) and `field` (`FieldModifiers`: attack-speed bonus, defense bonus, extra-attack chance,
-mana-gain multiplier; unused until field conditions exist). The holder is copied by `cloneUnit` (ghosts, stat previews)
+mana-gain multiplier; set by `CombatSystem` from the active field condition's trait bonuses and cleared when it ends). The holder is copied by `cloneUnit` (ghosts, stat previews)
 and reset by `restorePlanningPosition`. Slots combine with trait values at query time because traits apply after items
 and overwrite shared unit fields; each stat is composed once on the unit (`getAttackSpeedMultiplier`,
 `getEffectiveExtraAttackChance`, `getDefense`, `gainMana`), and `CombatSystem` makes one call per stat. Trait, augment
@@ -330,7 +344,11 @@ keeps evolution-only membership, icons, and tooltip data backend-derived without
 
 `CombatEvent` has exactly six fields: `timestamp`, `type`, `sourceId`, `targetId`, `value`, and `skillName`. Current types
 are `DAMAGE`, `SKILL`, `DEATH`, `HEAL`, `SHIELD`, and `ITEM` (a non-heal held-item proc: `sourceId` = holder,
-`targetId` = affected unit, `skillName` = item name; e.g. Focus Band save, King's Rock flinch, Lum Berry block). The decisive combat tick retains its final events.
+`targetId` = affected unit, `skillName` = item name; e.g. Focus Band save, King's Rock flinch, Lum Berry block), `FIELD`
+(a field condition started, was extended, or was cleared: `skillName` = condition id, `value` = duration in ms with 0 for
+the whole combat, `sourceId` = `targetId` = setting unit or null for the round rule), and `FIELD_DAMAGE` (periodic field
+damage: `sourceId` = `targetId` = damaged unit, `skillName` = condition id). The decisive combat tick retains its final
+events.
 
 `DamageEntry` is:
 
@@ -368,6 +386,24 @@ Abilities support `DAMAGE`, `STUN`, `HEAL`, `SHIELD`, `BUFF_ATK`, and `BUFF_SPD`
 knockback. `DamageResolver` applies mode affinity to basic attacks, direct damage abilities, and DOT damage. Pokemon
 derives the offensive element from the caster's traits and uses the best attacking trait against each target when a unit
 has two traits. Each mode resolves its own data-loaded affinity graph; One Piece remains neutral.
+
+Field conditions live in a `FieldConditionTracker` owned by `CombatSystem`, keyed by owner ID; both owners of a pairing
+share one state object and ghosts use their own IDs, so simultaneous pairings never leak. `GameRoom` calls
+`resetFieldConditions` before the pairing loop and `beginFieldConditions(pairing, roundCondition)` after augments and
+match-rule effects; `handleCombatEnd` removes the pairing's state and `endCombat` resets the tracker. At combat start the
+Weather Front condition (if any) starts first, then the strongest unit start setter overrides it: highest cost, then
+higher star, then the room RNG only on a real tie. Ability casts dispatch `FIELD_CONDITION` modifiers after the cast
+through `CombatStatCallback.onFieldCondition`: the newest condition overrides, `extendActive` refreshes the active
+condition's expiry (or starts its own when none is active), and expiry removes the condition. Starting or ending a
+condition rewrites each pairing unit's `CombatModifiers.field` from case-insensitive trait matches. `DamageResolver`
+multiplies affinity by the condition's element multiplier and picks the attacker's best element, covering basic attacks,
+abilities and DOT. Periodic damage runs at the top of `simulateTick` for living non-immune units as unmitigated HP loss
+(it ignores defense, shields, damage reduction and Focus Band) and goes through `resolveLethal`, so it can kill or trigger
+revives. Start events are queued and emitted on the pairing's first tick.
+
+The `RANDOM_FIELD_CONDITION` match rule (values `[durationSeconds]`, 0 = whole combat; Gen 2/3 "Weather Front") rolls one
+selectable condition with the room RNG at the start of every planning phase, exposes it as `fieldForecast`, and applies
+it to every pairing when that round's combat starts.
 
 Movement uses its own cooldown and falls back to the shortest reachable enemy approach when the nearest enemy is
 blocked. Stun and cast recovery still prevent movement. Enemy spells resolve living in-range targets before committing;

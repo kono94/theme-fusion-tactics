@@ -88,7 +88,13 @@ public class MatchRuleManager {
                     unit.setHasRevive(true);
                     unit.setReviveUsed(false);
                 });
-            case STARTING_LEVEL, REROLL_COST, LOOT_EVERY_ROUND, DEATH_EXPLOSION, KILL_BOUNTY, AFFINITY_STRENGTH -> {}
+            case STARTING_LEVEL,
+                    REROLL_COST,
+                    LOOT_EVERY_ROUND,
+                    DEATH_EXPLOSION,
+                    KILL_BOUNTY,
+                    AFFINITY_STRENGTH,
+                    RANDOM_FIELD_CONDITION -> {}
         }
     }
 
@@ -108,6 +114,10 @@ public class MatchRuleManager {
         return effect(MatchRuleEffectType.AFFINITY_STRENGTH)
                 .map(rule -> scaleAffinity(config, rule.value(0)))
                 .orElse(config);
+    }
+
+    public Optional<Integer> randomFieldConditionDurationSeconds() {
+        return effect(MatchRuleEffectType.RANDOM_FIELD_CONDITION).map(rule -> rule.value(0));
     }
 
     private Optional<MatchRuleDefinition> effect(MatchRuleEffectType type) {

@@ -13,6 +13,7 @@ import net.lwenstrom.tft.backend.core.model.ConditionalModifier;
 import net.lwenstrom.tft.backend.core.model.DotEffect;
 import net.lwenstrom.tft.backend.core.model.DotModifier;
 import net.lwenstrom.tft.backend.core.model.ExecuteModifier;
+import net.lwenstrom.tft.backend.core.model.FieldConditionModifier;
 import net.lwenstrom.tft.backend.core.model.GameUnit;
 import net.lwenstrom.tft.backend.core.model.KnockbackModifier;
 import net.lwenstrom.tft.backend.core.model.LifestealModifier;
@@ -84,6 +85,7 @@ public class DefaultAbilityCaster implements AbilityCaster {
             case DEBUFF_DEF -> castDebuffDefAbility(source, targets, ability, value, callback);
             case SHIELD -> castShieldAbility(source, allUnits, ability, value, callback);
         }
+        applyFieldConditionModifiers(source, ability, callback);
         return true;
     }
 
@@ -114,6 +116,18 @@ public class DefaultAbilityCaster implements AbilityCaster {
             callback.onDirectHit(target);
         }
         applyLifestealModifier(source, ability, totalDamageDealt, callback);
+    }
+
+    private void applyFieldConditionModifiers(GameUnit source, AbilityDefinition ability, CombatStatCallback callback) {
+        for (var modifier : ability.modifiers()) {
+            if (modifier instanceof FieldConditionModifier fieldConditionModifier) {
+                callback.onFieldCondition(
+                        source,
+                        fieldConditionModifier.conditionId(),
+                        fieldConditionModifier.getDurationSeconds(source.getStarLevel()),
+                        fieldConditionModifier.extendActive());
+            }
+        }
     }
 
     private boolean isFinalKill(GameUnit target) {

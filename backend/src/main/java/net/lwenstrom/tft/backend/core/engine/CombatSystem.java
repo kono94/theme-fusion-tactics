@@ -1,22 +1,30 @@
 package net.lwenstrom.tft.backend.core.engine;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 import net.lwenstrom.tft.backend.core.GameConstants;
 import net.lwenstrom.tft.backend.core.combat.AbilityCaster;
 import net.lwenstrom.tft.backend.core.combat.CombatUtils;
 import net.lwenstrom.tft.backend.core.combat.DamageResolver;
 import net.lwenstrom.tft.backend.core.combat.ElementalAffinityConfig;
+import net.lwenstrom.tft.backend.core.combat.FieldConditionTracker;
 import net.lwenstrom.tft.backend.core.combat.StunRules;
 import net.lwenstrom.tft.backend.core.combat.TargetSelector;
 import net.lwenstrom.tft.backend.core.combat.UnitMover;
+import net.lwenstrom.tft.backend.core.model.CombatModifiers;
 import net.lwenstrom.tft.backend.core.model.DotEffect;
+import net.lwenstrom.tft.backend.core.model.FieldConditionDefinition;
+import net.lwenstrom.tft.backend.core.model.FieldConditionView;
 import net.lwenstrom.tft.backend.core.model.GameState;
 import net.lwenstrom.tft.backend.core.model.GameUnit;
 import net.lwenstrom.tft.backend.core.random.DefaultRandomProvider;
@@ -36,6 +44,8 @@ public class CombatSystem {
     private static final int MAX_DEATH_SETTLE_PASSES = 16;
     private static final int DEFAULT_REVIVE_HEALTH_PERCENT = 40;
     private static final String ITEM_EVENT = "ITEM";
+    private static final String FIELD_EVENT = "FIELD";
+    private static final String FIELD_DAMAGE_EVENT = "FIELD_DAMAGE";
 
     private DamageResolver damageResolver;
 
@@ -43,6 +53,10 @@ public class CombatSystem {
     private List<GameState.CombatEvent> recentEvents = new ArrayList<>();
     private MatchRuleDeathEffects deathEffects = MatchRuleDeathEffects.NONE;
     private final Set<String> settledDeaths = new HashSet<>();
+    private final FieldConditionTracker fieldConditions = new FieldConditionTracker();
+    private Map<String, FieldConditionDefinition> fieldConditionDefinitions = Map.of();
+
+    public record RoundFieldCondition(FieldConditionDefinition condition, int durationSeconds) {}
 
     public record DamageEntry(
             String unitName,
@@ -106,7 +120,7 @@ public class CombatSystem {
     }
 
     public void configureAffinity(ElementalAffinityConfig affinityConfig) {
-        this.damageResolver = new DamageResolver(affinityConfig);
+        this.damageResolver = new DamageResolver(affinityConfig, fieldConditions);
         this.abilityCaster.setDamageResolver(this.damageResolver);
     }
 
@@ -223,6 +237,182 @@ public class CombatSystem {
         this.deathEffects = effects == null ? MatchRuleDeathEffects.NONE : effects;
     }
 
+    public void configureFieldConditions(Collection<FieldConditionDefinition> definitions) {
+        var byId = new LinkedHashMap<String, FieldConditionDefinition>();
+        if (definitions != null) {
+            definitions.forEach(definition -> byId.put(definition.id(), definition));
+        }
+        fieldConditionDefinitions = Map.copyOf(byId);
+        fieldConditions.reset();
+    }
+
+    public void resetFieldConditions() {
+        fieldConditions.reset();
+    }
+
+    public void beginFieldConditions(List<Player> participants, RoundFieldCondition roundCondition) {
+        beginFieldConditions(participants, roundCondition, clock.currentTimeMillis());
+    }
+
+    // The round condition starts first so a unit start setter, being newer, overrides it.
+    void beginFieldConditions(List<Player> participants, RoundFieldCondition roundCondition, long now) {
+        var state =
+                fieldConditions.open(participants.stream().map(Player::getId).toList());
+        var units = boardUnits(participants);
+        if (roundCondition != null && roundCondition.condition() != null) {
+            startFieldCondition(
+                    state,
+                    units,
+                    roundCondition.condition(),
+                    roundCondition.durationSeconds(),
+                    null,
+                    now,
+                    state::queueEvent);
+        }
+        selectStartSetter(units).ifPresent(setter -> {
+            var start = setter.getStartCondition();
+            startFieldCondition(
+                    state,
+                    units,
+                    fieldConditionDefinitions.get(start.conditionId()),
+                    start.durationSeconds(),
+                    setter.getId(),
+                    now,
+                    state::queueEvent);
+        });
+    }
+
+    public void endFieldConditions(List<Player> participants) {
+        fieldConditions.close(participants.stream().map(Player::getId).toList());
+    }
+
+    public Optional<FieldConditionView> fieldConditionView(String ownerId) {
+        return fieldConditions.view(ownerId, clock.currentTimeMillis());
+    }
+
+    private Optional<GameUnit> selectStartSetter(List<GameUnit> units) {
+        var setters = units.stream()
+                .filter(unit -> unit.getCurrentHealth() > 0)
+                .filter(unit -> unit.getStartCondition() != null)
+                .filter(unit -> fieldConditionDefinitions.containsKey(
+                        unit.getStartCondition().conditionId()))
+                .toList();
+        if (setters.isEmpty()) {
+            return Optional.empty();
+        }
+        var bestCost = setters.stream().mapToInt(GameUnit::getCost).max().orElseThrow();
+        var bestStar = setters.stream()
+                .filter(unit -> unit.getCost() == bestCost)
+                .mapToInt(GameUnit::getStarLevel)
+                .max()
+                .orElseThrow();
+        var tied = setters.stream()
+                .filter(unit -> unit.getCost() == bestCost && unit.getStarLevel() == bestStar)
+                .toList();
+        return Optional.of(tied.size() == 1 ? tied.getFirst() : tied.get(randomProvider.nextInt(tied.size())));
+    }
+
+    private void startFieldCondition(
+            FieldConditionTracker.State state,
+            List<GameUnit> units,
+            FieldConditionDefinition condition,
+            int durationSeconds,
+            String setterId,
+            long now,
+            Consumer<GameState.CombatEvent> emit) {
+        if (condition == null) {
+            return;
+        }
+        var durationMs = Math.max(0, durationSeconds) * 1000L;
+        state.start(condition, durationMs, now);
+        applyFieldModifiers(state, units);
+        emit.accept(new GameState.CombatEvent(now, FIELD_EVENT, setterId, setterId, (int) durationMs, condition.id()));
+    }
+
+    private void applyFieldModifiers(FieldConditionTracker.State state, List<GameUnit> units) {
+        var active = state.active().orElse(null);
+        units.forEach(unit -> unit.getCombatModifiers()
+                .setField(
+                        active == null ? CombatModifiers.FieldModifiers.NONE : active.modifiersFor(unit.getTraits())));
+    }
+
+    private void applyCastFieldCondition(
+            GameUnit source,
+            String conditionId,
+            int durationSeconds,
+            boolean extendActive,
+            List<Player> participants,
+            List<GameUnit> allUnits,
+            long currentTime) {
+        var condition = fieldConditionDefinitions.get(conditionId);
+        if (condition == null) {
+            return;
+        }
+        var state = fieldConditions
+                .stateFor(source.getOwnerId())
+                .orElseGet(() -> fieldConditions.open(
+                        participants.stream().map(Player::getId).toList()));
+        var durationMs = Math.max(0, durationSeconds) * 1000L;
+        if (extendActive && state.extend(durationMs, currentTime)) {
+            var active = state.active().orElseThrow();
+            recentEvents.add(new GameState.CombatEvent(
+                    currentTime, FIELD_EVENT, source.getId(), source.getId(), (int) durationMs, active.id()));
+            return;
+        }
+        startFieldCondition(
+                state, allUnits, condition, durationSeconds, source.getId(), currentTime, recentEvents::add);
+    }
+
+    private void updateFieldConditions(List<Player> participants, List<GameUnit> allUnits, long currentTime) {
+        if (participants.isEmpty()) {
+            return;
+        }
+        var state = fieldConditions.stateFor(participants.getFirst().getId()).orElse(null);
+        if (state == null) {
+            return;
+        }
+        state.drainEvents()
+                .forEach(event -> recentEvents.add(new GameState.CombatEvent(
+                        currentTime,
+                        event.type(),
+                        event.sourceId(),
+                        event.targetId(),
+                        event.value(),
+                        event.skillName())));
+        if (state.expireIfDue(currentTime)) {
+            applyFieldModifiers(state, allUnits);
+        }
+        if (state.takePeriodicTick(currentTime)) {
+            applyFieldDamage(state.active().orElseThrow(), allUnits, currentTime);
+        }
+    }
+
+    // Field damage is unmitigated: it ignores defense, shields and damage reduction.
+    private void applyFieldDamage(FieldConditionDefinition condition, List<GameUnit> allUnits, long currentTime) {
+        var periodicDamage = condition.periodicDamage();
+        for (var unit : List.copyOf(allUnits)) {
+            if (unit.getCurrentHealth() <= 0 || periodicDamage.isImmune(unit.getTraits())) {
+                continue;
+            }
+            var damage = Math.max(1, Math.round(unit.getMaxHealth() * periodicDamage.maxHealthPercent() / 100.0f));
+            var previousHealth = unit.getCurrentHealth();
+            unit.setCurrentHealth(Math.max(0, previousHealth - damage));
+            var actualDamage = previousHealth - unit.getCurrentHealth();
+            accumulateDamageTaken(unit, actualDamage);
+            recentEvents.add(new GameState.CombatEvent(
+                    currentTime, FIELD_DAMAGE_EVENT, unit.getId(), unit.getId(), actualDamage, condition.id()));
+            if (unit.getCurrentHealth() <= 0) {
+                resolveLethal(unit, unit.getId(), null, allUnits, currentTime);
+            }
+        }
+    }
+
+    private static List<GameUnit> boardUnits(Collection<Player> participants) {
+        var units = new ArrayList<GameUnit>();
+        participants.forEach(player -> units.addAll(player.getBoardUnits()));
+        return units;
+    }
+
     public void startCombat(java.util.Collection<Player> players) {
         clearDamageLog();
 
@@ -273,6 +463,7 @@ public class CombatSystem {
 
     public void endCombat(java.util.Collection<Player> players) {
         log.debug("Restoring units for {} players.", players.size());
+        fieldConditions.reset();
         for (var player : players) {
             player.setCombatSide(null);
             for (var unit : player.getBoardUnits()) {
@@ -293,6 +484,8 @@ public class CombatSystem {
         if (allUnits.isEmpty()) {
             log.warn("allUnits is empty in simulateTick");
         }
+
+        updateFieldConditions(participants, allUnits, currentTime);
 
         processDotEffects(allUnits, currentTime);
 
@@ -378,6 +571,22 @@ public class CombatSystem {
                                             targetId,
                                             shielding,
                                             unit.getAbility().name()));
+                                }
+
+                                @Override
+                                public void onFieldCondition(
+                                        GameUnit source,
+                                        String conditionId,
+                                        int durationSeconds,
+                                        boolean extendActive) {
+                                    applyCastFieldCondition(
+                                            source,
+                                            conditionId,
+                                            durationSeconds,
+                                            extendActive,
+                                            participants,
+                                            allUnits,
+                                            currentTime);
                                 }
 
                                 @Override

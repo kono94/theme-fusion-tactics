@@ -2,6 +2,7 @@ package net.lwenstrom.tft.backend.core.engine;
 
 import java.util.List;
 import net.lwenstrom.tft.backend.core.model.AbilityDefinition;
+import net.lwenstrom.tft.backend.core.model.FieldConditionStart;
 import net.lwenstrom.tft.backend.core.model.UnitRole;
 
 public record ResolvedForm(
@@ -18,4 +19,5 @@ public record ResolvedForm(
         int attackDamage,
         int abilityPower,
         int defense,
-        float attackSpeed) {}
+        float attackSpeed,
+        FieldConditionStart startCondition) {}
