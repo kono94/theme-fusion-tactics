@@ -146,22 +146,18 @@ public class GameRoom {
         this.clock = clock;
         this.randomProvider = randomProvider;
         this.botController = new BotController(dataLoader, randomProvider);
-        this.gameMode = gameMode;
         this.analyticsRecorder = analyticsRecorder;
         this.telemetry = telemetry;
 
         this.traitManager = new TraitManager();
-        gameModeRegistry.getProvider(this.gameMode).registerTraitEffects(this.traitManager);
         this.combatSystem = new CombatSystem(
                 traitManager,
                 clock,
                 new NearestEnemyTargetSelector(),
                 new BfsUnitMover(clock),
                 new DefaultAbilityCaster(),
-                randomProvider,
-                dataLoader.getAffinityConfig(this.gameMode));
-        this.augmentManager = new AugmentManager(dataLoader.getAugments(this.gameMode), randomProvider);
-        this.matchRuleManager = new MatchRuleManager(dataLoader.getMatchRules(this.gameMode));
+                randomProvider);
+        applyMode(gameMode);
 
         this.round = 0;
 
@@ -199,6 +195,10 @@ public class GameRoom {
         return gameMode;
     }
 
+    synchronized TraitManager getTraitManager() {
+        return traitManager;
+    }
+
     public synchronized GameState getState() {
         return currentState;
     }
@@ -214,20 +214,23 @@ public class GameRoom {
         if (!gameModeRegistry.getAvailableModes().contains(newMode)) {
             return false;
         }
-        var provider = gameModeRegistry.getProvider(newMode);
-        var affinityConfig = dataLoader.getAffinityConfig(newMode);
-        var newAugmentManager = new AugmentManager(dataLoader.getAugments(newMode), randomProvider);
-        var newMatchRuleManager = new MatchRuleManager(dataLoader.getMatchRules(newMode));
-
-        this.gameMode = newMode;
-        traitManager.clearEffects();
-        provider.registerTraitEffects(traitManager);
-        combatSystem.configureAffinity(affinityConfig);
-        augmentManager = newAugmentManager;
-        matchRuleManager = newMatchRuleManager;
+        applyMode(newMode);
         players.values().forEach(p -> p.resetForMode(newMode));
         updateGameState(0);
         return true;
+    }
+
+    private void applyMode(GameMode mode) {
+        var traitDefinitions = dataLoader.getTraitDefinitions(mode);
+        var affinityConfig = dataLoader.getAffinityConfig(mode);
+        var newAugmentManager = new AugmentManager(dataLoader.getAugments(mode), randomProvider);
+        var newMatchRuleManager = new MatchRuleManager(dataLoader.getMatchRules(mode));
+
+        traitManager.replaceEffects(traitDefinitions);
+        combatSystem.configureAffinity(affinityConfig);
+        gameMode = mode;
+        augmentManager = newAugmentManager;
+        matchRuleManager = newMatchRuleManager;
     }
 
     public synchronized boolean isEnded() {

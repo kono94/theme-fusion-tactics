@@ -12,7 +12,7 @@ public final class StunRules {
         if (stunSeconds <= 0) {
             return false;
         }
-        if (target.getHeldItemState().tryConsumeStunImmunity()) {
+        if (target.getCombatModifiers().items().tryConsumeStunImmunity()) {
             return false;
         }
 

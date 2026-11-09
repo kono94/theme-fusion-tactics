@@ -1,6 +1,7 @@
 package net.lwenstrom.tft.backend.core.engine;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -8,11 +9,11 @@ import java.util.Set;
 import java.util.UUID;
 import lombok.NonNull;
 import net.lwenstrom.tft.backend.core.model.AbilityDefinition;
+import net.lwenstrom.tft.backend.core.model.CombatModifiers;
 import net.lwenstrom.tft.backend.core.model.DotEffect;
 import net.lwenstrom.tft.backend.core.model.EvolutionOption;
 import net.lwenstrom.tft.backend.core.model.GameItem;
 import net.lwenstrom.tft.backend.core.model.GameUnit;
-import net.lwenstrom.tft.backend.core.model.HeldItemState;
 import net.lwenstrom.tft.backend.core.model.UnitRole;
 
 public abstract class AbstractGameUnit implements GameUnit {
@@ -100,7 +101,7 @@ public abstract class AbstractGameUnit implements GameUnit {
     private float lowHpAsBonus = 0.0f;
     private float lowHpAsThreshold = 0.0f;
     private boolean shieldOnDeath = false;
-    private HeldItemState heldItemState = HeldItemState.none();
+    private CombatModifiers combatModifiers = CombatModifiers.none();
 
     // Musician state
     private long buffExpirationTime = 0;
@@ -156,6 +157,20 @@ public abstract class AbstractGameUnit implements GameUnit {
         this.ability = ability;
         this.range = range;
         this.traits = traits;
+    }
+
+    protected AbstractGameUnit(ResolvedForm form, String lineId, int cost, List<EvolutionOption> evolutionOptions) {
+        this(
+                form.definitionId(),
+                lineId,
+                form.name(),
+                cost,
+                form.role(),
+                form.ability(),
+                form.range(),
+                new HashSet<>(form.traits()),
+                form.branchId(),
+                evolutionOptions);
     }
 
     protected AbstractGameUnit(AbstractGameUnit other) {
@@ -242,7 +257,7 @@ public abstract class AbstractGameUnit implements GameUnit {
         this.teamAttackDamageOnKill = other.teamAttackDamageOnKill;
         this.temporaryDefenseBuff = other.temporaryDefenseBuff;
         this.temporaryDefenseShred = other.temporaryDefenseShred;
-        this.heldItemState = other.heldItemState.copy();
+        this.combatModifiers = other.combatModifiers.copy();
     }
 
     // ========== GETTERS ==========
@@ -283,11 +298,13 @@ public abstract class AbstractGameUnit implements GameUnit {
     }
 
     @Override
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public String getBranchId() {
         return branchId;
     }
 
     @Override
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public List<EvolutionOption> getEvolutionOptions() {
         return evolutionOptions;
     }
@@ -314,7 +331,7 @@ public abstract class AbstractGameUnit implements GameUnit {
 
     @Override
     public int getDefense() {
-        return Math.max(0, defense + temporaryDefenseBuff - temporaryDefenseShred);
+        return Math.max(0, defense + combatModifiers.defenseBonus() + temporaryDefenseBuff - temporaryDefenseShred);
     }
 
     @Override
@@ -544,7 +561,9 @@ public abstract class AbstractGameUnit implements GameUnit {
                 shield = 0;
             }
         }
-        if (amount >= currentHealth && currentHealth > 0 && heldItemState.tryConsumeSurviveLethal()) {
+        if (amount >= currentHealth
+                && currentHealth > 0
+                && combatModifiers.items().tryConsumeSurviveLethal()) {
             this.currentHealth = 1;
             return;
         }
@@ -553,7 +572,7 @@ public abstract class AbstractGameUnit implements GameUnit {
 
     @Override
     public void gainMana(int amount) {
-        var multiplier = heldItemState.manaGainMultiplier();
+        var multiplier = combatModifiers.manaGainMultiplier();
         var scaledAmount = multiplier == 1.0f ? amount : Math.round(amount * multiplier);
         this.mana = Math.min(maxMana, this.mana + scaledAmount);
     }
@@ -632,7 +651,7 @@ public abstract class AbstractGameUnit implements GameUnit {
         this.teamAttackDamageOnKill = 0;
         this.temporaryDefenseBuff = 0;
         this.temporaryDefenseShred = 0;
-        this.heldItemState = HeldItemState.none();
+        this.combatModifiers = CombatModifiers.none();
     }
 
     @Override
@@ -888,12 +907,7 @@ public abstract class AbstractGameUnit implements GameUnit {
 
     @Override
     @JsonIgnore
-    public HeldItemState getHeldItemState() {
-        return heldItemState;
-    }
-
-    @Override
-    public void setHeldItemState(HeldItemState state) {
-        this.heldItemState = state == null ? HeldItemState.none() : state;
+    public CombatModifiers getCombatModifiers() {
+        return combatModifiers;
     }
 }

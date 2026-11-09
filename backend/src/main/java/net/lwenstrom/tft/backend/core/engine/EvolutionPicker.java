@@ -45,7 +45,7 @@ final class EvolutionPicker {
         if (def == null) return;
         var best = new ArrayList<String>();
         BotTeamEvaluator.Score bestScore = null;
-        for (var branchId : def.branchIdsAt(def.branchPoint())) {
+        for (var branchId : def.variantsAt(unit.getStarLevel())) {
             var candidate = new StandardGameUnit(def, unit.getStarLevel(), branchId);
             var score = evaluator.score(resultingBoard.apply(candidate));
             var comparison = bestScore == null ? 1 : evaluator.compare(score, bestScore);

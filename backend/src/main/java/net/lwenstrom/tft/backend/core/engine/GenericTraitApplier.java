@@ -5,73 +5,64 @@ import java.util.Map;
 import net.lwenstrom.tft.backend.core.model.CustomEffectHandler;
 import net.lwenstrom.tft.backend.core.model.EffectType;
 import net.lwenstrom.tft.backend.core.model.GameUnit;
+import net.lwenstrom.tft.backend.core.model.TraitDefinition;
 import net.lwenstrom.tft.backend.core.model.TraitEffect;
 import net.lwenstrom.tft.backend.core.model.TraitTargetScope;
 import tools.jackson.databind.JsonNode;
 
-/**
- * A data-driven trait applier that reads effect values from trait definition
- * JSON.
- * Can be used by any theme (One Piece, Pokemon, etc.) for standard effect
- * types.
- */
 public class GenericTraitApplier implements TraitEffect {
 
     private final String traitId;
     private final EffectType effectType;
     private final TraitTargetScope targetScope;
-    private final List<JsonNode> effects;
+    private final List<TraitDefinition.Breakpoint> effects;
     private final Map<String, CustomEffectHandler> customHandlers;
 
-    public GenericTraitApplier(String traitId, EffectType effectType, List<JsonNode> effects) {
+    public GenericTraitApplier(TraitDefinition definition) {
+        this(definition.id(), definition.effectType(), definition.targetScope(), definition.effects(), Map.of());
+    }
+
+    public GenericTraitApplier(String traitId, EffectType effectType, List<TraitDefinition.Breakpoint> effects) {
         this(traitId, effectType, TraitTargetScope.SELF, effects, Map.of());
-    }
-
-    public GenericTraitApplier(
-            String traitId, EffectType effectType, TraitTargetScope targetScope, List<JsonNode> effects) {
-        this(traitId, effectType, targetScope, effects, Map.of());
-    }
-
-    public GenericTraitApplier(
-            String traitId,
-            EffectType effectType,
-            List<JsonNode> effects,
-            Map<String, CustomEffectHandler> customHandlers) {
-        this(traitId, effectType, TraitTargetScope.SELF, effects, customHandlers);
     }
 
     public GenericTraitApplier(
             String traitId,
             EffectType effectType,
             TraitTargetScope targetScope,
-            List<JsonNode> effects,
+            List<TraitDefinition.Breakpoint> effects) {
+        this(traitId, effectType, targetScope, effects, Map.of());
+    }
+
+    public GenericTraitApplier(
+            String traitId,
+            EffectType effectType,
+            TraitTargetScope targetScope,
+            List<TraitDefinition.Breakpoint> effects,
             Map<String, CustomEffectHandler> customHandlers) {
         this.traitId = traitId;
         this.effectType = effectType;
         this.targetScope = targetScope == null ? TraitTargetScope.SELF : targetScope;
-        this.effects = effects;
+        this.effects = List.copyOf(effects);
         this.customHandlers = customHandlers;
     }
 
     @Override
     public void apply(int count, List<GameUnit> units) {
-        // Find the highest matching breakpoint
-        JsonNode activeEffect = null;
-        for (JsonNode effect : effects) {
-            int minUnits = effect.get("minUnits").asInt();
-            if (count >= minUnits) {
+        TraitDefinition.Breakpoint activeEffect = null;
+        for (var effect : effects) {
+            if (count >= effect.minUnits()) {
                 activeEffect = effect;
             }
         }
 
-        if (activeEffect == null || !activeEffect.has("values")) {
+        if (activeEffect == null || activeEffect.values() == null) {
             return;
         }
 
-        var values = activeEffect.get("values");
+        var values = activeEffect.values();
         var recipients = getRecipients(units);
 
-        // Apply effect based on effectType
         switch (effectType) {
             case HP -> applyHp(recipients, values);
             case HP_AND_AS -> applyHpAndAs(recipients, values);
@@ -97,14 +88,13 @@ public class GenericTraitApplier implements TraitEffect {
         }
     }
 
-    private void applyCustom(int count, List<GameUnit> units, JsonNode effect) {
-        if (!effect.has("customHandler")) {
+    private void applyCustom(int count, List<GameUnit> units, TraitDefinition.Breakpoint effect) {
+        if (effect.customHandler() == null) {
             return;
         }
-        var handlerId = effect.get("customHandler").asString();
-        var handler = customHandlers.get(handlerId);
+        var handler = customHandlers.get(effect.customHandler());
         if (handler != null) {
-            handler.apply(count, units, effect.get("values"));
+            handler.apply(count, units, effect.values());
         }
     }
 

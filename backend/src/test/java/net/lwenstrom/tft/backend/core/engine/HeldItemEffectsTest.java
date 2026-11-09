@@ -318,26 +318,26 @@ class HeldItemEffectsTest {
                 0.99,
                 item("Focus Band", ItemEffectType.SURVIVE_LETHAL_ONCE, Map.of()),
                 item("Lum Berry", ItemEffectType.STUN_IMMUNITY_CHARGES, Map.of("charges", 2.0)));
-        assertEquals(1, holder.getHeldItemState().remainingSurviveLethalCharges());
-        assertEquals(2, holder.getHeldItemState().remainingStunImmunityCharges());
+        assertEquals(1, holder.getCombatModifiers().items().remainingSurviveLethalCharges());
+        assertEquals(2, holder.getCombatModifiers().items().remainingStunImmunityCharges());
 
         StunRules.applyStun(holder, 1.0f, 0);
         var clone = holder.cloneUnit();
-        assertEquals(1, clone.getHeldItemState().remainingStunImmunityCharges());
+        assertEquals(1, clone.getCombatModifiers().items().remainingStunImmunityCharges());
         holder.takeDamage(5000);
-        assertEquals(0, holder.getHeldItemState().remainingSurviveLethalCharges());
-        assertEquals(1, clone.getHeldItemState().remainingSurviveLethalCharges());
+        assertEquals(0, holder.getCombatModifiers().items().remainingSurviveLethalCharges());
+        assertEquals(1, clone.getCombatModifiers().items().remainingSurviveLethalCharges());
 
         combatSystem.endCombat(List.of(holderPlayer, enemyPlayer));
-        assertEquals(0, holder.getHeldItemState().remainingSurviveLethalCharges());
-        assertEquals(1.0f, holder.getHeldItemState().manaGainMultiplier());
+        assertEquals(0, holder.getCombatModifiers().items().remainingSurviveLethalCharges());
+        assertEquals(1.0f, holder.getCombatModifiers().items().manaGainMultiplier());
 
         var ghost = holderPlayer.createGhost();
         combatSystem.startCombat(List.of(ghost, enemyPlayer));
         var ghostUnit = ghost.getBoardUnits().getFirst();
-        assertEquals(1, ghostUnit.getHeldItemState().remainingSurviveLethalCharges());
-        assertEquals(2, ghostUnit.getHeldItemState().remainingStunImmunityCharges());
-        assertEquals(0, holder.getHeldItemState().remainingSurviveLethalCharges());
+        assertEquals(1, ghostUnit.getCombatModifiers().items().remainingSurviveLethalCharges());
+        assertEquals(2, ghostUnit.getCombatModifiers().items().remainingStunImmunityCharges());
+        assertEquals(0, holder.getCombatModifiers().items().remainingSurviveLethalCharges());
     }
 
     @Test

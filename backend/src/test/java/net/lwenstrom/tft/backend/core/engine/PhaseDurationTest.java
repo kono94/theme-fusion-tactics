@@ -40,9 +40,6 @@ public class PhaseDurationTest {
             public String getTraitsPath() {
                 return "";
             }
-
-            @Override
-            public void registerTraitEffects(TraitManager traitManager) {}
         };
 
         GameModeRegistry registry = new GameModeRegistry(List.of(provider));
@@ -71,7 +68,7 @@ public class PhaseDurationTest {
             }
 
             @Override
-            public List<net.lwenstrom.tft.backend.core.model.TraitMetadata> getTraitMetadata(GameMode mode) {
+            public List<net.lwenstrom.tft.backend.core.model.TraitDefinition> getTraitDefinitions(GameMode mode) {
                 return List.of();
             }
 

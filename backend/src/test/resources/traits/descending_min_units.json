@@ -1,0 +1,29 @@
+[
+  {
+    "id": "broken",
+    "name": "Broken",
+    "type": "origin",
+    "targetScope": "TEAM",
+    "description": "Broken trait.",
+    "iconColor": "#fff",
+    "effectType": "DEFENSE",
+    "effects": [
+      {
+        "minUnits": 4,
+        "description": "(4)",
+        "style": "silver",
+        "values": {
+          "defense": 20
+        }
+      },
+      {
+        "minUnits": 2,
+        "description": "(2)",
+        "style": "bronze",
+        "values": {
+          "defense": 10
+        }
+      }
+    ]
+  }
+]

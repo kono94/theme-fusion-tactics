@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.IntStream;
+import net.lwenstrom.tft.backend.core.engine.ResolvedForm;
 import net.lwenstrom.tft.backend.core.engine.UnitDefinition;
 import net.lwenstrom.tft.backend.core.model.GameMode;
 import net.lwenstrom.tft.backend.core.model.UnitRole;
@@ -127,7 +128,7 @@ class RoleBalanceSimulationTest {
                 balancedVariants.stream()
                         .map(variant -> new SelectedUnit(
                                 variant.lineId(),
-                                variant.definition().getName(starLevel, variant.branchId()),
+                                variant.form(starLevel).name(),
                                 variant.cost(),
                                 starLevel,
                                 variant.role(starLevel)))
@@ -137,13 +138,7 @@ class RoleBalanceSimulationTest {
     private static List<Variant> variantsAt(List<UnitDefinition> definitions, int starLevel) {
         var variants = new ArrayList<Variant>();
         for (var definition : definitions) {
-            if (definition.isPending(starLevel, null)) {
-                definition.branchIdsAt(definition.branchPoint()).stream()
-                        .map(branchId -> new Variant(definition, branchId))
-                        .forEach(variants::add);
-            } else {
-                variants.add(new Variant(definition, null));
-            }
+            definition.variantsAt(starLevel).forEach(branchId -> variants.add(new Variant(definition, branchId)));
         }
         return variants;
     }
@@ -175,7 +170,7 @@ class RoleBalanceSimulationTest {
         var backIndex = 0;
 
         for (var variant : variants) {
-            var ranged = variant.definition().getActiveRange(starLevel, variant.branchId()) > 1;
+            var ranged = variant.form(starLevel).range() > 1;
             var x = ranged ? 2 + backIndex++ : 3 + frontIndex++;
             var y = ranged ? 2 : 0;
             specs.add(new UnitSpec(variant.definition().id(), starLevel, x, y, variant.branchId()));
@@ -315,7 +310,11 @@ class RoleBalanceSimulationTest {
         }
 
         UnitRole role(int starLevel) {
-            return definition.getRole(starLevel, branchId);
+            return form(starLevel).role();
+        }
+
+        ResolvedForm form(int starLevel) {
+            return definition.formAt(starLevel, branchId);
         }
     }
 

@@ -17,27 +17,26 @@ class GameModeRegistryTest {
 
     @Test
     void onePieceIsTheInitialRoomModeWhenAllModesAreRegistered() {
-        var registry =
-                new GameModeRegistry(TestHelpers.allModeProviders(jsonMapper).reversed());
+        var registry = new GameModeRegistry(TestHelpers.allModeProviders().reversed());
 
         assertEquals(GameMode.ONEPIECE, registry.getDefaultMode());
     }
 
     @Test
     void focusedRegistryUsesItsOnlyAvailableMode() {
-        var registry = new GameModeRegistry(List.of(new PokemonGameModeProvider(jsonMapper)));
+        var registry = new GameModeRegistry(List.of(new PokemonGameModeProvider()));
 
         assertEquals(GameMode.POKEMON, registry.getDefaultMode());
     }
 
     @Test
     void registersTheGen23ModeWithoutChangingTheDefault() {
-        var registry = new GameModeRegistry(TestHelpers.allModeProviders(jsonMapper));
+        var registry = new GameModeRegistry(TestHelpers.allModeProviders());
 
         assertEquals(GameMode.ONEPIECE, registry.getDefaultMode());
         assertEquals(
                 GameMode.POKEMON_GEN23,
-                new GameModeRegistry(List.of(new PokemonGen23GameModeProvider(jsonMapper))).getDefaultMode());
+                new GameModeRegistry(List.of(new PokemonGen23GameModeProvider())).getDefaultMode());
     }
 
     @Test

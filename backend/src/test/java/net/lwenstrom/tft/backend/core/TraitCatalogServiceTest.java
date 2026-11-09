@@ -26,7 +26,7 @@ class TraitCatalogServiceTest {
     @BeforeEach
     void setUp() {
         var jsonMapper = JsonMapper.builder().build();
-        var registry = new GameModeRegistry(TestHelpers.allModeProviders(jsonMapper));
+        var registry = new GameModeRegistry(TestHelpers.allModeProviders());
         service = new TraitCatalogService(new DataLoader(registry, jsonMapper));
     }
 

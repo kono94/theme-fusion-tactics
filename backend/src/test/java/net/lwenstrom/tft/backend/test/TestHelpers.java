@@ -1,5 +1,6 @@
 package net.lwenstrom.tft.backend.test;
 
+import java.util.Arrays;
 import java.util.List;
 import net.lwenstrom.tft.backend.core.DataLoader;
 import net.lwenstrom.tft.backend.core.GameModeProvider;
@@ -17,7 +18,7 @@ import net.lwenstrom.tft.backend.core.model.AbilityDefinition;
 import net.lwenstrom.tft.backend.core.model.AugmentDefinition;
 import net.lwenstrom.tft.backend.core.model.AugmentEffectType;
 import net.lwenstrom.tft.backend.core.model.GameMode;
-import net.lwenstrom.tft.backend.core.model.TraitMetadata;
+import net.lwenstrom.tft.backend.core.model.TraitDefinition;
 import net.lwenstrom.tft.backend.core.model.UnitRole;
 import net.lwenstrom.tft.backend.core.random.RandomProvider;
 import net.lwenstrom.tft.backend.core.time.Clock;
@@ -32,11 +33,16 @@ public final class TestHelpers {
 
     public static final long TEST_SEED = 42L;
 
-    public static List<GameModeProvider> allModeProviders(JsonMapper mapper) {
-        return List.of(
-                new OnePieceGameModeProvider(mapper),
-                new PokemonGameModeProvider(mapper),
-                new PokemonGen23GameModeProvider(mapper));
+    public static List<GameModeProvider> allModeProviders() {
+        return Arrays.stream(GameMode.values()).map(TestHelpers::modeProvider).toList();
+    }
+
+    public static GameModeProvider modeProvider(GameMode mode) {
+        return switch (mode) {
+            case ONEPIECE -> new OnePieceGameModeProvider();
+            case POKEMON -> new PokemonGameModeProvider();
+            case POKEMON_GEN23 -> new PokemonGen23GameModeProvider();
+        };
     }
 
     public static GameModeRegistry createMockRegistry() {
@@ -55,9 +61,6 @@ public final class TestHelpers {
             public String getTraitsPath() {
                 return "";
             }
-
-            @Override
-            public void registerTraitEffects(TraitManager traitManager) {}
         };
         return new GameModeRegistry(List.of(provider));
     }
@@ -102,7 +105,7 @@ public final class TestHelpers {
             }
 
             @Override
-            public List<TraitMetadata> getTraitMetadata(GameMode mode) {
+            public List<TraitDefinition> getTraitDefinitions(GameMode mode) {
                 return List.of();
             }
 

@@ -35,9 +35,9 @@ class DefenseAndRoleTest {
                         new UnitFormDefinition(2, "metapod", "Metapod", UnitRole.TANK, null, null, null),
                         new UnitFormDefinition(3, "butterfree", "Butterfree", null, null, null, null)));
 
-        assertEquals(UnitRole.SUPPORT, definition.getRole(1));
-        assertEquals(UnitRole.TANK, definition.getRole(2));
-        assertEquals(UnitRole.SUPPORT, definition.getRole(3));
+        assertEquals(UnitRole.SUPPORT, definition.formAt(1, null).role());
+        assertEquals(UnitRole.TANK, definition.formAt(2, null).role());
+        assertEquals(UnitRole.SUPPORT, definition.formAt(3, null).role());
         assertEquals(UnitRole.TANK, new StandardGameUnit(definition, 2).getRole());
     }
 

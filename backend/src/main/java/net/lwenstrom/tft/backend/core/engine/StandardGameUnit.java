@@ -1,7 +1,5 @@
 package net.lwenstrom.tft.backend.core.engine;
 
-import java.util.HashSet;
-
 public class StandardGameUnit extends AbstractGameUnit {
 
     public StandardGameUnit(UnitDefinition def) {
@@ -13,25 +11,23 @@ public class StandardGameUnit extends AbstractGameUnit {
     }
 
     public StandardGameUnit(UnitDefinition def, int starLevel, String branchId) {
+        this(def, def.formAt(starLevel, branchId));
+    }
+
+    private StandardGameUnit(UnitDefinition def, ResolvedForm form) {
         super(
-                def.getDefinitionId(starLevel, branchId),
+                form,
                 def.lineId(),
-                def.getName(starLevel, branchId),
                 def.cost(),
-                def.getRole(starLevel, branchId),
-                def.getAbility(starLevel, branchId),
-                def.getActiveRange(starLevel, branchId),
-                new HashSet<>(def.getTraits(starLevel, branchId)),
-                branchId,
-                def.isPending(starLevel, branchId) ? def.evolutionOptions(starLevel) : null);
-        setStarLevel(starLevel);
-        setMaxHealth(def.getMaxHealth(starLevel, branchId));
-        setMaxMana(def.getMaxMana(starLevel, branchId));
-        setAttackDamage(def.getAttackDamage(starLevel, branchId));
-        setAbilityPower(def.getAbilityPower(starLevel));
-        setDefense(def.getDefense(starLevel, branchId));
-        setAttackSpeed(def.getAttackSpeed(starLevel, branchId));
-        setCurrentHealth(def.getMaxHealth(starLevel, branchId));
+                def.isPending(form.starLevel(), form.branchId()) ? def.evolutionOptions(form.starLevel()) : null);
+        setStarLevel(form.starLevel());
+        setMaxHealth(form.maxHealth());
+        setMaxMana(form.maxMana());
+        setAttackDamage(form.attackDamage());
+        setAbilityPower(form.abilityPower());
+        setDefense(form.defense());
+        setAttackSpeed(form.attackSpeed());
+        setCurrentHealth(form.maxHealth());
     }
 
     public boolean isDead() {

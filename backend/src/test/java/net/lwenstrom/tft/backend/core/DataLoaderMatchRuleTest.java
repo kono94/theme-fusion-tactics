@@ -61,7 +61,7 @@ class DataLoaderMatchRuleTest {
 
     private static DataLoader createDataLoader() {
         var jsonMapper = JsonMapper.builder().build();
-        var registry = new GameModeRegistry(TestHelpers.allModeProviders(jsonMapper));
+        var registry = new GameModeRegistry(TestHelpers.allModeProviders());
         return new DataLoader(registry, jsonMapper);
     }
 }

@@ -2,6 +2,7 @@ package net.lwenstrom.tft.backend.core;
 
 import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,7 @@ import net.lwenstrom.tft.backend.core.model.GameMode;
 import net.lwenstrom.tft.backend.core.model.ItemDefinition;
 import net.lwenstrom.tft.backend.core.model.ItemEffectType;
 import net.lwenstrom.tft.backend.core.model.MatchRuleDefinition;
+import net.lwenstrom.tft.backend.core.model.TraitDefinition;
 import net.lwenstrom.tft.backend.core.model.TraitMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,7 +50,7 @@ public class DataLoader {
 
     private record ModeData(
             Map<String, UnitDefinition> unitRegistry,
-            List<TraitMetadata> traitMetadata,
+            List<TraitDefinition> traits,
             List<AugmentDefinition> augments,
             List<ItemDefinition> items) {}
 
@@ -63,7 +65,6 @@ public class DataLoader {
             getModeData(mode);
             getElementalAffinity(mode);
             getMatchRules(mode);
-            gameModeRegistry.getProvider(mode).registerTraitEffects(new TraitManager());
         });
     }
 
@@ -80,6 +81,7 @@ public class DataLoader {
         if (units.isEmpty() || traits.isEmpty() || augments.isEmpty() || items.isEmpty()) {
             throw new IllegalStateException("Incomplete data for game mode: " + mode);
         }
+        validateTraitReferences(mode, units.values(), traits);
         return new ModeData(units, traits, augments, items);
     }
 
@@ -123,12 +125,37 @@ public class DataLoader {
         }
     }
 
+    private static void validateTraitReferences(
+            GameMode mode, Collection<UnitDefinition> units, List<TraitDefinition> traits) {
+        var traitIds = traits.stream()
+                .map(trait -> TraitManager.normalizeTraitId(trait.id()))
+                .collect(Collectors.toSet());
+        for (var unit : units) {
+            var references = new ArrayList<>(unit.traits() == null ? List.<String>of() : unit.traits());
+            unit.forms().stream()
+                    .filter(form -> form.traits() != null)
+                    .forEach(form -> references.addAll(form.traits()));
+            for (var trait : references) {
+                if (!traitIds.contains(TraitManager.normalizeTraitId(trait))) {
+                    throw new IllegalStateException(
+                            "Unit " + unit.id() + " references unknown trait " + trait + " in mode " + mode);
+                }
+            }
+        }
+    }
+
     public static void validateUnitForms(UnitDefinition unit) {
         var forms = unit.forms();
         var formKeys = new HashSet<String>();
         for (var form : forms) {
             if (!formKeys.add(form.starLevel() + ":" + form.branchId())) {
                 throw invalidForms(unit, "duplicate form for star " + form.starLevel() + branchLabel(form.branchId()));
+            }
+            if (form.branchId() != null && (isBlank(form.definitionId()) || isBlank(form.name()))) {
+                throw invalidForms(
+                        unit,
+                        "branched form at star " + form.starLevel() + branchLabel(form.branchId())
+                                + " needs its own definitionId and name");
             }
             validateFormStats(unit, form.branchId(), "maxHealth", form.maxHealth());
             validateFormStats(unit, form.branchId(), "maxMana", form.maxMana());
@@ -169,6 +196,10 @@ public class DataLoader {
         }
     }
 
+    private static boolean isBlank(String value) {
+        return value == null || value.isBlank();
+    }
+
     private static String branchLabel(String branchId) {
         return branchId == null ? "" : " (branch '" + branchId + "')";
     }
@@ -177,16 +208,23 @@ public class DataLoader {
         return new IllegalStateException("Invalid forms for unit " + unit.id() + ": " + reason);
     }
 
-    private List<TraitMetadata> loadTraits(String path) {
+    private List<TraitDefinition> loadTraits(String path) {
         try (var inputStream = getClass().getResourceAsStream(path)) {
             if (inputStream == null) {
                 throw new IllegalStateException("Could not find traits at " + path);
             }
-            var metadata = jsonMapper.readValue(inputStream, new TypeReference<List<TraitMetadata>>() {});
-            log.info("Loaded {} traits from {}", metadata.size(), path);
-            return metadata;
+            List<TraitDefinition> traits = jsonMapper.readValue(inputStream, new TypeReference<>() {});
+            var ids = new HashSet<String>();
+            for (var trait : traits) {
+                trait.validate();
+                if (!ids.add(TraitManager.normalizeTraitId(trait.id()))) {
+                    throw new IllegalStateException("Duplicate trait id " + trait.id());
+                }
+            }
+            log.info("Loaded {} traits from {}", traits.size(), path);
+            return List.copyOf(traits);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to load trait data: " + path, e);
+            throw new IllegalStateException("Failed to load trait data: " + path, e);
         }
     }
 
@@ -342,8 +380,12 @@ public class DataLoader {
         return List.copyOf(getModeData(mode).unitRegistry().values());
     }
 
+    public List<TraitDefinition> getTraitDefinitions(GameMode mode) {
+        return getModeData(mode).traits();
+    }
+
     public List<TraitMetadata> getTraitMetadata(GameMode mode) {
-        return getModeData(mode).traitMetadata();
+        return getTraitDefinitions(mode).stream().map(TraitDefinition::metadata).toList();
     }
 
     public List<AugmentDefinition> getAugments(GameMode mode) {

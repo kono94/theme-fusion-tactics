@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import net.lwenstrom.tft.backend.core.DataLoader;
-import net.lwenstrom.tft.backend.core.GameModeRegistry;
 import net.lwenstrom.tft.backend.core.combat.BfsUnitMover;
 import net.lwenstrom.tft.backend.core.combat.DefaultAbilityCaster;
 import net.lwenstrom.tft.backend.core.combat.NearestEnemyTargetSelector;
@@ -23,12 +22,10 @@ import net.lwenstrom.tft.backend.test.SeededRandomProvider;
 
 public class CombatSimulator {
     private final DataLoader dataLoader;
-    private final GameModeRegistry gameModeRegistry;
     private final Map<GameMode, TraitManager> traitManagers = new ConcurrentHashMap<>();
 
-    public CombatSimulator(DataLoader dataLoader, GameModeRegistry gameModeRegistry) {
+    public CombatSimulator(DataLoader dataLoader) {
         this.dataLoader = dataLoader;
-        this.gameModeRegistry = gameModeRegistry;
     }
 
     public CombatSimulationResult simulate(CombatSimulationRequest request) {
@@ -38,11 +35,8 @@ public class CombatSimulator {
         var totalBoardOneHealth = 0L;
         var totalBoardTwoHealth = 0L;
         var unitStats = new HashMap<String, MutableUnitStats>();
-        var traitManager = traitManagers.computeIfAbsent(request.mode(), mode -> {
-            var manager = new TraitManager();
-            gameModeRegistry.getProvider(mode).registerTraitEffects(manager);
-            return manager;
-        });
+        var traitManager = traitManagers.computeIfAbsent(
+                request.mode(), mode -> TraitManager.fromDefinitions(dataLoader.getTraitDefinitions(mode)));
 
         for (var run = 0; run < request.runs(); run++) {
             var randomProvider = new SeededRandomProvider(request.seed() + run);

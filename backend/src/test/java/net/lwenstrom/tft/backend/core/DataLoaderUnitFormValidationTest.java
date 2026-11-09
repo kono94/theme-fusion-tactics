@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
-import net.lwenstrom.tft.backend.core.engine.TraitManager;
 import net.lwenstrom.tft.backend.core.engine.UnitDefinition;
 import net.lwenstrom.tft.backend.core.engine.UnitFormDefinition;
 import net.lwenstrom.tft.backend.core.model.GameMode;
@@ -58,6 +57,18 @@ class DataLoaderUnitFormValidationTest {
     }
 
     @Test
+    void rejectsBranchedFormsWithoutTheirOwnIdentity() {
+        var withoutId = new UnitFormDefinition(
+                2, null, "A", UnitRole.DAMAGE, List.of("T"), null, null, "a", null, null, null, null, null);
+        assertInvalid(
+                "branched form at star 2 (branch 'a') needs its own definitionId and name",
+                unit(withoutId, form(2, "b", "b")));
+        var withoutName = new UnitFormDefinition(
+                2, "a", " ", UnitRole.DAMAGE, List.of("T"), null, null, "a", null, null, null, null, null);
+        assertInvalid("needs its own definitionId and name", unit(form(2, "b", "b"), withoutName));
+    }
+
+    @Test
     void rejectsDuplicateFormsForTheSameStarAndBranch() {
         assertInvalid("duplicate form for star 2 (branch 'a')", unit(form(2, "a", "a"), form(2, "a2", "a")));
     }
@@ -80,9 +91,6 @@ class DataLoaderUnitFormValidationTest {
             public String getTraitsPath() {
                 return "/data/traits_onepiece.json";
             }
-
-            @Override
-            public void registerTraitEffects(TraitManager traitManager) {}
         };
         var dataLoader = new DataLoader(new GameModeRegistry(List.of(provider)), jsonMapper);
 

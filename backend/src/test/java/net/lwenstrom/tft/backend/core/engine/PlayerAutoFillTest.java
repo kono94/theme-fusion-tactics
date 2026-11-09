@@ -11,7 +11,7 @@ import net.lwenstrom.tft.backend.core.GameModeProvider;
 import net.lwenstrom.tft.backend.core.GameModeRegistry;
 import net.lwenstrom.tft.backend.core.model.GameMode;
 import net.lwenstrom.tft.backend.core.model.GameUnit;
-import net.lwenstrom.tft.backend.core.model.TraitMetadata;
+import net.lwenstrom.tft.backend.core.model.TraitDefinition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.json.JsonMapper;
@@ -29,7 +29,7 @@ class PlayerAutoFillTest {
         }
 
         @Override
-        public List<TraitMetadata> getTraitMetadata(GameMode mode) {
+        public List<TraitDefinition> getTraitDefinitions(GameMode mode) {
             return List.of();
         }
     }
@@ -50,9 +50,6 @@ class PlayerAutoFillTest {
             public String getTraitsPath() {
                 return "";
             }
-
-            @Override
-            public void registerTraitEffects(TraitManager traitManager) {}
         };
         return new GameModeRegistry(List.of(provider));
     }

@@ -54,22 +54,6 @@ export interface AbilityDefinition {
   modifiers?: Record<string, unknown>[]
 }
 
-export interface UnitFormDefinition {
-  starLevel: number
-  definitionId: string
-  name: string
-  role?: UnitRole
-  traits?: string[]
-  range?: number[]
-  ability?: AbilityDefinition | null
-  branchId?: string | null
-  maxHealth?: number[] | null
-  maxMana?: number[] | null
-  attackDamage?: number[] | null
-  defense?: number[] | null
-  attackSpeed?: number[] | null
-}
-
 export interface EvolutionLaterForm {
   starLevel: number
   definitionId: string
@@ -176,9 +160,9 @@ export interface GameUnit {
   abilityDamageMultiplier?: number
   damageReduction?: number
   lifesteal?: number
-  // Always sent by the backend; optional here so client-built preview units can omit them.
+  // Omitted from snapshots while unset.
   branchId?: string | null
-  evolutionOptions?: EvolutionOption[] | null // Non-null only while the unit awaits a branch choice
+  evolutionOptions?: EvolutionOption[] | null // Present only while the unit awaits a branch choice
 }
 
 export interface UnitDefinition {
@@ -196,7 +180,6 @@ export interface UnitDefinition {
   range: number
   traits: string[]
   ability: AbilityDefinition | null
-  forms?: UnitFormDefinition[]
 }
 
 // ============================================================================

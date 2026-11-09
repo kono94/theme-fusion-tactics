@@ -467,21 +467,12 @@ public class CombatSystem {
                     int manaGain = (int) (GameConstants.MANA_PER_HIT * unit.getManaGainMultiplier());
                     unit.gainMana(manaGain);
 
-                    // Speed buff + Low HP AS (Berserker)
                     float as = Math.max(0.1f, unit.getAttackSpeed());
-                    float spdMultiplier = unit.getSpdBuff();
-                    if (unit.getLowHpAsBonus() > 0
-                            && (float) unit.getCurrentHealth() / unit.getMaxHealth() <= unit.getLowHpAsThreshold()) {
-                        spdMultiplier += unit.getLowHpAsBonus();
-                    }
-
-                    float effectiveAs = as * spdMultiplier;
+                    float effectiveAs = as * unit.getAttackSpeedMultiplier();
                     long cooldownMs = (long) (1000 / effectiveAs);
 
                     // Extra Attack Chance (Swordsman)
-                    var extraAttackChance = unit.getExtraAttackChance()
-                            + unit.getHeldItemState().extraAttackChance();
-                    if (randomProvider.nextDouble() < extraAttackChance) {
+                    if (randomProvider.nextDouble() < unit.getEffectiveExtraAttackChance()) {
                         log.debug("{} triggers extra attack!", unit.getName());
                         // For simplicity, we just reduce next attack time significantly
                         unit.setNextAttackTime(currentTime + (cooldownMs / 4));
@@ -715,7 +706,7 @@ public class CombatSystem {
     }
 
     private void applyHeldItemTick(GameUnit unit, long currentTime) {
-        var state = unit.getHeldItemState();
+        var state = unit.getCombatModifiers().items();
         var regen = state.regenHealAmount(unit.getMaxHealth(), GameConstants.TICK_RATE_MS);
         if (regen > 0) {
             applyItemHeal(unit, regen, state.regenItemName(), currentTime);
@@ -727,7 +718,7 @@ public class CombatSystem {
     }
 
     private void applyOnHitItemStun(GameUnit unit, GameUnit target, long currentTime) {
-        var state = unit.getHeldItemState();
+        var state = unit.getCombatModifiers().items();
         if (state.onHitStunChance() <= 0 || target.getCurrentHealth() <= 0) {
             return;
         }
@@ -747,7 +738,7 @@ public class CombatSystem {
     }
 
     private void healFromDamageDealt(GameUnit unit, int damageDealt, long currentTime) {
-        var state = unit.getHeldItemState();
+        var state = unit.getCombatModifiers().items();
         if (state.damageDealtHealRatio() <= 0 || damageDealt <= 0 || unit.getCurrentHealth() <= 0) {
             return;
         }
@@ -773,7 +764,7 @@ public class CombatSystem {
 
     private void flushItemProcs(List<GameUnit> allUnits, long currentTime) {
         for (var unit : allUnits) {
-            for (var proc : unit.getHeldItemState().drainProcs()) {
+            for (var proc : unit.getCombatModifiers().items().drainProcs()) {
                 recentEvents.add(new GameState.CombatEvent(
                         currentTime, ITEM_EVENT, unit.getId(), unit.getId(), proc.value(), proc.itemName()));
             }

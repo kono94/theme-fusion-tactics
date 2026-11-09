@@ -150,9 +150,6 @@ class MatchRuleGameRoomTest {
             public String getTraitsPath() {
                 return "";
             }
-
-            @Override
-            public void registerTraitEffects(TraitManager traitManager) {}
         };
     }
 }

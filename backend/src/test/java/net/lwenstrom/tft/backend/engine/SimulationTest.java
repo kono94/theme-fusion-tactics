@@ -35,11 +35,6 @@ public class SimulationTest {
                     public String getTraitsPath() {
                         return "/data/traits_onepiece.json";
                     }
-
-                    @Override
-                    public void registerTraitEffects(net.lwenstrom.tft.backend.core.engine.TraitManager traitManager) {
-                        // No-op for test
-                    }
                 };
 
         net.lwenstrom.tft.backend.core.GameModeRegistry registry =
@@ -48,6 +43,11 @@ public class SimulationTest {
         // Mock DataLoader
         DataLoader dataLoader = new DataLoader(
                 registry, tools.jackson.databind.json.JsonMapper.builder().build()) {
+            @Override
+            public List<net.lwenstrom.tft.backend.core.model.TraitDefinition> getTraitDefinitions(GameMode mode) {
+                return List.of();
+            }
+
             @Override
             public List<UnitDefinition> getAllUnits(GameMode mode) {
                 return List.of(new UnitDefinition(
@@ -137,15 +137,17 @@ public class SimulationTest {
                     public String getTraitsPath() {
                         return "";
                     }
-
-                    @Override
-                    public void registerTraitEffects(net.lwenstrom.tft.backend.core.engine.TraitManager traitManager) {}
                 };
         net.lwenstrom.tft.backend.core.GameModeRegistry registry =
                 new net.lwenstrom.tft.backend.core.GameModeRegistry(List.of(provider));
 
         DataLoader dataLoader = new DataLoader(
                 registry, tools.jackson.databind.json.JsonMapper.builder().build()) {
+            @Override
+            public List<net.lwenstrom.tft.backend.core.model.TraitDefinition> getTraitDefinitions(GameMode mode) {
+                return List.of();
+            }
+
             @Override
             public List<UnitDefinition> getAllUnits(GameMode mode) {
                 return List.of(new UnitDefinition(

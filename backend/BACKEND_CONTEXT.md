@@ -59,13 +59,13 @@ BackendApplication
 │   └── AugmentManager              offers, selection, and effects
 ├── core/combat                     generic targeting, movement, ability, affinity logic
 ├── core/model                      command, state, event, and data records
-├── game/{mode}                     mode providers and trait registration
+├── game/{mode}                     mode providers (mode id + optional affinity file)
 ├── analytics                       async recorder, public history, protected REST API, bearer sessions
 └── core/observability              bounded game metrics and synchronized room snapshots
 ```
 
-Core code does not import a franchise package. `GameModeProvider` supplies resource paths, trait registration, optional
-affinity data. Bot strategies are shared across modes. One Piece, Pokemon and Pokemon Gen 2/3 are provider/data configurations.
+Core code does not import a franchise package. `GameModeProvider` derives every resource path from the mode wire value
+(`/data/<kind>_<mode>.json`); a provider only names its `GameMode` and, optionally, an affinity file. Bot strategies are shared across modes. One Piece, Pokemon and Pokemon Gen 2/3 are provider/data configurations.
 
 ## 4. Ownership and concurrency
 
@@ -133,7 +133,16 @@ mode. Focused tests that register only one provider use that available provider 
 | Pokemon Gen 2/3 (`pokemongen23`) | `units_pokemongen23.json` | `traits_pokemongen23.json` | `augments_pokemongen23.json` | `items_pokemongen23.json` | `match_rules_common.json` + `match_rules_pokemongen23.json` | `affinities_pokemongen23.json` (17 types, no Fairy) |
 
 `DataLoader.loadData()` preloads every registered mode at startup. Missing resources, malformed JSON, duplicate unit IDs,
-or an empty required units/traits/augments/items dataset fail startup. Item `statBonuses` keys are the `ItemStat` enum, so an
+or an empty required units/traits/augments/items dataset fail startup.
+
+Each mode's traits file is parsed once into `TraitDefinition` records (id, name, description, type, `targetScope`,
+iconColor, `effectType`, and `effects[{minUnits, description, style, values}]`) and validated strictly: every field is
+required, enums must be known, `minUnits` starts at 1 and ascends, every breakpoint of a non-`NONE` effect needs a
+`values` object, and trait IDs are unique. A unit or form trait that names no defined trait also fails startup.
+`/api/traits` serves `TraitMetadata`, a projection of these records. Rooms build their `GenericTraitApplier`s from the
+cached records through `TraitManager.replaceEffects`; no trait file is read after startup.
+`GameRoom.applyMode` (used by the constructor and lobby mode changes) resolves traits, affinity, augments and match rules
+before assigning any of them, so a failed load leaves the room unchanged. Item `statBonuses` keys are the `ItemStat` enum, so an
 unknown stat, duplicate item ID, missing icon, or non-positive bonus also fails startup. Items may also declare optional
 `effects` (`[{type, values}]`, type = `ItemEffectType`); `DataLoader.validateItemEffects` requires exactly the type's
 parameters, each positive and within its maximum (chances and thresholds at most 1, `charges` whole). A provider that
@@ -155,6 +164,9 @@ range, and ability at higher stars while preserving the line used for upgrades.
 
 Forms can also branch. A form with a `branchId` is one alternative at its star level; forms may carry their own
 `maxHealth`, `maxMana`, `attackDamage`, `defense`, and `attackSpeed` arrays that override the line's arrays.
+`UnitDefinition.formAt(star, branchId)` returns a `ResolvedForm` (definition ID, name, role, traits, active range,
+ability, and stats at that star) that unit construction, evolution options, trait rosters and bot evolution picks share;
+`variantsAt(star)` lists the selectable branch IDs, or a single `null` for unbranched or pre-branch stars.
 `UnitDefinition.resolveForm(star, branchId)` picks the chosen branch's highest form at or below the star (a branch chosen
 at 2★ keeps applying at 3★ until a later form of that branch replaces it); without a branch it picks the highest
 unbranched form, else the root fields. The branch point is the lowest star with branched forms; a unit at or above it
@@ -163,8 +175,9 @@ chosen branch among the merged copies, else stay pending. The room resolves ever
 (after augment auto-selection, orb collection, and board auto-fill, before pairing and ghost cloning) by the best
 `BotTeamEvaluator` score, consulting the room RNG only on ties; bench units may stay pending. Bots resolve board and
 bench units during planning. `DataLoader` fails fast when the branch point is below 2★, it has fewer than two branches,
-an unbranched form sits at or above it, a higher form uses an undeclared branch, a per-form stat array does not have
-three values, or two forms share a star and branch. Trait rosters list a line under each trait at the earliest star
+an unbranched form sits at or above it, a higher form uses an undeclared branch, a branched form lacks its own
+`definitionId` or `name`, a per-form stat array does not have three values, or two forms share a star and branch.
+Shop `UnitDefinition`s read `forms` from JSON but never serialize them. Trait rosters list a line under each trait at the earliest star
 where any branch carries it.
 
 ## 7. Transport and identity
@@ -281,10 +294,14 @@ in final-board analytics. Planning-only `MOVE_ITEM` accepts an item instance ID 
 target returns the item to inventory. The room checks phase and player identity, and `Player` checks ownership and slot
 capacity. Sales return equipment to inventory, and upgrades fill the survivor's slots before returning extra copies.
 
-Held item effects are generic engine hooks (only Pokemon Gen 2/3 items use them today). `ItemStatApplier` builds a
-per-unit `HeldItemState` from equipped items at combat start; it is copied by `cloneUnit` (ghosts, stat previews) and
-reset by `restorePlanningPosition`. Effects combine with trait values at query time because traits apply after items
-and overwrite shared unit fields:
+Held item effects are generic engine hooks (only Pokemon Gen 2/3 items use them today). Each unit owns a
+`CombatModifiers` holder with source-isolated slots: `items` (a `HeldItemState` built by `ItemStatApplier` at combat
+start, with its charges and procs) and `field` (`FieldModifiers`: attack-speed bonus, defense bonus, extra-attack chance,
+mana-gain multiplier; unused until field conditions exist). The holder is copied by `cloneUnit` (ghosts, stat previews)
+and reset by `restorePlanningPosition`. Slots combine with trait values at query time because traits apply after items
+and overwrite shared unit fields; each stat is composed once on the unit (`getAttackSpeedMultiplier`,
+`getEffectiveExtraAttackChance`, `getDefense`, `gainMana`), and `CombatSystem` makes one call per stat. Trait, augment
+and match-rule values stay in their own unit fields:
 - `REGEN_MAX_HEALTH_PERCENT {percentPerSecond}` and `HEAL_ONCE_BELOW_HEALTH {threshold, healPercent}`: per-unit tick
   hook in `CombatSystem.simulateTick` (after buff updates, before the stun skip).
 - `SURVIVE_LETHAL_ONCE {}`: `AbstractGameUnit.applyDamage` leaves the holder at 1 HP, before revive/second wind.
@@ -299,7 +316,7 @@ use the normal healing statistics and emit `HEAL` with `skillName` = item name; 
 effects by category (defensive → tanks, offensive → damage, utility → anyone) and never give mana-penalty items to
 supports.
 
-Units also serialize nullable `branchId` and `evolutionOptions`. `evolutionOptions` is non-null only for pending units;
+Units serialize `branchId` and `evolutionOptions` only when set. `evolutionOptions` is present only for pending units;
 each `EvolutionOption` carries `branchId, definitionId, name, role, traits, range, maxHealth, attackDamage, defense,
 attackSpeed, maxMana` at the unit's star, `abilityName`, the server-formatted `abilityDescription`, and `laterForms`
 (`starLevel, definitionId, name`) previewing that branch's higher-star forms.

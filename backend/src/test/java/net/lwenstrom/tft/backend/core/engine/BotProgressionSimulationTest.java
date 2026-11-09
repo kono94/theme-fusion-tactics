@@ -41,7 +41,7 @@ class BotProgressionSimulationTest {
 
     private List<String> simulate(GameMode mode, long seed) {
         var mapper = JsonMapper.builder().build();
-        var registry = new GameModeRegistry(TestHelpers.allModeProviders(mapper));
+        var registry = new GameModeRegistry(TestHelpers.allModeProviders());
         var loader = new DataLoader(registry, mapper);
         var random = new DefaultRandomProvider();
         random.getRandom().setSeed(seed);
@@ -50,8 +50,7 @@ class BotProgressionSimulationTest {
         bot.setBot(true);
         var controller = new BotController(loader, random);
         var augments = new AugmentManager(loader.getAugments(mode), random);
-        var traits = new TraitManager();
-        registry.getProvider(mode).registerTraitEffects(traits);
+        var traits = TraitManager.fromDefinitions(loader.getTraitDefinitions(mode));
         var clock = TestHelpers.createTestClock();
         var combat = new CombatSystem(
                 traits,

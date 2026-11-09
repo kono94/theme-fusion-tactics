@@ -1,0 +1,34 @@
+[
+  {
+    "id": "luffy_v1",
+    "name": "Monkey D. Luffy",
+    "cost": 1,
+    "role": "DAMAGE",
+    "maxHealth": [510, 918, 1652],
+    "maxMana": [50, 50, 50],
+    "attackDamage": [50, 90, 162],
+    "abilityPower": [0, 0, 0],
+    "defense": [15, 15, 15],
+    "attackSpeed": [0.65, 0.65, 0.65],
+    "range": [2, 2, 2],
+    "traits": [
+      "Straw Hat",
+      "Not A Trait"
+    ],
+    "ability": {
+      "name": "Gum Gum Pistol",
+      "description": "Stretches arm to deal $value damage. Executes enemies below 30% HP.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [175, 400, 1000],
+      "range": [2, 2, 2],
+      "modifiers": [
+        {
+          "type": "EXECUTE",
+          "hpThreshold": [0.3, 0.3, 0.3],
+          "bonusDamageMultiplier": [0.5, 0.5, 0.5]
+        }
+      ]
+    }
+  }
+]

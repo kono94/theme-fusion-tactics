@@ -16,20 +16,20 @@ class DataLoaderAffinityTest {
 
     @Test
     void providersExposeGenericAffinityResources() {
-        var onePiece = new OnePieceGameModeProvider(jsonMapper);
-        var pokemon = new PokemonGameModeProvider(jsonMapper);
+        var onePiece = new OnePieceGameModeProvider();
+        var pokemon = new PokemonGameModeProvider();
 
         assertTrue(onePiece.getAffinitiesPath().isEmpty());
         assertEquals(
                 "/data/affinities_pokemon.json", pokemon.getAffinitiesPath().orElseThrow());
         assertEquals(
                 "/data/affinities_pokemongen23.json",
-                new PokemonGen23GameModeProvider(jsonMapper).getAffinitiesPath().orElseThrow());
+                new PokemonGen23GameModeProvider().getAffinitiesPath().orElseThrow());
     }
 
     @Test
     void dataLoaderCachesPokemonAndOnePieceAffinityConfigs() {
-        var registry = new GameModeRegistry(TestHelpers.allModeProviders(jsonMapper));
+        var registry = new GameModeRegistry(TestHelpers.allModeProviders());
         var dataLoader = new DataLoader(registry, jsonMapper);
 
         assertEquals(

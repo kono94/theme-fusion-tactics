@@ -11,7 +11,7 @@ public final class ItemStatApplier {
 
     public static void apply(GameUnit unit) {
         var items = unit.getItems();
-        unit.setHeldItemState(HeldItemState.from(items));
+        unit.getCombatModifiers().setItems(HeldItemState.from(items));
         if (items.isEmpty()) return;
         var healthBonus = Math.round(unit.getMaxHealth() * total(items, ItemStat.MAX_HEALTH_PERCENT) / 100.0f);
         unit.setMaxHealth(unit.getMaxHealth() + healthBonus);

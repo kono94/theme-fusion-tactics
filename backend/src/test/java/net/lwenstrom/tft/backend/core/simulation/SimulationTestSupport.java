@@ -13,11 +13,11 @@ final class SimulationTestSupport {
 
     static Fixture createFixture() {
         var jsonMapper = JsonMapper.builder().build();
-        List<GameModeProvider> providers = TestHelpers.allModeProviders(jsonMapper);
+        List<GameModeProvider> providers = TestHelpers.allModeProviders();
         var registry = new GameModeRegistry(providers);
         var dataLoader = new DataLoader(registry, jsonMapper);
         dataLoader.loadData();
-        return new Fixture(registry, dataLoader, new CombatSimulator(dataLoader, registry));
+        return new Fixture(registry, dataLoader, new CombatSimulator(dataLoader));
     }
 
     record Fixture(GameModeRegistry registry, DataLoader dataLoader, CombatSimulator simulator) {}

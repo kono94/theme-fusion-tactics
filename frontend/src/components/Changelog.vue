@@ -148,7 +148,8 @@ const version160Commits = [
                 seven Eeveelutions, Ralts to 3 stars for Gardevoir or Gallade, and Wurmple or
                 Snorunt to 2 stars for their two paths. Click the Evolve badge to see every option
                 with its role, types and move. If you don't choose before combat starts, the best
-                fit for your team is picked for you.
+                fit for your team is picked for you. When evolved copies combine, the unit on your
+                board keeps its evolution.
               </p>
             </div>
             <div class="feature-note">

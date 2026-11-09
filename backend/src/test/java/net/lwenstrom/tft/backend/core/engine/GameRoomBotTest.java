@@ -19,7 +19,7 @@ class GameRoomBotTest {
     @EnumSource(GameMode.class)
     void assignsDistinctPlanningPersonalities(GameMode mode) {
         var mapper = JsonMapper.builder().build();
-        var registry = new GameModeRegistry(TestHelpers.allModeProviders(mapper));
+        var registry = new GameModeRegistry(TestHelpers.allModeProviders());
         var loader = new DataLoader(registry, mapper);
         var room = new GameRoom(
                 "personalities",
@@ -50,7 +50,7 @@ class GameRoomBotTest {
     @EnumSource(GameMode.class)
     void botsBuyNormalUnitsOncePerPlanningRound(GameMode mode) {
         var mapper = JsonMapper.builder().build();
-        var registry = new GameModeRegistry(TestHelpers.allModeProviders(mapper));
+        var registry = new GameModeRegistry(TestHelpers.allModeProviders());
         var loader = new DataLoader(registry, mapper);
         var clock = TestHelpers.createTestClock();
         var room = new GameRoom("bots", loader, registry, clock, TestHelpers.createSeededRandomProvider(), mode);

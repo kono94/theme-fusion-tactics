@@ -64,6 +64,19 @@ class BranchingEvolutionPlayerTest {
     }
 
     @Test
+    void boardUnitOffTheGridIsLeftUntouched() {
+        var player = player();
+        var pending = new StandardGameUnit(eevee, 2);
+        pending.setPosition(-1, -1);
+        TestHelpers.addUnitToPlayer(player, pending);
+
+        assertFalse(player.chooseEvolution(pending.getId(), "jolteon"));
+
+        assertSame(pending, player.getBoardUnits().getFirst());
+        assertNull(pending.getBranchId());
+    }
+
+    @Test
     void choosingOnTheBenchKeepsTheSlot() {
         var player = player();
         player.getBenchSlots().set(3, owned(player, new StandardGameUnit(wurmple, 2)));
@@ -255,7 +268,7 @@ class BranchingEvolutionPlayerTest {
         var pending = mapper.readTree(mapper.writeValueAsString(new StandardGameUnit(wurmple, 2)));
         var chosen = mapper.readTree(mapper.writeValueAsString(new StandardGameUnit(wurmple, 2, "silcoon")));
 
-        assertTrue(pending.get("branchId").isNull());
+        assertFalse(pending.has("branchId"));
         var options = pending.get("evolutionOptions");
         assertEquals(2, options.size());
         assertEquals("silcoon", options.get(0).get("branchId").asString());
@@ -265,9 +278,20 @@ class BranchingEvolutionPlayerTest {
                 options.get(0).get("laterForms").get(0).get("definitionId").asString());
         assertEquals(3, options.get(0).get("laterForms").get(0).get("starLevel").asInt());
         assertEquals("silcoon", chosen.get("branchId").asString());
-        assertTrue(chosen.get("evolutionOptions") == null
-                || chosen.get("evolutionOptions").isNull());
+        assertFalse(chosen.has("evolutionOptions"));
         assertFalse(pending.has("evolutionPending"));
+    }
+
+    @Test
+    void shopDefinitionsReadFormsButNeverSendThem() {
+        var mapper = JsonMapper.builder().build();
+        assertFalse(eevee.forms().isEmpty());
+
+        var json = mapper.readTree(mapper.writeValueAsString(eevee));
+
+        assertFalse(json.has("forms"));
+        assertEquals("eevee", json.get("id").asString());
+        assertEquals(eevee.formAt(1, null).maxHealth(), json.get("maxHealth").asInt());
     }
 
     private UnitDefinition unit(String id) {

@@ -1,31 +1,36 @@
 package net.lwenstrom.tft.backend.core;
 
 import java.util.Optional;
-import net.lwenstrom.tft.backend.core.engine.TraitManager;
 import net.lwenstrom.tft.backend.core.model.GameMode;
 
 public interface GameModeProvider {
     GameMode getMode();
 
-    String getUnitsPath();
+    default String getUnitsPath() {
+        return dataPath("units");
+    }
 
-    String getTraitsPath();
+    default String getTraitsPath() {
+        return dataPath("traits");
+    }
 
     default String getAugmentsPath() {
-        return "/data/augments_" + getMode().getValue() + ".json";
+        return dataPath("augments");
     }
 
     default String getItemsPath() {
-        return "/data/items_" + getMode().getValue() + ".json";
+        return dataPath("items");
     }
 
     default String getMatchRulesPath() {
-        return "/data/match_rules_" + getMode().getValue() + ".json";
+        return dataPath("match_rules");
     }
 
     default Optional<String> getAffinitiesPath() {
         return Optional.empty();
     }
 
-    void registerTraitEffects(TraitManager traitManager);
+    private String dataPath(String kind) {
+        return "/data/" + kind + "_" + getMode().getValue() + ".json";
+    }
 }

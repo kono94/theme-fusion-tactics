@@ -208,11 +208,7 @@ public class Player {
             }
             boardUnits.removeAll(unitsToRemove);
 
-            var def = dataLoader.getAllUnits(gameMode).stream()
-                    .filter(d -> d.lineId().equals(lineId))
-                    .findFirst()
-                    .orElse(null);
-
+            var def = findLineDefinition(lineId);
             if (def != null) {
                 var upgraded =
                         new StandardGameUnit(def, starLevel + 1, inheritedBranchId(targetPosUnit, unitsToRemove));
@@ -275,12 +271,12 @@ public class Player {
         var boardIndex = boardUnits.indexOf(unit);
         var x = unit.getX();
         var y = unit.getY();
-        grid.removeUnit(unit);
-        if (grid.isEmpty(x, y)) {
-            grid.placeUnit(evolved, x, y);
-        } else {
-            evolved.setPosition(x, y);
+        var occupant = grid.getUnitAt(x, y).orElse(null);
+        if (boardIndex < 0 || !grid.isValid(x, y) || (occupant != null && occupant != unit)) {
+            return false;
         }
+        grid.removeUnit(unit);
+        grid.placeUnit(evolved, x, y);
         boardUnits.set(boardIndex, evolved);
         return true;
     }

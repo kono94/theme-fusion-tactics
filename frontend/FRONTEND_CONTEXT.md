@@ -209,8 +209,8 @@ onto one half of the 9×6 combat canvas.
 unique instance IDs and mode-specific definition IDs. `/api/items?mode=...` provides names, descriptions, icons, and
 bonus metadata for analytics; owned copies in snapshots include their display data. The backend decides equip legality.
 
-Units carry nullable `branchId` and `evolutionOptions` (typed optional so client-built preview units may omit them).
-`evolutionOptions` is non-null only for a pending unit that still needs a branch choice; each `EvolutionOption` holds the
+Units carry optional `branchId` and `evolutionOptions`; the backend omits them while unset.
+`evolutionOptions` is present only for a pending unit that still needs a branch choice; each `EvolutionOption` holds the
 branch's identity, role, traits, key stats at the unit's star, ability name, the server-formatted ability description,
 and `laterForms`. `CHOOSE_EVOLUTION` sends `unitId` and `branchId`; it is planning-only and the backend auto-picks
 pending board units when combat starts.
@@ -236,8 +236,8 @@ pending board units when combat starts.
 - Keeps shop controls and bench-only drag/sell interactions available during combat while board movement, item moves, and orb
   collection remain planning-only.
 - Emits `GameAction` objects upward to `App.vue`.
-- Shows an "Evolve" badge on the local player's pending bench units (board badges come from `GameCanvas`'s `evolve`
-  emit) only during planning and never while spectating or eliminated. The badge opens `EvolutionChoiceOverlay`, whose
+- Shows the shared `EvolveBadge` on the local player's pending bench units (board badges come from `GameCanvas`'s
+  `evolve` emit) only during planning and never while spectating or eliminated. The badge opens `EvolutionChoiceOverlay`, whose
   `select` emit becomes a `CHOOSE_EVOLUTION` action. Visibility and action shape live in `utils/evolution.ts`;
   `UnitTooltip` shows a "Choose an evolution" hint for pending units.
 - Resolves hovered units from the latest snapshot. Planning board tooltips use backend projected item/trait/augment

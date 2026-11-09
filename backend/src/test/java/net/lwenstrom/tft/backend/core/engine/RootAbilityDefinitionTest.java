@@ -36,11 +36,11 @@ class RootAbilityDefinitionTest {
                 List.of("Water"),
                 ability);
 
-        assertSame(ability, definition.getAbility(1));
-        assertSame(ability, definition.getAbility(2));
-        assertSame(ability, definition.getAbility(3));
-        assertEquals(100, definition.getAbility(1).getValueForLevel(1));
-        assertEquals(200, definition.getAbility(2).getValueForLevel(2));
-        assertEquals(300, definition.getAbility(3).getValueForLevel(3));
+        assertSame(ability, definition.formAt(1, null).ability());
+        assertSame(ability, definition.formAt(2, null).ability());
+        assertSame(ability, definition.formAt(3, null).ability());
+        assertEquals(100, definition.formAt(1, null).ability().getValueForLevel(1));
+        assertEquals(200, definition.formAt(2, null).ability().getValueForLevel(2));
+        assertEquals(300, definition.formAt(3, null).ability().getValueForLevel(3));
     }
 }

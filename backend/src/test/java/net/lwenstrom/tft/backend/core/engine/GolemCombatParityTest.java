@@ -21,7 +21,7 @@ import tools.jackson.databind.json.JsonMapper;
 class GolemCombatParityTest {
     private final JsonMapper mapper = JsonMapper.builder().build();
     private final DataLoader loader =
-            new DataLoader(new GameModeRegistry(List.of(new PokemonGameModeProvider(mapper))), mapper);
+            new DataLoader(new GameModeRegistry(List.of(new PokemonGameModeProvider())), mapper);
 
     @Test
     void ownershipAndMirroredPositionsDoNotChangeGolemDamage() {

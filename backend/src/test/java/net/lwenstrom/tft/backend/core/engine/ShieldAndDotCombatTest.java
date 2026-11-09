@@ -15,11 +15,12 @@ import net.lwenstrom.tft.backend.core.model.DotModifier;
 import net.lwenstrom.tft.backend.core.model.EffectType;
 import net.lwenstrom.tft.backend.core.model.GameMode;
 import net.lwenstrom.tft.backend.core.model.GameUnit;
+import net.lwenstrom.tft.backend.core.model.TraitDefinition;
 import net.lwenstrom.tft.backend.core.model.TraitTargetScope;
 import net.lwenstrom.tft.backend.test.MockUnit;
 import net.lwenstrom.tft.backend.test.TestHelpers;
 import org.junit.jupiter.api.Test;
-import tools.jackson.databind.JsonNode;
+import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.json.JsonMapper;
 
 class ShieldAndDotCombatTest {
@@ -264,12 +265,7 @@ class ShieldAndDotCombatTest {
         assertEquals(18, normal.getDefense());
     }
 
-    private List<JsonNode> effects(String json) throws Exception {
-        var result = new java.util.ArrayList<JsonNode>();
-        var array = jsonMapper.readTree(json);
-        for (var effect : array) {
-            result.add(effect);
-        }
-        return result;
+    private List<TraitDefinition.Breakpoint> effects(String json) throws Exception {
+        return jsonMapper.readValue(json, new TypeReference<>() {});
     }
 }

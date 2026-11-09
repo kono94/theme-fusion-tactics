@@ -1,6 +1,21 @@
 [
-    {
-        "id": "broken",
-        "targetScope": "NOT_A_REAL_SCOPE"
-    }
+  {
+    "id": "broken",
+    "name": "Broken",
+    "type": "origin",
+    "targetScope": "NOT_A_REAL_SCOPE",
+    "description": "Broken trait.",
+    "iconColor": "#fff",
+    "effectType": "DEFENSE",
+    "effects": [
+      {
+        "minUnits": 2,
+        "description": "(2) +10 Defense",
+        "style": "bronze",
+        "values": {
+          "defense": 10
+        }
+      }
+    ]
+  }
 ]

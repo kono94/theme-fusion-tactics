@@ -33,7 +33,7 @@ class ItemSystemTest {
     @Test
     void bothModesLoadEightDistinctItems() {
         var mapper = JsonMapper.builder().build();
-        var registry = new GameModeRegistry(TestHelpers.allModeProviders(mapper));
+        var registry = new GameModeRegistry(TestHelpers.allModeProviders());
         var loader = new DataLoader(registry, mapper);
 
         assertEquals(8, loader.getItems(GameMode.ONEPIECE).size());
@@ -64,7 +64,7 @@ class ItemSystemTest {
     @Test
     void largeAndMixedProfilesAddBonusesBeforeApplyingThem() {
         var mapper = JsonMapper.builder().build();
-        var registry = new GameModeRegistry(TestHelpers.allModeProviders(mapper));
+        var registry = new GameModeRegistry(TestHelpers.allModeProviders());
         var loader = new DataLoader(registry, mapper);
         var catalog = loader.getItems(GameMode.ONEPIECE);
         var axe = catalog.stream()
@@ -93,7 +93,7 @@ class ItemSystemTest {
     @Test
     void scheduledRewardCanBeEquippedInBothModes() {
         var mapper = JsonMapper.builder().build();
-        var registry = new GameModeRegistry(TestHelpers.allModeProviders(mapper));
+        var registry = new GameModeRegistry(TestHelpers.allModeProviders());
         var loader = new DataLoader(registry, mapper);
         for (var mode : GameMode.values()) {
             var room = new GameRoom(

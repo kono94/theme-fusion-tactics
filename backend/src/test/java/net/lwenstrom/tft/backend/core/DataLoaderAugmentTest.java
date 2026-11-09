@@ -19,7 +19,7 @@ class DataLoaderAugmentTest {
     @Test
     void loadsAndValidatesModeAugments() {
         var jsonMapper = JsonMapper.builder().build();
-        var registry = new GameModeRegistry(TestHelpers.allModeProviders(jsonMapper));
+        var registry = new GameModeRegistry(TestHelpers.allModeProviders());
         var dataLoader = new DataLoader(registry, jsonMapper);
 
         validate(dataLoader, GameMode.ONEPIECE);

@@ -393,7 +393,9 @@ class BalanceSimulationReportTest {
         return board.spec().units().stream()
                 .map(unit -> {
                     var definition = unitById.get(unit.definitionId());
-                    return definition == null ? List.<String>of() : definition.getTraits(unit.starLevel());
+                    return definition == null
+                            ? List.<String>of()
+                            : definition.formAt(unit.starLevel(), null).traits();
                 })
                 .flatMap(List::stream)
                 .filter(unit -> unit != null)

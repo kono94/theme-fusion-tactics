@@ -81,7 +81,7 @@ class DataLoaderItemEffectTest {
     @Test
     void gen23ItemsLoadWithOneEffectEachWhileOtherModesStayStatOnly() {
         var mapper = JsonMapper.builder().build();
-        var loader = new DataLoader(new GameModeRegistry(TestHelpers.allModeProviders(mapper)), mapper);
+        var loader = new DataLoader(new GameModeRegistry(TestHelpers.allModeProviders()), mapper);
 
         var gen23 = loader.getItems(GameMode.POKEMON_GEN23);
         assertTrue(gen23.stream().allMatch(item -> item.effects().size() == 1));

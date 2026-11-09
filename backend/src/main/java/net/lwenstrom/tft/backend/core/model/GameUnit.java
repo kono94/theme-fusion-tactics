@@ -1,6 +1,7 @@
 package net.lwenstrom.tft.backend.core.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import java.util.Set;
@@ -16,10 +17,12 @@ public interface GameUnit {
 
     String getName();
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     default String getBranchId() {
         return null;
     }
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     default List<EvolutionOption> getEvolutionOptions() {
         return null;
     }
@@ -335,9 +338,21 @@ public interface GameUnit {
     default void setTeamAttackDamageOnKill(int bonus) {}
 
     @JsonIgnore
-    default HeldItemState getHeldItemState() {
-        return HeldItemState.none();
+    default CombatModifiers getCombatModifiers() {
+        return CombatModifiers.none();
     }
 
-    default void setHeldItemState(HeldItemState state) {}
+    @JsonIgnore
+    default float getAttackSpeedMultiplier() {
+        var multiplier = getSpdBuff();
+        if (getLowHpAsBonus() > 0 && (float) getCurrentHealth() / getMaxHealth() <= getLowHpAsThreshold()) {
+            multiplier += getLowHpAsBonus();
+        }
+        return multiplier + getCombatModifiers().attackSpeedBonus();
+    }
+
+    @JsonIgnore
+    default float getEffectiveExtraAttackChance() {
+        return getExtraAttackChance() + getCombatModifiers().extraAttackChance();
+    }
 }

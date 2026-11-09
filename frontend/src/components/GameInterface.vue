@@ -8,6 +8,7 @@ import PlayerList from './PlayerList.vue'
 import EndScreen from './EndScreen.vue'
 import AugmentSelectionOverlay from './AugmentSelectionOverlay.vue'
 import EvolutionChoiceOverlay from './EvolutionChoiceOverlay.vue'
+import EvolveBadge from './EvolveBadge.vue'
 import SettingsPanel from './SettingsPanel.vue'
 import ItemInventory from './ItemInventory.vue'
 import ItemTooltip from './game/ItemTooltip.vue'
@@ -1099,18 +1100,12 @@ watch(
                   <!-- 3-Star Conqueror Flow Effect (Before inner to be behind) -->
                   <div v-if="slot.unit.starLevel === 3" class="star-3-flow"></div>
 
-                  <button
+                  <EvolveBadge
                     v-if="canChooseEvolution(slot.unit, evolutionContext)"
-                    type="button"
-                    class="evolve-badge"
-                    draggable="false"
-                    :aria-label="`Choose evolution for ${slot.unit.name}`"
-                    data-testid="evolve-badge"
-                    @click.stop="openEvolutionChoice(slot.unit.id)"
-                    @dragstart.stop.prevent
-                  >
-                    Evolve
-                  </button>
+                    :unit-name="slot.unit.name"
+                    placement="bench"
+                    @evolve="openEvolutionChoice(slot.unit.id)"
+                  />
 
                   <div
                     class="bench-unit-inner"
@@ -1591,30 +1586,6 @@ watch(
   pointer-events: none;
   z-index: 2; /* Ensures portrait stays above halos/flows */
 }
-.evolve-badge {
-  position: absolute;
-  z-index: 12;
-  top: -8px;
-  left: 50%;
-  padding: 1px 6px;
-  border: 1px solid var(--room-accent-contrast, #0f172a);
-  border-radius: 999px;
-  color: var(--room-accent-contrast, #0f172a);
-  background: var(--room-accent, #f59e0b);
-  font-size: 10px;
-  font-weight: 900;
-  letter-spacing: 0.4px;
-  line-height: 1.4;
-  text-transform: uppercase;
-  transform: translateX(-50%);
-  cursor: pointer;
-}
-
-.evolve-badge:focus-visible {
-  outline: 2px solid #f8fafc;
-  outline-offset: 1px;
-}
-
 .bench-items {
   position: absolute;
   z-index: 5;

@@ -39,41 +39,41 @@ class BranchingEvolutionDefinitionTest {
         assertTrue(eevee.isPending(2, null));
         assertTrue(eevee.isPending(3, null));
         assertFalse(eevee.isPending(2, "jolteon"));
-        assertEquals("Eevee", eevee.getName(2));
-        assertEquals("eevee", eevee.getDefinitionId(3));
+        assertEquals("Eevee", eevee.formAt(2, null).name());
+        assertEquals("eevee", eevee.formAt(3, null).definitionId());
 
         assertFalse(ralts.isPending(2, null));
         assertTrue(ralts.isPending(3, null));
-        assertEquals("Kirlia", ralts.getName(2));
-        assertEquals("Kirlia", ralts.getName(3));
-        assertEquals("Wurmple", wurmple.getName(2));
+        assertEquals("Kirlia", ralts.formAt(2, null).name());
+        assertEquals("Kirlia", ralts.formAt(3, null).name());
+        assertEquals("Wurmple", wurmple.formAt(2, null).name());
     }
 
     @Test
     void chosenBranchesKeepApplyingAtHigherStars() {
-        assertEquals("Vaporeon", eevee.getName(2, "vaporeon"));
-        assertEquals("Vaporeon", eevee.getName(3, "vaporeon"));
-        assertEquals(List.of("Water"), eevee.getTraits(3, "vaporeon"));
-        assertEquals(UnitRole.TANK, eevee.getRole(3, "vaporeon"));
-        assertEquals("Gallade", ralts.getName(3, "gallade"));
-        assertEquals(List.of("Psychic", "Fighting"), ralts.getTraits(3, "gallade"));
-        assertEquals("Silcoon", wurmple.getName(2, "silcoon"));
-        assertEquals("beautifly", wurmple.getDefinitionId(3, "silcoon"));
-        assertEquals("dustox", wurmple.getDefinitionId(3, "cascoon"));
-        assertEquals("Wurmple", wurmple.getName(1, "silcoon"));
+        assertEquals("Vaporeon", eevee.formAt(2, "vaporeon").name());
+        assertEquals("Vaporeon", eevee.formAt(3, "vaporeon").name());
+        assertEquals(List.of("Water"), eevee.formAt(3, "vaporeon").traits());
+        assertEquals(UnitRole.TANK, eevee.formAt(3, "vaporeon").role());
+        assertEquals("Gallade", ralts.formAt(3, "gallade").name());
+        assertEquals(List.of("Psychic", "Fighting"), ralts.formAt(3, "gallade").traits());
+        assertEquals("Silcoon", wurmple.formAt(2, "silcoon").name());
+        assertEquals("beautifly", wurmple.formAt(3, "silcoon").definitionId());
+        assertEquals("dustox", wurmple.formAt(3, "cascoon").definitionId());
+        assertEquals("Wurmple", wurmple.formAt(1, "silcoon").name());
     }
 
     @Test
     void perFormStatArraysOverrideTheLineStats() {
-        assertEquals(1400, eevee.getMaxHealth(2, "vaporeon"));
-        assertEquals(2600, eevee.getMaxHealth(3, "vaporeon"));
-        assertEquals(40, eevee.getDefense(2, "vaporeon"));
-        assertEquals(900, eevee.getMaxHealth(2, "jolteon"));
-        assertEquals(1.0f, eevee.getAttackSpeed(2, "jolteon"));
-        assertEquals(2, eevee.getActiveRange(2, "jolteon"));
-        assertEquals(95, eevee.getAttackDamage(2, "flareon"));
-        assertEquals(70, eevee.getAttackDamage(2));
-        assertEquals(50, eevee.getMaxMana(2, "flareon"));
+        assertEquals(1400, eevee.formAt(2, "vaporeon").maxHealth());
+        assertEquals(2600, eevee.formAt(3, "vaporeon").maxHealth());
+        assertEquals(40, eevee.formAt(2, "vaporeon").defense());
+        assertEquals(900, eevee.formAt(2, "jolteon").maxHealth());
+        assertEquals(1.0f, eevee.formAt(2, "jolteon").attackSpeed());
+        assertEquals(2, eevee.formAt(2, "jolteon").range());
+        assertEquals(95, eevee.formAt(2, "flareon").attackDamage());
+        assertEquals(70, eevee.formAt(2, null).attackDamage());
+        assertEquals(50, eevee.formAt(2, "flareon").maxMana());
 
         var unit = new StandardGameUnit(eevee, 2, "vaporeon");
         assertEquals(1400, unit.getMaxHealth());
@@ -133,13 +133,12 @@ class BranchingEvolutionDefinitionTest {
     @Test
     void existingModeDataResolvesExactlyAsTheExactStarLookup() {
         var jsonMapper = JsonMapper.builder().build();
-        var dataLoader = new DataLoader(new GameModeRegistry(TestHelpers.allModeProviders(jsonMapper)), jsonMapper);
+        var dataLoader = new DataLoader(new GameModeRegistry(TestHelpers.allModeProviders()), jsonMapper);
         for (var mode : GameMode.values()) {
             for (var unit : dataLoader.getAllUnits(mode)) {
-                if (mode == GameMode.POKEMON_GEN23 && unit.branchPoint() > 0) {
+                if (unit.branchPoint() > 0) {
                     continue;
                 }
-                assertEquals(-1, unit.branchPoint(), unit.id());
                 for (var star = 1; star <= 3; star++) {
                     var level = star;
                     var exact = unit.forms().stream()
