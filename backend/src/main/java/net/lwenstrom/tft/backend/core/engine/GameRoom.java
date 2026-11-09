@@ -536,6 +536,11 @@ public class GameRoom {
                         yield true;
                     }
                     case MOVE_ITEM -> player.moveItem(action.itemInstanceId(), action.targetUnitId());
+                    case CHOOSE_EVOLUTION ->
+                        phase == GamePhase.PLANNING
+                                && action.unitId() != null
+                                && action.branchId() != null
+                                && player.chooseEvolution(action.unitId(), action.branchId());
                     case READY_FOR_COMBAT, SELECT_AUGMENT -> false;
                 };
 
@@ -554,7 +559,7 @@ public class GameRoom {
                         && action.targetY() == -1
                         && player.hasBenchUnit(action.unitId());
             case SELL -> action.unitId() != null && player.hasBenchUnit(action.unitId());
-            case COLLECT_ORB, READY_FOR_COMBAT, SELECT_AUGMENT, MOVE_ITEM -> false;
+            case COLLECT_ORB, READY_FOR_COMBAT, SELECT_AUGMENT, MOVE_ITEM, CHOOSE_EVOLUTION -> false;
         };
     }
 
@@ -741,6 +746,7 @@ public class GameRoom {
                 p.setInCombat(true);
                 p.autoFillBoard();
             });
+            resolvePendingEvolutions();
 
             recordAnalytics(() -> analyticsRecorder.roundStarted(
                     analyticsMatchKey, round, clock.currentTimeMillis(), aliveHumanPlayers()));
@@ -870,6 +876,13 @@ public class GameRoom {
             var choices = augmentManager.generateOffers(player, tier);
             player.setAugmentChoices(choices);
         });
+    }
+
+    private void resolvePendingEvolutions() {
+        var evaluator = new BotTeamEvaluator(dataLoader.getTraitMetadata(gameMode));
+        players.values().stream()
+                .filter(player -> player.getHealth() > 0)
+                .forEach(player -> EvolutionPicker.resolvePendingBoardUnits(player, evaluator, randomProvider));
     }
 
     private void selectRandomPendingAugments() {

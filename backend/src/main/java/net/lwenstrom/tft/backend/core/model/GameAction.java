@@ -11,7 +11,35 @@ public record GameAction(
         String augmentId,
         String clientActionId,
         String itemInstanceId,
-        String targetUnitId) {
+        String targetUnitId,
+        String branchId) {
+
+    public GameAction(
+            ActionType type,
+            String playerId,
+            String unitId,
+            String orbId,
+            Integer targetX,
+            Integer targetY,
+            Integer shopIndex,
+            String augmentId,
+            String clientActionId,
+            String itemInstanceId,
+            String targetUnitId) {
+        this(
+                type,
+                playerId,
+                unitId,
+                orbId,
+                targetX,
+                targetY,
+                shopIndex,
+                augmentId,
+                clientActionId,
+                itemInstanceId,
+                targetUnitId,
+                null);
+    }
 
     public GameAction(
             ActionType type,

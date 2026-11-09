@@ -95,78 +95,90 @@ class RoleBalanceSimulationTest {
 
     private Matchup createMatchup(
             List<UnitDefinition> definitions, int boardSize, int starLevel, Random random, int index) {
-        var balancedDefinitions = new ArrayList<UnitDefinition>();
-        var damageDefinitions = new ArrayList<UnitDefinition>();
+        var variants = variantsAt(definitions, starLevel);
+        var balancedVariants = new ArrayList<Variant>();
+        var damageVariants = new ArrayList<Variant>();
         var balancedIds = new HashSet<String>();
         var damageIds = new HashSet<String>();
 
         for (var role : BALANCED_LAYOUTS.get(boardSize)) {
-            var roleCandidates = definitions.stream()
-                    .filter(definition -> definition.getRole(starLevel) == role)
-                    .filter(definition -> !balancedIds.contains(definition.lineId()))
-                    .filter(definition ->
-                            hasDamageCandidateAtCost(definitions, definition.cost(), starLevel, damageIds))
+            var roleCandidates = variants.stream()
+                    .filter(variant -> variant.role(starLevel) == role)
+                    .filter(variant -> !balancedIds.contains(variant.lineId()))
+                    .filter(variant -> hasDamageCandidateAtCost(variants, variant.cost(), starLevel, damageIds))
                     .toList();
             var balanced = roleCandidates.get(random.nextInt(roleCandidates.size()));
-            var damageCandidates = definitions.stream()
-                    .filter(definition -> definition.cost() == balanced.cost())
-                    .filter(definition -> definition.getRole(starLevel) == UnitRole.DAMAGE)
-                    .filter(definition -> !damageIds.contains(definition.lineId()))
+            var damageCandidates = variants.stream()
+                    .filter(variant -> variant.cost() == balanced.cost())
+                    .filter(variant -> variant.role(starLevel) == UnitRole.DAMAGE)
+                    .filter(variant -> !damageIds.contains(variant.lineId()))
                     .toList();
             var damage = damageCandidates.get(random.nextInt(damageCandidates.size()));
 
-            balancedDefinitions.add(balanced);
-            damageDefinitions.add(damage);
+            balancedVariants.add(balanced);
+            damageVariants.add(damage);
             balancedIds.add(balanced.lineId());
             damageIds.add(damage.lineId());
         }
 
         return new Matchup(
-                new BoardSpec("Balanced " + index, boardSize, positionBalancedUnits(balancedDefinitions, starLevel)),
-                new BoardSpec("Damage " + index, boardSize, positionDamageUnits(damageDefinitions, starLevel)),
-                balancedDefinitions.stream()
-                        .map(definition -> new SelectedUnit(
-                                definition.lineId(),
-                                definition.getName(starLevel),
-                                definition.cost(),
+                new BoardSpec("Balanced " + index, boardSize, positionBalancedUnits(balancedVariants, starLevel)),
+                new BoardSpec("Damage " + index, boardSize, positionDamageUnits(damageVariants, starLevel)),
+                balancedVariants.stream()
+                        .map(variant -> new SelectedUnit(
+                                variant.lineId(),
+                                variant.definition().getName(starLevel, variant.branchId()),
+                                variant.cost(),
                                 starLevel,
-                                definition.getRole(starLevel)))
+                                variant.role(starLevel)))
                         .toList());
     }
 
-    private boolean hasDamageCandidateAtCost(
-            List<UnitDefinition> definitions, int cost, int starLevel, Set<String> selectedIds) {
-        return definitions.stream()
-                .anyMatch(definition -> definition.cost() == cost
-                        && definition.getRole(starLevel) == UnitRole.DAMAGE
-                        && !selectedIds.contains(definition.lineId()));
+    private static List<Variant> variantsAt(List<UnitDefinition> definitions, int starLevel) {
+        var variants = new ArrayList<Variant>();
+        for (var definition : definitions) {
+            if (definition.isPending(starLevel, null)) {
+                definition.branchIdsAt(definition.branchPoint()).stream()
+                        .map(branchId -> new Variant(definition, branchId))
+                        .forEach(variants::add);
+            } else {
+                variants.add(new Variant(definition, null));
+            }
+        }
+        return variants;
     }
 
-    private List<UnitSpec> positionBalancedUnits(List<UnitDefinition> definitions, int starLevel) {
+    private boolean hasDamageCandidateAtCost(List<Variant> variants, int cost, int starLevel, Set<String> selectedIds) {
+        return variants.stream()
+                .anyMatch(variant -> variant.cost() == cost
+                        && variant.role(starLevel) == UnitRole.DAMAGE
+                        && !selectedIds.contains(variant.lineId()));
+    }
+
+    private List<UnitSpec> positionBalancedUnits(List<Variant> variants, int starLevel) {
         var specs = new ArrayList<UnitSpec>();
         var frontIndex = 0;
         var backIndex = 0;
 
-        for (var definition : definitions) {
-            var role = definition.getRole(starLevel);
-            var isTank = role == UnitRole.TANK;
+        for (var variant : variants) {
+            var isTank = variant.role(starLevel) == UnitRole.TANK;
             var x = isTank ? 3 + frontIndex++ : 2 + backIndex++;
             var y = isTank ? 0 : 2;
-            specs.add(new UnitSpec(definition.id(), starLevel, x, y));
+            specs.add(new UnitSpec(variant.definition().id(), starLevel, x, y, variant.branchId()));
         }
         return specs;
     }
 
-    private List<UnitSpec> positionDamageUnits(List<UnitDefinition> definitions, int starLevel) {
+    private List<UnitSpec> positionDamageUnits(List<Variant> variants, int starLevel) {
         var specs = new ArrayList<UnitSpec>();
         var frontIndex = 0;
         var backIndex = 0;
 
-        for (var definition : definitions) {
-            var ranged = definition.getActiveRange(starLevel) > 1;
+        for (var variant : variants) {
+            var ranged = variant.definition().getActiveRange(starLevel, variant.branchId()) > 1;
             var x = ranged ? 2 + backIndex++ : 3 + frontIndex++;
             var y = ranged ? 2 : 0;
-            specs.add(new UnitSpec(definition.id(), starLevel, x, y));
+            specs.add(new UnitSpec(variant.definition().id(), starLevel, x, y, variant.branchId()));
         }
         return specs;
     }
@@ -292,6 +304,20 @@ class RoleBalanceSimulationTest {
     }
 
     private record Matchup(BoardSpec balanced, BoardSpec damageOnly, List<SelectedUnit> balancedUnits) {}
+
+    private record Variant(UnitDefinition definition, String branchId) {
+        String lineId() {
+            return definition.lineId();
+        }
+
+        int cost() {
+            return definition.cost();
+        }
+
+        UnitRole role(int starLevel) {
+            return definition.getRole(starLevel, branchId);
+        }
+    }
 
     private record SelectedUnit(String lineId, String name, int cost, int starLevel, UnitRole role) {}
 

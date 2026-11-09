@@ -5,8 +5,15 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import net.lwenstrom.tft.backend.core.engine.UnitDefinition;
 import net.lwenstrom.tft.backend.core.model.GameMode;
+import net.lwenstrom.tft.backend.core.model.TraitCatalogEntry;
+import net.lwenstrom.tft.backend.core.model.TraitMetadata;
 import net.lwenstrom.tft.backend.core.model.TraitRosterUnit;
+import net.lwenstrom.tft.backend.test.BranchingTestUnits;
 import net.lwenstrom.tft.backend.test.TestHelpers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -75,5 +82,45 @@ class TraitCatalogServiceTest {
         assertFalse(pokemonIds.contains("luffy_v1"));
         assertTrue(onePieceIds.contains("luffy_v1"));
         assertFalse(onePieceIds.contains("charmander"));
+    }
+
+    @Test
+    void rosterListsBranchFormsUnderEveryBranchTrait() {
+        var units = BranchingTestUnits.load();
+        var traitIds = List.of("normal", "water", "electric", "fire", "psychic", "fighting", "bug", "flying", "poison");
+        var traits = traitIds.stream()
+                .map(id -> new TraitMetadata(id, id, "", "type", null, "#fff", List.of(), Map.of()))
+                .toList();
+        var dataLoader = new DataLoader(
+                TestHelpers.createMockRegistry(), JsonMapper.builder().build()) {
+            @Override
+            public List<UnitDefinition> getAllUnits(GameMode mode) {
+                return units;
+            }
+
+            @Override
+            public List<TraitMetadata> getTraitMetadata(GameMode mode) {
+                return traits;
+            }
+        };
+        var roster = new TraitCatalogService(dataLoader)
+                .getTraits(GameMode.ONEPIECE).stream()
+                        .collect(Collectors.toMap(TraitCatalogEntry::id, entry -> entry.units()));
+
+        assertEquals(List.of("eevee"), definitionIds(roster.get("normal")));
+        assertEquals(List.of("vaporeon"), definitionIds(roster.get("water")));
+        assertEquals(List.of("jolteon"), definitionIds(roster.get("electric")));
+        assertEquals(List.of("flareon"), definitionIds(roster.get("fire")));
+        assertEquals(2, roster.get("water").getFirst().starLevel());
+        assertEquals(1400, roster.get("water").getFirst().maxHealth());
+        assertEquals(List.of("ralts"), definitionIds(roster.get("psychic")));
+        assertEquals(List.of("gallade"), definitionIds(roster.get("fighting")));
+        assertEquals(List.of("beautifly"), definitionIds(roster.get("flying")));
+        assertEquals(List.of("dustox"), definitionIds(roster.get("poison")));
+        assertEquals(List.of("wurmple"), definitionIds(roster.get("bug")));
+    }
+
+    private static List<String> definitionIds(List<TraitRosterUnit> units) {
+        return units.stream().map(TraitRosterUnit::definitionId).toList();
     }
 }

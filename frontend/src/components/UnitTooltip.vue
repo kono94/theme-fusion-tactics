@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { GameUnit, UnitDefinition, UnitRole, UnitStats } from '../types'
-import { getTraitData } from '../data/traitData'
+import { traitTagStyle } from '../utils/traitTagStyle'
+import { evolutionHint } from '../utils/evolution'
 
 type TooltipUnit = Partial<GameUnit & UnitDefinition> & {
     formattedAbilityDescription?: string
@@ -53,17 +54,7 @@ const attackStyle = computed(() => Number(stats.value.range) === 1 ? 'MELEE' : '
 const formatRole = (value: UnitRole): string =>
     value.charAt(0) + value.slice(1).toLowerCase()
 
-const NEUTRAL_TRAIT_COLOR = '#94a3b8'
-
-const traitTagStyle = (trait: string) => {
-    const color = getTraitData(trait)?.iconColor || NEUTRAL_TRAIT_COLOR
-    const hex = color.match(/^#([0-9a-f]{6})$/i)?.[1]
-    const backgroundColor = hex
-        ? `rgba(${Number.parseInt(hex.slice(0, 2), 16)}, ${Number.parseInt(hex.slice(2, 4), 16)}, ${Number.parseInt(hex.slice(4, 6), 16)}, 0.14)`
-        : 'rgba(148, 163, 184, 0.14)'
-
-    return { color, borderColor: color, backgroundColor }
-}
+const evolutionHintText = computed(() => evolutionHint(props.unit))
 
 const rarityColor = computed(() => {
     const cost = props.unit.cost || 1
@@ -93,6 +84,7 @@ const rarityColor = computed(() => {
           <span class="role-badge" :class="`role-${role.toLowerCase()}`">{{ formatRole(role) }}</span>
           <span class="range-badge" :class="`range-${attackStyle.toLowerCase()}`">{{ attackStyle }}</span>
       </div>
+      <div v-if="evolutionHintText" class="evolution-hint" data-testid="evolution-hint">{{ evolutionHintText }}</div>
       <div v-if="preview" class="preview-label">{{ unit.y === -1 ? 'Item-adjusted bench stats' : 'Projected combat-start stats' }}</div>
       <div class="stats-grid">
           <div class="stat-row">
@@ -140,6 +132,17 @@ const rarityColor = computed(() => {
 </template>
 
 <style scoped>
+.evolution-hint {
+    margin-bottom: 6px;
+    padding: 4px 6px;
+    border: 1px solid var(--room-accent, #f59e0b);
+    border-radius: 6px;
+    color: var(--room-accent, #f59e0b);
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
 .unit-tooltip :deep(.active) {
     color: #ffd700;
     font-weight: bold;

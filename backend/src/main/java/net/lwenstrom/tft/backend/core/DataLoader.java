@@ -113,12 +113,67 @@ public class DataLoader {
                 throw new IllegalStateException("Could not find units at " + path);
             }
             List<UnitDefinition> units = jsonMapper.readValue(inputStream, new TypeReference<>() {});
+            units.forEach(DataLoader::validateUnitForms);
             var registry = units.stream().collect(Collectors.toMap(UnitDefinition::id, unit -> unit));
             log.info("Loaded {} units from {}", registry.size(), path);
             return registry;
         } catch (Exception e) {
             throw new RuntimeException("Failed to load unit data: " + path, e);
         }
+    }
+
+    public static void validateUnitForms(UnitDefinition unit) {
+        var forms = unit.forms();
+        var formKeys = new HashSet<String>();
+        for (var form : forms) {
+            if (!formKeys.add(form.starLevel() + ":" + form.branchId())) {
+                throw invalidForms(unit, "duplicate form for star " + form.starLevel() + branchLabel(form.branchId()));
+            }
+            validateFormStats(unit, form.branchId(), "maxHealth", form.maxHealth());
+            validateFormStats(unit, form.branchId(), "maxMana", form.maxMana());
+            validateFormStats(unit, form.branchId(), "attackDamage", form.attackDamage());
+            validateFormStats(unit, form.branchId(), "defense", form.defense());
+            validateFormStats(unit, form.branchId(), "attackSpeed", form.attackSpeed());
+        }
+
+        var branchPoint = unit.branchPoint();
+        if (branchPoint < 0) {
+            return;
+        }
+        if (branchPoint < 2) {
+            throw invalidForms(unit, "branch point must be at least 2 stars but is " + branchPoint);
+        }
+        var declaredBranches = unit.branchIdsAt(branchPoint);
+        if (declaredBranches.size() < 2) {
+            throw invalidForms(unit, "branch point " + branchPoint + " needs at least 2 distinct branches");
+        }
+        for (var form : forms) {
+            if (form.branchId() == null && form.starLevel() >= branchPoint) {
+                throw invalidForms(
+                        unit,
+                        "unbranched form at star " + form.starLevel() + " is at or above branch point " + branchPoint);
+            }
+            if (form.branchId() != null && !declaredBranches.contains(form.branchId())) {
+                throw invalidForms(
+                        unit,
+                        "branch '" + form.branchId() + "' at star " + form.starLevel()
+                                + " is not declared at branch point " + branchPoint);
+            }
+        }
+    }
+
+    private static void validateFormStats(UnitDefinition unit, String branchId, String stat, List<?> values) {
+        if (values != null && values.size() != 3) {
+            throw invalidForms(unit, stat + branchLabel(branchId) + " must contain exactly three star-level values");
+        }
+    }
+
+    private static String branchLabel(String branchId) {
+        return branchId == null ? "" : " (branch '" + branchId + "')";
+    }
+
+    private static IllegalStateException invalidForms(UnitDefinition unit, String reason) {
+        return new IllegalStateException("Invalid forms for unit " + unit.id() + ": " + reason);
     }
 
     private List<TraitMetadata> loadTraits(String path) {

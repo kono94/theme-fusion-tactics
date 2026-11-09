@@ -11,4 +11,28 @@ public record UnitFormDefinition(
         UnitRole role,
         List<String> traits,
         List<Integer> range,
-        AbilityDefinition ability) {}
+        AbilityDefinition ability,
+        String branchId,
+        List<Integer> maxHealth,
+        List<Integer> maxMana,
+        List<Integer> attackDamage,
+        List<Integer> defense,
+        List<Float> attackSpeed) {
+
+    public UnitFormDefinition(
+            int starLevel,
+            String definitionId,
+            String name,
+            UnitRole role,
+            List<String> traits,
+            List<Integer> range,
+            AbilityDefinition ability) {
+        this(starLevel, definitionId, name, role, traits, range, ability, null, null, null, null, null, null);
+    }
+
+    public UnitFormDefinition {
+        if (branchId != null && branchId.isBlank()) {
+            branchId = null;
+        }
+    }
+}

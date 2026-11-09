@@ -106,4 +106,30 @@ describe('UnitTooltip', () => {
         expect(tags[0].attributes('style')).toContain('rgb(34, 197, 94)')
         expect(tags[1].attributes('style')).toContain('rgb(148, 163, 184)')
     })
+
+    it('shows a pending evolution hint only for pending units', () => {
+        const base = { ...unitDefinition(), evolutionOptions: null }
+        const plain = mount(UnitTooltip, { props: { unit: base } })
+        expect(plain.find('[data-testid="evolution-hint"]').exists()).toBe(false)
+        plain.unmount()
+
+        const option = {
+            definitionId: 'x', role: 'TANK' as const, traits: [], range: 1, maxHealth: 1, attackDamage: 1,
+            defense: 1, attackSpeed: 1, maxMana: 1, abilityName: null, abilityDescription: '', laterForms: [],
+        }
+        const pending = mount(UnitTooltip, {
+            props: {
+                unit: {
+                    ...base,
+                    evolutionOptions: [
+                        { ...option, branchId: 'silcoon', name: 'Silcoon' },
+                        { ...option, branchId: 'cascoon', name: 'Cascoon' },
+                    ],
+                },
+            },
+        })
+        expect(pending.get('[data-testid="evolution-hint"]').text()).toBe('Choose an evolution: Silcoon, Cascoon')
+        pending.unmount()
+    })
 })
+

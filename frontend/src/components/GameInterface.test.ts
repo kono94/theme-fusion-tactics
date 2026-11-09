@@ -425,3 +425,79 @@ describe('GameInterface match rules and economy', () => {
         wrapper.unmount()
     })
 })
+
+describe('GameInterface evolution choice', () => {
+    function pendingBenchUnit(): GameUnit {
+        return {
+            ...benchUnit(),
+            branchId: null,
+            evolutionOptions: [
+                {
+                    branchId: 'silcoon', definitionId: 'silcoon', name: 'Silcoon', role: 'TANK', traits: ['Bug'],
+                    range: 1, maxHealth: 900, attackDamage: 70, defense: 20, attackSpeed: 0.7, maxMana: 50,
+                    abilityName: 'Harden', abilityDescription: 'Hardens.',
+                    laterForms: [{ starLevel: 3, definitionId: 'beautifly', name: 'Beautifly' }],
+                },
+                {
+                    branchId: 'cascoon', definitionId: 'cascoon', name: 'Cascoon', role: 'TANK', traits: ['Bug'],
+                    range: 1, maxHealth: 900, attackDamage: 70, defense: 20, attackSpeed: 0.7, maxMana: 50,
+                    abilityName: 'Harden', abilityDescription: 'Hardens.', laterForms: [],
+                },
+            ],
+        }
+    }
+
+    it('opens the overlay from the bench badge and emits a CHOOSE_EVOLUTION action', async () => {
+        const state = gameState('PLANNING', 100, 1)
+        state.players['player-1'].bench = [pendingBenchUnit(), { ...benchUnit(), id: 'plain-unit' }]
+        const wrapper = mount(GameInterface, {
+            props: { state, currentPlayerId: 'player-1' },
+            global: { stubs: childStubs },
+        })
+
+        expect(wrapper.findAll('[data-testid="evolve-badge"]')).toHaveLength(1)
+        expect(wrapper.find('.evolution-layer').exists()).toBe(false)
+        await wrapper.get('[data-testid="evolve-badge"]').trigger('click')
+        expect(wrapper.findAll('.evolution-card')).toHaveLength(2)
+
+        await wrapper.findAll('.evolution-card')[1]!.trigger('click')
+
+        const action = wrapper.emitted('action')?.at(-1)?.[0] as GameAction
+        expect(action).toEqual({
+            type: 'CHOOSE_EVOLUTION',
+            playerId: 'player-1',
+            unitId: 'bench-unit',
+            branchId: 'cascoon',
+        })
+        wrapper.unmount()
+    })
+
+    it('hides the bench badge outside planning', () => {
+        const state = gameState('COMBAT', 100, 1)
+        state.players['player-1'].bench = [pendingBenchUnit()]
+        const wrapper = mount(GameInterface, {
+            props: { state, currentPlayerId: 'player-1' },
+            global: { stubs: childStubs },
+        })
+
+        expect(wrapper.find('[data-testid="evolve-badge"]').exists()).toBe(false)
+        wrapper.unmount()
+    })
+
+    it('closes the overlay with the cancel button without sending an action', async () => {
+        const state = gameState('PLANNING', 100, 1)
+        state.players['player-1'].bench = [pendingBenchUnit()]
+        const wrapper = mount(GameInterface, {
+            props: { state, currentPlayerId: 'player-1' },
+            global: { stubs: childStubs },
+        })
+
+        await wrapper.get('[data-testid="evolve-badge"]').trigger('click')
+        await wrapper.get('.cancel-button').trigger('click')
+
+        expect(wrapper.find('.evolution-layer').exists()).toBe(false)
+        expect(wrapper.emitted('action')).toBeUndefined()
+        wrapper.unmount()
+    })
+})
+

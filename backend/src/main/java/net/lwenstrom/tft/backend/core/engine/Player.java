@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -213,7 +214,8 @@ public class Player {
                     .orElse(null);
 
             if (def != null) {
-                var upgraded = new StandardGameUnit(def, starLevel + 1);
+                var upgraded =
+                        new StandardGameUnit(def, starLevel + 1, inheritedBranchId(targetPosUnit, unitsToRemove));
                 upgraded.setOwnerId(this.id);
                 carriedItems.stream().limit(itemSlotsPerUnit).forEach(upgraded.getItems()::add);
                 carriedItems.stream().skip(itemSlotsPerUnit).forEach(inventory::add);
@@ -232,6 +234,62 @@ public class Player {
                 checkUpgrade(lineId, starLevel + 1);
             }
         }
+    }
+
+    private static String inheritedBranchId(GameUnit survivor, List<GameUnit> mergedUnits) {
+        if (survivor.getBranchId() != null) {
+            return survivor.getBranchId();
+        }
+        return mergedUnits.stream()
+                .map(GameUnit::getBranchId)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
+    }
+
+    public boolean chooseEvolution(String unitId, String branchId) {
+        if (unitId == null || branchId == null) {
+            return false;
+        }
+        var unit = ownedUnits()
+                .filter(candidate -> candidate.getId().equals(unitId))
+                .findFirst()
+                .orElse(null);
+        if (unit == null || unit.getBranchId() != null) {
+            return false;
+        }
+        var def = findLineDefinition(unit.getLineId());
+        if (def == null || !def.isPending(unit.getStarLevel(), null) || !def.offersBranch(branchId)) {
+            return false;
+        }
+
+        var evolved = new StandardGameUnit(def, unit.getStarLevel(), branchId);
+        evolved.setOwnerId(this.id);
+        evolved.getItems().addAll(unit.getItems());
+
+        var benchEntry = bench.findUnit(unitId);
+        if (benchEntry.isPresent()) {
+            bench.set(benchEntry.get().index(), evolved);
+            return true;
+        }
+        var boardIndex = boardUnits.indexOf(unit);
+        var x = unit.getX();
+        var y = unit.getY();
+        grid.removeUnit(unit);
+        if (grid.isEmpty(x, y)) {
+            grid.placeUnit(evolved, x, y);
+        } else {
+            evolved.setPosition(x, y);
+        }
+        boardUnits.set(boardIndex, evolved);
+        return true;
+    }
+
+    UnitDefinition findLineDefinition(String lineId) {
+        return dataLoader.getAllUnits(gameMode).stream()
+                .filter(d -> d.lineId().equals(lineId))
+                .findFirst()
+                .orElse(null);
     }
 
     private int getRequiredCopiesForUpgrade(int starLevel) {
@@ -636,8 +694,12 @@ public class Player {
     }
 
     public void addUnitToBoard(UnitDefinition def, int x, int y, int starLevel) {
+        addUnitToBoard(def, x, y, starLevel, null);
+    }
+
+    public void addUnitToBoard(UnitDefinition def, int x, int y, int starLevel, String branchId) {
         if (boardUnits.size() >= level) return;
-        var unit = new StandardGameUnit(def, starLevel);
+        var unit = new StandardGameUnit(def, starLevel, branchId);
         unit.setOwnerId(this.id);
         if (grid.isValid(x, y) && grid.isEmpty(x, y)) {
             grid.placeUnit(unit, x, y);

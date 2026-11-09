@@ -1,5 +1,6 @@
 package net.lwenstrom.tft.backend.core;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -37,32 +38,51 @@ public class TraitCatalogService {
     }
 
     private Optional<TraitRosterUnit> getRosterUnit(String traitId, UnitDefinition unit) {
+        var branchPoint = unit.branchPoint();
+        var branchIds = branchPoint > 0 ? unit.branchIdsAt(branchPoint) : List.<String>of();
         for (var starLevel = 1; starLevel <= MAX_STAR_LEVEL; starLevel++) {
-            var traits = unit.getTraits(starLevel);
-            var hasTrait = traits.stream().map(TraitManager::normalizeTraitId).anyMatch(traitId::equals);
-            if (!hasTrait) {
-                continue;
+            var candidates = new ArrayList<String>();
+            if (!unit.isPending(starLevel, null)) {
+                candidates.add(null);
             }
-
-            var ability = unit.getAbility(starLevel);
-            return Optional.of(new TraitRosterUnit(
-                    unit.lineId(),
-                    unit.cost(),
-                    starLevel,
-                    unit.getDefinitionId(starLevel),
-                    unit.getName(starLevel),
-                    unit.getRole(starLevel),
-                    unit.getMaxHealth(starLevel),
-                    unit.getMaxMana(starLevel),
-                    unit.getAttackDamage(starLevel),
-                    unit.getAbilityPower(starLevel),
-                    unit.getDefense(starLevel),
-                    unit.getAttackSpeed(starLevel),
-                    unit.getActiveRange(starLevel),
-                    traits,
-                    ability,
-                    ability != null ? ability.getFormattedDescription(starLevel) : ""));
+            if (branchPoint > 0 && starLevel >= branchPoint) {
+                candidates.addAll(branchIds);
+            }
+            for (var branchId : candidates) {
+                var rosterUnit = rosterUnitWithTrait(traitId, unit, starLevel, branchId);
+                if (rosterUnit.isPresent()) {
+                    return rosterUnit;
+                }
+            }
         }
         return Optional.empty();
+    }
+
+    private Optional<TraitRosterUnit> rosterUnitWithTrait(
+            String traitId, UnitDefinition unit, int starLevel, String branchId) {
+        var traits = unit.getTraits(starLevel, branchId);
+        var hasTrait = traits.stream().map(TraitManager::normalizeTraitId).anyMatch(traitId::equals);
+        if (!hasTrait) {
+            return Optional.empty();
+        }
+
+        var ability = unit.getAbility(starLevel, branchId);
+        return Optional.of(new TraitRosterUnit(
+                unit.lineId(),
+                unit.cost(),
+                starLevel,
+                unit.getDefinitionId(starLevel, branchId),
+                unit.getName(starLevel, branchId),
+                unit.getRole(starLevel, branchId),
+                unit.getMaxHealth(starLevel, branchId),
+                unit.getMaxMana(starLevel, branchId),
+                unit.getAttackDamage(starLevel, branchId),
+                unit.getAbilityPower(starLevel),
+                unit.getDefense(starLevel, branchId),
+                unit.getAttackSpeed(starLevel, branchId),
+                unit.getActiveRange(starLevel, branchId),
+                traits,
+                ability,
+                ability != null ? ability.getFormattedDescription(starLevel) : ""));
     }
 }

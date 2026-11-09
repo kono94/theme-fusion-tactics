@@ -118,7 +118,12 @@ public class CombatSimulator {
                 throw new IllegalArgumentException(
                         "Unknown unit for " + request.mode() + ": " + unitSpec.definitionId());
             }
-            player.addUnitToBoard(def, unitSpec.x(), unitSpec.y(), unitSpec.starLevel());
+            var branchId = unitSpec.branchId();
+            if (branchId == null && def.isPending(unitSpec.starLevel(), null)) {
+                var branches = def.branchIdsAt(def.branchPoint());
+                branchId = branches.get(randomProvider.nextInt(branches.size()));
+            }
+            player.addUnitToBoard(def, unitSpec.x(), unitSpec.y(), unitSpec.starLevel(), branchId);
         }
         return player;
     }

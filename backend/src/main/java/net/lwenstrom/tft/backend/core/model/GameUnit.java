@@ -16,6 +16,19 @@ public interface GameUnit {
 
     String getName();
 
+    default String getBranchId() {
+        return null;
+    }
+
+    default List<EvolutionOption> getEvolutionOptions() {
+        return null;
+    }
+
+    @JsonIgnore
+    default boolean isEvolutionPending() {
+        return getEvolutionOptions() != null;
+    }
+
     int getCost();
 
     UnitRole getRole();

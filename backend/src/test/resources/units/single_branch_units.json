@@ -1,0 +1,66 @@
+[
+  {
+    "id": "eevee",
+    "lineId": "eevee",
+    "name": "Eevee",
+    "cost": 2,
+    "role": "DAMAGE",
+    "maxHealth": [500, 900, 1600],
+    "maxMana": [50, 50, 60],
+    "attackDamage": [40, 70, 120],
+    "abilityPower": [0, 0, 0],
+    "defense": [20, 20, 20],
+    "attackSpeed": [0.7, 0.7, 0.7],
+    "range": [1, 1, 1],
+    "traits": [
+      "Normal"
+    ],
+    "ability": {
+      "name": "Eevee Strike",
+      "description": "Eevee Strike deals $value damage.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [10, 20, 30],
+      "range": [1, 1, 2]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "eevee",
+        "name": "Eevee",
+        "role": "DAMAGE",
+        "traits": [
+          "Normal"
+        ],
+        "ability": {
+          "name": "Eevee Move",
+          "description": "Eevee Move deals $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [10, 20, 30],
+          "range": [1, 1, 2]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "vaporeon",
+        "name": "Vaporeon",
+        "role": "TANK",
+        "traits": [
+          "Water"
+        ],
+        "ability": {
+          "name": "Vaporeon Move",
+          "description": "Vaporeon Move deals $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [10, 20, 30],
+          "range": [1, 1, 2]
+        },
+        "branchId": "vaporeon",
+        "maxHealth": [600, 1400, 2600],
+        "defense": [30, 40, 50]
+      }
+    ]
+  }
+]

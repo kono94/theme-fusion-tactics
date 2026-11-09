@@ -28,6 +28,7 @@ export type ActionType =
   | 'READY_FOR_COMBAT'
   | 'SELECT_AUGMENT'
   | 'MOVE_ITEM'
+  | 'CHOOSE_EVOLUTION'
 
 export type CombatSide = 'TOP' | 'BOTTOM'
 
@@ -61,6 +62,36 @@ export interface UnitFormDefinition {
   traits?: string[]
   range?: number[]
   ability?: AbilityDefinition | null
+  branchId?: string | null
+  maxHealth?: number[] | null
+  maxMana?: number[] | null
+  attackDamage?: number[] | null
+  defense?: number[] | null
+  attackSpeed?: number[] | null
+}
+
+export interface EvolutionLaterForm {
+  starLevel: number
+  definitionId: string
+  name: string
+}
+
+// One selectable branch of a pending unit; stats are the values at the unit's current star level.
+export interface EvolutionOption {
+  branchId: string
+  definitionId: string
+  name: string
+  role: UnitRole
+  traits: string[]
+  range: number
+  maxHealth: number
+  attackDamage: number
+  defense: number
+  attackSpeed: number
+  maxMana: number
+  abilityName: string | null
+  abilityDescription: string // Server-formatted HTML with active/inactive star spans
+  laterForms: EvolutionLaterForm[]
 }
 
 export type ItemStat =
@@ -128,6 +159,9 @@ export interface GameUnit {
   abilityDamageMultiplier?: number
   damageReduction?: number
   lifesteal?: number
+  // Always sent by the backend; optional here so client-built preview units can omit them.
+  branchId?: string | null
+  evolutionOptions?: EvolutionOption[] | null // Non-null only while the unit awaits a branch choice
 }
 
 export interface UnitDefinition {
@@ -342,6 +376,7 @@ export interface GameAction {
   augmentId?: string // For SELECT_AUGMENT
   itemInstanceId?: string // For MOVE_ITEM
   targetUnitId?: string | null // MOVE_ITEM: null returns an equipped item to inventory
+  branchId?: string // For CHOOSE_EVOLUTION
 }
 
 export interface ActionResult {

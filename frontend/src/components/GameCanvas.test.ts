@@ -237,3 +237,50 @@ describe('GameCanvas 3D battle view', () => {
         classic.unmount()
     })
 })
+
+describe('GameCanvas evolve badge', () => {
+    beforeEach(() => {
+        vi.stubGlobal('ResizeObserver', class {
+            observe() {}
+            disconnect() {}
+        })
+    })
+
+    function pendingState(phase: GameState['phase']): GameState {
+        const game = state(phase)
+        game.players.me.board[0]!.evolutionOptions = [{
+            branchId: 'vaporeon', definitionId: 'vaporeon', name: 'Vaporeon', role: 'TANK', traits: ['Water'],
+            range: 1, maxHealth: 1400, attackDamage: 70, defense: 40, attackSpeed: 0.7, maxMana: 50,
+            abilityName: null, abilityDescription: '', laterForms: [],
+        }]
+        game.players.opponent.board[0]!.evolutionOptions = game.players.me.board[0]!.evolutionOptions
+        return game
+    }
+
+    it('shows the badge on own pending planning units and emits evolve', async () => {
+        const wrapper = mount(GameCanvas, {
+            props: { state: pendingState('PLANNING'), actingPlayerId: 'me', viewedPlayerId: 'me', isReadOnly: false },
+            global: { stubs: { CombatEffectsCanvas: true } },
+        })
+
+        const badges = wrapper.findAll('[data-testid="evolve-badge"]')
+        expect(badges).toHaveLength(1)
+        await badges[0]!.trigger('click')
+        expect(wrapper.emitted('evolve')?.[0]).toEqual(['fighter'])
+        expect(wrapper.emitted('unit-click')).toBeUndefined()
+        wrapper.unmount()
+    })
+
+    it('hides the badge while spectating, read-only or in combat', () => {
+        for (const props of [
+            { state: pendingState('PLANNING'), actingPlayerId: 'me', viewedPlayerId: 'opponent', isReadOnly: true },
+            { state: pendingState('PLANNING'), actingPlayerId: 'me', viewedPlayerId: 'me', isReadOnly: true },
+            { state: pendingState('COMBAT'), actingPlayerId: 'me', viewedPlayerId: 'me', isReadOnly: false },
+        ]) {
+            const wrapper = mount(GameCanvas, { props, global: { stubs: { CombatEffectsCanvas: true } } })
+            expect(wrapper.find('[data-testid="evolve-badge"]').exists()).toBe(false)
+            wrapper.unmount()
+        }
+    })
+})
+

@@ -9,6 +9,7 @@ import java.util.UUID;
 import lombok.NonNull;
 import net.lwenstrom.tft.backend.core.model.AbilityDefinition;
 import net.lwenstrom.tft.backend.core.model.DotEffect;
+import net.lwenstrom.tft.backend.core.model.EvolutionOption;
 import net.lwenstrom.tft.backend.core.model.GameItem;
 import net.lwenstrom.tft.backend.core.model.GameUnit;
 import net.lwenstrom.tft.backend.core.model.UnitRole;
@@ -23,6 +24,8 @@ public abstract class AbstractGameUnit implements GameUnit {
     private final AbilityDefinition ability;
     private final int range;
     private final Set<String> traits;
+    private final String branchId;
+    private final List<EvolutionOption> evolutionOptions;
 
     // Combat stats
     private int maxHealth;
@@ -127,6 +130,22 @@ public abstract class AbstractGameUnit implements GameUnit {
             AbilityDefinition ability,
             int range,
             Set<String> traits) {
+        this(definitionId, lineId, name, cost, role, ability, range, traits, null, null);
+    }
+
+    public AbstractGameUnit(
+            String definitionId,
+            String lineId,
+            String name,
+            int cost,
+            UnitRole role,
+            AbilityDefinition ability,
+            int range,
+            Set<String> traits,
+            String branchId,
+            List<EvolutionOption> evolutionOptions) {
+        this.branchId = branchId;
+        this.evolutionOptions = evolutionOptions == null ? null : List.copyOf(evolutionOptions);
         this.definitionId = definitionId;
         this.lineId = lineId == null || lineId.isBlank() ? definitionId : lineId;
         this.name = name;
@@ -147,6 +166,8 @@ public abstract class AbstractGameUnit implements GameUnit {
         this.ability = other.ability;
         this.range = other.range;
         this.traits = new HashSet<>(other.traits);
+        this.branchId = other.branchId;
+        this.evolutionOptions = other.evolutionOptions;
 
         // Combat stats
         this.maxHealth = other.maxHealth;
@@ -256,6 +277,16 @@ public abstract class AbstractGameUnit implements GameUnit {
     @Override
     public AbilityDefinition getAbility() {
         return ability;
+    }
+
+    @Override
+    public String getBranchId() {
+        return branchId;
+    }
+
+    @Override
+    public List<EvolutionOption> getEvolutionOptions() {
+        return evolutionOptions;
     }
 
     @Override

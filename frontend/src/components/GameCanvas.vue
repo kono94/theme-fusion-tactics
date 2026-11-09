@@ -13,6 +13,7 @@ import { findNearestEnemy, latestCombatEventTimestamp, takeNewCombatEvents } fro
 import type { CombatViewSetting } from '../utils/clientSettings'
 import { pickArenaId, readArenaOverride } from '../utils/arenaSelection'
 import { getGameModeMetadata, isGameMode } from '../data/gameModeMetadata'
+import { canChooseEvolution, type EvolutionChoiceContext } from '../utils/evolution'
 
 // Three.js is only downloaded by players who enable the 3D battle view.
 const CombatView3d = defineAsyncComponent(() => import('../combat3d/CombatView3d.vue'))
@@ -30,7 +31,7 @@ const props = defineProps<{
     combatView?: CombatViewSetting
 }>()
 
-const emit = defineEmits(['move', 'drag-start', 'drag-end', 'collect-orb', 'update:cell-size', 'update:is-over-grid', 'show-tooltip', 'hide-tooltip', 'combat-view-fallback', 'item-drop', 'item-select', 'item-drag-start', 'item-drag-end', 'unit-click', 'show-item-tooltip', 'hide-item-tooltip'])
+const emit = defineEmits(['move', 'drag-start', 'drag-end', 'collect-orb', 'update:cell-size', 'update:is-over-grid', 'show-tooltip', 'hide-tooltip', 'combat-view-fallback', 'item-drop', 'item-select', 'item-drag-start', 'item-drag-end', 'unit-click', 'show-item-tooltip', 'hide-item-tooltip', 'evolve'])
 
 const show3dCombat = computed(() => props.combatView === '3d' && props.state?.phase === 'COMBAT')
 
@@ -66,6 +67,11 @@ function reportInvalidCoordinate(unit: GameUnit, phase: BoardProjectionPhase) {
 
 const currentViewedPlayerId = computed(() => props.viewedPlayerId || props.actingPlayerId)
 const isHomeView = computed(() => !!props.actingPlayerId && currentViewedPlayerId.value === props.actingPlayerId)
+const evolutionContext = computed((): EvolutionChoiceContext => ({
+    phase: props.state?.phase,
+    actingPlayerId: props.actingPlayerId,
+    readOnly: !!props.isReadOnly || !isHomeView.value
+}))
 
 function isHighlightedTraitContributor(unit: DisplayedUnit): boolean {
     if (!props.highlightedTraitId || !unit.isMine || unit.isDying) return false
@@ -1008,6 +1014,13 @@ const onOrbClick = (orbId: string) => {
                             <div v-if="unit.spdBuff < 0.99" class="buff-icon spd-debuff">❄️</div>
                         </div>
                         <img :src="unit.image" class="unit-img" :alt="unit.name" draggable="false" />
+                        <button v-if="!unit.isDying && canChooseEvolution(unit, evolutionContext)" type="button"
+                            class="evolve-badge" draggable="false" data-testid="evolve-badge"
+                            :aria-label="`Choose evolution for ${unit.name}`"
+                            @click.stop="emit('evolve', unit.id)"
+                            @dragstart.stop.prevent>
+                            Evolve
+                        </button>
                         <div v-if="unit.items?.length" class="board-items">
                             <button v-for="item in unit.items" :key="item.instanceId" type="button" class="board-item"
                                 :class="{ selected: item.instanceId === selectedItemId }"
@@ -1425,6 +1438,28 @@ const onOrbClick = (orbId: string) => {
     z-index: 10;
     pointer-events: auto; 
     background-color: #1e293b; 
+}
+.evolve-badge {
+    position: absolute;
+    z-index: 14;
+    top: -9px;
+    left: 50%;
+    padding: 1px 6px;
+    border: 1px solid var(--room-accent-contrast, #0f172a);
+    border-radius: 999px;
+    color: var(--room-accent-contrast, #0f172a);
+    background: var(--room-accent, #f59e0b);
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.4px;
+    line-height: 1.4;
+    text-transform: uppercase;
+    transform: translateX(-50%);
+    cursor: pointer;
+}
+.evolve-badge:focus-visible {
+    outline: 2px solid #f8fafc;
+    outline-offset: 1px;
 }
 .unit.mine {
     cursor: grab;

@@ -10,5 +10,6 @@ public enum ActionType {
     COLLECT_ORB,
     READY_FOR_COMBAT,
     SELECT_AUGMENT,
-    MOVE_ITEM
+    MOVE_ITEM,
+    CHOOSE_EVOLUTION
 }

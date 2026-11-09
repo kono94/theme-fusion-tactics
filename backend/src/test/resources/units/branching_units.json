@@ -1,0 +1,321 @@
+[
+  {
+    "id": "eevee",
+    "lineId": "eevee",
+    "name": "Eevee",
+    "cost": 2,
+    "role": "DAMAGE",
+    "maxHealth": [500, 900, 1600],
+    "maxMana": [50, 50, 60],
+    "attackDamage": [40, 70, 120],
+    "abilityPower": [0, 0, 0],
+    "defense": [20, 20, 20],
+    "attackSpeed": [0.7, 0.7, 0.7],
+    "range": [1, 1, 1],
+    "traits": [
+      "Normal"
+    ],
+    "ability": {
+      "name": "Eevee Strike",
+      "description": "Eevee Strike deals $value damage.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [10, 20, 30],
+      "range": [1, 1, 2]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "eevee",
+        "name": "Eevee",
+        "role": "DAMAGE",
+        "traits": [
+          "Normal"
+        ],
+        "ability": {
+          "name": "Eevee Move",
+          "description": "Eevee Move deals $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [10, 20, 30],
+          "range": [1, 1, 2]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "vaporeon",
+        "name": "Vaporeon",
+        "role": "TANK",
+        "traits": [
+          "Water"
+        ],
+        "ability": {
+          "name": "Vaporeon Move",
+          "description": "Vaporeon Move deals $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [10, 20, 30],
+          "range": [1, 1, 2]
+        },
+        "branchId": "vaporeon",
+        "maxHealth": [600, 1400, 2600],
+        "defense": [30, 40, 50]
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "jolteon",
+        "name": "Jolteon",
+        "role": "DAMAGE",
+        "traits": [
+          "Electric"
+        ],
+        "ability": {
+          "name": "Jolteon Move",
+          "description": "Jolteon Move deals $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [10, 20, 30],
+          "range": [1, 1, 2]
+        },
+        "branchId": "jolteon",
+        "attackSpeed": [0.9, 1.0, 1.2],
+        "range": [2, 2, 3]
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "flareon",
+        "name": "Flareon",
+        "role": "DAMAGE",
+        "traits": [
+          "Fire"
+        ],
+        "ability": {
+          "name": "Flareon Move",
+          "description": "Flareon Move deals $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [10, 20, 30],
+          "range": [1, 1, 2]
+        },
+        "branchId": "flareon",
+        "attackDamage": [50, 95, 170]
+      }
+    ]
+  },
+  {
+    "id": "ralts",
+    "lineId": "ralts",
+    "name": "Ralts",
+    "cost": 3,
+    "role": "SUPPORT",
+    "maxHealth": [500, 900, 1600],
+    "maxMana": [50, 50, 60],
+    "attackDamage": [40, 70, 120],
+    "abilityPower": [0, 0, 0],
+    "defense": [20, 20, 20],
+    "attackSpeed": [0.7, 0.7, 0.7],
+    "range": [1, 1, 1],
+    "traits": [
+      "Psychic"
+    ],
+    "ability": {
+      "name": "Ralts Strike",
+      "description": "Ralts Strike deals $value damage.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [10, 20, 30],
+      "range": [1, 1, 2]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "ralts",
+        "name": "Ralts",
+        "role": "SUPPORT",
+        "traits": [
+          "Psychic"
+        ],
+        "ability": {
+          "name": "Ralts Move",
+          "description": "Ralts Move deals $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [10, 20, 30],
+          "range": [1, 1, 2]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "kirlia",
+        "name": "Kirlia",
+        "role": "SUPPORT",
+        "traits": [
+          "Psychic"
+        ],
+        "ability": {
+          "name": "Kirlia Move",
+          "description": "Kirlia Move deals $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [10, 20, 30],
+          "range": [1, 1, 2]
+        }
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "gardevoir",
+        "name": "Gardevoir",
+        "role": "SUPPORT",
+        "traits": [
+          "Psychic"
+        ],
+        "ability": {
+          "name": "Gardevoir Move",
+          "description": "Gardevoir Move deals $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [10, 20, 30],
+          "range": [1, 1, 2]
+        },
+        "branchId": "gardevoir"
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "gallade",
+        "name": "Gallade",
+        "role": "DAMAGE",
+        "traits": [
+          "Psychic",
+          "Fighting"
+        ],
+        "ability": {
+          "name": "Gallade Move",
+          "description": "Gallade Move deals $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [10, 20, 30],
+          "range": [1, 1, 2]
+        },
+        "branchId": "gallade"
+      }
+    ]
+  },
+  {
+    "id": "wurmple",
+    "lineId": "wurmple",
+    "name": "Wurmple",
+    "cost": 1,
+    "role": "DAMAGE",
+    "maxHealth": [500, 900, 1600],
+    "maxMana": [50, 50, 60],
+    "attackDamage": [40, 70, 120],
+    "abilityPower": [0, 0, 0],
+    "defense": [20, 20, 20],
+    "attackSpeed": [0.7, 0.7, 0.7],
+    "range": [1, 1, 1],
+    "traits": [
+      "Bug"
+    ],
+    "ability": {
+      "name": "Wurmple Strike",
+      "description": "Wurmple Strike deals $value damage.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [10, 20, 30],
+      "range": [1, 1, 2]
+    },
+    "forms": [
+      {
+        "starLevel": 1,
+        "definitionId": "wurmple",
+        "name": "Wurmple",
+        "role": "DAMAGE",
+        "traits": [
+          "Bug"
+        ],
+        "ability": {
+          "name": "Wurmple Move",
+          "description": "Wurmple Move deals $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [10, 20, 30],
+          "range": [1, 1, 2]
+        }
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "silcoon",
+        "name": "Silcoon",
+        "role": "TANK",
+        "traits": [
+          "Bug"
+        ],
+        "ability": {
+          "name": "Silcoon Move",
+          "description": "Silcoon Move deals $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [10, 20, 30],
+          "range": [1, 1, 2]
+        },
+        "branchId": "silcoon"
+      },
+      {
+        "starLevel": 2,
+        "definitionId": "cascoon",
+        "name": "Cascoon",
+        "role": "TANK",
+        "traits": [
+          "Bug"
+        ],
+        "ability": {
+          "name": "Cascoon Move",
+          "description": "Cascoon Move deals $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [10, 20, 30],
+          "range": [1, 1, 2]
+        },
+        "branchId": "cascoon"
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "beautifly",
+        "name": "Beautifly",
+        "role": "DAMAGE",
+        "traits": [
+          "Bug",
+          "Flying"
+        ],
+        "ability": {
+          "name": "Beautifly Move",
+          "description": "Beautifly Move deals $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [10, 20, 30],
+          "range": [1, 1, 2]
+        },
+        "branchId": "silcoon"
+      },
+      {
+        "starLevel": 3,
+        "definitionId": "dustox",
+        "name": "Dustox",
+        "role": "DAMAGE",
+        "traits": [
+          "Bug",
+          "Poison"
+        ],
+        "ability": {
+          "name": "Dustox Move",
+          "description": "Dustox Move deals $value damage.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [10, 20, 30],
+          "range": [1, 1, 2]
+        },
+        "branchId": "cascoon"
+      }
+    ]
+  }
+]

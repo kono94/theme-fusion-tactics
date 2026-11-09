@@ -80,6 +80,7 @@ public final class BotController {
             rerolls++;
             actions++;
         }
+        EvolutionPicker.resolvePendingUnits(player, evaluator, random);
         arrangeBoard(player, evaluator);
         positionBoard(player);
         equipItems(player);

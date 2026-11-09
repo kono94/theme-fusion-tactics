@@ -150,6 +150,20 @@ settle pass in `CombatSystem.simulateTick`, so every damage source is covered. E
 `UnitDefinition.lineId` is the combination identity. Optional `forms` can change definition ID, name, role, traits,
 range, and ability at higher stars while preserving the line used for upgrades.
 
+Forms can also branch. A form with a `branchId` is one alternative at its star level; forms may carry their own
+`maxHealth`, `maxMana`, `attackDamage`, `defense`, and `attackSpeed` arrays that override the line's arrays.
+`UnitDefinition.resolveForm(star, branchId)` picks the chosen branch's highest form at or below the star (a branch chosen
+at 2★ keeps applying at 3★ until a later form of that branch replaces it); without a branch it picks the highest
+unbranched form, else the root fields. The branch point is the lowest star with branched forms; a unit at or above it
+with no `branchId` is pending and carries `evolutionOptions`. Upgrades inherit the survivor's branch, else the first
+chosen branch among the merged copies, else stay pending. The room resolves every pending board unit when combat starts
+(after augment auto-selection, orb collection, and board auto-fill, before pairing and ghost cloning) by the best
+`BotTeamEvaluator` score, consulting the room RNG only on ties; bench units may stay pending. Bots resolve board and
+bench units during planning. `DataLoader` fails fast when the branch point is below 2★, it has fewer than two branches,
+an unbranched form sits at or above it, a higher form uses an undeclared branch, a per-form stat array does not have
+three values, or two forms share a star and branch. Trait rosters list a line under each trait at the earliest star
+where any branch carries it.
+
 ## 7. Transport and identity
 
 ### STOMP setup
@@ -214,6 +228,9 @@ supersedes earlier snapshots. Message drops and send failures are counted by bou
 - `COLLECT_ORB` is planning-only.
 - `MOVE_ITEM` is planning-only and requires `itemInstanceId`; omitted `targetUnitId` returns the copy to inventory.
 - `SELECT_AUGMENT` is planning-only and requires `augmentId`.
+- `CHOOSE_EVOLUTION` is planning-only and requires `unitId` and `branchId`. The unit must be owned and pending and the
+  branch must be offered at the line's branch point. The unit is rebuilt with a new ID in the same bench slot or board
+  cell (board order kept) with its items.
 - `READY_FOR_COMBAT` succeeds only for the eligible solo-training human.
 - The backend remains authoritative even if the UI incorrectly enables a control.
 
@@ -260,6 +277,11 @@ round results. It records each real participant once when combat resolves and ig
 in final-board analytics. Planning-only `MOVE_ITEM` accepts an item instance ID and optional owned target unit ID. A null
 target returns the item to inventory. The room checks phase and player identity, and `Player` checks ownership and slot
 capacity. Sales return equipment to inventory, and upgrades fill the survivor's slots before returning extra copies.
+
+Units also serialize nullable `branchId` and `evolutionOptions`. `evolutionOptions` is non-null only for pending units;
+each `EvolutionOption` carries `branchId, definitionId, name, role, traits, range, maxHealth, attackDamage, defense,
+attackSpeed, maxMana` at the unit's star, `abilityName`, the server-formatted `abilityDescription`, and `laterForms`
+(`starLevel, definitionId, name`) previewing that branch's higher-star forms.
 The room publishes `statPreviews` by cloning units: board previews apply items, traits, then augments; bench previews
 apply items only. Combat snapshots expose live modified values.
 

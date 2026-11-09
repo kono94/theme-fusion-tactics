@@ -9,23 +9,29 @@ public class StandardGameUnit extends AbstractGameUnit {
     }
 
     public StandardGameUnit(UnitDefinition def, int starLevel) {
+        this(def, starLevel, null);
+    }
+
+    public StandardGameUnit(UnitDefinition def, int starLevel, String branchId) {
         super(
-                def.getDefinitionId(starLevel),
+                def.getDefinitionId(starLevel, branchId),
                 def.lineId(),
-                def.getName(starLevel),
+                def.getName(starLevel, branchId),
                 def.cost(),
-                def.getRole(starLevel),
-                def.getAbility(starLevel),
-                def.getActiveRange(starLevel),
-                new HashSet<>(def.getTraits(starLevel)));
+                def.getRole(starLevel, branchId),
+                def.getAbility(starLevel, branchId),
+                def.getActiveRange(starLevel, branchId),
+                new HashSet<>(def.getTraits(starLevel, branchId)),
+                branchId,
+                def.isPending(starLevel, branchId) ? def.evolutionOptions(starLevel) : null);
         setStarLevel(starLevel);
-        setMaxHealth(def.getMaxHealth(starLevel));
-        setMaxMana(def.getMaxMana(starLevel));
-        setAttackDamage(def.getAttackDamage(starLevel));
+        setMaxHealth(def.getMaxHealth(starLevel, branchId));
+        setMaxMana(def.getMaxMana(starLevel, branchId));
+        setAttackDamage(def.getAttackDamage(starLevel, branchId));
         setAbilityPower(def.getAbilityPower(starLevel));
-        setDefense(def.getDefense(starLevel));
-        setAttackSpeed(def.getAttackSpeed(starLevel));
-        setCurrentHealth(def.getMaxHealth(starLevel));
+        setDefense(def.getDefense(starLevel, branchId));
+        setAttackSpeed(def.getAttackSpeed(starLevel, branchId));
+        setCurrentHealth(def.getMaxHealth(starLevel, branchId));
     }
 
     public boolean isDead() {
