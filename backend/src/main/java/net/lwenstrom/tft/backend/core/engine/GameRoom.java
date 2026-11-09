@@ -277,7 +277,7 @@ public class GameRoom {
             hostId = player.getId();
         }
 
-        player.refreshShop();
+        player.refreshShopFree();
         updateGameState(0);
         return Optional.of(player);
     }
@@ -426,7 +426,7 @@ public class GameRoom {
         bot.setBotPersonality(BOT_PERSONALITIES.get(nextBotPersonalityIndex % BOT_PERSONALITIES.size()));
         nextBotPersonalityIndex++;
         players.put(bot.getId(), bot);
-        bot.refreshShop();
+        bot.refreshShopFree();
         updateGameState(phaseEndTime - clock.currentTimeMillis());
         return Optional.of(bot);
     }
@@ -726,7 +726,7 @@ public class GameRoom {
                 }
 
                 p.gainXp(GameConstants.XP_PER_PHASE);
-                p.refreshShop();
+                p.refreshShopForNewRound();
                 if (round % 2 == 0 || matchRuleManager.spawnsLootEveryRound()) {
                     spawnLootOrbsForPlayer(p);
                 }

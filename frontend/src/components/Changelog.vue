@@ -203,6 +203,14 @@ const version160Commits = [
               </p>
             </div>
             <div class="feature-note">
+              <h3>Free Shop Refresh Each Round</h3>
+              <p>
+                The new shop you get at the start of each planning phase no longer costs reroll
+                gold, and you now start the match with the full 10 gold. Manual rerolls still cost
+                gold, and a locked shop keeps its units.
+              </p>
+            </div>
+            <div class="feature-note">
               <h3>Navigator Gold Fixed</h3>
               <p>
                 In One Piece, Navigators now pay out their 1-3 bonus gold at the start of each

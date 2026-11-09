@@ -100,8 +100,9 @@ LOBBY → PLANNING ⇄ COMBAT → END_CELEBRATION → END
 ```
 
 - A room starts in `LOBBY` with no running timer.
+- Joining players and bots receive a free initial shop and keep their starting gold.
 - Starting fills vacant positions with bots and enters round 1 planning.
-- Planning grants income/interest and XP, refreshes unlocked shops, restores units, upgrades pending copies, spawns
+- Planning grants income/interest and XP, refreshes unlocked shops for free, restores units, upgrades pending copies, spawns
   scheduled loot, including an item orb on rounds 2, 4, 6, and 10, and generates augment offers on rounds 3, 6, and 11.
 - Augment offers do not pause normal multiplayer planning. Unanswered offers are selected randomly when combat begins.
 - Solo-human training against bots uses `planningTimerPaused=true`, `planningPauseReason=SOLO_READY`, and
@@ -113,7 +114,7 @@ LOBBY → PLANNING ⇄ COMBAT → END_CELEBRATION → END
   them.
 
 Bots keep their units, gold, and XP across rounds. `BotController` runs once per living bot after planning income,
-paid shop refresh, loot, and augment offers, including round 1. It collects loot, chooses a random offered augment,
+free shop refresh, loot, and augment offers, including round 1. It collects loot, chooses a random offered augment,
 and uses normal purchase, sale, XP, reroll, upgrade, and movement operations. Lobby bots have no generated army or
 hidden economy/stat grants. Each bot is initialized with an economy, reroll, fast-level, or trait-focused `BotStrategy`.
 Strategies vary reserve, reroll, leveling, and team-scoring policy while sharing the same authoritative player actions.

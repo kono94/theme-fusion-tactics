@@ -118,6 +118,12 @@ public class Player {
         refreshShopFree();
     }
 
+    public void refreshShopForNewRound() {
+        if (!shopLocked) {
+            refreshShopFree();
+        }
+    }
+
     public void refreshShopFree() {
         var availableUnits = dataLoader.getAllUnits(gameMode).stream()
                 .filter(def -> !hasCompletedUnitLine(def.lineId()))

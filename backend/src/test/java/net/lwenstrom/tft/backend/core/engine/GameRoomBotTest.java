@@ -60,7 +60,7 @@ class GameRoomBotTest {
         room.startMatch();
         assertFalse(bot.getBoardUnits().isEmpty());
         assertTrue(bot.getBoardUnits().size() <= bot.getLevel());
-        assertTrue(bot.getLevel() <= 2, "Starting level follows normal XP");
+        assertTrue(bot.getLevel() <= 3, "Starting level follows normal and bought XP");
         var ids = bot.getBoardUnits().stream().map(unit -> unit.getId()).toList();
         var gold = bot.getGold();
         var xp = bot.getXp();

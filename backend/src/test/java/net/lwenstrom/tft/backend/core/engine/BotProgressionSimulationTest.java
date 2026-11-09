@@ -70,7 +70,7 @@ class BotProgressionSimulationTest {
                 player.gainGold(
                         GameConstants.BASE_INCOME + Math.min(player.getGold() / 10, GameConstants.MAX_INTEREST));
                 player.gainXp(GameConstants.XP_PER_PHASE);
-                player.refreshShop();
+                player.refreshShopForNewRound();
                 if (round % 2 == 0) player.addLootOrb(new LootOrb("round-" + round, 0, 0, LootType.GOLD, null, 6));
             }
             var actions = controller.plan(bot, round, augments);
