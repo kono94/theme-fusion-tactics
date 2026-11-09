@@ -101,6 +101,21 @@ export type ItemStat =
   | 'ATTACK_SPEED_PERCENT'
   | 'ABILITY_DAMAGE_PERCENT'
 
+export type ItemEffectType =
+  | 'REGEN_MAX_HEALTH_PERCENT'
+  | 'SURVIVE_LETHAL_ONCE'
+  | 'ON_HIT_STUN_CHANCE'
+  | 'DAMAGE_DEALT_HEAL_RATIO'
+  | 'HEAL_ONCE_BELOW_HEALTH'
+  | 'STUN_IMMUNITY_CHARGES'
+  | 'EXTRA_ATTACK_CHANCE'
+  | 'MANA_GAIN_MULTIPLIER'
+
+export interface ItemEffect {
+  type: ItemEffectType
+  values: Record<string, number>
+}
+
 export interface GameItem {
   instanceId: string
   id: string
@@ -108,6 +123,8 @@ export interface GameItem {
   description: string
   icon: string
   statBonuses: Partial<Record<ItemStat, number>>
+  // Always sent by the backend (empty for stat-only items); optional for older fixtures.
+  effects?: ItemEffect[]
 }
 
 export type ItemDefinition = Omit<GameItem, 'instanceId'>
@@ -300,7 +317,8 @@ export interface PlayerState {
 
 export interface CombatEvent {
   timestamp: number
-  type: 'DAMAGE' | 'SKILL' | 'DEATH' | 'HEAL' | 'SHIELD'
+  // ITEM: a held-item proc that is not a heal; skillName is the item name.
+  type: 'DAMAGE' | 'SKILL' | 'DEATH' | 'HEAL' | 'SHIELD' | 'ITEM'
   sourceId: string
   targetId: string
   value: number

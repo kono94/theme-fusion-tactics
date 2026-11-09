@@ -10,6 +10,7 @@ import { setUnitDragPreview } from '../utils/dragPreview'
 import { isBenchCoordinate, projectBoardCoordinate, type BoardProjectionPhase } from '../utils/boardProjection'
 import { normalizeTraitId } from '../data/traitData'
 import { findNearestEnemy, latestCombatEventTimestamp, takeNewCombatEvents } from '../utils/combatView'
+import { createItemProcThrottle, resolveItemProc, type ItemProcLabel } from '../utils/itemProcs'
 import type { CombatViewSetting } from '../utils/clientSettings'
 import { pickArenaId, readArenaOverride } from '../utils/arenaSelection'
 import { getGameModeMetadata, isGameMode } from '../data/gameModeMetadata'
@@ -556,6 +557,8 @@ interface FloatingText {
 }
 const castingAnimations = ref<FloatingText[]>([])
 const floatingHeals = ref<FloatingText[]>([])
+const itemProcLabels = ref<FloatingText[]>([])
+let shouldShowItemProc = createItemProcThrottle()
 const transientAnimationTimers = ref<number[]>([])
 
 function scheduleTransientAnimationCleanup(callback: () => void, duration: number) {
@@ -579,6 +582,8 @@ function clearCombatVisualState() {
     castingUnits.value = new Set()
     castingAnimations.value = []
     floatingHeals.value = []
+    itemProcLabels.value = []
+    shouldShowItemProc = createItemProcThrottle()
     transientAnimationTimers.value.forEach(timer => clearTimeout(timer))
     transientAnimationTimers.value = []
     lastProcessedEventTime.value = 0
@@ -668,6 +673,25 @@ function normalizeCombatEvent(
     }
 }
 
+function itemNamesForUnit(unitId: string): string[] | undefined {
+    return lookupUnit(unitId)?.items?.map((item) => item.name)
+}
+
+function showItemProcLabel(label: ItemProcLabel) {
+    const unit = lookupUnit(label.unitId)
+    if (!unit) return
+    const labelId = nextVisualEventId++
+    itemProcLabels.value.push({
+        id: labelId,
+        x: unit.visualX * CELL_SIZE.value + CELL_SIZE.value / 2,
+        y: unit.visualY * CELL_SIZE.value - 8,
+        text: label.text
+    })
+    scheduleTransientAnimationCleanup(() => {
+        itemProcLabels.value = itemProcLabels.value.filter((item) => item.id !== labelId)
+    }, 1200)
+}
+
 function isHealingCombatEvent(event: CombatEvent, source: RenderedUnit | DisplayedUnit): boolean {
     return event.type === 'HEAL' || event.value < 0 || source.ability?.type === 'HEAL'
 }
@@ -682,6 +706,9 @@ watch(() => props.state?.recentEvents, (newEvents) => {
         const targetFromEvent = lookupUnit(event.targetId)
         const source = lookupUnit(event.sourceId) || targetFromEvent
         if (!source) return
+
+        const itemProc = resolveItemProc(event, itemNamesForUnit)
+        if (itemProc && shouldShowItemProc(itemProc, event.timestamp)) showItemProcLabel(itemProc)
 
         if (event.type === 'DAMAGE') {
             const target = targetFromEvent
@@ -1126,6 +1153,12 @@ const onOrbClick = (orbId: string) => {
                   class="floating-text"
                   :style="{ left: anim.x + 'px', top: anim.y + 'px' }">
                   {{ anim.text }}
+             </div>
+
+             <div v-for="label in itemProcLabels" :key="label.id"
+                  class="item-proc-label"
+                  :style="{ left: label.x + 'px', top: label.y + 'px' }">
+                  {{ label.text }}
              </div>
 
              <!-- Heal Floating Text -->
@@ -1897,6 +1930,28 @@ const onOrbClick = (orbId: string) => {
     letter-spacing: 0.5px;
 }
 
+.item-proc-label {
+    position: absolute;
+    z-index: 21;
+    padding: 1px 6px;
+    border-radius: 5px;
+    background: rgb(15 23 42 / 82%);
+    color: #fde68a;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+    pointer-events: none;
+    transform: translate(-50%, -100%);
+    animation: itemProcRise 1.2s ease-out forwards;
+}
+
+@keyframes itemProcRise {
+    0% { opacity: 0; margin-top: 4px; }
+    15% { opacity: 1; margin-top: 0; }
+    80% { opacity: 1; }
+    100% { opacity: 0; margin-top: -10px; }
+}
+
 .floating-text.heal {
     color: #22c55e; /* Green */
     font-size: 16px;
@@ -2158,5 +2213,14 @@ const onOrbClick = (orbId: string) => {
         animation: none;
         transition: none;
     }
+
+    .item-proc-label {
+        animation-name: itemProcFade;
+    }
+}
+
+@keyframes itemProcFade {
+    0%, 100% { opacity: 0; }
+    15%, 80% { opacity: 1; }
 }
 </style>

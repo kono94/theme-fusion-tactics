@@ -11,8 +11,11 @@ import java.util.stream.Stream;
 import net.lwenstrom.tft.backend.core.GameConstants;
 import net.lwenstrom.tft.backend.core.model.GameMode;
 import net.lwenstrom.tft.backend.core.model.ItemDefinition;
+import net.lwenstrom.tft.backend.core.model.ItemEffect;
+import net.lwenstrom.tft.backend.core.model.ItemEffectType;
 import net.lwenstrom.tft.backend.core.model.ItemInstance;
 import net.lwenstrom.tft.backend.core.model.ItemStat;
+import net.lwenstrom.tft.backend.core.model.UnitRole;
 import net.lwenstrom.tft.backend.test.TestHelpers;
 import org.junit.jupiter.api.Test;
 
@@ -43,6 +46,77 @@ class BotControllerTest {
 
         assertTrue(bot.getInventory().isEmpty());
         assertEquals(item, bot.getBoardUnits().getFirst().getItems().getFirst());
+    }
+
+    private static UnitDefinition roleUnit(String id, UnitRole role) {
+        return new UnitDefinition(
+                id,
+                id,
+                1,
+                role,
+                List.of(100, 100, 100),
+                List.of(100, 100, 100),
+                List.of(10, 10, 10),
+                List.of(0, 0, 0),
+                List.of(0, 0, 0),
+                List.of(1.0f, 1.0f, 1.0f),
+                List.of(1, 1, 1),
+                List.of(),
+                null);
+    }
+
+    private static ItemInstance effectItem(String id, Map<ItemStat, Integer> stats, ItemEffect effect) {
+        return ItemInstance.from(new ItemDefinition(id, id, id, "/items/" + id + ".png", stats, List.of(effect)));
+    }
+
+    @Test
+    void neverEquipsManaPenaltyItemsOnSupports() {
+        var support = roleUnit("support", UnitRole.SUPPORT);
+        var bot = bot(0);
+        bot.addUnitToBoard(support, 0, 0);
+        var choiceBand = effectItem(
+                "choice_band",
+                Map.of(ItemStat.ATTACK_DAMAGE_PERCENT, 55),
+                new ItemEffect(ItemEffectType.MANA_GAIN_MULTIPLIER, Map.of("multiplier", 0.5)));
+        bot.getInventory().add(choiceBand);
+
+        controller.plan(bot, 1, augments);
+
+        assertEquals(List.of(choiceBand), bot.getInventory());
+        assertTrue(bot.getBoardUnits().getFirst().getItems().isEmpty());
+    }
+
+    @Test
+    void effectCategoriesSteerItemsTowardMatchingRoles() {
+        var tank = roleUnit("tank", UnitRole.TANK);
+        var damage = roleUnit("damage", UnitRole.DAMAGE);
+        var bot = bot(0);
+        bot.setLevel(2);
+        bot.addUnitToBoard(tank, 0, 0);
+        bot.addUnitToBoard(damage, 1, 0);
+        var focusBand = effectItem(
+                "focus_band",
+                Map.of(ItemStat.DEFENSE_FLAT, 20),
+                new ItemEffect(ItemEffectType.SURVIVE_LETHAL_ONCE, Map.of()));
+        var quickClaw = effectItem(
+                "quick_claw",
+                Map.of(ItemStat.ATTACK_SPEED_PERCENT, 15),
+                new ItemEffect(ItemEffectType.EXTRA_ATTACK_CHANCE, Map.of("chance", 0.15)));
+        bot.getInventory().addAll(List.of(focusBand, quickClaw));
+
+        controller.plan(bot, 1, augments);
+
+        var units = bot.getBoardUnits();
+        var tankUnit = units.stream()
+                .filter(u -> u.getRole() == UnitRole.TANK)
+                .findFirst()
+                .orElseThrow();
+        var damageUnit = units.stream()
+                .filter(u -> u.getRole() == UnitRole.DAMAGE)
+                .findFirst()
+                .orElseThrow();
+        assertEquals(List.of(focusBand), tankUnit.getItems());
+        assertEquals(List.of(quickClaw), damageUnit.getItems());
     }
 
     @Test

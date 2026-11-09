@@ -3,6 +3,7 @@ package net.lwenstrom.tft.backend.core.engine;
 import java.util.List;
 import net.lwenstrom.tft.backend.core.model.GameItem;
 import net.lwenstrom.tft.backend.core.model.GameUnit;
+import net.lwenstrom.tft.backend.core.model.HeldItemState;
 import net.lwenstrom.tft.backend.core.model.ItemStat;
 
 public final class ItemStatApplier {
@@ -10,6 +11,7 @@ public final class ItemStatApplier {
 
     public static void apply(GameUnit unit) {
         var items = unit.getItems();
+        unit.setHeldItemState(HeldItemState.from(items));
         if (items.isEmpty()) return;
         var healthBonus = Math.round(unit.getMaxHealth() * total(items, ItemStat.MAX_HEALTH_PERCENT) / 100.0f);
         unit.setMaxHealth(unit.getMaxHealth() + healthBonus);

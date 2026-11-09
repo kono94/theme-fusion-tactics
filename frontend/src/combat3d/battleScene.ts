@@ -17,6 +17,7 @@ import { CameraRig, EffectSystem, disposeObject } from './effects'
 import type { CombatEvent3d, CombatUnit3d } from './types'
 import { UnitView, disposePortraitTextures, portraitTexture } from './unitView'
 import { TEAM_COLORS } from '../utils/colorUtils'
+import { createItemProcThrottle, resolveItemProc } from '../utils/itemProcs'
 
 const MAX_EFFECTS = 90
 const CROWDED_UNITS = 12
@@ -46,6 +47,7 @@ export class BattleScene {
   private frameHandle = 0
   private disposed = false
   private now = 0
+  private readonly shouldShowItemProc = createItemProcThrottle()
 
   constructor(
     private readonly host: HTMLElement,
@@ -204,6 +206,8 @@ export class BattleScene {
     const source = this.views.get(event.sourceId) ?? target
     if (!source) return
 
+    this.showItemProc(event)
+
     switch (event.type) {
       case 'DAMAGE': {
         if (!target) return
@@ -287,7 +291,21 @@ export class BattleScene {
     shake(ctx, 1.5, 0, 180)
   }
 
-  private floatText(view: UnitView, text: string, kind: FloatKind, delayMs = 0): void {
+  private showItemProc(event: CombatEvent3d): void {
+    const label = resolveItemProc(event, (unitId) =>
+      this.views.get(unitId)?.unit.items.map((item) => item.name),
+    )
+    if (!label || !this.shouldShowItemProc(label, this.now)) return
+    const view = this.views.get(label.unitId)
+    if (view) this.floatText(view, label.text, 'item-proc')
+  }
+
+  private floatText(
+    view: UnitView,
+    text: string,
+    kind: FloatKind | 'item-proc',
+    delayMs = 0,
+  ): void {
     const element = document.createElement('div')
     element.className = `float-text ${kind}`
     element.textContent = text

@@ -130,6 +130,7 @@ class ItemSystemTest {
                         new GameAction(
                                 ActionType.COLLECT_ORB, player.getId(), null, orb.id(), null, null, null, null)));
             }
+            player.getBenchSlots().clearAll();
             var owned = player.getInventory().getFirst();
             assertEquals(itemOrb.contentId(), owned.getId());
             var unit = player.getBoardUnits().getFirst();

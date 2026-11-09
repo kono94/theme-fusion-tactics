@@ -12,6 +12,7 @@ import net.lwenstrom.tft.backend.core.model.DotEffect;
 import net.lwenstrom.tft.backend.core.model.EvolutionOption;
 import net.lwenstrom.tft.backend.core.model.GameItem;
 import net.lwenstrom.tft.backend.core.model.GameUnit;
+import net.lwenstrom.tft.backend.core.model.HeldItemState;
 import net.lwenstrom.tft.backend.core.model.UnitRole;
 
 public abstract class AbstractGameUnit implements GameUnit {
@@ -99,6 +100,7 @@ public abstract class AbstractGameUnit implements GameUnit {
     private float lowHpAsBonus = 0.0f;
     private float lowHpAsThreshold = 0.0f;
     private boolean shieldOnDeath = false;
+    private HeldItemState heldItemState = HeldItemState.none();
 
     // Musician state
     private long buffExpirationTime = 0;
@@ -240,6 +242,7 @@ public abstract class AbstractGameUnit implements GameUnit {
         this.teamAttackDamageOnKill = other.teamAttackDamageOnKill;
         this.temporaryDefenseBuff = other.temporaryDefenseBuff;
         this.temporaryDefenseShred = other.temporaryDefenseShred;
+        this.heldItemState = other.heldItemState.copy();
     }
 
     // ========== GETTERS ==========
@@ -541,12 +544,18 @@ public abstract class AbstractGameUnit implements GameUnit {
                 shield = 0;
             }
         }
+        if (amount >= currentHealth && currentHealth > 0 && heldItemState.tryConsumeSurviveLethal()) {
+            this.currentHealth = 1;
+            return;
+        }
         this.currentHealth = Math.max(0, this.currentHealth - amount);
     }
 
     @Override
     public void gainMana(int amount) {
-        this.mana = Math.min(maxMana, this.mana + amount);
+        var multiplier = heldItemState.manaGainMultiplier();
+        var scaledAmount = multiplier == 1.0f ? amount : Math.round(amount * multiplier);
+        this.mana = Math.min(maxMana, this.mana + scaledAmount);
     }
 
     @Override
@@ -623,6 +632,7 @@ public abstract class AbstractGameUnit implements GameUnit {
         this.teamAttackDamageOnKill = 0;
         this.temporaryDefenseBuff = 0;
         this.temporaryDefenseShred = 0;
+        this.heldItemState = HeldItemState.none();
     }
 
     @Override
@@ -874,5 +884,16 @@ public abstract class AbstractGameUnit implements GameUnit {
     @Override
     public void setTeamAttackDamageOnKill(int bonus) {
         this.teamAttackDamageOnKill = bonus;
+    }
+
+    @Override
+    @JsonIgnore
+    public HeldItemState getHeldItemState() {
+        return heldItemState;
+    }
+
+    @Override
+    public void setHeldItemState(HeldItemState state) {
+        this.heldItemState = state == null ? HeldItemState.none() : state;
     }
 }

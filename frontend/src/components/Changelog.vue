@@ -151,6 +151,17 @@ const version160Commits = [
                 fit for your team is picked for you.
               </p>
             </div>
+            <div class="feature-note">
+              <h3>Held Items</h3>
+              <p>
+                In Pokemon Gen 2/3, items do more than add stats. Leftovers restore HP every second,
+                Focus Band survives the first lethal hit at 1 HP, King's Rock can make targets
+                flinch, Shell Bell heals from damage dealt, Sitrus Berry heals once at low HP, Lum
+                Berry ignores the first stun, Quick Claw grants extra attacks, and Choice Band adds
+                lots of attack but halves mana gain. Hover an item to read its effect; the item's
+                name pops up over the unit when it triggers.
+              </p>
+            </div>
           </div>
         </div>
       </section>

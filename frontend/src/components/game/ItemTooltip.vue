@@ -6,6 +6,9 @@ import { formatItemBonuses } from '../../utils/itemStats'
 const props = defineProps<{ item: GameItem }>()
 
 const bonuses = computed(() => formatItemBonuses(props.item))
+const effectDescription = computed(() =>
+  props.item.effects?.length ? props.item.description : null,
+)
 </script>
 
 <template>
@@ -14,6 +17,7 @@ const bonuses = computed(() => formatItemBonuses(props.item))
     <div class="item-tooltip-body">
       <strong>{{ item.name }}</strong>
       <span v-for="bonus in bonuses" :key="bonus">{{ bonus }}</span>
+      <span v-if="effectDescription" class="item-tooltip-effect">{{ effectDescription }}</span>
     </div>
   </div>
 </template>
@@ -32,7 +36,9 @@ const bonuses = computed(() => formatItemBonuses(props.item))
   border-radius: 10px;
   color: white;
   font-family: var(--app-font-family);
-  box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 12px 20px -5px rgba(0, 0, 0, 0.5),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1);
   pointer-events: none;
 }
 
@@ -49,6 +55,11 @@ const bonuses = computed(() => formatItemBonuses(props.item))
   font-size: 12px;
   line-height: 1.3;
   color: #cbd5e1;
+}
+
+.item-tooltip-effect {
+  margin-top: 2px;
+  color: #f8fafc;
 }
 
 .item-tooltip-body strong {

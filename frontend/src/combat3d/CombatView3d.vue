@@ -204,6 +204,17 @@ onBeforeUnmount(() => {
   color: #cfe6ff;
 }
 
+.overlay :deep(.float-text.item-proc) {
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: rgb(10 14 26 / 78%);
+  color: #fde68a;
+  font-size: 12px;
+  font-weight: 700;
+  text-shadow: none;
+  animation-duration: 1200ms;
+}
+
 .overlay :deep(.float-text.skill-name) {
   padding: 2px 8px;
   border-radius: 6px;
@@ -234,9 +245,25 @@ onBeforeUnmount(() => {
   }
 }
 
+@keyframes item-proc-fade {
+  0%,
+  100% {
+    opacity: 0;
+  }
+
+  15%,
+  80% {
+    opacity: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .overlay :deep(.float-text) {
     animation-duration: 1200ms;
+  }
+
+  .overlay :deep(.float-text.item-proc) {
+    animation-name: item-proc-fade;
   }
 }
 </style>

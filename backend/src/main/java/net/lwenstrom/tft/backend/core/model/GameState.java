@@ -163,7 +163,7 @@ public record GameState(
 
     public record CombatEvent(
             long timestamp,
-            String type, // DAMAGE, SKILL, DEATH, HEAL, SHIELD
+            String type, // DAMAGE, SKILL, DEATH, HEAL, SHIELD, ITEM
             String sourceId,
             String targetId,
             int value,

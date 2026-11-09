@@ -17,6 +17,7 @@ import net.lwenstrom.tft.backend.core.engine.UnitDefinition;
 import net.lwenstrom.tft.backend.core.model.AugmentDefinition;
 import net.lwenstrom.tft.backend.core.model.GameMode;
 import net.lwenstrom.tft.backend.core.model.ItemDefinition;
+import net.lwenstrom.tft.backend.core.model.ItemEffectType;
 import net.lwenstrom.tft.backend.core.model.MatchRuleDefinition;
 import net.lwenstrom.tft.backend.core.model.TraitMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -213,6 +214,7 @@ public class DataLoader {
                 if (!isValidItem(item) || !ids.add(item.id())) {
                     throw new IllegalStateException("Invalid item definition " + item.id() + " in " + path);
                 }
+                validateItemEffects(item);
             }
             return List.copyOf(items);
         } catch (Exception e) {
@@ -230,6 +232,36 @@ public class DataLoader {
                 && item.statBonuses() != null
                 && !item.statBonuses().isEmpty()
                 && item.statBonuses().values().stream().allMatch(value -> value != null && value > 0);
+    }
+
+    public static void validateItemEffects(ItemDefinition item) {
+        for (var effect : item.effects()) {
+            if (effect == null || effect.type() == null) {
+                throw invalidItemEffect(item, "effect type is missing");
+            }
+            var parameters = effect.type().parameters();
+            var expectedNames =
+                    parameters.stream().map(ItemEffectType.Parameter::name).collect(Collectors.toSet());
+            if (!expectedNames.equals(effect.values().keySet())) {
+                throw invalidItemEffect(
+                        item,
+                        effect.type() + " expects parameters " + expectedNames + " but got "
+                                + effect.values().keySet());
+            }
+            for (var parameter : parameters) {
+                if (!parameter.accepts(effect.values().get(parameter.name()))) {
+                    throw invalidItemEffect(
+                            item,
+                            effect.type() + " parameter " + parameter.name() + " must be "
+                                    + (parameter.wholeNumber() ? "a whole number " : "")
+                                    + "greater than 0 and at most " + parameter.max());
+                }
+            }
+        }
+    }
+
+    private static IllegalStateException invalidItemEffect(ItemDefinition item, String reason) {
+        return new IllegalStateException("Invalid effect on item " + item.id() + ": " + reason);
     }
 
     public List<MatchRuleDefinition> getMatchRules(GameMode mode) {

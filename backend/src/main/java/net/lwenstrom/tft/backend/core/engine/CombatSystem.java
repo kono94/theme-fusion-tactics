@@ -13,6 +13,7 @@ import net.lwenstrom.tft.backend.core.combat.AbilityCaster;
 import net.lwenstrom.tft.backend.core.combat.CombatUtils;
 import net.lwenstrom.tft.backend.core.combat.DamageResolver;
 import net.lwenstrom.tft.backend.core.combat.ElementalAffinityConfig;
+import net.lwenstrom.tft.backend.core.combat.StunRules;
 import net.lwenstrom.tft.backend.core.combat.TargetSelector;
 import net.lwenstrom.tft.backend.core.combat.UnitMover;
 import net.lwenstrom.tft.backend.core.model.DotEffect;
@@ -34,6 +35,7 @@ public class CombatSystem {
     private static final int EXPLOSION_RADIUS = 1;
     private static final int MAX_DEATH_SETTLE_PASSES = 16;
     private static final int DEFAULT_REVIVE_HEALTH_PERCENT = 40;
+    private static final String ITEM_EVENT = "ITEM";
 
     private DamageResolver damageResolver;
 
@@ -307,6 +309,7 @@ public class CombatSystem {
             if (unit instanceof AbstractGameUnit agu) {
                 agu.updateBuffs(currentTime);
             }
+            applyHeldItemTick(unit, currentTime);
 
             // Handle stunned units - skip their turn and decrement stun counter
             if (unit.getStunSecondsRemaining() > 0) {
@@ -344,6 +347,7 @@ public class CombatSystem {
                                             targetId,
                                             actualDamage,
                                             unit.getAbility().name()));
+                                    healFromDamageDealt(unit, actualDamage, currentTime);
                                 }
 
                                 @Override
@@ -440,6 +444,8 @@ public class CombatSystem {
                     accumulateDamageTaken(target, actualDamage);
                     recentEvents.add(new GameState.CombatEvent(
                             currentTime, "DAMAGE", unit.getId(), target.getId(), actualDamage, null));
+                    applyOnHitItemStun(unit, target, currentTime);
+                    healFromDamageDealt(unit, actualDamage, currentTime);
 
                     // Lifesteal (Big Mom Pirates)
                     if (unit.getLifesteal() > 0) {
@@ -473,7 +479,9 @@ public class CombatSystem {
                     long cooldownMs = (long) (1000 / effectiveAs);
 
                     // Extra Attack Chance (Swordsman)
-                    if (randomProvider.nextDouble() < unit.getExtraAttackChance()) {
+                    var extraAttackChance = unit.getExtraAttackChance()
+                            + unit.getHeldItemState().extraAttackChance();
+                    if (randomProvider.nextDouble() < extraAttackChance) {
                         log.debug("{} triggers extra attack!", unit.getName());
                         // For simplicity, we just reduce next attack time significantly
                         unit.setNextAttackTime(currentTime + (cooldownMs / 4));
@@ -487,6 +495,7 @@ public class CombatSystem {
         }
 
         settleDeaths(participants, allUnits, currentTime);
+        flushItemProcs(allUnits, currentTime);
 
         long playersWithUnits = participants.stream()
                 .filter(p -> p.getBoardUnits().stream().anyMatch(u -> u.getCurrentHealth() > 0))
@@ -660,6 +669,9 @@ public class CombatSystem {
                 accumulateDamageTaken(target, actualDamage);
                 recentEvents.add(new GameState.CombatEvent(
                         currentTime, "DAMAGE", effect.sourceId(), target.getId(), actualDamage, effect.skillName()));
+                if (source != null) {
+                    healFromDamageDealt(source, actualDamage, currentTime);
+                }
 
                 iterator.remove();
                 if (target.getCurrentHealth() > 0 && currentTime + effect.tickIntervalMs() < effect.expiresAt()) {
@@ -700,6 +712,72 @@ public class CombatSystem {
                 currentTime + durationMs + 1,
                 tickIntervalMs,
                 skillName));
+    }
+
+    private void applyHeldItemTick(GameUnit unit, long currentTime) {
+        var state = unit.getHeldItemState();
+        var regen = state.regenHealAmount(unit.getMaxHealth(), GameConstants.TICK_RATE_MS);
+        if (regen > 0) {
+            applyItemHeal(unit, regen, state.regenItemName(), currentTime);
+        }
+        var thresholdHeal = state.takeHealBelowThreshold(unit.getCurrentHealth(), unit.getMaxHealth());
+        if (thresholdHeal > 0) {
+            applyItemHeal(unit, thresholdHeal, state.healBelowItemName(), currentTime);
+        }
+    }
+
+    private void applyOnHitItemStun(GameUnit unit, GameUnit target, long currentTime) {
+        var state = unit.getHeldItemState();
+        if (state.onHitStunChance() <= 0 || target.getCurrentHealth() <= 0) {
+            return;
+        }
+        if (randomProvider.nextDouble() >= state.onHitStunChance()) {
+            return;
+        }
+        var durationMs = state.onHitStunDurationMs();
+        if (StunRules.applyStun(target, durationMs / 1000.0f, currentTime)) {
+            recentEvents.add(new GameState.CombatEvent(
+                    currentTime,
+                    ITEM_EVENT,
+                    unit.getId(),
+                    target.getId(),
+                    (int) durationMs,
+                    state.onHitStunItemName()));
+        }
+    }
+
+    private void healFromDamageDealt(GameUnit unit, int damageDealt, long currentTime) {
+        var state = unit.getHeldItemState();
+        if (state.damageDealtHealRatio() <= 0 || damageDealt <= 0 || unit.getCurrentHealth() <= 0) {
+            return;
+        }
+        var heal = Math.round(damageDealt * state.damageDealtHealRatio());
+        if (heal > 0) {
+            applyItemHeal(unit, heal, state.damageDealtHealItemName(), currentTime);
+        }
+    }
+
+    private void applyItemHeal(GameUnit unit, int amount, String itemName, long currentTime) {
+        if (unit.getCurrentHealth() <= 0) {
+            return;
+        }
+        var previousHealth = unit.getCurrentHealth();
+        unit.setCurrentHealth(Math.min(unit.getMaxHealth(), previousHealth + amount));
+        var effectiveHeal = unit.getCurrentHealth() - previousHealth;
+        if (effectiveHeal > 0) {
+            accumulateHealing(unit, effectiveHeal);
+            recentEvents.add(new GameState.CombatEvent(
+                    currentTime, "HEAL", unit.getId(), unit.getId(), effectiveHeal, itemName));
+        }
+    }
+
+    private void flushItemProcs(List<GameUnit> allUnits, long currentTime) {
+        for (var unit : allUnits) {
+            for (var proc : unit.getHeldItemState().drainProcs()) {
+                recentEvents.add(new GameState.CombatEvent(
+                        currentTime, ITEM_EVENT, unit.getId(), unit.getId(), proc.value(), proc.itemName()));
+            }
+        }
     }
 
     private void triggerShieldOnDeath(GameUnit deadUnit, List<GameUnit> allUnits, long currentTime) {

@@ -333,4 +333,11 @@ public interface GameUnit {
     }
 
     default void setTeamAttackDamageOnKill(int bonus) {}
+
+    @JsonIgnore
+    default HeldItemState getHeldItemState() {
+        return HeldItemState.none();
+    }
+
+    default void setHeldItemState(HeldItemState state) {}
 }

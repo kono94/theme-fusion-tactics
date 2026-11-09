@@ -134,8 +134,10 @@ mode. Focused tests that register only one provider use that available provider 
 
 `DataLoader.loadData()` preloads every registered mode at startup. Missing resources, malformed JSON, duplicate unit IDs,
 or an empty required units/traits/augments/items dataset fail startup. Item `statBonuses` keys are the `ItemStat` enum, so an
-unknown stat, duplicate item ID, missing icon, or non-positive bonus also fails startup. A provider that declares an affinity file must supply a
-valid one. One Piece intentionally has no affinity file and receives a neutral resolver.
+unknown stat, duplicate item ID, missing icon, or non-positive bonus also fails startup. Items may also declare optional
+`effects` (`[{type, values}]`, type = `ItemEffectType`); `DataLoader.validateItemEffects` requires exactly the type's
+parameters, each positive and within its maximum (chances and thresholds at most 1, `charges` whole). A provider that
+declares an affinity file must supply a valid one. One Piece intentionally has no affinity file and receives a neutral resolver.
 
 Match rules (`MatchRuleDefinition`: id, name, description, icon, `effectType`, `values`) are loaded by
 `DataLoader.getMatchRules(mode)` from the shared common file plus an optional mode file (`GameModeProvider.getMatchRulesPath()`).
@@ -279,6 +281,24 @@ in final-board analytics. Planning-only `MOVE_ITEM` accepts an item instance ID 
 target returns the item to inventory. The room checks phase and player identity, and `Player` checks ownership and slot
 capacity. Sales return equipment to inventory, and upgrades fill the survivor's slots before returning extra copies.
 
+Held item effects are generic engine hooks (only Pokemon Gen 2/3 items use them today). `ItemStatApplier` builds a
+per-unit `HeldItemState` from equipped items at combat start; it is copied by `cloneUnit` (ghosts, stat previews) and
+reset by `restorePlanningPosition`. Effects combine with trait values at query time because traits apply after items
+and overwrite shared unit fields:
+- `REGEN_MAX_HEALTH_PERCENT {percentPerSecond}` and `HEAL_ONCE_BELOW_HEALTH {threshold, healPercent}`: per-unit tick
+  hook in `CombatSystem.simulateTick` (after buff updates, before the stun skip).
+- `SURVIVE_LETHAL_ONCE {}`: `AbstractGameUnit.applyDamage` leaves the holder at 1 HP, before revive/second wind.
+- `ON_HIT_STUN_CHANCE {chance, durationMs}`: after a basic hit, through `StunRules` (diminishing returns apply).
+- `DAMAGE_DEALT_HEAL_RATIO {ratio}`: basic hits, ability damage, and the holder's damage-over-time ticks.
+- `STUN_IMMUNITY_CHARGES {charges}`: `StunRules.applyStun` consumes a charge instead of stunning; a blocked stun does not
+  count toward diminishing returns.
+- `EXTRA_ATTACK_CHANCE {chance}`: added to the trait chance in the existing extra-attack roll.
+- `MANA_GAIN_MULTIPLIER {multiplier}`: applied in `gainMana`, multiplying any trait mana-gain bonus.
+Random rolls happen only when an item chance is positive, so seeded runs without item effects are unchanged. Item heals
+use the normal healing statistics and emit `HEAL` with `skillName` = item name; other procs emit `ITEM`. Bots weight
+effects by category (defensive → tanks, offensive → damage, utility → anyone) and never give mana-penalty items to
+supports.
+
 Units also serialize nullable `branchId` and `evolutionOptions`. `evolutionOptions` is non-null only for pending units;
 each `EvolutionOption` carries `branchId, definitionId, name, role, traits, range, maxHealth, attackDamage, defense,
 attackSpeed, maxMana` at the unit's star, `abilityName`, the server-formatted `abilityDescription`, and `laterForms`
@@ -292,7 +312,8 @@ comes from `/api/traits` and the board is used to derive display counts. Each tr
 keeps evolution-only membership, icons, and tooltip data backend-derived without expanding `GameState`.
 
 `CombatEvent` has exactly six fields: `timestamp`, `type`, `sourceId`, `targetId`, `value`, and `skillName`. Current types
-are `DAMAGE`, `SKILL`, `DEATH`, `HEAL`, and `SHIELD`. The decisive combat tick retains its final events.
+are `DAMAGE`, `SKILL`, `DEATH`, `HEAL`, `SHIELD`, and `ITEM` (a non-heal held-item proc: `sourceId` = holder,
+`targetId` = affected unit, `skillName` = item name; e.g. Focus Band save, King's Rock flinch, Lum Berry block). The decisive combat tick retains its final events.
 
 `DamageEntry` is:
 

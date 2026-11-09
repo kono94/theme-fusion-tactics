@@ -1,5 +1,6 @@
 package net.lwenstrom.tft.backend.core.model;
 
+import java.util.List;
 import java.util.Map;
 
 public interface GameItem {
@@ -14,6 +15,10 @@ public interface GameItem {
     String getDescription();
 
     Map<ItemStat, Integer> getStatBonuses();
+
+    default List<ItemEffect> getEffects() {
+        return List.of();
+    }
 
     default String getIcon() {
         return "";

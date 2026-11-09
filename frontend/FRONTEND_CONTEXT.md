@@ -196,8 +196,10 @@ backend to the earliest form that carries the trait. `TraitSidebar` renders thos
 the representative with the viewed player's live board form when it contributes, and leaves bench or inactive forms
 gray.
 
-Current combat event types are `DAMAGE`, `SKILL`, `DEATH`, `HEAL`, and `SHIELD`. Events contain only timestamp, type,
-source ID, target ID, value, and optional skill name. Do not add cast/status/zone/coordinate assumptions without first
+Current combat event types are `DAMAGE`, `SKILL`, `DEATH`, `HEAL`, `SHIELD`, and `ITEM`. Events contain only timestamp,
+type, source ID, target ID, value, and optional skill name. `ITEM` is a held-item proc whose skill name is the item name;
+item heals arrive as `HEAL` with the item name. `utils/itemProcs.ts` resolves both into a short floating item label
+(2D in `GameCanvas`, 3D in `battleScene.ts`), throttling repeating heal procs per unit and item. Do not add cast/status/zone/coordinate assumptions without first
 extending the backend record.
 
 For `MOVE`, `targetX` is a board column from `0-8`. When `targetY` is `-1`, the same `targetX` instead identifies the
@@ -277,7 +279,8 @@ is a grid of at least six slots, one per item copy, with six 36 px slots per row
 scrolling. Stash sizing is local to `ItemInventory`; equipped badges keep the shared 24 px `--item-slot-size`
 (board badges stack on the unit's left edge; combat buff icons sit on the right). Items move by drag/drop or tap-select
 then tap a unit; dropping an equipped item on the inventory card (or tapping an empty slot while it is selected)
-unequips it. `ItemTooltip` is teleported by `GameInterface` for hover, focus, and tap on any item badge; the unit
+unequips it. `ItemTooltip` is teleported by `GameInterface` for hover, focus, and tap on any item badge. It lists the
+formatted stat bonuses and, for items with `effects`, the backend `description` of the effect; the unit
 tooltip no longer lists items and is nudged back inside the viewport when it would overflow. Item drags defer the
 `isDraggingItem` flip past `dragstart`, because Chrome cancels a drag whose source subtree changes during it.
 

@@ -10,12 +10,14 @@ import net.lwenstrom.tft.backend.core.DataLoader;
 import net.lwenstrom.tft.backend.core.GameConstants;
 import net.lwenstrom.tft.backend.core.model.GameItem;
 import net.lwenstrom.tft.backend.core.model.GameUnit;
+import net.lwenstrom.tft.backend.core.model.ItemEffectType;
 import net.lwenstrom.tft.backend.core.model.ItemStat;
 import net.lwenstrom.tft.backend.core.model.UnitRole;
 import net.lwenstrom.tft.backend.core.random.RandomProvider;
 
 public final class BotController {
     static final int MAX_ACTIONS = 40;
+    private static final int EFFECT_ROLE_FIT = 40;
     private final DataLoader dataLoader;
     private final RandomProvider random;
     private final Map<String, Integer> lastPlanningRound = new HashMap<>();
@@ -91,6 +93,7 @@ public final class BotController {
         for (var item : List.copyOf(player.getInventory())) {
             var target = player.getBoardUnits().stream()
                     .filter(unit -> unit.getItems().size() < player.getItemSlotsPerUnit())
+                    .filter(unit -> suitsRole(item, unit))
                     .max(Comparator.comparingInt((GameUnit unit) -> itemFit(item, unit))
                             .thenComparingInt(GameUnit::getStarLevel)
                             .thenComparingInt(GameUnit::getCost))
@@ -106,7 +109,25 @@ public final class BotController {
                 + bonuses.getOrDefault(ItemStat.ABILITY_DAMAGE_PERCENT, 0);
         var defensive =
                 bonuses.getOrDefault(ItemStat.MAX_HEALTH_PERCENT, 0) + bonuses.getOrDefault(ItemStat.DEFENSE_FLAT, 0);
-        return unit.getRole() == UnitRole.TANK ? defensive * 2 + offensive : offensive * 2 + defensive;
+        var statFit = unit.getRole() == UnitRole.TANK ? defensive * 2 + offensive : offensive * 2 + defensive;
+        return statFit + effectFit(item, unit);
+    }
+
+    private static int effectFit(GameItem item, GameUnit unit) {
+        return item.getEffects().stream()
+                .mapToInt(effect -> switch (effect.type().category()) {
+                    case DEFENSIVE -> unit.getRole() == UnitRole.TANK ? EFFECT_ROLE_FIT : 0;
+                    case OFFENSIVE -> unit.getRole() == UnitRole.DAMAGE ? EFFECT_ROLE_FIT : 0;
+                    case UTILITY -> EFFECT_ROLE_FIT / 2;
+                })
+                .sum();
+    }
+
+    private static boolean suitsRole(GameItem item, GameUnit unit) {
+        return unit.getRole() != UnitRole.SUPPORT
+                || item.getEffects().stream()
+                        .noneMatch(effect -> effect.type() == ItemEffectType.MANA_GAIN_MULTIPLIER
+                                && effect.value("multiplier") < 1.0);
     }
 
     private int buyXpTowardNextLevel(Player player, int reserve, int actions) {

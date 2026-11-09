@@ -8,9 +8,12 @@ public final class StunRules {
 
     private StunRules() {}
 
-    public static void applyStun(GameUnit target, float stunSeconds, long currentTime) {
+    public static boolean applyStun(GameUnit target, float stunSeconds, long currentTime) {
         if (stunSeconds <= 0) {
-            return;
+            return false;
+        }
+        if (target.getHeldItemState().tryConsumeStunImmunity()) {
+            return false;
         }
 
         var recentStunCount = target.getRecentStunCount();
@@ -27,5 +30,6 @@ public final class StunRules {
         target.setStunSecondsRemaining(Math.max(target.getStunSecondsRemaining(), diminishedDuration));
         target.setRecentStunCount(Math.min(recentStunCount + 1, STUN_DURATION_MULTIPLIERS.length));
         target.setLastStunAppliedAt(currentTime);
+        return true;
     }
 }

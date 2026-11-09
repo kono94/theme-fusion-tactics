@@ -194,6 +194,46 @@ describe('GameCanvas trait highlighting', () => {
     })
 })
 
+describe('GameCanvas held item procs', () => {
+    beforeEach(() => {
+        vi.stubGlobal('ResizeObserver', class {
+            observe() {}
+            disconnect() {}
+        })
+    })
+
+    it('floats item names for item procs and item-named heals but not ability heals', async () => {
+        const game = state('COMBAT')
+        game.players.me.board[0]!.items = [{
+            instanceId: 'leftovers-1', id: 'pokemongen23_leftovers', name: 'Leftovers',
+            description: 'Restores 1.5% max HP every second in combat.', icon: '/leftovers.png',
+            statBonuses: { MAX_HEALTH_PERCENT: 20 },
+            effects: [{ type: 'REGEN_MAX_HEALTH_PERCENT', values: { percentPerSecond: 1.5 } }],
+        }]
+        const wrapper = mount(GameCanvas, {
+            props: { state: game, actingPlayerId: 'me', viewedPlayerId: 'me' },
+            global: { stubs: { CombatEffectsCanvas: true } },
+        })
+
+        await wrapper.setProps({
+            state: {
+                ...game,
+                recentEvents: [
+                    { timestamp: 100, type: 'ITEM', sourceId: 'fighter', targetId: 'opponent-fighter', value: 600, skillName: "King's Rock" },
+                    { timestamp: 100, type: 'HEAL', sourceId: 'fighter', targetId: 'fighter', value: 15, skillName: 'Leftovers' },
+                    { timestamp: 100, type: 'HEAL', sourceId: 'support', targetId: 'fighter', value: 40, skillName: 'Soft-Boiled' },
+                ],
+            },
+        })
+
+        expect(wrapper.findAll('.item-proc-label').map((label) => label.text())).toEqual([
+            "King's Rock!",
+            'Leftovers!',
+        ])
+        wrapper.unmount()
+    })
+})
+
 describe('GameCanvas 3D battle view', () => {
     beforeEach(() => {
         vi.stubGlobal('ResizeObserver', class {
