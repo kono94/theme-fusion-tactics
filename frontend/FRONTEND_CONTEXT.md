@@ -1,6 +1,6 @@
 # Frontend Context
 
-> Last reviewed: 2026-10-15
+> Last reviewed: 2026-11-09
 >
 > Scope: the current Vue application, backend contracts, animation pipeline, analytics UI, and test/build workflow.
 >
@@ -43,6 +43,7 @@ src/
 │   ├── TraitSidebar.vue            derived trait display
 │   ├── AugmentSelectionOverlay.vue augment choices
 │   ├── EvolutionChoiceOverlay.vue  branching-evolution choice cards
+│   ├── EvolveBadge.vue             shared pending-evolution badge (bench and board)
 │   ├── PhaseAnnouncement.vue       phase/ready/emergency messaging
 │   ├── EndScreen.vue               placement and exit controls
 │   ├── Changelog.vue               in-app release notes
@@ -53,6 +54,9 @@ src/
 │   └── game/
 │       ├── CombatEffectsCanvas.vue layered animation renderer
 │       ├── DamageReport.vue        combat statistics
+│       ├── FieldConditionChip.vue  top-bar weather/forecast chip
+│       ├── FieldConditionOverlay.vue classic-view weather particles
+│       ├── ItemTooltip.vue         teleported item details
 │       ├── OutcomeOverlay.vue      short win/loss/draw overlay
 │       └── UltimateGallery.vue     development-only animation gallery
 ├── animations/                     shared animation render policy and gallery registry
@@ -67,6 +71,9 @@ src/
     ├── combatView.ts               shared combat event dedupe and nearest-enemy lookup
     ├── arenaSelection.ts           deterministic per-room 3D arena choice
     ├── combatAnimationConfig.ts    live shared animation lookup
+    ├── evolution.ts                evolve-badge visibility and CHOOSE_EVOLUTION action shape
+    ├── fieldConditions.ts          weather chip/visual mapping and field event filtering
+    ├── itemProcs.ts                floating held-item proc labels
     ├── economy.ts                  backend-aligned sell preview
     ├── dragPreview.ts              drag image support
     └── iconUtils.ts                mode-aware asset paths
@@ -307,11 +314,16 @@ Unit portrait paths:
 
 - One Piece: `/assets/units/onepiece/{definitionId}.png`
 - Pokemon: `/assets/units/pokemon/{definitionId}.png`
-- Pokemon Gen 2/3: `/assets/units/pokemongen23/{definitionId}.png` (temporary placeholders rendered by
-  `scripts/generate_placeholder_portraits.py` until the real sprites from the batch prompts in that folder are cut in)
+- Pokemon Gen 2/3: `/assets/units/pokemongen23/{definitionId}.png` (pixel-art sprites cut with
+  `scripts/quadrant_cutter.py` and compressed with `scripts/compress_images.py`)
 
 Pixel-art item PNGs, rendered by `scripts/generate_item_icons.py`, are under `/assets/items/{mode}/{iconName}.png`; backend item definitions provide the
 exact path. The 3D combat view shows equipped icons on its unit labels; item hover details stay in the classic UI.
+Field-condition and match-rule icons live under `/assets/field-conditions/` and `/assets/match-rules/`; backend
+definitions provide the exact path.
+
+3D arenas per mode come from `gameModeMetadata.ts`: One Piece uses Foosha, Baratie, Sabaody, Marineford and Wano;
+Pokemon uses Stadium and Rock Gym; Pokemon Gen 2/3 uses Bell Tower and Sea Route.
 
 The public lobby and waiting room use mode themes. In-match components intentionally use shared generic chrome.
 
@@ -418,6 +430,10 @@ Current focused tests cover:
 - augment/phase presentation;
 - shared animation configuration and live mode lookup;
 - sell-refund parity;
+- evolution badge visibility, choice overlay, and `CHOOSE_EVOLUTION` action shape;
+- field-condition chip, classic weather overlay, and field event filtering;
+- held-item proc labels and item tooltips;
+- signature ultimate coverage for every unit form in each mode;
 - client identity persistence;
 - analytics client behavior and utility functions.
 

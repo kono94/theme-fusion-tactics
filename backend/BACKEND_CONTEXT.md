@@ -1,6 +1,6 @@
 # Backend Context
 
-> Last reviewed: 2026-10-15
+> Last reviewed: 2026-11-09
 >
 > Scope: the current Java backend, transport contracts, mode data, analytics, observability, and test/build workflow.
 >
@@ -159,6 +159,16 @@ augments in both combat start and planning stat previews. Death effects (explosi
 settle pass in `CombatSystem.simulateTick`, so every damage source is covered. Effects use a generic vocabulary
 (`MatchRuleEffectType`); themed names live only in data.
 
+Field conditions ("weather") are optional per mode: `GameModeProvider.getFieldConditionsPath()` defaults to
+`/data/field_conditions_<mode>.json`, a missing file means no conditions, and malformed data fails startup.
+`FieldConditionDefinition` is `{id, name, description, icon, elementDamageMultipliers, periodicDamage{maxHealthPercent,
+intervalMs, immuneTraits} | null, traitAttackSpeedBonus, traitDefenseBonus, selectableByRule, clearsField}`; a
+`clearsField` condition has no effects and removes the active one. Units and forms may declare
+`startCondition {conditionId, durationSeconds}` (0 = whole combat), which flows through `ResolvedForm` onto the unit, and
+any ability may carry a `FIELD_CONDITION {conditionId, durationSeconds[3], extendActive}` modifier. `DataLoader` fails
+startup when a start setter, ability modifier or condition trait key names an unknown condition or trait, when modifier
+durations are not three non-negative values, or when a `RANDOM_FIELD_CONDITION` rule has no selectable condition.
+
 `UnitDefinition.lineId` is the combination identity. Optional `forms` can change definition ID, name, role, traits,
 range, and ability at higher stars while preserving the line used for upgrades.
 
@@ -260,16 +270,6 @@ For `MOVE`, `targetX` is `0-8`. A `targetY` of `0-2` selects a planning-board ro
 | `/topic/room/{id}` | Full `GameState` snapshot |
 | `/topic/room/{id}/event` | `RoomEvent<CombatResultPayload>` or `RoomEvent<EmergencyDropPayload>` |
 | `/user/queue/room-result` | Private `RoomRequestResult` |
-
-Field conditions ("weather") are optional per mode: `GameModeProvider.getFieldConditionsPath()` defaults to
-`/data/field_conditions_<mode>.json`, a missing file means no conditions, and malformed data fails startup.
-`FieldConditionDefinition` is `{id, name, description, icon, elementDamageMultipliers, periodicDamage{maxHealthPercent,
-intervalMs, immuneTraits} | null, traitAttackSpeedBonus, traitDefenseBonus, selectableByRule, clearsField}`; a
-`clearsField` condition has no effects and removes the active one. Units and forms may declare
-`startCondition {conditionId, durationSeconds}` (0 = whole combat), which flows through `ResolvedForm` onto the unit, and
-any ability may carry a `FIELD_CONDITION {conditionId, durationSeconds[3], extendActive}` modifier. `DataLoader` fails
-startup when a start setter, ability modifier or condition trait key names an unknown condition or trait, when modifier
-durations are not three non-negative values, or when a `RANDOM_FIELD_CONDITION` rule has no selectable condition.
 
 ## 8. State contract
 
@@ -381,9 +381,9 @@ Combat result `winnerId` and `loserId` are nullable for draws; they are not enco
 The grid is 9×6 in combat, with each player planning on a 9×3 half. Combat pairing order is shuffled. The first member
 of each generated pair is placed on `TOP`; the second is placed on `BOTTOM`. It is not lexicographic.
 
-Abilities support `DAMAGE`, `STUN`, `HEAL`, `SHIELD`, `BUFF_ATK`, and `BUFF_SPD`; patterns are `SINGLE`, `LINE`, and
-`SURROUND`. Implemented modifiers include stun, lifesteal, execute, conditional/scaling damage, damage-over-time, and
-knockback. `DamageResolver` applies mode affinity to basic attacks, direct damage abilities, and DOT damage. Pokemon
+Abilities support `DAMAGE`, `STUN`, `HEAL`, `SHIELD`, `BUFF_ATK`, `BUFF_SPD`, `BUFF_DEF`, and `DEBUFF_DEF`; patterns are
+`SINGLE`, `LINE`, and `SURROUND`. Implemented modifiers include stun, lifesteal, execute, conditional/scaling damage,
+damage-over-time, knockback, and field condition. `DamageResolver` applies mode affinity to basic attacks, direct damage abilities, and DOT damage. Pokemon
 derives the offensive element from the caster's traits and uses the best attacking trait against each target when a unit
 has two traits. Each mode resolves its own data-loaded affinity graph; One Piece remains neutral.
 
@@ -519,7 +519,7 @@ the same OpenTelemetry pipeline. There is no tracing pipeline or trace backend.
 
 ## 12. Test strategy
 
-`BotProgressionSimulationTest` writes seeded 25-round progression reports for both modes under
+`BotProgressionSimulationTest` writes seeded 25-round progression reports for every mode under
 `target/simulation-reports/economy-bots-*.csv`, including gold, level, stars, action counts, and results against a fixed
 buy-first/level-above-20 baseline. These controlled comparisons are not estimates of human win rates.
 
@@ -544,6 +544,16 @@ mvn -Dtest=RoleBalanceSimulationTest \
   -Dsimulation.role-report=true \
   -Dsimulation.runs=100000 test
 ```
+
+```bash
+mvn -Dtest=BalanceSimulationReportTest \
+  -Dsimulation.report=true \
+  -Dsimulation.mode=pokemongen23 \
+  -Dsimulation.runs=100000 test
+```
+
+The balance report rolls a branch for every pending unit when it generates boards and ranks units and traits by that
+resolved form, so branch variants appear as their own rows.
 
 ## 13. Operational boundaries
 

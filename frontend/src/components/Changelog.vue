@@ -121,7 +121,10 @@ const version160Commits = [
         <div class="release-header">
           <p class="eyebrow">Latest</p>
           <h2>Version X.X.X</h2>
-          <p>Journey to Johto and Hoenn in the new Pokemon Gen 2/3 mode.</p>
+          <p>
+            Journey to Johto and Hoenn in the new Pokemon Gen 2/3 mode, with branching evolutions,
+            held items and weather.
+          </p>
         </div>
         <div class="release-grid">
           <div class="release-features">
@@ -131,16 +134,13 @@ const version160Commits = [
                 The host can pick Pokemon Gen 2/3 in the lobby. Build teams from 66 Johto and Hoenn
                 lines, from Chikorita, Treecko and Mudkip up to Lugia, Ho-Oh, Kyogre, Groudon and
                 Rayquaza, using their original Gen 2/3 typings, each with new pixel-art portraits.
-                In the 3D battle view every Gen 2/3 Pokemon unleashes its own signature ultimate,
-                and matches are fought at the new Bell Tower and Sea Route arenas.
               </p>
             </div>
             <div class="feature-note">
-              <h3>The Dark Type</h3>
+              <h3>Signature Ultimates and New Arenas</h3>
               <p>
-                Dark Pokemon fight dirty when cornered: while a unit is below half health, its basic
-                attacks hit harder, and the bonus grows with every Dark Pokemon on your board. In
-                this mode, Steel Pokemon reduce the damage your whole team takes.
+                In the 3D battle view every Gen 2/3 Pokemon unleashes its own signature ultimate,
+                and matches are fought at the new Bell Tower and Sea Route arenas.
               </p>
             </div>
             <div class="feature-note">
@@ -178,14 +178,28 @@ const version160Commits = [
               <p>
                 Rain boosts Water damage by 20%, weakens Fire damage by 20% and speeds up Water
                 Pokemon. Harsh Sunlight does the opposite and speeds up Grass Pokemon. Sandstorm
-                chips 3% and Hail 2.5% max HP every second from everyone except Rock, Ground and
-                Steel or Ice Pokemon, and give Rock or Ice Pokemon extra defense. The current
-                weather shows next to the match rule at the top of the screen, and on the board as
-                falling rain, drifting sand, hail or warm sunlight.
+                chips 3% max HP every second from everyone except Rock, Ground and Steel Pokemon,
+                and gives Rock Pokemon extra defense. Hail chips 2.5% max HP every second from
+                everyone except Ice Pokemon, and gives Ice Pokemon extra defense.
               </p>
+              <p>
+                The current weather shows next to the match rule at the top of the screen, and on
+                the board as falling rain, drifting sand, hail or warm sunlight.
+              </p>
+            </div>
+            <div class="feature-note">
+              <h3>Weather Front</h3>
               <p>
                 New match rule <strong>Weather Front</strong>: every fight starts in random weather,
                 shown as a forecast during planning. Units that bring their own weather replace it.
+              </p>
+            </div>
+            <div class="feature-note">
+              <h3>The Dark Type</h3>
+              <p>
+                Dark Pokemon fight dirty when cornered: while a unit is below half health, its basic
+                attacks hit harder, and the bonus grows with every Dark Pokemon on your board. In
+                this mode, Steel Pokemon reduce the damage your whole team takes.
               </p>
             </div>
           </div>

@@ -1,7 +1,7 @@
 # TFT Roadmap
 
 Status: approved direction  
-Progress reviewed: 2026-10-15
+Progress reviewed: 2026-11-09
 Supersedes: `archive/2026-08-03_NEXT_PRODUCT_INITIATIVES.md`
 
 TFT is a browser game hosted on a VPS. Server operations are documented in the
@@ -25,8 +25,8 @@ Delivered from the previous roadmap:
 
 | Order | Initiative | Player outcome |
 |---|---|---|
-| 1 | Match Rules | Every match can have a distinct flavor chosen by the host (first release implemented: 7 shared rules plus one themed rule per mode; the open questions below are settled, Random is the default) |
-| 2 | Item system | Shipped stat-item foundation; triggered effects and Match Rule variants remain later work |
+| 1 | Match Rules | Every match can have a distinct flavor chosen by the host (first release implemented: 7 shared rules plus themed rules per mode: one each for One Piece and Pokemon, two for Pokemon Gen 2/3; the open questions below are settled, Random is the default) |
+| 2 | Item system | Shipped stat-item foundation; Pokemon Gen 2/3 held items add triggered effects; Match Rule variants remain later work |
 | 3 | Mobile support | Full matches playable on tablets and landscape phones |
 | 4 | Bot improvements | Bots use Match Rules and items credibly and position better |
 | Side track | 3D combat view | Combat watched in 3D with portrait billboards in every mode (shipped; polish ongoing) |
@@ -70,8 +70,9 @@ Random is the default lobby choice; the host may also choose None or a specific 
 
 Definitions and values are maintained in
 [`match_rules_common.json`](backend/src/main/resources/data/match_rules_common.json),
-[`match_rules_onepiece.json`](backend/src/main/resources/data/match_rules_onepiece.json), and
-[`match_rules_pokemon.json`](backend/src/main/resources/data/match_rules_pokemon.json).
+[`match_rules_onepiece.json`](backend/src/main/resources/data/match_rules_onepiece.json),
+[`match_rules_pokemon.json`](backend/src/main/resources/data/match_rules_pokemon.json), and
+[`match_rules_pokemongen23.json`](backend/src/main/resources/data/match_rules_pokemongen23.json).
 
 ### Done when
 
@@ -82,7 +83,7 @@ Definitions and values are maintained in
 
 ## 4. Initiative 2: Item system
 
-The first release is implemented in both modes. It uses eight complete stat items per mode, with profiles ranging from
+The first release is implemented in every mode. It uses eight complete stat items per mode, with profiles ranging from
 one large bonus to three moderate bonuses. One scheduled orb becomes an item orb on rounds 2, 4, 6, and 10. Duplicates
 are independent copies. The default is two slots per unit; the room owns that limit for future Match Rules.
 
@@ -95,8 +96,9 @@ are independent copies. The default is two slots per unit; the room owns that li
 - **Fewer drops.** Loot orbs gain an `ITEM` loot type. Roughly 3–5 items per player per game is the starting target,
   to be tuned with analytics.
 - **Mode-themed items on a shared effect vocabulary.** The first set uses max HP, attack, DEF, attack speed, and
-  ability-damage bonuses. Each mode supplies its own names and SVG icons in `items_<mode>.json`. Triggered effects
-  such as lifesteal, shields, mana on hit, and on-kill effects remain later work.
+  ability-damage bonuses. Each mode supplies its own names and SVG icons in `items_<mode>.json`. Pokemon Gen 2/3
+  items also carry triggered held-item effects; triggered effects for the other modes, such as lifesteal, shields, mana
+  on hit, and on-kill effects, remain later work.
 
 ### Transfer and inventory rules
 
@@ -111,7 +113,7 @@ are independent copies. The default is two slots per unit; the room owns that li
 - Items drop, can be inspected, and can be equipped without outside explanation.
 - Unit tiles show equipped item icons. Tooltips describe the exact backend effect.
 - Final-composition analytics already store item ids per unit, and the admin view shows them.
-- No single item or item/unit pairing dominates in either mode.
+- No single item or item/unit pairing dominates in any mode.
 
 ## 5. Initiative 3: Mobile support (tablets and landscape phones)
 
@@ -180,9 +182,9 @@ Rules:
   renders in `frontend/src/combat3d/`, which is lazy-loaded. Planning stays 2D, and WebGL failure falls back to
   Classic.
 - Arenas rotate per room from a mode pool. One Piece uses story stages (Foosha Village, Baratie, Sabaody,
-  Marineford, Wano). Pokemon uses Battle Stadium and Rock Gym.
-- Every One Piece unit has a signature auto-attack and ultimate. Every Pokemon form and move has a signature
-  ultimate, and forms that change moves by star level get one per move. Units without a signature use ability-type,
+  Marineford, Wano). Pokemon uses Battle Stadium and Rock Gym. Pokemon Gen 2/3 uses Bell Tower and Sea Route.
+- Every One Piece unit has a signature auto-attack and ultimate. Every Pokemon and Pokemon Gen 2/3 form and
+  move has a signature ultimate, and forms that change moves by star level get one per move. Units without a signature use ability-type,
   element, and generic fallbacks.
 - Big fights stay readable: camera zooms and shakes are throttled battle-wide, there are no screen flashes, and
   ranged units cast from their own tile.
@@ -197,7 +199,7 @@ Rules:
 
 Live 3D combat, lazy loading, and signature 3D effects are already shipped; they are not new implementation tasks.
 
-Done when combat in both game modes (One Piece and Pokemon) can be watched in either view, players can switch
+Done when combat in every game mode (One Piece, Pokemon, and Pokemon Gen 2/3) can be watched in either view, players can switch
 between Classic and 3D at any time, every existing ability has a visible effect in both views, and 3D falls back
 to Classic cleanly.
 

@@ -241,13 +241,28 @@ class BalanceSimulationReportTest {
                     ? starLevel
                     : STAR_LEVELS.get(boardDetailsRandomProvider.nextInt(STAR_LEVELS.size()));
             var position = positions.get(slot);
-            specs.add(new UnitSpec(unit.id(), unitStarLevel, position.x(), position.y()));
+            specs.add(new UnitSpec(
+                    unit.id(),
+                    unitStarLevel,
+                    position.x(),
+                    position.y(),
+                    rollBranch(unit, unitStarLevel, boardDetailsRandomProvider)));
             slot++;
         }
 
         var starDescription = style == SimulationStyle.SAME_STAR ? starLevel + " star" : "random stars";
         return new GeneratedBoard(
                 new BoardSpec(boardName + " L" + boardSize + " " + starDescription, boardSize, specs), costProfile);
+    }
+
+    // Branches are rolled here instead of inside CombatSimulator so the report can attribute each simulated unit
+    // to the form it actually fought as. Non-branching units draw nothing, keeping their random sequence unchanged.
+    private String rollBranch(UnitDefinition unit, int starLevel, SeededRandomProvider randomProvider) {
+        if (!unit.isPending(starLevel, null)) {
+            return null;
+        }
+        var branches = unit.branchIdsAt(unit.branchPoint());
+        return branches.get(randomProvider.nextInt(branches.size()));
     }
 
     private List<BoardPosition> boardPositions(SimulationStyle style, SeededRandomProvider randomProvider) {
@@ -322,7 +337,11 @@ class BalanceSimulationReportTest {
 
     private String unitImpactKey(UnitSpec spec, Map<String, UnitDefinition> unitById) {
         var unit = unitById.get(spec.definitionId());
-        var unitName = unit == null ? spec.definitionId() : unit.name();
+        var unitName = unit == null
+                ? spec.definitionId()
+                : spec.branchId() == null
+                        ? unit.name()
+                        : unit.formAt(spec.starLevel(), spec.branchId()).name();
         var cost = unit == null ? "?" : Integer.toString(unit.cost());
         return spec.starLevel() + "|" + unitName + "|" + cost;
     }
@@ -395,7 +414,9 @@ class BalanceSimulationReportTest {
                     var definition = unitById.get(unit.definitionId());
                     return definition == null
                             ? List.<String>of()
-                            : definition.formAt(unit.starLevel(), null).traits();
+                            : definition
+                                    .formAt(unit.starLevel(), unit.branchId())
+                                    .traits();
                 })
                 .flatMap(List::stream)
                 .filter(unit -> unit != null)
@@ -609,7 +630,8 @@ class BalanceSimulationReportTest {
 
     private String boardSignature(GeneratedBoard board) {
         var units = board.spec().units().stream()
-                .map(unit -> unit.starLevel() + ":" + unit.definitionId())
+                .map(unit -> unit.starLevel() + ":" + unit.definitionId()
+                        + (unit.branchId() == null ? "" : "/" + unit.branchId()))
                 .sorted()
                 .collect(Collectors.joining(","));
         return board.spec().level() + "|" + units;

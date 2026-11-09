@@ -2,8 +2,8 @@
 
 **Build your team. Find your synergies. Watch the battle unfold.**
 
-A fan-made auto-battler inspired by Teamfight Tactics. Recruit a One Piece crew or evolve a
-Pokémon team, equip items, choose augments, and outlast seven opponents. Play in your browser
+A fan-made auto-battler inspired by Teamfight Tactics. Recruit a One Piece crew, evolve a
+Pokémon team, or journey through Johto and Hoenn in Pokémon Gen 2/3. Equip items, choose augments, and outlast seven opponents. Play in your browser
 with friends or against bots, with Classic or optional 3D battles.
 
 [Host your own server](deployment/DEPLOYMENT_GUIDE.md) ·
@@ -32,8 +32,18 @@ and [augment selection](docs/screenshots/augment-selection.jpg).
   make a 3★. Pokémon can evolve into new forms with different abilities and roles.
 - **Shape your build with items and augments.** Equip and move items freely during planning,
   and choose team-wide bonuses on rounds 3, 6, and 11.
-- **Give each match a twist.** Choose One Piece or Pokémon in the lobby, then pick a match rule,
+- **Give each match a twist.** Choose One Piece, Pokémon, or Pokémon Gen 2/3 in the lobby, then pick a match rule,
   let the game choose one randomly, or play with standard rules.
+- **Journey to Johto and Hoenn.** Pokémon Gen 2/3 brings 66 Gen 2 and Gen 3 lines with their
+  own signature ultimates in 3D battles, plus three mechanics of its own:
+  - *Choose your evolution.* Some Pokémon branch, like Eevee, Ralts, Wurmple, and Snorunt. When
+    one reaches its evolution star, click the **Evolve** badge to compare the options and pick
+    one; if you don't choose before combat starts, the best fit for your team is picked for you.
+  - *Held items.* Items such as Leftovers, Focus Band, and Sitrus Berry trigger effects in
+    combat on top of their stats. Hover an item to read what it does.
+  - *Weather.* Rain, Harsh Sunlight, Sandstorm, and Hail boost or weaken types, and some
+    Pokémon bring weather into the fight. With the **Weather Front** match rule, every fight
+    starts in random weather, shown as a forecast during planning.
 - **Play solo at your own pace.** Face seven bots that buy, save, and upgrade their own teams.
   Planning waits until you're ready; fight for first place and review your team in Match History.
 
@@ -42,8 +52,8 @@ and [augment selection](docs/screenshots/augment-selection.jpg).
 Players need a current desktop browser and a connection to the game server.
 
 Open your server's game URL, choose a player name, and create a room.
-Invite friends with the room's invite link or room code. The host can choose One Piece or
-Pokémon, select a Match Rule, and start; empty seats fill with bots.
+Invite friends with the room's invite link or room code. The host can choose One Piece,
+Pokémon, or Pokémon Gen 2/3, select a Match Rule, and start; empty seats fill with bots.
 
 For a solo match, start a room on your own and face seven bots. Planning waits until you're
 ready. Enable **3D** in Settings for the arena view, and browse completed solo games in
