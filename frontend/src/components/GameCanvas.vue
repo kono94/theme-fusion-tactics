@@ -518,6 +518,26 @@ const onUnitMouseLeave = () => {
     emit('hide-tooltip')
 }
 
+// While the pointer is on the evolve button the unit tooltip steps aside and the unit
+// stops being draggable, so the press always lands as a click on the button.
+const evolveHoverUnitId = ref<string | null>(null)
+const onEvolveHoverStart = (unit: RenderedUnit) => {
+    evolveHoverUnitId.value = unit.id
+    emit('hide-tooltip')
+}
+const onEvolveHoverEnd = (evt: MouseEvent, unit: RenderedUnit) => {
+    evolveHoverUnitId.value = null
+    const unitEl = (evt.currentTarget as HTMLElement | null)?.closest('.unit')
+    if (!unitEl || !(evt.relatedTarget instanceof Node) || !unitEl.contains(evt.relatedTarget)) return
+    if (isDragging.value || props.isDraggingProp) return
+    hoveredUnitId.value = unit.id
+    emit('show-tooltip', {
+        rect: unitEl.getBoundingClientRect(),
+        unit,
+        placement: unit.visualY < 4 ? 'bottom' : 'top'
+    })
+}
+
 // ========== ANIMATION SYSTEM ==========
 
 const combatVisualEvents = ref<NormalizedCombatVisualEvent[]>([])
@@ -1042,7 +1062,7 @@ const onOrbClick = (orbId: string) => {
                             'trait-contributor': isHighlightedTraitContributor(unit),
                             'trait-dimmed': isDimmedByTraitHighlight(unit)
                          }"
-                         :draggable="unit.ownerId === actingPlayerId && !isReadOnly && props.state?.phase !== 'COMBAT' && !unit.isDying"
+                         :draggable="unit.ownerId === actingPlayerId && !isReadOnly && props.state?.phase !== 'COMBAT' && !unit.isDying && evolveHoverUnitId !== unit.id"
                          @dragstart="(e) => onDragStart(e, unit)"
                          @dragend="onDragEnd"
                          @mouseenter="(e) => onUnitMouseEnter(e, unit)"
@@ -1071,7 +1091,9 @@ const onOrbClick = (orbId: string) => {
                         </div>
                         <img :src="unit.image" class="unit-img" :alt="unit.name" draggable="false" />
                         <EvolveBadge v-if="!unit.isDying && canChooseEvolution(unit, evolutionContext)"
-                            :unit-name="unit.name" @evolve="emit('evolve', unit.id)" />
+                            :unit-name="unit.name" @evolve="emit('evolve', unit.id)"
+                            @hover-start="onEvolveHoverStart(unit)"
+                            @hover-end="(evt) => onEvolveHoverEnd(evt, unit)" />
                         <div v-if="unit.items?.length" class="board-items">
                             <button v-for="item in unit.items" :key="item.instanceId" type="button" class="board-item"
                                 :class="{ selected: item.instanceId === selectedItemId }"

@@ -508,6 +508,22 @@ const handleHideTooltip = () => {
   hoveredOwnedUnitId.value = null
 }
 
+const evolveHoverBenchUnitId = ref<string | null>(null)
+
+function onBenchEvolveHoverStart(unit: GameUnit) {
+  evolveHoverBenchUnitId.value = unit.id
+  handleHideTooltip()
+}
+
+function onBenchEvolveHoverEnd(event: MouseEvent, unit: GameUnit) {
+  evolveHoverBenchUnitId.value = null
+  const unitEl = (event.currentTarget as HTMLElement | null)?.closest('.bench-unit')
+  if (!unitEl || !(event.relatedTarget instanceof Node) || !unitEl.contains(event.relatedTarget)) {
+    return
+  }
+  handleShowTooltip(unitEl.getBoundingClientRect(), unit)
+}
+
 const TOOLTIP_VIEWPORT_MARGIN = 8
 const tooltipContainer = ref<HTMLElement | null>(null)
 const tooltipNudgeY = ref(0)
@@ -1093,7 +1109,7 @@ watch(
                   class="bench-unit"
                   :class="{ 'star-up': isStarringUp(slot.unit.id) }"
                   :style="{ '--rarity-color': getRarityColor(slot.unit.cost) }"
-                  :draggable="canManageShopAndBench"
+                  :draggable="canManageShopAndBench && evolveHoverBenchUnitId !== slot.unit.id"
                   @dragstart="(e) => onBenchDragStart(e, slot.unit!)"
                   @dragend="onBenchDragEnd"
                   @mouseenter="
@@ -1122,6 +1138,8 @@ watch(
                     :unit-name="slot.unit.name"
                     placement="bench"
                     @evolve="openEvolutionChoice(slot.unit.id)"
+                    @hover-start="onBenchEvolveHoverStart(slot.unit)"
+                    @hover-end="(event) => onBenchEvolveHoverEnd(event, slot.unit!)"
                   />
 
                   <div

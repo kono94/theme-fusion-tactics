@@ -120,6 +120,25 @@ const version160Commits = [
       <section class="release-section">
         <div class="release-header">
           <p class="eyebrow">Latest</p>
+          <h2>Version X.X.X</h2>
+          <p>The Evolve button is much easier to use.</p>
+        </div>
+        <div class="release-grid">
+          <div class="release-features">
+            <div class="feature-note">
+              <h3>Easier Evolve Button</h3>
+              <p>
+                The Evolve button on a Pokemon waiting for its evolution choice is bigger and now sits
+                at the bottom of the unit, clear of the health bar. Pointing at it hides the unit
+                info card, so the button is always visible and one click opens the evolution choice.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="release-section">
+        <div class="release-header">
+          <p class="eyebrow">Previous</p>
           <h2>Version 3.1.1</h2>
           <p>
             Journey to Johto and Hoenn in the new Pokemon: Johto &amp; Hoenn mode, with branching

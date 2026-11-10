@@ -371,6 +371,25 @@ describe('GameCanvas evolve badge', () => {
         wrapper.unmount()
     })
 
+    it('hides the unit tooltip and pauses dragging while the pointer is on the badge', async () => {
+        const wrapper = mount(GameCanvas, {
+            props: { state: pendingState('PLANNING'), actingPlayerId: 'me', viewedPlayerId: 'me', isReadOnly: false },
+            global: { stubs: { CombatEffectsCanvas: true } },
+        })
+        const badge = wrapper.get('[data-testid="evolve-badge"]')
+        const unit = wrapper.findAll('.unit').find((candidate) => candidate.element.contains(badge.element))!
+
+        expect(unit.attributes('draggable')).toBe('true')
+        await badge.trigger('mouseenter')
+        expect(wrapper.emitted('hide-tooltip')).toHaveLength(1)
+        expect(unit.attributes('draggable')).toBe('false')
+
+        await badge.trigger('mouseleave', { relatedTarget: unit.element })
+        expect(wrapper.emitted('show-tooltip')).toHaveLength(1)
+        expect(unit.attributes('draggable')).toBe('true')
+        wrapper.unmount()
+    })
+
     it('hides the badge while spectating, read-only or in combat', () => {
         for (const props of [
             { state: pendingState('PLANNING'), actingPlayerId: 'me', viewedPlayerId: 'opponent', isReadOnly: true },

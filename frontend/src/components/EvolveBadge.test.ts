@@ -20,6 +20,16 @@ describe('EvolveBadge', () => {
     expect(parentClicks).toBe(0)
   })
 
+  it('reports when the pointer enters and leaves the button', async () => {
+    const wrapper = mount(EvolveBadge, { props: { unitName: 'Eevee' } })
+
+    await wrapper.trigger('mouseenter')
+    await wrapper.trigger('mouseleave')
+
+    expect(wrapper.emitted('hover-start')).toHaveLength(1)
+    expect(wrapper.emitted('hover-end')).toHaveLength(1)
+  })
+
   it('uses the board placement by default and the bench placement on request', () => {
     expect(mount(EvolveBadge, { props: { unitName: 'Eevee' } }).classes()).toContain('board')
     expect(
