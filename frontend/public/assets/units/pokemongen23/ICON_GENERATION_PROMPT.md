@@ -458,6 +458,8 @@ Style: close-cropped Pokemon portrait with head and upper body visible, modern h
 
 Unown is one line with 28 letter variants. Background color = the letter's second type (`?` and `!` use Psychic). Each quadrant must show the actual Pokemon Unown creature design from Pokemon Gold/Silver, not a font letter with an eye: a black body built around one big eye, with thin stick-like limbs that end in small round nubs and only suggest the letter shape. The whole body is visible, because Unown has no head or shoulders.
 
+Attach the official artwork of the four forms after the style reference, in quadrant order, and tell the model to copy each silhouette. Forms that still come out wrong (C, D, O, P, R, T, V, W, Y and `!` did) are regenerated one per image with only that form's official artwork attached, saved as `_generated_batches/gen23-unown-<id>.png` and scaled to 512x512.
+
 | Batch | Top-left (q1) | Top-right (q2) | Bottom-left (q3) | Bottom-right (q4) |
 |---|---|---|---|---|
 | 36 | `unown_a` | `unown_b` | `unown_c` | `unown_d` |
