@@ -120,7 +120,7 @@ const version160Commits = [
       <section class="release-section">
         <div class="release-header">
           <p class="eyebrow">Latest</p>
-          <h2>Version 3.1.0</h2>
+          <h2>Version 3.1.1</h2>
           <p>
             Journey to Johto and Hoenn in the new Pokemon: Johto &amp; Hoenn mode, with branching
             evolutions, held items and weather.
