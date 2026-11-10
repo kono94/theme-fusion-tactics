@@ -21,9 +21,11 @@ describe('game mode metadata', () => {
             order: 1,
         })
         expect(getGameModeMetadata('pokemon')).toMatchObject({
-            label: 'Pokemon',
+            label: 'Pokemon: Kanto',
+            shortLabel: 'Kanto',
+            generationTag: 'Gen 1',
             lobbyCaption: 'Build a team of iconic trainers',
-            documentTitle: 'Theme Fusion Tactics — Pokemon',
+            documentTitle: 'Theme Fusion Tactics — Pokemon: Kanto',
             favicon: '/pokeball.png',
             unitAssetFolder: 'pokemon',
             themeClass: 'theme-pokemon',
@@ -31,10 +33,11 @@ describe('game mode metadata', () => {
             order: 2,
         })
         expect(getGameModeMetadata('pokemongen23')).toMatchObject({
-            label: 'Pokemon Gen 2/3',
-            shortLabel: 'Gen 2/3',
-            lobbyCaption: 'Johto & Hoenn: weather, held items and branching evolutions',
-            documentTitle: 'Theme Fusion Tactics — Pokemon Gen 2/3',
+            label: 'Pokemon: Johto & Hoenn',
+            shortLabel: 'Johto & Hoenn',
+            generationTag: 'Gen 2–3',
+            lobbyCaption: 'Weather, held items and branching evolutions',
+            documentTitle: 'Theme Fusion Tactics — Pokemon: Johto & Hoenn',
             favicon: '/pokeball.png',
             unitAssetFolder: 'pokemongen23',
             themeClass: 'theme-pokemongen23',

@@ -177,6 +177,9 @@ function selectMode(mode: GameMode) {
                     <span v-if="mode === 'onepiece'" class="mode-motif-star">✦</span>
                 </span>
                 <span class="mode-name">{{ modeMetadata(mode).label }}</span>
+                <span v-if="modeMetadata(mode).generationTag" class="mode-tag">{{
+                    modeMetadata(mode).generationTag
+                }}</span>
                 <span class="mode-caption">{{ modeMetadata(mode).lobbyCaption }}</span>
                 <span v-if="selectedMode === mode" class="mode-check" aria-hidden="true">✓</span>
             </button>
@@ -549,6 +552,18 @@ function selectMode(mode: GameMode) {
 .mode-name {
     font-size: 0.95em;
     font-weight: 800;
+}
+
+.mode-tag {
+    flex: none;
+    padding: 1px 7px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 999px;
+    color: var(--room-muted);
+    font-size: 0.68em;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
 }
 
 .mode-caption {

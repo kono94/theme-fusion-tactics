@@ -122,16 +122,17 @@ const version160Commits = [
           <p class="eyebrow">Latest</p>
           <h2>Version X.X.X</h2>
           <p>
-            Journey to Johto and Hoenn in the new Pokemon Gen 2/3 mode, with branching evolutions,
-            held items and weather.
+            Journey to Johto and Hoenn in the new Pokemon: Johto &amp; Hoenn mode, with branching
+            evolutions, held items and weather.
           </p>
         </div>
         <div class="release-grid">
           <div class="release-features">
             <div class="feature-note">
-              <h3>Pokemon Gen 2/3</h3>
+              <h3>Pokemon: Johto &amp; Hoenn</h3>
               <p>
-                The host can pick Pokemon Gen 2/3 in the lobby. Build teams from 67 Johto and Hoenn
+                The host can pick Pokemon: Johto &amp; Hoenn in the lobby. The original Pokemon mode is
+                now called Pokemon: Kanto, and both show a small generation tag. Build teams from 67 Johto and Hoenn
                 lines, from Chikorita, Treecko and Mudkip up to Lugia, Ho-Oh, Kyogre, Groudon and
                 Rayquaza, using their original Gen 2/3 typings, each with new pixel-art portraits.
               </p>
@@ -139,7 +140,7 @@ const version160Commits = [
             <div class="feature-note">
               <h3>Signature Ultimates and New Arenas</h3>
               <p>
-                In the 3D battle view every Gen 2/3 Pokemon unleashes its own signature ultimate,
+                In the 3D battle view every Johto and Hoenn Pokemon unleashes its own signature ultimate,
                 and matches are fought at the new Bell Tower and Sea Route arenas.
               </p>
             </div>
@@ -173,7 +174,7 @@ const version160Commits = [
             <div class="feature-note">
               <h3>Held Items</h3>
               <p>
-                In Pokemon Gen 2/3, items do more than add stats. Leftovers restore HP every second,
+                In Pokemon: Johto &amp; Hoenn, items do more than add stats. Leftovers restore HP every second,
                 Focus Band survives the first lethal hit at 1 HP, King's Rock can make targets
                 flinch, Shell Bell heals from damage dealt, Sitrus Berry heals once at low HP, Lum
                 Berry ignores the first stun, Quick Claw grants extra attacks, and Choice Band adds
@@ -184,7 +185,7 @@ const version160Commits = [
             <div class="feature-note">
               <h3>Weather</h3>
               <p>
-                Fights in Pokemon Gen 2/3 can change with the weather. Kyogre brings Rain, Groudon
+                Fights in Pokemon: Johto &amp; Hoenn can change with the weather. Kyogre brings Rain, Groudon
                 and Torkoal bring Harsh Sunlight, and 3-star Tyranitar brings a Sandstorm for the
                 whole fight; if both boards bring weather, the more expensive unit wins. Pelipper's
                 Rain Dance and Glalie's and Walrein's Hail start weather for a few seconds,

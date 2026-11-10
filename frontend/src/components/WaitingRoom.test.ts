@@ -80,7 +80,9 @@ describe('WaitingRoom mode selection', () => {
 
         const modeButtons = wrapper.findAll(modeOptionSelector)
         expect(modeButtons).toHaveLength(2)
-        expect(modeButtons.map((button) => button.find('span.mode-name').text())).toEqual(['One Piece', 'Pokemon'])
+        expect(modeButtons.map((button) => button.find('span.mode-name').text())).toEqual(['One Piece', 'Pokemon: Kanto'])
+        expect(modeButtons.map((button) => button.find('span.mode-tag').exists())).toEqual([false, true])
+        expect(modeButtons[1].find('span.mode-tag').text()).toBe('Gen 1')
         expect(wrapper.find('.waiting-room').classes()).toContain('theme-onepiece')
 
         await modeButtons[0].trigger('click')
@@ -101,13 +103,13 @@ describe('WaitingRoom mode selection', () => {
         const modeButtons = wrapper.findAll(modeOptionSelector)
         expect(modeButtons.map((button) => button.find('span.mode-name').text())).toEqual([
             'One Piece',
-            'Pokemon',
-            'Pokemon Gen 2/3',
+            'Pokemon: Kanto',
+            'Pokemon: Johto & Hoenn',
         ])
         expect(modeButtons.map((button) => button.find('span.mode-caption').text())).toEqual([
             'Set sail with legendary pirates',
             'Build a team of iconic trainers',
-            'Johto & Hoenn: weather, held items and branching evolutions',
+            'Weather, held items and branching evolutions',
         ])
         expect(modeButtons[2].find('.mode-motif').classes()).toContain('motif-pokemongen23')
     })

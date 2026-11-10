@@ -4,6 +4,7 @@ export interface GameModeMetadata {
     id: GameMode
     label: string
     shortLabel: string
+    generationTag?: string
     lobbyCaption: string
     documentTitle: string
     favicon: string
@@ -30,10 +31,11 @@ export const GAME_MODE_METADATA: Record<GameMode, GameModeMetadata> = {
     },
     pokemon: {
         id: 'pokemon',
-        label: 'Pokemon',
-        shortLabel: 'Pokemon',
+        label: 'Pokemon: Kanto',
+        shortLabel: 'Kanto',
+        generationTag: 'Gen 1',
         lobbyCaption: 'Build a team of iconic trainers',
-        documentTitle: 'Theme Fusion Tactics — Pokemon',
+        documentTitle: 'Theme Fusion Tactics — Pokemon: Kanto',
         favicon: '/pokeball.png',
         unitAssetFolder: 'pokemon',
         themeClass: 'theme-pokemon',
@@ -43,10 +45,11 @@ export const GAME_MODE_METADATA: Record<GameMode, GameModeMetadata> = {
     },
     pokemongen23: {
         id: 'pokemongen23',
-        label: 'Pokemon Gen 2/3',
-        shortLabel: 'Gen 2/3',
-        lobbyCaption: 'Johto & Hoenn: weather, held items and branching evolutions',
-        documentTitle: 'Theme Fusion Tactics — Pokemon Gen 2/3',
+        label: 'Pokemon: Johto & Hoenn',
+        shortLabel: 'Johto & Hoenn',
+        generationTag: 'Gen 2–3',
+        lobbyCaption: 'Weather, held items and branching evolutions',
+        documentTitle: 'Theme Fusion Tactics — Pokemon: Johto & Hoenn',
         favicon: '/pokeball.png',
         unitAssetFolder: 'pokemongen23',
         themeClass: 'theme-pokemongen23',

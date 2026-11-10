@@ -38,7 +38,7 @@ describe('MatchHistory', () => {
         const wrapper = mount(MatchHistory)
 
         await vi.waitFor(() => expect(wrapper.find('[data-test="match-history-card"]').exists()).toBe(true))
-        expect(wrapper.text()).toContain('Pokemon solo match')
+        expect(wrapper.text()).toContain('Kanto solo match')
         expect(wrapper.text()).toContain('Final round 14')
         expect(wrapper.text()).toContain('1 real player vs 7 bots')
         expect(wrapper.text()).toContain('★')
@@ -60,7 +60,7 @@ describe('MatchHistory', () => {
 
         await vi.waitFor(() => expect(wrapper.findAll('[data-test="match-history-card"]')).toHaveLength(3))
         expect(wrapper.text()).toContain('One Piece solo match')
-        expect(wrapper.text()).toContain('Gen 2/3 solo match')
+        expect(wrapper.text()).toContain('Johto & Hoenn solo match')
         expect(wrapper.text()).toContain('retired-mode solo match')
     })
 
