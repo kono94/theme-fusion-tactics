@@ -191,6 +191,22 @@ an unbranched form sits at or above it, a higher form uses an undeclared branch,
 Shop `UnitDefinition`s read `forms` (and `startCondition`) from JSON but never serialize them. Trait rosters list a line under each trait at the earliest star
 where any branch carries it.
 
+Variant groups: a unit JSON entry may declare `variants` (`id, name, traits, ability`, optional `shopWeight` default 1,
+optional `wildcardTrait`). `DataLoader.parseUnits` expands the template into one `UnitDefinition` per variant that
+shares the template's line, cost, and stats and carries `variantGroup` (= the template line); the template itself is not
+registered. Variants cannot also declare `forms`; ids must be unique, weights positive, and variant traits go through
+the normal trait validation. `variantGroup` (and `wildcardTrait` when true) serialize on shop definitions; `shopWeight`
+does not. Shop and loot rolls collapse each group to one pool entry (`VariantGroups.collapse`), so the group has the odds
+of one unit of its cost, then `Player.resolveVariant` returns the player's locked variant or a weighted random one.
+The first acquisition (buy or unit orb) locks the group to that variant in `Player.lockedVariants` and rewrites other
+shop slots of the group; buying a stale slot substitutes the locked variant. The lock is released when no unit of the
+line remains on bench, board, or in pending upgrades, and cleared on mode reset. Upgrades and evolutions resolve the
+survivor's own definition (`Player.definitionFor`), so merged variants keep their identity. A `wildcardTrait` unit gains
+a second trait copying the trait carried by the most distinct other lines on the owner's board (its own base traits and
+line excluded, ties in the mode's trait order); `Player.refreshWildcardTraits` recomputes it for state snapshots,
+stat previews, and before combat trait application. Trait rosters list one entry per line, so a group appears once per
+trait.
+
 ## 7. Transport and identity
 
 ### STOMP setup

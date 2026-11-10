@@ -883,6 +883,7 @@ public class GameRoom {
 
     private Map<String, UnitStats> buildStatPreviews(Player player) {
         var previews = new HashMap<String, UnitStats>();
+        player.refreshWildcardTraits();
         var board = player.getBoardUnits();
         var copies = board.stream().map(GameUnit::cloneUnit).toList();
         combatSystem.applyStartingBonuses(copies);
@@ -1059,9 +1060,13 @@ public class GameRoom {
     }
 
     Optional<UnitDefinition> chooseLootUnitDefinitionForPlayer(Player player, List<UnitDefinition> units) {
-        var availableUnits = units.stream()
+        return chooseLootUnitRepresentative(player, units).map(player::resolveVariant);
+    }
+
+    private Optional<UnitDefinition> chooseLootUnitRepresentative(Player player, List<UnitDefinition> units) {
+        var availableUnits = VariantGroups.collapse(units.stream()
                 .filter(def -> !player.hasCompletedUnitLine(def.lineId()))
-                .toList();
+                .toList());
         if (availableUnits.isEmpty()) {
             return Optional.empty();
         }

@@ -56,19 +56,24 @@ def font(size):
 def forms(units):
     seen = {}
     for unit in units:
+        if unit.get('variants'):
+            for variant in unit['variants']:
+                glyph = variant['name'].split()[-1]
+                seen.setdefault(variant['id'], (variant['name'], variant['traits'], glyph))
+            continue
         entries = unit.get('forms') or [{'definitionId': unit['id'], 'name': unit['name'], 'traits': unit['traits']}]
         for form in entries:
-            seen.setdefault(form['definitionId'], (form['name'], form.get('traits') or unit['traits']))
+            seen.setdefault(form['definitionId'], (form['name'], form.get('traits') or unit['traits'], form['name'][0]))
     return seen
 
 
-def render(name, traits):
+def render(name, traits, glyph):
     background = hex_rgb(TYPE_COLORS.get(traits[0], FALLBACK_COLOR))
     image = Image.new('RGB', (SIZE, SIZE), background)
     draw = ImageDraw.Draw(image)
     accent = darker(background, 0.82)
     draw.ellipse((96, 56, 416, 376), fill=accent)
-    draw.text((SIZE / 2, 216), name[0].upper(), font=font(220), fill=INK, anchor='mm')
+    draw.text((SIZE / 2, 216), glyph.upper(), font=font(220), fill=INK, anchor='mm')
     label_size = 56 if len(name) <= 10 else 44
     draw.text((SIZE / 2, 422), name, font=font(label_size), fill=INK, anchor='mm')
     draw.text((SIZE / 2, 470), ' / '.join(traits), font=font(26), fill=darker(INK, 1.6), anchor='mm')
@@ -81,11 +86,11 @@ def main(units_path, out_dir, overwrite):
     target_dir = Path(out_dir)
     target_dir.mkdir(parents=True, exist_ok=True)
     written = 0
-    for definition_id, (name, traits) in forms(units).items():
+    for definition_id, (name, traits, glyph) in forms(units).items():
         target = target_dir / f'{definition_id}.png'
         if target.exists() and not overwrite:
             continue
-        render(name, traits).save(target, optimize=True)
+        render(name, traits, glyph).save(target, optimize=True)
         written += 1
     print(f'Wrote {written} placeholder portraits to {target_dir}')
 

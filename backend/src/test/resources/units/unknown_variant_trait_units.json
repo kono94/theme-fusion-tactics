@@ -1,0 +1,44 @@
+[
+  {
+    "id": "glyph",
+    "lineId": "glyph",
+    "name": "Glyph",
+    "cost": 2,
+    "role": "SUPPORT",
+    "maxHealth": [600, 1000, 2000],
+    "maxMana": [50, 50, 50],
+    "attackDamage": [40, 70, 130],
+    "abilityPower": [0, 0, 0],
+    "defense": [20, 20, 20],
+    "attackSpeed": [0.7, 0.7, 0.7],
+    "range": [3, 3, 3],
+    "traits": [
+      "Straw Hat"
+    ],
+    "ability": {
+      "name": "Mark",
+      "description": "Deals $value damage.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [100, 200, 400],
+      "range": [3, 3, 4]
+    },
+    "variants": [
+      {
+        "id": "glyph_a",
+        "name": "Glyph A",
+        "traits": [
+          "Straw Hat"
+        ]
+      },
+      {
+        "id": "glyph_b",
+        "name": "Glyph B",
+        "traits": [
+          "Straw Hat",
+          "Not A Trait"
+        ]
+      }
+    ]
+  }
+]

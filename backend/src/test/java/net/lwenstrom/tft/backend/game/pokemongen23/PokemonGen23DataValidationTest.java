@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import net.lwenstrom.tft.backend.core.DataLoader;
 import net.lwenstrom.tft.backend.core.engine.StandardGameUnit;
 import net.lwenstrom.tft.backend.core.engine.UnitDefinition;
 import net.lwenstrom.tft.backend.core.model.AbilityDefinition;
@@ -25,20 +26,30 @@ class PokemonGen23DataValidationTest {
     private final JsonMapper jsonMapper = JsonMapper.builder().build();
 
     @Test
-    void rosterHasSixtySixLinesWithTheExpectedCostDistribution() {
+    void rosterHasSixtySevenLinesWithTheExpectedCostDistribution() {
         var units = loadUnits("units_pokemongen23.json");
 
-        assertEquals(66, units.size());
+        assertEquals(94, units.size());
         assertEquals(
-                Map.of(1, 14L, 2, 16L, 3, 13L, 4, 14L, 5, 9L),
-                units.stream().collect(Collectors.groupingBy(UnitDefinition::cost, Collectors.counting())));
-        assertEquals(66, units.stream().map(UnitDefinition::lineId).distinct().count());
+                Map.of(1, 14L, 2, 17L, 3, 13L, 4, 14L, 5, 9L),
+                units.stream()
+                        .collect(Collectors.toMap(
+                                UnitDefinition::lineId, UnitDefinition::cost, (first, ignored) -> first))
+                        .values()
+                        .stream()
+                        .collect(Collectors.groupingBy(cost -> cost, Collectors.counting())));
+        assertEquals(67, units.stream().map(UnitDefinition::lineId).distinct().count());
+        assertEquals(
+                28,
+                units.stream()
+                        .filter(unit -> "unown".equals(unit.variantGroup()))
+                        .count());
         var definitionIds = new HashSet<String>();
         units.forEach(unit -> {
             definitionIds.add(unit.id());
             unit.forms().forEach(form -> definitionIds.add(form.definitionId()));
         });
-        assertEquals(140, definitionIds.size());
+        assertEquals(168, definitionIds.size());
     }
 
     @Test
@@ -172,7 +183,7 @@ class PokemonGen23DataValidationTest {
     private List<UnitDefinition> loadUnits(String file) {
         var is = getClass().getResourceAsStream("/data/" + file);
         assertNotNull(is, file);
-        return jsonMapper.readValue(is, new TypeReference<>() {});
+        return DataLoader.parseUnits(jsonMapper, jsonMapper.readTree(is));
     }
 
     private List<Map<String, Object>> loadTraits() {

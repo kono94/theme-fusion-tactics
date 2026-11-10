@@ -5138,5 +5138,513 @@
       "values": [28, 48, 72],
       "range": [4, 5, 5]
     }
+  },
+  {
+    "id": "unown",
+    "lineId": "unown",
+    "name": "Unown",
+    "cost": 2,
+    "role": "SUPPORT",
+    "maxHealth": [620, 1116, 2046],
+    "maxMana": [50, 50, 50],
+    "attackDamage": [42, 76, 139],
+    "abilityPower": [0, 0, 0],
+    "defense": [25, 25, 25],
+    "attackSpeed": [0.7, 0.7, 0.7],
+    "range": [3, 3, 3],
+    "traits": [
+      "Psychic"
+    ],
+    "ability": {
+      "name": "Hidden Power",
+      "description": "Fires a mysterious Psychic-type Hidden Power, dealing $value damage to its target. Unown ? also takes on the type shared by the most different Pokemon on your board.",
+      "type": "DAMAGE",
+      "pattern": "SINGLE",
+      "values": [190, 430, 900],
+      "range": [3, 3, 4]
+    },
+    "variants": [
+      {
+        "id": "unown_a",
+        "name": "Unown A",
+        "traits": [
+          "Psychic",
+          "Flying"
+        ],
+        "ability": {
+          "name": "Hidden Power",
+          "description": "Whips up a Flying-type Hidden Power tailwind, increasing nearby allies' attack speed by $value%.",
+          "type": "BUFF_SPD",
+          "pattern": "SURROUND",
+          "values": [15, 22, 33],
+          "range": [3, 3, 4]
+        },
+        "shopWeight": 2
+      },
+      {
+        "id": "unown_b",
+        "name": "Unown B",
+        "traits": [
+          "Psychic",
+          "Bug"
+        ],
+        "ability": {
+          "name": "Hidden Power",
+          "description": "Swarms nearby enemies with a Bug-type Hidden Power, lowering their DEF by $value.",
+          "type": "DEBUFF_DEF",
+          "pattern": "SURROUND",
+          "values": [12, 22, 34],
+          "range": [3, 3, 4]
+        },
+        "shopWeight": 2
+      },
+      {
+        "id": "unown_c",
+        "name": "Unown C",
+        "traits": [
+          "Psychic",
+          "Ice"
+        ],
+        "ability": {
+          "name": "Hidden Power",
+          "description": "Fires a freezing Ice-type Hidden Power, stunning its target for $value seconds.",
+          "type": "STUN",
+          "pattern": "SINGLE",
+          "values": [2, 2, 3],
+          "stunDurationSeconds": [1.5, 1.5, 2],
+          "range": [3, 3, 4]
+        },
+        "shopWeight": 2
+      },
+      {
+        "id": "unown_d",
+        "name": "Unown D",
+        "traits": [
+          "Psychic",
+          "Dragon"
+        ],
+        "ability": {
+          "name": "Hidden Power",
+          "description": "Unleashes a draconic Dragon-type Hidden Power, dealing $value damage to its target.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [190, 430, 900],
+          "range": [3, 3, 4]
+        },
+        "shopWeight": 2
+      },
+      {
+        "id": "unown_e",
+        "name": "Unown E",
+        "traits": [
+          "Psychic",
+          "Electric"
+        ],
+        "ability": {
+          "name": "Hidden Power",
+          "description": "Zaps its target with an Electric-type Hidden Power, stunning it for $value seconds.",
+          "type": "STUN",
+          "pattern": "SINGLE",
+          "values": [2, 2, 3],
+          "stunDurationSeconds": [1.5, 1.5, 2],
+          "range": [3, 3, 4]
+        },
+        "shopWeight": 2
+      },
+      {
+        "id": "unown_f",
+        "name": "Unown F",
+        "traits": [
+          "Psychic",
+          "Fire"
+        ],
+        "ability": {
+          "name": "Hidden Power",
+          "description": "Hurls a blazing Fire-type Hidden Power, dealing $value damage to its target.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [190, 430, 900],
+          "range": [3, 3, 4]
+        },
+        "shopWeight": 2
+      },
+      {
+        "id": "unown_g",
+        "name": "Unown G",
+        "traits": [
+          "Psychic",
+          "Grass"
+        ],
+        "ability": {
+          "name": "Hidden Power",
+          "description": "Channels a soothing Grass-type Hidden Power, healing nearby allies for $value.",
+          "type": "HEAL",
+          "pattern": "SURROUND",
+          "values": [140, 320, 700],
+          "range": [3, 3, 4]
+        },
+        "shopWeight": 2
+      },
+      {
+        "id": "unown_h",
+        "name": "Unown H",
+        "traits": [
+          "Psychic",
+          "Ghost"
+        ],
+        "ability": {
+          "name": "Hidden Power",
+          "description": "Haunts nearby enemies with a Ghost-type Hidden Power, lowering their DEF by $value.",
+          "type": "DEBUFF_DEF",
+          "pattern": "SURROUND",
+          "values": [12, 22, 34],
+          "range": [3, 3, 4]
+        },
+        "shopWeight": 2
+      },
+      {
+        "id": "unown_i",
+        "name": "Unown I",
+        "traits": [
+          "Psychic",
+          "Ice"
+        ],
+        "ability": {
+          "name": "Hidden Power",
+          "description": "Fires a freezing Ice-type Hidden Power, stunning its target for $value seconds.",
+          "type": "STUN",
+          "pattern": "SINGLE",
+          "values": [2, 2, 3],
+          "stunDurationSeconds": [1.5, 1.5, 2],
+          "range": [3, 3, 4]
+        },
+        "shopWeight": 2
+      },
+      {
+        "id": "unown_j",
+        "name": "Unown J",
+        "traits": [
+          "Psychic",
+          "Fighting"
+        ],
+        "ability": {
+          "name": "Hidden Power",
+          "description": "Strikes with a Fighting-type Hidden Power, dealing $value damage to its target.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [190, 430, 900],
+          "range": [3, 3, 4]
+        },
+        "shopWeight": 2
+      },
+      {
+        "id": "unown_k",
+        "name": "Unown K",
+        "traits": [
+          "Psychic",
+          "Fighting"
+        ],
+        "ability": {
+          "name": "Hidden Power",
+          "description": "Strikes with a Fighting-type Hidden Power, dealing $value damage to its target.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [190, 430, 900],
+          "range": [3, 3, 4]
+        },
+        "shopWeight": 2
+      },
+      {
+        "id": "unown_l",
+        "name": "Unown L",
+        "traits": [
+          "Psychic",
+          "Grass"
+        ],
+        "ability": {
+          "name": "Hidden Power",
+          "description": "Channels a soothing Grass-type Hidden Power, healing nearby allies for $value.",
+          "type": "HEAL",
+          "pattern": "SURROUND",
+          "values": [140, 320, 700],
+          "range": [3, 3, 4]
+        },
+        "shopWeight": 2
+      },
+      {
+        "id": "unown_m",
+        "name": "Unown M",
+        "traits": [
+          "Psychic",
+          "Steel"
+        ],
+        "ability": {
+          "name": "Hidden Power",
+          "description": "Forms a Steel-type Hidden Power barrier, shielding nearby allies for $value.",
+          "type": "SHIELD",
+          "pattern": "SURROUND",
+          "values": [100, 190, 340],
+          "range": [3, 3, 4]
+        },
+        "shopWeight": 2
+      },
+      {
+        "id": "unown_n",
+        "name": "Unown N",
+        "traits": [
+          "Psychic",
+          "Normal"
+        ],
+        "ability": {
+          "name": "Hidden Power",
+          "description": "Rallies nearby allies with a Normal-type Hidden Power, increasing their attack speed by $value%.",
+          "type": "BUFF_SPD",
+          "pattern": "SURROUND",
+          "values": [15, 22, 33],
+          "range": [3, 3, 4]
+        },
+        "shopWeight": 2
+      },
+      {
+        "id": "unown_o",
+        "name": "Unown O",
+        "traits": [
+          "Psychic",
+          "Rock"
+        ],
+        "ability": {
+          "name": "Hidden Power",
+          "description": "Launches a Rock-type Hidden Power, stunning its target for $value seconds.",
+          "type": "STUN",
+          "pattern": "SINGLE",
+          "values": [2, 2, 3],
+          "stunDurationSeconds": [1.5, 1.5, 2],
+          "range": [3, 3, 4]
+        },
+        "shopWeight": 2
+      },
+      {
+        "id": "unown_p",
+        "name": "Unown P",
+        "traits": [
+          "Psychic",
+          "Poison"
+        ],
+        "ability": {
+          "name": "Hidden Power",
+          "description": "Sprays a Poison-type Hidden Power, lowering nearby enemies' DEF by $value.",
+          "type": "DEBUFF_DEF",
+          "pattern": "SURROUND",
+          "values": [12, 22, 34],
+          "range": [3, 3, 4]
+        },
+        "shopWeight": 2
+      },
+      {
+        "id": "unown_q",
+        "name": "Unown Q",
+        "traits": [
+          "Psychic",
+          "Ground"
+        ],
+        "ability": {
+          "name": "Hidden Power",
+          "description": "Raises a Ground-type Hidden Power wall, shielding nearby allies for $value.",
+          "type": "SHIELD",
+          "pattern": "SURROUND",
+          "values": [100, 190, 340],
+          "range": [3, 3, 4]
+        },
+        "shopWeight": 2
+      },
+      {
+        "id": "unown_r",
+        "name": "Unown R",
+        "traits": [
+          "Psychic",
+          "Rock"
+        ],
+        "ability": {
+          "name": "Hidden Power",
+          "description": "Launches a Rock-type Hidden Power, stunning its target for $value seconds.",
+          "type": "STUN",
+          "pattern": "SINGLE",
+          "values": [2, 2, 3],
+          "stunDurationSeconds": [1.5, 1.5, 2],
+          "range": [3, 3, 4]
+        },
+        "shopWeight": 2
+      },
+      {
+        "id": "unown_s",
+        "name": "Unown S",
+        "traits": [
+          "Psychic",
+          "Steel"
+        ],
+        "ability": {
+          "name": "Hidden Power",
+          "description": "Forms a Steel-type Hidden Power barrier, shielding nearby allies for $value.",
+          "type": "SHIELD",
+          "pattern": "SURROUND",
+          "values": [100, 190, 340],
+          "range": [3, 3, 4]
+        },
+        "shopWeight": 2
+      },
+      {
+        "id": "unown_t",
+        "name": "Unown T",
+        "traits": [
+          "Psychic",
+          "Ground"
+        ],
+        "ability": {
+          "name": "Hidden Power",
+          "description": "Raises a Ground-type Hidden Power wall, shielding nearby allies for $value.",
+          "type": "SHIELD",
+          "pattern": "SURROUND",
+          "values": [100, 190, 340],
+          "range": [3, 3, 4]
+        },
+        "shopWeight": 2
+      },
+      {
+        "id": "unown_u",
+        "name": "Unown U",
+        "traits": [
+          "Psychic",
+          "Dark"
+        ],
+        "ability": {
+          "name": "Hidden Power",
+          "description": "Lashes out with a Dark-type Hidden Power, dealing $value damage to its target.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [190, 430, 900],
+          "range": [3, 3, 4]
+        },
+        "shopWeight": 2
+      },
+      {
+        "id": "unown_v",
+        "name": "Unown V",
+        "traits": [
+          "Psychic",
+          "Poison"
+        ],
+        "ability": {
+          "name": "Hidden Power",
+          "description": "Sprays a Poison-type Hidden Power, lowering nearby enemies' DEF by $value.",
+          "type": "DEBUFF_DEF",
+          "pattern": "SURROUND",
+          "values": [12, 22, 34],
+          "range": [3, 3, 4]
+        },
+        "shopWeight": 2
+      },
+      {
+        "id": "unown_w",
+        "name": "Unown W",
+        "traits": [
+          "Psychic",
+          "Water"
+        ],
+        "ability": {
+          "name": "Hidden Power",
+          "description": "Releases a refreshing Water-type Hidden Power, healing nearby allies for $value.",
+          "type": "HEAL",
+          "pattern": "SURROUND",
+          "values": [140, 320, 700],
+          "range": [3, 3, 4]
+        },
+        "shopWeight": 2
+      },
+      {
+        "id": "unown_x",
+        "name": "Unown X",
+        "traits": [
+          "Psychic",
+          "Dragon"
+        ],
+        "ability": {
+          "name": "Hidden Power",
+          "description": "Unleashes a draconic Dragon-type Hidden Power, dealing $value damage to its target.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [190, 430, 900],
+          "range": [3, 3, 4]
+        },
+        "shopWeight": 2
+      },
+      {
+        "id": "unown_y",
+        "name": "Unown Y",
+        "traits": [
+          "Psychic",
+          "Flying"
+        ],
+        "ability": {
+          "name": "Hidden Power",
+          "description": "Whips up a Flying-type Hidden Power tailwind, increasing nearby allies' attack speed by $value%.",
+          "type": "BUFF_SPD",
+          "pattern": "SURROUND",
+          "values": [15, 22, 33],
+          "range": [3, 3, 4]
+        },
+        "shopWeight": 2
+      },
+      {
+        "id": "unown_z",
+        "name": "Unown Z",
+        "traits": [
+          "Psychic",
+          "Electric"
+        ],
+        "ability": {
+          "name": "Hidden Power",
+          "description": "Zaps its target with an Electric-type Hidden Power, stunning it for $value seconds.",
+          "type": "STUN",
+          "pattern": "SINGLE",
+          "values": [2, 2, 3],
+          "stunDurationSeconds": [1.5, 1.5, 2],
+          "range": [3, 3, 4]
+        },
+        "shopWeight": 2
+      },
+      {
+        "id": "unown_question",
+        "name": "Unown ?",
+        "traits": [
+          "Psychic"
+        ],
+        "wildcardTrait": true,
+        "shopWeight": 1,
+        "ability": {
+          "name": "Hidden Power",
+          "description": "Fires a mysterious Psychic-type Hidden Power, dealing $value damage to its target. Unown ? also takes on the type shared by the most different Pokemon on your board.",
+          "type": "DAMAGE",
+          "pattern": "SINGLE",
+          "values": [190, 430, 900],
+          "range": [3, 3, 4]
+        }
+      },
+      {
+        "id": "unown_exclamation",
+        "name": "Unown !",
+        "traits": [
+          "Psychic"
+        ],
+        "shopWeight": 1,
+        "ability": {
+          "name": "Hidden Power",
+          "description": "Focuses every letter into a Psychic-type Hidden Power beam, dealing $value damage to all enemies in a line.",
+          "type": "DAMAGE",
+          "pattern": "LINE",
+          "values": [300, 680, 1400],
+          "range": [4, 4, 5]
+        }
+      }
+    ]
   }
 ]

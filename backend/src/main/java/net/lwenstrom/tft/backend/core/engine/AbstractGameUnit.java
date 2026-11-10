@@ -3,7 +3,7 @@ package net.lwenstrom.tft.backend.core.engine;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -170,7 +170,7 @@ public abstract class AbstractGameUnit implements GameUnit {
                 form.role(),
                 form.ability(),
                 form.range(),
-                new HashSet<>(form.traits()),
+                new LinkedHashSet<>(form.traits()),
                 form.branchId(),
                 evolutionOptions);
         this.startCondition = form.startCondition();
@@ -185,7 +185,7 @@ public abstract class AbstractGameUnit implements GameUnit {
         this.role = other.role;
         this.ability = other.ability;
         this.range = other.range;
-        this.traits = new HashSet<>(other.traits);
+        this.traits = new LinkedHashSet<>(other.traits);
         this.branchId = other.branchId;
         this.evolutionOptions = other.evolutionOptions;
 

@@ -3,6 +3,8 @@ package net.lwenstrom.tft.backend.core;
 import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +18,7 @@ import net.lwenstrom.tft.backend.core.combat.ElementalAffinityLoader;
 import net.lwenstrom.tft.backend.core.engine.MatchRuleManager;
 import net.lwenstrom.tft.backend.core.engine.TraitManager;
 import net.lwenstrom.tft.backend.core.engine.UnitDefinition;
+import net.lwenstrom.tft.backend.core.engine.UnitVariantDefinition;
 import net.lwenstrom.tft.backend.core.model.AbilityDefinition;
 import net.lwenstrom.tft.backend.core.model.AugmentDefinition;
 import net.lwenstrom.tft.backend.core.model.FieldConditionDefinition;
@@ -31,7 +34,9 @@ import net.lwenstrom.tft.backend.core.model.TraitMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 @Service
 @Slf4j
@@ -60,6 +65,7 @@ public class DataLoader {
             List<AugmentDefinition> augments,
             List<ItemDefinition> items) {}
 
+    private static final String VARIANTS_FIELD = "variants";
     private static final String COMMON_MATCH_RULES_PATH = "/data/match_rules_common.json";
 
     private final Map<GameMode, ModeData> modeDataCache = new ConcurrentHashMap<>();
@@ -225,14 +231,71 @@ public class DataLoader {
             if (inputStream == null) {
                 throw new IllegalStateException("Could not find units at " + path);
             }
-            List<UnitDefinition> units = jsonMapper.readValue(inputStream, new TypeReference<>() {});
+            var units = parseUnits(jsonMapper, jsonMapper.readTree(inputStream));
             units.forEach(DataLoader::validateUnitForms);
-            var registry = units.stream().collect(Collectors.toMap(UnitDefinition::id, unit -> unit));
+            var registry = new HashMap<String, UnitDefinition>();
+            units.forEach(unit -> registry.put(unit.id(), unit));
             log.info("Loaded {} units from {}", registry.size(), path);
             return registry;
         } catch (Exception e) {
             throw new RuntimeException("Failed to load unit data: " + path, e);
         }
+    }
+
+    public static List<UnitDefinition> parseUnits(JsonMapper jsonMapper, JsonNode root) {
+        var units = new ArrayList<UnitDefinition>();
+        for (var entry : root) {
+            if (!entry.has(VARIANTS_FIELD)) {
+                units.add(jsonMapper.treeToValue(entry, UnitDefinition.class));
+                continue;
+            }
+            var templateNode = (ObjectNode) entry.deepCopy();
+            var variantsNode = templateNode.remove(VARIANTS_FIELD);
+            var template = jsonMapper.treeToValue(templateNode, UnitDefinition.class);
+            List<UnitVariantDefinition> variants =
+                    jsonMapper.convertValue(variantsNode, new TypeReference<List<UnitVariantDefinition>>() {});
+            units.addAll(expandVariants(template, variants));
+        }
+        var ids = new HashSet<String>();
+        for (var unit : units) {
+            if (!ids.add(unit.id())) {
+                throw new IllegalStateException("Duplicate unit id " + unit.id());
+            }
+        }
+        return List.copyOf(units);
+    }
+
+    public static List<UnitDefinition> expandVariants(UnitDefinition template, List<UnitVariantDefinition> variants) {
+        if (variants == null || variants.isEmpty()) {
+            throw invalidVariants(template, "variants must not be empty");
+        }
+        if (!template.forms().isEmpty()) {
+            throw invalidVariants(template, "a variant template cannot also declare forms");
+        }
+        return variants.stream()
+                .map(variant -> {
+                    if (isBlank(variant.id()) || isBlank(variant.name())) {
+                        throw invalidVariants(template, "every variant needs an id and a name");
+                    }
+                    if (variant.traits() == null || variant.traits().isEmpty()) {
+                        throw invalidVariants(template, "variant " + variant.id() + " needs traits");
+                    }
+                    if (variant.resolvedShopWeight() <= 0) {
+                        throw invalidVariants(template, "variant " + variant.id() + " needs a positive shopWeight");
+                    }
+                    return template.asVariant(
+                            variant.id(),
+                            variant.name(),
+                            variant.traits(),
+                            variant.ability() != null ? variant.ability() : template.ability(),
+                            variant.resolvedShopWeight(),
+                            variant.resolvedWildcardTrait());
+                })
+                .toList();
+    }
+
+    private static IllegalStateException invalidVariants(UnitDefinition template, String reason) {
+        return new IllegalStateException("Invalid variants for unit " + template.id() + ": " + reason);
     }
 
     private static void validateTraitReferences(
@@ -501,6 +564,16 @@ public class DataLoader {
 
     public List<UnitDefinition> getAllUnits(GameMode mode) {
         return List.copyOf(getModeData(mode).unitRegistry().values());
+    }
+
+    public List<UnitDefinition> getVariants(GameMode mode, String variantGroup) {
+        if (variantGroup == null) {
+            return List.of();
+        }
+        return getAllUnits(mode).stream()
+                .filter(unit -> variantGroup.equals(unit.variantGroup()))
+                .sorted(Comparator.comparing(UnitDefinition::id))
+                .toList();
     }
 
     public List<TraitDefinition> getTraitDefinitions(GameMode mode) {

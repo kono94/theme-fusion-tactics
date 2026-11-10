@@ -453,3 +453,94 @@ Bottom-left: Rayquaza on a flat soft pastel Dragon-type background #CFC8FF with 
 Bottom-right: Latios on a flat soft pastel Dragon-type background #CFC8FF with subtle scale-shimmer pixel accents.
 Style: close-cropped Pokemon portrait with head and upper body visible, modern high-quality pixel art, thick dark navy/black pixel outline, chunky pixel grid, saturated cel-shaded colors, crisp edges, centered and filling most of each quadrant. No text, no watermark, no UI frame, no decorative border, no black grid lines, no visible divider lines between quadrants.
 ```
+
+## Unown Letter Batches
+
+Unown is one line with 28 letter variants. Background color = the letter's second type (`?` and `!` use Psychic). Each quadrant must show the actual Pokemon Unown creature design from Pokemon Gold/Silver, not a font letter with an eye: a black body built around one big eye, with thin stick-like limbs that end in small round nubs and only suggest the letter shape. The whole body is visible, because Unown has no head or shoulders.
+
+| Batch | Top-left (q1) | Top-right (q2) | Bottom-left (q3) | Bottom-right (q4) |
+|---|---|---|---|---|
+| 36 | `unown_a` | `unown_b` | `unown_c` | `unown_d` |
+| 37 | `unown_e` | `unown_f` | `unown_g` | `unown_h` |
+| 38 | `unown_i` | `unown_j` | `unown_k` | `unown_l` |
+| 39 | `unown_m` | `unown_n` | `unown_o` | `unown_p` |
+| 40 | `unown_q` | `unown_r` | `unown_s` | `unown_t` |
+| 41 | `unown_u` | `unown_v` | `unown_w` | `unown_x` |
+| 42 | `unown_y` | `unown_z` | `unown_question` | `unown_exclamation` |
+
+### Batch 36: Unown A, B, C, D
+
+```text
+Create a single 1024x1024 image split into four equal quadrants for auto-battler unit icons. I will provide a reference image of the style that should be used. Each quadrant shows the real Pokemon Unown (Pokedex #201) in one of its official forms, drawn faithfully to its original Pokemon Gold/Silver sprite and anime design. Unown anatomy, follow it strictly: (1) the largest part is a round black body that is mostly one big white eye with a dark pupil; (2) everything else is THIN black stick-limbs, much thinner than the eye body (about a quarter of the eye's width); (3) EVERY free limb end finishes in a small round black ball nub; (4) the limbs attach to the eye body and only loosely sketch the letter, the way a stick figure sketches a pose; (5) no thick uniform letter strokes, no closed letter outlines, no rectangles, no font shapes. It must look like a strange floating creature first and a letter second, like the official Unown A: an eye body, an antenna with a ball on top, and two thin legs with balls at the feet.
+Top-left: Unown A form exactly as its official design, on a flat soft pastel Flying-type background #DCE5FF with subtle feather and breeze pixel accents.
+Top-right: Unown B form exactly as its official design, on a flat soft pastel Bug-type background #D8F5A6 with subtle pollen pixel accents.
+Bottom-left: Unown C form exactly as its official design, on a flat soft pastel Ice-type background #D7F7FF with subtle snowflake pixel accents.
+Bottom-right: Unown D form exactly as its official design, on a flat soft pastel Dragon-type background #CFC8FF with subtle scale-shimmer pixel accents.
+Style: modern high-quality pixel art version of the official Unown designs, dark navy/black pixel outline around the eye body, thin limbs, chunky pixel grid, crisp edges, the whole Unown body visible, centered and filling most of each quadrant. Do not draw plain alphabet letters, fonts or typography. No text, no watermark, no UI frame, no decorative border, no black grid lines, no visible divider lines between quadrants.
+```
+
+### Batch 37: Unown E, F, G, H
+
+```text
+Create a single 1024x1024 image split into four equal quadrants for auto-battler unit icons. I will provide a reference image of the style that should be used. Each quadrant shows the real Pokemon Unown (Pokedex #201) in one of its official forms, drawn faithfully to its original Pokemon Gold/Silver sprite and anime design. Unown anatomy, follow it strictly: (1) the largest part is a round black body that is mostly one big white eye with a dark pupil; (2) everything else is THIN black stick-limbs, much thinner than the eye body (about a quarter of the eye's width); (3) EVERY free limb end finishes in a small round black ball nub; (4) the limbs attach to the eye body and only loosely sketch the letter, the way a stick figure sketches a pose; (5) no thick uniform letter strokes, no closed letter outlines, no rectangles, no font shapes. It must look like a strange floating creature first and a letter second, like the official Unown A: an eye body, an antenna with a ball on top, and two thin legs with balls at the feet.
+Top-left: Unown E form exactly as its official design, on a flat soft pastel Electric-type background #FFF4A8 with subtle spark pixel accents.
+Top-right: Unown F form exactly as its official design, on a flat soft pastel Fire-type background #FFD6B8 with subtle ember pixel accents.
+Bottom-left: Unown G form exactly as its official design, on a flat soft pastel Grass-type background #C9F3C2 with subtle leaf pixel accents.
+Bottom-right: Unown H form exactly as its official design, on a flat soft pastel Ghost-type background #D8C4F0 with subtle wisp pixel accents.
+Style: modern high-quality pixel art version of the official Unown designs, dark navy/black pixel outline around the eye body, thin limbs, chunky pixel grid, crisp edges, the whole Unown body visible, centered and filling most of each quadrant. Do not draw plain alphabet letters, fonts or typography. No text, no watermark, no UI frame, no decorative border, no black grid lines, no visible divider lines between quadrants.
+```
+
+### Batch 38: Unown I, J, K, L
+
+```text
+Create a single 1024x1024 image split into four equal quadrants for auto-battler unit icons. I will provide a reference image of the style that should be used. Each quadrant shows the real Pokemon Unown (Pokedex #201) in one of its official forms, drawn faithfully to its original Pokemon Gold/Silver sprite and anime design. Unown anatomy, follow it strictly: (1) the largest part is a round black body that is mostly one big white eye with a dark pupil; (2) everything else is THIN black stick-limbs, much thinner than the eye body (about a quarter of the eye's width); (3) EVERY free limb end finishes in a small round black ball nub; (4) the limbs attach to the eye body and only loosely sketch the letter, the way a stick figure sketches a pose; (5) no thick uniform letter strokes, no closed letter outlines, no rectangles, no font shapes. It must look like a strange floating creature first and a letter second, like the official Unown A: an eye body, an antenna with a ball on top, and two thin legs with balls at the feet.
+Top-left: Unown I form exactly as its official design, on a flat soft pastel Ice-type background #D7F7FF with subtle snowflake pixel accents.
+Top-right: Unown J form exactly as its official design, on a flat soft pastel Fighting-type background #F5B8A8 with subtle impact-line pixel accents.
+Bottom-left: Unown K form exactly as its official design, on a flat soft pastel Fighting-type background #F5B8A8 with subtle impact-line pixel accents.
+Bottom-right: Unown L form exactly as its official design, on a flat soft pastel Grass-type background #C9F3C2 with subtle leaf pixel accents.
+Style: modern high-quality pixel art version of the official Unown designs, dark navy/black pixel outline around the eye body, thin limbs, chunky pixel grid, crisp edges, the whole Unown body visible, centered and filling most of each quadrant. Do not draw plain alphabet letters, fonts or typography. No text, no watermark, no UI frame, no decorative border, no black grid lines, no visible divider lines between quadrants.
+```
+
+### Batch 39: Unown M, N, O, P
+
+```text
+Create a single 1024x1024 image split into four equal quadrants for auto-battler unit icons. I will provide a reference image of the style that should be used. Each quadrant shows the real Pokemon Unown (Pokedex #201) in one of its official forms, drawn faithfully to its original Pokemon Gold/Silver sprite and anime design. Unown anatomy, follow it strictly: (1) the largest part is a round black body that is mostly one big white eye with a dark pupil; (2) everything else is THIN black stick-limbs, much thinner than the eye body (about a quarter of the eye's width); (3) EVERY free limb end finishes in a small round black ball nub; (4) the limbs attach to the eye body and only loosely sketch the letter, the way a stick figure sketches a pose; (5) no thick uniform letter strokes, no closed letter outlines, no rectangles, no font shapes. It must look like a strange floating creature first and a letter second, like the official Unown A: an eye body, an antenna with a ball on top, and two thin legs with balls at the feet.
+Top-left: Unown M form exactly as its official design, on a flat soft pastel Steel-type background #DADDE8 with subtle metal-shard pixel accents.
+Top-right: Unown N form exactly as its official design, on a flat soft pastel Normal-type background #E9E6DE with subtle dust pixel accents.
+Bottom-left: Unown O form exactly as its official design, on a flat soft pastel Rock-type background #D8D2C4 with subtle pebble pixel accents.
+Bottom-right: Unown P form exactly as its official design, on a flat soft pastel Poison-type background #E6C6F2 with subtle toxic-bubble pixel accents.
+Style: modern high-quality pixel art version of the official Unown designs, dark navy/black pixel outline around the eye body, thin limbs, chunky pixel grid, crisp edges, the whole Unown body visible, centered and filling most of each quadrant. Do not draw plain alphabet letters, fonts or typography. No text, no watermark, no UI frame, no decorative border, no black grid lines, no visible divider lines between quadrants.
+```
+
+### Batch 40: Unown Q, R, S, T
+
+```text
+Create a single 1024x1024 image split into four equal quadrants for auto-battler unit icons. I will provide a reference image of the style that should be used. Each quadrant shows the real Pokemon Unown (Pokedex #201) in one of its official forms, drawn faithfully to its original Pokemon Gold/Silver sprite and anime design. Unown anatomy, follow it strictly: (1) the largest part is a round black body that is mostly one big white eye with a dark pupil; (2) everything else is THIN black stick-limbs, much thinner than the eye body (about a quarter of the eye's width); (3) EVERY free limb end finishes in a small round black ball nub; (4) the limbs attach to the eye body and only loosely sketch the letter, the way a stick figure sketches a pose; (5) no thick uniform letter strokes, no closed letter outlines, no rectangles, no font shapes. It must look like a strange floating creature first and a letter second, like the official Unown A: an eye body, an antenna with a ball on top, and two thin legs with balls at the feet.
+Top-left: Unown Q form exactly as its official design, on a flat soft pastel Ground-type background #E8D0A5 with subtle sand-grain pixel accents.
+Top-right: Unown R form exactly as its official design, on a flat soft pastel Rock-type background #D8D2C4 with subtle pebble pixel accents.
+Bottom-left: Unown S form exactly as its official design, on a flat soft pastel Steel-type background #DADDE8 with subtle metal-shard pixel accents.
+Bottom-right: Unown T form exactly as its official design, on a flat soft pastel Ground-type background #E8D0A5 with subtle sand-grain pixel accents.
+Style: modern high-quality pixel art version of the official Unown designs, dark navy/black pixel outline around the eye body, thin limbs, chunky pixel grid, crisp edges, the whole Unown body visible, centered and filling most of each quadrant. Do not draw plain alphabet letters, fonts or typography. No text, no watermark, no UI frame, no decorative border, no black grid lines, no visible divider lines between quadrants.
+```
+
+### Batch 41: Unown U, V, W, X
+
+```text
+Create a single 1024x1024 image split into four equal quadrants for auto-battler unit icons. I will provide a reference image of the style that should be used. Each quadrant shows the real Pokemon Unown (Pokedex #201) in one of its official forms, drawn faithfully to its original Pokemon Gold/Silver sprite and anime design. Unown anatomy, follow it strictly: (1) the largest part is a round black body that is mostly one big white eye with a dark pupil; (2) everything else is THIN black stick-limbs, much thinner than the eye body (about a quarter of the eye's width); (3) EVERY free limb end finishes in a small round black ball nub; (4) the limbs attach to the eye body and only loosely sketch the letter, the way a stick figure sketches a pose; (5) no thick uniform letter strokes, no closed letter outlines, no rectangles, no font shapes. It must look like a strange floating creature first and a letter second, like the official Unown A: an eye body, an antenna with a ball on top, and two thin legs with balls at the feet.
+Top-left: Unown U form exactly as its official design, on a flat soft pastel Dark-type background #C4B8AD with subtle crescent-moon and shadow pixel accents.
+Top-right: Unown V form exactly as its official design, on a flat soft pastel Poison-type background #E6C6F2 with subtle toxic-bubble pixel accents.
+Bottom-left: Unown W form exactly as its official design, on a flat soft pastel Water-type background #BFEFFF with subtle bubble pixel accents.
+Bottom-right: Unown X form exactly as its official design, on a flat soft pastel Dragon-type background #CFC8FF with subtle scale-shimmer pixel accents.
+Style: modern high-quality pixel art version of the official Unown designs, dark navy/black pixel outline around the eye body, thin limbs, chunky pixel grid, crisp edges, the whole Unown body visible, centered and filling most of each quadrant. Do not draw plain alphabet letters, fonts or typography. No text, no watermark, no UI frame, no decorative border, no black grid lines, no visible divider lines between quadrants.
+```
+
+### Batch 42: Unown Y, Z, ?, !
+
+```text
+Create a single 1024x1024 image split into four equal quadrants for auto-battler unit icons. I will provide a reference image of the style that should be used. Each quadrant shows the real Pokemon Unown (Pokedex #201) in one of its official forms, drawn faithfully to its original Pokemon Gold/Silver sprite and anime design. Unown anatomy, follow it strictly: (1) the largest part is a round black body that is mostly one big white eye with a dark pupil; (2) everything else is THIN black stick-limbs, much thinner than the eye body (about a quarter of the eye's width); (3) EVERY free limb end finishes in a small round black ball nub; (4) the limbs attach to the eye body and only loosely sketch the letter, the way a stick figure sketches a pose; (5) no thick uniform letter strokes, no closed letter outlines, no rectangles, no font shapes. It must look like a strange floating creature first and a letter second, like the official Unown A: an eye body, an antenna with a ball on top, and two thin legs with balls at the feet.
+Top-left: Unown Y form exactly as its official design, on a flat soft pastel Flying-type background #DCE5FF with subtle feather and breeze pixel accents.
+Top-right: Unown Z form exactly as its official design, on a flat soft pastel Electric-type background #FFF4A8 with subtle spark pixel accents.
+Bottom-left: Unown Question Mark form exactly as its official design, on a flat soft pastel Psychic-type background #F6C7E6 with subtle psychic aura pixel accents.
+Bottom-right: Unown Exclamation Mark form exactly as its official design, on a flat soft pastel Psychic-type background #F6C7E6 with subtle psychic aura pixel accents.
+Style: modern high-quality pixel art version of the official Unown designs, dark navy/black pixel outline around the eye body, thin limbs, chunky pixel grid, crisp edges, the whole Unown body visible, centered and filling most of each quadrant. Do not draw plain alphabet letters, fonts or typography. No text, no watermark, no UI frame, no decorative border, no black grid lines, no visible divider lines between quadrants.
+```

@@ -1,12 +1,16 @@
 package net.lwenstrom.tft.backend.core.engine;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -81,6 +85,7 @@ public class Player {
     private boolean emergencyDropTriggered = false;
 
     private final List<PendingUpgrade> pendingUpgrades = new ArrayList<>();
+    private final Map<String, String> lockedVariants = new HashMap<>();
 
     private record PendingUpgrade(String lineId, int starLevel) {}
 
@@ -125,13 +130,76 @@ public class Player {
     }
 
     public void refreshShopFree() {
-        var availableUnits = dataLoader.getAllUnits(gameMode).stream()
+        var availableUnits = VariantGroups.collapse(dataLoader.getAllUnits(gameMode).stream()
                 .filter(def -> !hasCompletedUnitLine(def.lineId()))
-                .toList();
+                .toList());
         shop = new ArrayList<>();
         for (var i = 0; i < GameConstants.SHOP_SIZE; i++) {
-            shop.add(availableUnits.isEmpty() ? null : ShopOdds.rollUnit(level, availableUnits, randomProvider));
+            shop.add(
+                    availableUnits.isEmpty()
+                            ? null
+                            : resolveVariant(ShopOdds.rollUnit(level, availableUnits, randomProvider)));
         }
+    }
+
+    UnitDefinition resolveVariant(UnitDefinition def) {
+        if (def == null || def.variantGroup() == null) {
+            return def;
+        }
+        var locked = lockedVariant(def.variantGroup());
+        if (locked != null) {
+            return locked;
+        }
+        var variants = dataLoader.getVariants(gameMode, def.variantGroup());
+        return variants.isEmpty() ? def : VariantGroups.pickWeighted(variants, randomProvider);
+    }
+
+    private UnitDefinition lockedVariant(String variantGroup) {
+        var lockedId = lockedVariants.get(variantGroup);
+        if (lockedId == null) {
+            return null;
+        }
+        return dataLoader.getVariants(gameMode, variantGroup).stream()
+                .filter(variant -> variant.id().equals(lockedId))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private UnitDefinition applyVariantLock(UnitDefinition def) {
+        if (def == null || def.variantGroup() == null) {
+            return def;
+        }
+        var locked = lockedVariant(def.variantGroup());
+        return locked != null ? locked : def;
+    }
+
+    private void lockVariant(UnitDefinition def) {
+        if (def.variantGroup() == null) {
+            return;
+        }
+        lockedVariants.putIfAbsent(def.variantGroup(), def.id());
+        var locked = lockedVariant(def.variantGroup());
+        if (locked == null) {
+            return;
+        }
+        for (var i = 0; i < shop.size(); i++) {
+            var offer = shop.get(i);
+            if (offer != null
+                    && locked.variantGroup().equals(offer.variantGroup())
+                    && !offer.id().equals(locked.id())) {
+                shop.set(i, locked);
+            }
+        }
+    }
+
+    private void releaseUnusedVariantLocks() {
+        lockedVariants.entrySet().removeIf(entry -> {
+            var locked = lockedVariant(entry.getKey());
+            var lineId = locked != null ? locked.lineId() : entry.getKey();
+            return ownedUnits().noneMatch(unit -> unit.getLineId().equals(lineId))
+                    && pendingUpgrades.stream()
+                            .noneMatch(pending -> pending.lineId().equals(lineId));
+        });
     }
 
     public void resetForMode(GameMode mode) {
@@ -140,6 +208,7 @@ public class Player {
         this.boardLocked = false;
         this.inCombat = false;
         this.pendingUpgrades.clear();
+        this.lockedVariants.clear();
         this.lootOrbs.clear();
         this.inventory.clear();
         this.augmentChoices.clear();
@@ -153,7 +222,7 @@ public class Player {
 
     public void buyUnit(int shopIndex) {
         if (shopIndex < 0 || shopIndex >= shop.size()) return;
-        var def = shop.get(shopIndex);
+        var def = applyVariantLock(shop.get(shopIndex));
 
         if (def == null) return;
         if (hasCompletedUnitLine(def.lineId())) return;
@@ -167,6 +236,7 @@ public class Player {
         newUnit.setOwnerId(this.id);
         bench.set(emptySlot.get(), newUnit);
         shop.set(shopIndex, null);
+        lockVariant(def);
 
         if (inCombat) {
             pendingUpgrades.add(new PendingUpgrade(def.lineId(), 1));
@@ -214,7 +284,7 @@ public class Player {
             }
             boardUnits.removeAll(unitsToRemove);
 
-            var def = findLineDefinition(lineId);
+            var def = definitionFor(targetPosUnit);
             if (def != null) {
                 var upgraded =
                         new StandardGameUnit(def, starLevel + 1, inheritedBranchId(targetPosUnit, unitsToRemove));
@@ -260,7 +330,7 @@ public class Player {
         if (unit == null || unit.getBranchId() != null) {
             return false;
         }
-        var def = findLineDefinition(unit.getLineId());
+        var def = definitionFor(unit);
         if (def == null || !def.isPending(unit.getStarLevel(), null) || !def.offersBranch(branchId)) {
             return false;
         }
@@ -285,6 +355,16 @@ public class Player {
         grid.placeUnit(evolved, x, y);
         boardUnits.set(boardIndex, evolved);
         return true;
+    }
+
+    UnitDefinition definitionFor(GameUnit unit) {
+        var lineDefinitions = dataLoader.getAllUnits(gameMode).stream()
+                .filter(def -> def.lineId().equals(unit.getLineId()))
+                .toList();
+        return lineDefinitions.stream()
+                .filter(def -> def.id().equals(unit.getDefinitionId()))
+                .findFirst()
+                .orElse(lineDefinitions.isEmpty() ? null : lineDefinitions.getFirst());
     }
 
     UnitDefinition findLineDefinition(String lineId) {
@@ -327,6 +407,7 @@ public class Player {
             inventory.addAll(unit.getItems());
             bench.clear(benchEntry.get().index());
             gold += refund;
+            releaseUnusedVariantLocks();
             return;
         }
 
@@ -343,6 +424,7 @@ public class Player {
             grid.removeUnit(boardUnit);
             boardUnits.remove(boardUnit);
             gold += refund;
+            releaseUnusedVariantLocks();
         }
     }
 
@@ -372,6 +454,7 @@ public class Player {
         for (var pending : upgradesToProcess) {
             checkUpgrade(pending.lineId(), pending.starLevel());
         }
+        releaseUnusedVariantLocks();
     }
 
     public void addLootOrb(LootOrb orb) {
@@ -393,6 +476,7 @@ public class Player {
                                 || unit.name().equals(orb.contentId()))
                         .findFirst()
                         .orElse(null);
+                def = applyVariantLock(def);
                 if (def != null) {
                     if (hasCompletedUnitLine(def.lineId())) {
                         gainGold(def.cost());
@@ -400,7 +484,9 @@ public class Player {
                     }
                     var unit = new StandardGameUnit(def);
                     unit.setOwnerId(this.id);
-                    addToBenchOrRefund(unit, def.cost());
+                    if (addToBenchOrRefund(unit, def.cost())) {
+                        lockVariant(def);
+                    }
                 }
             } else if (orb.type() == LootType.ITEM) {
                 dataLoader
@@ -455,14 +541,15 @@ public class Player {
         new ArrayList<>(lootOrbs).stream().map(LootOrb::id).forEach(this::collectOrb);
     }
 
-    private void addToBenchOrRefund(GameUnit unit, int refundAmount) {
+    private boolean addToBenchOrRefund(GameUnit unit, int refundAmount) {
         var emptySlot = bench.findFirstEmptySlot();
         if (emptySlot.isPresent()) {
             bench.set(emptySlot.get(), unit);
             checkUpgrade(unit.getLineId(), unit.getStarLevel());
-        } else {
-            gainGold(refundAmount);
+            return true;
         }
+        gainGold(refundAmount);
+        return false;
     }
 
     private void addToBench(GameUnit unit) {
@@ -784,7 +871,62 @@ public class Player {
         return toState(Map.of());
     }
 
+    public void refreshWildcardTraits() {
+        var wildcardIds = dataLoader.getAllUnits(gameMode).stream()
+                .filter(UnitDefinition::hasWildcardTrait)
+                .map(UnitDefinition::id)
+                .collect(Collectors.toSet());
+        if (wildcardIds.isEmpty()) {
+            return;
+        }
+        var wildcardUnits = ownedUnits()
+                .filter(unit -> wildcardIds.contains(unit.getDefinitionId()))
+                .toList();
+        for (var unit : wildcardUnits) {
+            var baseTraits = definitionFor(unit)
+                    .formAt(unit.getStarLevel(), unit.getBranchId())
+                    .traits();
+            var traits = unit.getTraits();
+            traits.clear();
+            traits.addAll(baseTraits);
+            dominantBoardTrait(unit.getLineId(), baseTraits, wildcardIds).ifPresent(traits::add);
+        }
+    }
+
+    // Copies the trait carried by the most distinct lines on the board; ties resolve in the mode's trait order.
+    private Optional<String> dominantBoardTrait(String ownLineId, List<String> ownTraits, Set<String> wildcardIds) {
+        var excluded = new HashSet<String>();
+        ownTraits.forEach(trait -> excluded.add(TraitManager.normalizeTraitId(trait)));
+        var linesByTrait = new HashMap<String, Set<String>>();
+        for (var unit : boardUnits) {
+            if (unit.getLineId().equals(ownLineId) || wildcardIds.contains(unit.getDefinitionId())) continue;
+            for (var trait : unit.getTraits()) {
+                var traitId = TraitManager.normalizeTraitId(trait);
+                if (!excluded.contains(traitId)) {
+                    linesByTrait
+                            .computeIfAbsent(traitId, ignored -> new HashSet<>())
+                            .add(unit.getLineId());
+                }
+            }
+        }
+        String best = null;
+        var bestCount = 0;
+        for (var trait : dataLoader.getTraitDefinitions(gameMode)) {
+            var count = linesByTrait
+                    .getOrDefault(TraitManager.normalizeTraitId(trait.id()), Set.of())
+                    .size();
+            if (count > bestCount) {
+                best = trait.name();
+                bestCount = count;
+            }
+        }
+        return Optional.ofNullable(best);
+    }
+
     public PlayerState toState(Map<String, UnitStats> statPreviews) {
+        if (!inCombat) {
+            refreshWildcardTraits();
+        }
         return new PlayerState(
                 id,
                 name,

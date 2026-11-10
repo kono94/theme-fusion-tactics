@@ -41,7 +41,7 @@ final class EvolutionPicker {
             BotTeamEvaluator evaluator,
             RandomProvider random,
             Function<GameUnit, List<GameUnit>> resultingBoard) {
-        var def = player.findLineDefinition(unit.getLineId());
+        var def = player.definitionFor(unit);
         if (def == null) return;
         var best = new ArrayList<String>();
         BotTeamEvaluator.Score bestScore = null;

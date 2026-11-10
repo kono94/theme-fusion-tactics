@@ -1,6 +1,7 @@
 package net.lwenstrom.tft.backend.core.engine;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,7 +34,52 @@ public record UnitDefinition(
         List<UnitFormDefinition> forms,
 
         @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-        FieldConditionStart startCondition) {
+        FieldConditionStart startCondition,
+
+        @JsonInclude(JsonInclude.Include.NON_NULL) String variantGroup,
+
+        @JsonIgnore Integer shopWeight,
+
+        @JsonInclude(JsonInclude.Include.NON_NULL) Boolean wildcardTrait) {
+
+    public UnitDefinition(
+            String id,
+            String name,
+            int cost,
+            UnitRole role,
+            List<Integer> maxHealth,
+            List<Integer> maxMana,
+            List<Integer> attackDamage,
+            List<Integer> abilityPower,
+            List<Integer> defense,
+            List<Float> attackSpeed,
+            List<Integer> range,
+            List<String> traits,
+            AbilityDefinition ability,
+            String lineId,
+            List<UnitFormDefinition> forms,
+            FieldConditionStart startCondition) {
+        this(
+                id,
+                name,
+                cost,
+                role,
+                maxHealth,
+                maxMana,
+                attackDamage,
+                abilityPower,
+                defense,
+                attackSpeed,
+                range,
+                traits,
+                ability,
+                lineId,
+                forms,
+                startCondition,
+                null,
+                1,
+                false);
+    }
 
     public UnitDefinition(
             String id,
@@ -111,10 +157,45 @@ public record UnitDefinition(
         if (defense.stream().anyMatch(value -> value == null || value < 0)) {
             throw new IllegalArgumentException("Unit defense values must be non-negative");
         }
+        shopWeight = shopWeight == null || shopWeight < 1 ? 1 : shopWeight;
+        wildcardTrait = Boolean.TRUE.equals(wildcardTrait) ? Boolean.TRUE : null;
     }
 
     public String lineId() {
         return lineId == null || lineId.isBlank() ? id : lineId;
+    }
+
+    public boolean hasWildcardTrait() {
+        return Boolean.TRUE.equals(wildcardTrait);
+    }
+
+    public UnitDefinition asVariant(
+            String variantId,
+            String variantName,
+            List<String> variantTraits,
+            AbilityDefinition variantAbility,
+            int variantShopWeight,
+            boolean variantWildcardTrait) {
+        return new UnitDefinition(
+                variantId,
+                variantName,
+                cost,
+                role,
+                maxHealth,
+                maxMana,
+                attackDamage,
+                abilityPower,
+                defense,
+                attackSpeed,
+                range,
+                List.copyOf(variantTraits),
+                variantAbility,
+                lineId(),
+                forms,
+                startCondition,
+                lineId(),
+                variantShopWeight,
+                variantWildcardTrait);
     }
 
     public List<UnitFormDefinition> forms() {

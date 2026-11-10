@@ -1,6 +1,7 @@
 package net.lwenstrom.tft.backend.core;
 
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -28,9 +29,12 @@ public class TraitCatalogService {
     }
 
     private List<TraitRosterUnit> getRosterUnits(String traitId, List<UnitDefinition> unitDefinitions) {
+        var seenLines = new HashSet<String>();
         return unitDefinitions.stream()
+                .sorted(Comparator.comparing(UnitDefinition::id))
                 .map(unit -> getRosterUnit(traitId, unit))
                 .flatMap(Optional::stream)
+                .filter(rosterUnit -> seenLines.add(rosterUnit.lineId()))
                 .sorted(Comparator.comparingInt(TraitRosterUnit::cost)
                         .thenComparingInt(TraitRosterUnit::starLevel)
                         .thenComparing(TraitRosterUnit::name))

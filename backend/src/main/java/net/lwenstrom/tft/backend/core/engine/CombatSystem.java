@@ -426,6 +426,7 @@ public class CombatSystem {
             for (var unit : player.getBoardUnits()) {
                 unit.savePlanningPosition();
             }
+            player.refreshWildcardTraits();
             applyStartingBonuses(player.getBoardUnits());
         }
 
