@@ -10,6 +10,13 @@ export interface RawPokemonForm {
     ability?: AbilityDefinition | null
 }
 
+export interface RawPokemonVariant {
+    id: string
+    name: string
+    traits: string[]
+    ability: AbilityDefinition
+}
+
 export interface RawPokemonUnit {
     id: string
     name: string
@@ -17,6 +24,7 @@ export interface RawPokemonUnit {
     traits?: string[]
     ability?: AbilityDefinition | null
     forms?: RawPokemonForm[]
+    variants?: RawPokemonVariant[]
 }
 
 function toGalleryUnit(
@@ -37,8 +45,20 @@ function toGalleryUnit(
     }
 }
 
+// A variant group (e.g. 28 letters) previews one variant per distinct ability type and pattern instead of every id.
+function variantGalleryUnits(unit: RawPokemonUnit, variants: readonly RawPokemonVariant[]): UltimateGalleryUnit[] {
+    const seen = new Set<string>()
+    return variants.flatMap((variant) => {
+        const key = `${variant.ability.type}:${variant.ability.pattern}`
+        if (seen.has(key)) return []
+        seen.add(key)
+        return [toGalleryUnit(unit, variant.id, variant.name, variant.ability, variant.traits)]
+    })
+}
+
 export function buildPokemonGalleryRoster(units: readonly RawPokemonUnit[]): UltimateGalleryUnit[] {
     return units.flatMap((unit) => {
+        if (unit.variants?.length) return variantGalleryUnits(unit, unit.variants)
         const seen = new Set<string>()
         const entries: UltimateGalleryUnit[] = []
 

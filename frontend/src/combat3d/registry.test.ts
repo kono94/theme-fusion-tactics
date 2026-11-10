@@ -23,6 +23,7 @@ interface RawUnit {
   traits?: string[]
   ability: RawAbility
   forms?: { definitionId: string; traits?: string[]; ability?: RawAbility | null }[]
+  variants?: { id: string; traits: string[]; ability: RawAbility }[]
 }
 
 interface PokemonMove {
@@ -119,9 +120,16 @@ function pokemonMoves(
   const moves = new Map<string, PokemonMove>()
   for (const unit of units) {
     if (!filter(unit.cost)) continue
-    const forms = unit.forms?.length
-      ? unit.forms
-      : [{ definitionId: unit.id, ability: unit.ability }]
+    // A variant group registers only its variants, never the template.
+    const forms = unit.variants?.length
+      ? unit.variants.map((variant) => ({
+          definitionId: variant.id,
+          traits: variant.traits,
+          ability: variant.ability,
+        }))
+      : unit.forms?.length
+        ? unit.forms
+        : [{ definitionId: unit.id, ability: unit.ability }]
     for (const form of forms) {
       const abilityName = (form.ability ?? unit.ability).name
       const traits = ('traits' in form ? form.traits : undefined) ?? unit.traits ?? []

@@ -33,6 +33,7 @@ import {
 } from '../utils/evolution'
 import { setUnitDragPreview } from '../utils/dragPreview'
 import { calculateInterest, calculateSellRefund } from '../utils/economy'
+import { VARIANT_SHOP_HINT_TEXT, variantShopHint } from '../utils/variantGroups'
 import { SHOP_ODDS } from '../data/shopOdds'
 import { getGameModeMetadata } from '../data/gameModeMetadata'
 import { fieldConditionChip } from '../utils/fieldConditions'
@@ -244,6 +245,13 @@ function isShopCardOwned(card: UnitDefinition): boolean {
   const identity = lineIdentity(card.lineId) ?? lineIdentity(card.id) ?? lineIdentity(card.name)
   return identity ? ownedLineIds.value.has(identity) : false
 }
+
+const shopCardHints = computed(() =>
+  shopCards.value.map((card) => {
+    const hint = card ? variantShopHint(card, ownedLineIds.value) : null
+    return hint ? { kind: hint, ...VARIANT_SHOP_HINT_TEXT[hint] } : null
+  }),
+)
 
 const viewedPlayerBoardUnits = computed((): GameUnit[] => {
   if (!viewedPlayer.value) return []
@@ -1205,6 +1213,15 @@ watch(
                     class="shop-card-img"
                     draggable="false"
                   />
+                  <span
+                    v-if="shopCardHints[idx]"
+                    class="variant-hint"
+                    :class="`variant-hint-${shopCardHints[idx]?.kind}`"
+                    :title="shopCardHints[idx]?.detail"
+                    :aria-label="shopCardHints[idx]?.detail"
+                    data-test="shop-variant-hint"
+                    >{{ shopCardHints[idx]?.badge }}</span
+                  >
                 </div>
                 <div class="shop-card-content">
                   <div class="name">{{ card.name }}</div>
@@ -2275,6 +2292,7 @@ watch(
 }
 
 .shop-card-portrait {
+  position: relative;
   width: 100%;
   height: 48px; /* Reduced from 60px as requested */
   margin-bottom: 4px;
@@ -2288,6 +2306,28 @@ watch(
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.variant-hint {
+  position: absolute;
+  left: 3px;
+  bottom: 3px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  border: 1px solid #475569;
+  background: rgba(15, 23, 42, 0.85);
+  color: #cbd5e1;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  line-height: 1.3;
+  text-transform: uppercase;
+  pointer-events: auto;
+}
+
+.variant-hint-locked {
+  border-color: rgba(34, 211, 238, 0.7);
+  color: #a5f3fc;
 }
 
 .shop-card-content {

@@ -180,6 +180,10 @@ export interface UnitDefinition {
   range: number
   traits: string[]
   ability: AbilityDefinition | null
+  // Variant groups (e.g. Unown letters): the shared template line, omitted for regular units.
+  variantGroup?: string | null
+  // Present only when true: the unit gains a copied trait at runtime, reflected in its live `traits`.
+  wildcardTrait?: true
 }
 
 // ============================================================================

@@ -4,6 +4,7 @@ import { GEN23_TIER1_ULTIMATES } from './gen23Tier1'
 import { GEN23_TIER2_ULTIMATES } from './gen23Tier2'
 import { GEN23_TIER3_ULTIMATES } from './gen23Tier3'
 import { GEN23_TIER45_ULTIMATES } from './gen23Tier45'
+import { GEN23_UNOWN_ULTIMATES } from './gen23Unown'
 import { MARINES_WARLORDS_ULTIMATES } from './marinesWarlords'
 import { POKEMON_MYTHIC_ULTIMATES } from './pokemonMythic'
 import { POKEMON_TIER_1_ULTIMATES } from './pokemonTier1'
@@ -27,6 +28,7 @@ export const SIGNATURE_ULTIMATE_SETS: Record<string, UltimateSet> = {
   gen23Tier2: GEN23_TIER2_ULTIMATES,
   gen23Tier3: GEN23_TIER3_ULTIMATES,
   gen23Tier45: GEN23_TIER45_ULTIMATES,
+  gen23Unown: GEN23_UNOWN_ULTIMATES,
   // Reworked showpieces override their tier entries.
   pokemonMythic: POKEMON_MYTHIC_ULTIMATES,
 }

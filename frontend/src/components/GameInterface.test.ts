@@ -238,6 +238,30 @@ describe('GameInterface end celebration', () => {
         wrapper.unmount()
     })
 
+    it('hints whether a variant-group shop card is random or locked', async () => {
+        const state = gameState('PLANNING', 100, 1)
+        const variant = { ...unitDefinition(), id: 'glyph_a', lineId: 'glyph', variantGroup: 'glyph' }
+        state.players['player-1'].shop = [variant, unitDefinition()]
+        const wrapper = mount(GameInterface, {
+            props: { state, currentPlayerId: 'player-1' },
+            global: { stubs: childStubs },
+        })
+
+        const hints = wrapper.findAll('[data-test="shop-variant-hint"]')
+        expect(hints).toHaveLength(1)
+        expect(hints[0].text()).toBe('Random')
+
+        const owned = { ...state, players: { ...state.players } }
+        owned.players['player-1'] = {
+            ...state.players['player-1'],
+            bench: [{ ...benchUnit(), definitionId: 'glyph_b', lineId: 'glyph' }],
+        }
+        await wrapper.setProps({ state: owned })
+
+        expect(wrapper.get('[data-test="shop-variant-hint"]').text()).toBe('Locked')
+        wrapper.unmount()
+    })
+
     it('allows shop and bench management during combat', async () => {
         const state = gameState('COMBAT', 100, 1)
         state.players['player-1'].shop = [unitDefinition()]

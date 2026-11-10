@@ -13,6 +13,7 @@ export interface GalleryRangeUnit {
     id: string
     range: number[]
     forms?: { definitionId: string }[]
+    variants?: { id: string }[]
 }
 
 export interface GalleryBoardTheme {
@@ -100,6 +101,7 @@ export function buildGalleryUnitRanges(configs: readonly GalleryModeConfig[]): M
             config.units.flatMap((unit) => [
                 [unit.id, unit.range[0]] as const,
                 ...(unit.forms ?? []).map((form) => [form.definitionId, unit.range[0]] as const),
+                ...(unit.variants ?? []).map((variant) => [variant.id, unit.range[0]] as const),
             ]),
         ),
     )

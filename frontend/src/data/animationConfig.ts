@@ -539,7 +539,13 @@ const POKEMON_STYLE_BY_ID: Record<string, keyof typeof POKEMON_ATTACK_BY_STYLE> 
     mankey: 'fighting', primeape: 'fighting', annihilape: 'fighting', machop: 'fighting', machoke: 'fighting', machamp: 'fighting', hitmonlee: 'fighting', hitmonchan: 'fighting',
     dratini: 'dragon', dragonair: 'dragon', dragonite: 'dragon',
     porygon: 'steel',
-    rattata: 'normal', raticate: 'normal', jigglypuff: 'normal', wigglytuff: 'normal', kangaskhan: 'normal', tauros: 'normal', ditto: 'normal', lickitung: 'normal', snorlax: 'normal'
+    rattata: 'normal', raticate: 'normal', jigglypuff: 'normal', wigglytuff: 'normal', kangaskhan: 'normal', tauros: 'normal', ditto: 'normal', lickitung: 'normal', snorlax: 'normal',
+    // Gen 2/3 Unown letters share Psychic as their first trait, so each letter's Hidden Power element is explicit.
+    unown_a: 'flying', unown_b: 'bug', unown_c: 'ice', unown_d: 'dragon', unown_e: 'electric', unown_f: 'fire', unown_g: 'grass',
+    unown_h: 'ghost', unown_i: 'ice', unown_j: 'fighting', unown_k: 'fighting', unown_l: 'grass', unown_m: 'steel', unown_n: 'normal',
+    unown_o: 'rock', unown_p: 'poison', unown_q: 'ground', unown_r: 'rock', unown_s: 'steel', unown_t: 'ground', unown_u: 'dark',
+    unown_v: 'poison', unown_w: 'water', unown_x: 'dragon', unown_y: 'flying', unown_z: 'electric',
+    unown_question: 'psychic', unown_exclamation: 'psychic'
 }
 
 const POKEMON_ULTIMATE_STYLE_BY_ATTACK_STYLE: Record<keyof typeof POKEMON_ATTACK_BY_STYLE, AbilityEffectStyle> = {
@@ -567,7 +573,7 @@ const EMPHASIZED_POKEMON = new Set([
     'lugia', 'ho_oh', 'raikou', 'entei', 'suicune', 'kyogre', 'groudon', 'rayquaza', 'latios', 'tyranitar', 'metagross', 'salamence'
 ])
 
-// Lookup order: explicit Gen 1 id map, then the per-unit tables (One Piece and hand-tuned units), then the first
+// Lookup order: explicit id map (Gen 1 and Unown letters), then the per-unit tables (One Piece and hand-tuned units), then the first
 // trait that names a Pokemon type, so new Pokemon modes get type styling without per-id entries.
 export function resolvePokemonStyle(definitionId: string, traits: readonly string[] = []): string | undefined {
     const explicit = POKEMON_STYLE_BY_ID[definitionId]

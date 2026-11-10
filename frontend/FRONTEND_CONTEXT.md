@@ -225,6 +225,11 @@ onto one half of the 9×6 combat canvas.
 unique instance IDs and mode-specific definition IDs. `/api/items?mode=...` provides names, descriptions, icons, and
 bonus metadata for analytics; owned copies in snapshots include their display data. The backend decides equip legality.
 
+Shop definitions of a variant group (Gen 2/3 Unown letters) carry `variantGroup` (the shared template line) and,
+only when true, `wildcardTrait`. The backend owns the lock; `utils/variantGroups.ts` derives the shop card's
+Random/Locked badge purely from whether the player owns a unit whose `lineId` equals the group. A wildcard unit's copied
+type arrives in its live `traits`, so trait counts and tooltips read unit traits, never definition traits.
+
 Units carry optional `branchId` and `evolutionOptions`; the backend omits them while unset.
 `evolutionOptions` is present only for a pending unit that still needs a branch choice; each `EvolutionOption` holds the
 branch's identity, role, traits, key stats at the unit's star, ability name, the server-formatted ability description,
@@ -377,6 +382,9 @@ after a `combat-view-fallback`. Planning always stays on the 2D board.
   choreography. Gen 2/3 signatures live in the `gen23Tier1`, `gen23Tier2`, `gen23Tier3` and `gen23Tier45` sets (with
   matching `kit/` files; only the Tier 3 and Tier 4/5 sets add signature auto-attacks), keyed `definitionId:Ability`.
   `combat3d/signatureSets.test.ts` rejects keys that appear in more than one set.
+  All 28 Unown letters share one Hidden Power choreography in the `gen23Unown` set (`kit/gen23Unown.ts` holds the ink
+  glyphs and elemental orb); the ability type and LINE pattern steer its shape, and `animationConfig.ts` maps each
+  letter id to its element style. The registry test expands `variants` instead of the template id.
 - `arenas/` holds procedural stages that use no downloaded assets. Mode metadata lists arena ids per mode, and
   `utils/arenaSelection.ts` picks one from `roomId`. In development `?arena=<id>` forces a stage.
 

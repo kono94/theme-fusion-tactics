@@ -131,7 +131,7 @@ const version160Commits = [
             <div class="feature-note">
               <h3>Pokemon Gen 2/3</h3>
               <p>
-                The host can pick Pokemon Gen 2/3 in the lobby. Build teams from 66 Johto and Hoenn
+                The host can pick Pokemon Gen 2/3 in the lobby. Build teams from 67 Johto and Hoenn
                 lines, from Chikorita, Treecko and Mudkip up to Lugia, Ho-Oh, Kyogre, Groudon and
                 Rayquaza, using their original Gen 2/3 typings, each with new pixel-art portraits.
               </p>
@@ -141,6 +141,22 @@ const version160Commits = [
               <p>
                 In the 3D battle view every Gen 2/3 Pokemon unleashes its own signature ultimate,
                 and matches are fought at the new Bell Tower and Sea Route arenas.
+              </p>
+            </div>
+            <div class="feature-note">
+              <h3>Unown and the Alphabet Lock</h3>
+              <p>
+                Unown is a 2-cost Psychic support with 28 forms: the letters A to Z, ? and !. Until
+                you buy your first Unown, every Unown in your shop shows a random letter, marked
+                <strong>Random</strong> on the card. Your first buy locks that letter: other Unown in
+                your shop switch to it right away and only that letter appears afterwards, marked
+                <strong>Locked</strong>. Sell every Unown to free the letter and roll a new one.
+              </p>
+              <p>
+                The letter decides Unown's second type and what its Hidden Power does, from damage
+                and stuns to heals, shields, speed boosts and armor breaks. Unown ? copies the type
+                shared by the most different Pokemon on your board, and Unown ! is a pure Psychic
+                powerhouse whose Hidden Power blasts through a whole row of enemies.
               </p>
             </div>
             <div class="feature-note">
