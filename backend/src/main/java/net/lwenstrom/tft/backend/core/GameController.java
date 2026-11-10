@@ -17,6 +17,7 @@ import net.lwenstrom.tft.backend.core.model.GameAction;
 import net.lwenstrom.tft.backend.core.model.GameMode;
 import net.lwenstrom.tft.backend.core.model.RoomEvent;
 import net.lwenstrom.tft.backend.core.model.RoomEventType;
+import net.lwenstrom.tft.backend.core.model.RoundTimeSettings;
 import net.lwenstrom.tft.backend.core.model.TraitCatalogEntry;
 import net.lwenstrom.tft.backend.core.observability.ClientUserAgent;
 import org.springframework.context.event.EventListener;
@@ -372,6 +373,26 @@ public class GameController {
         }
     }
 
+    @MessageMapping("/room/{id}/round-time")
+    public void changeRoundTime(
+            @DestinationVariable String id,
+            @Payload RoundTimeChangeRequest request,
+            @Header("simpSessionId") String sessionId) {
+        var room = gameEngine.getRoom(id);
+        if (room == null) return;
+
+        var sessionPlayer = resolveSessionPlayer(room.getId(), sessionId);
+        if (sessionPlayer != null
+                && request != null
+                && request.planningSeconds() != null
+                && request.combatSeconds() != null
+                && room.setRoundTimeForHost(
+                        sessionPlayer.playerId(),
+                        new RoundTimeSettings(request.planningSeconds(), request.combatSeconds()))) {
+            broadcastRoomState(room);
+        }
+    }
+
     private void broadcastRoomState(GameRoom room) {
         synchronized (room) {
             messagingTemplate.convertAndSend("/topic/room/" + room.getId(), room.getState());
@@ -453,6 +474,8 @@ public class GameController {
     public record ModeChangeRequest(String playerName, GameMode gameMode) {}
 
     public record MatchRuleChangeRequest(String playerName, String matchRule) {}
+
+    public record RoundTimeChangeRequest(Integer planningSeconds, Integer combatSeconds) {}
 
     public record ActionResult(String clientActionId, ActionType actionType, String outcome, String reason) {}
 

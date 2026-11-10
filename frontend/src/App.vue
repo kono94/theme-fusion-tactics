@@ -33,6 +33,7 @@ import type {
     GameState,
     RoomRequestResult,
     RoomGameEvent,
+  RoundTimeSettings,
 } from './types'
 import {
     clearActiveRoomSession,
@@ -738,6 +739,14 @@ const handleRuleChange = (matchRule: string) => {
     })
 }
 
+const handleRoundTimeChange = (settings: RoundTimeSettings) => {
+    if (!client.value || !isConnected.value) return
+    client.value.publish({
+        destination: `/app/room/${currentRoomId.value}/round-time`,
+        body: JSON.stringify(settings)
+    })
+}
+
 const handleModeChange = (mode: GameMode) => {
     if (!client.value || !isConnected.value) return
     client.value.publish({
@@ -958,7 +967,8 @@ const applyThemeMeta = (mode: GameMode) => {
                               @rule-change="handleRuleChange"
                               @start="handleStartGame"
                               @leave="handleLeaveLobby"
-                              @mode-change="handleModeChange" />
+                              @mode-change="handleModeChange"
+      @round-time-change="handleRoundTimeChange" />
 
 	                 <!-- Otherwise show GameInterface -->
 	                 <template v-else>

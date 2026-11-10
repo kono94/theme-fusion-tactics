@@ -144,6 +144,8 @@ remembered name joins automatically after the WebSocket connects, while new visi
 | `/app/abandon` | `{ roomId, playerName }` |
 | `/app/start` | `{ roomId, playerName }` |
 | `/app/room/{id}/mode` | `{ playerName, gameMode }` |
+| `/app/room/{id}/match-rule` | `{ playerName, matchRule }` |
+| `/app/room/{id}/round-time` | `{ planningSeconds, combatSeconds }` |
 | `/app/room/{id}/action` | `GameAction` |
 
 Host authority for start/mode/add-bot and action authority are enforced by the backend's session binding. `playerName`
@@ -189,6 +191,7 @@ interface GameState {
   rerollCost: number
   fieldConditions: Record<string, FieldConditionView> // player id -> active condition of their pairing
   fieldForecast: FieldConditionView | null // Weather Front roll, planning only
+  roundTimeSettings: { planningSeconds: number; combatSeconds: number } // host lobby choice
 }
 ```
 
@@ -247,7 +250,9 @@ pending board units when combat starts.
 - Shows backend-configured mode choices in stable metadata order (One Piece, Pokemon, Pokemon Gen 2/3).
 - Shows a second panel for the Match Rule (Random, None, and the rules passed in `matchRules`), read-only for non-hosts, with
   the selected rule's description. `App.vue` fetches `/api/match-rules?mode=` when the room mode changes.
-- Emits mode selection, rule selection, start, and leave; it does not publish STOMP directly.
+- Shows a Round Time panel with planning and combat-limit sliders (limits in `data/roundTime.ts`), read-only for
+  non-hosts. Dragging previews locally; the choice is emitted once on release.
+- Emits mode selection, rule selection, round-time selection, start, and leave; it does not publish STOMP directly.
 
 ### `GameInterface.vue`
 

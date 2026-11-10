@@ -364,6 +364,11 @@ export interface EmergencyDropPayload {
 // Full Game State (sent from backend every tick)
 // ============================================================================
 
+export interface RoundTimeSettings {
+  planningSeconds: number // Round 1 planning time; later rounds grow slightly
+  combatSeconds: number // Combat time limit
+}
+
 export interface GameState {
   roomId: string
   hostId: string | null
@@ -389,6 +394,7 @@ export interface GameState {
   fieldConditions: Record<string, FieldConditionView>
   // The condition the match rule rolled for the upcoming combat; only set during planning.
   fieldForecast: FieldConditionView | null
+  roundTimeSettings: RoundTimeSettings
 }
 
 // ============================================================================

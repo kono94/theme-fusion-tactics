@@ -43,6 +43,10 @@ public final class GameConstants {
     public static final int TICK_RATE_MS = 100;
     public static final long BASE_PLANNING_DURATION_MS = 15000L;
     public static final long PLANNING_DURATION_INCREMENT_MS = 250L;
+    public static final int MIN_PLANNING_SECONDS = 5;
+    public static final int MAX_PLANNING_SECONDS = 60;
+    public static final int MIN_COMBAT_SECONDS = 15;
+    public static final int MAX_COMBAT_SECONDS = 60;
 
     // Loot Orbs
     public static final int MIN_ORB_COUNT = 2;

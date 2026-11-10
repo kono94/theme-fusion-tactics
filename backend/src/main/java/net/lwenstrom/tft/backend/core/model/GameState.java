@@ -28,10 +28,12 @@ public record GameState(
         int maxInterest,
         int rerollCost,
         Map<String, FieldConditionView> fieldConditions,
-        FieldConditionView fieldForecast) {
+        FieldConditionView fieldForecast,
+        RoundTimeSettings roundTimeSettings) {
 
     public GameState {
         fieldConditions = fieldConditions == null ? Map.of() : Map.copyOf(fieldConditions);
+        roundTimeSettings = roundTimeSettings == null ? RoundTimeSettings.defaults() : roundTimeSettings;
     }
 
     public GameState(
@@ -77,6 +79,7 @@ public record GameState(
                 maxInterest,
                 rerollCost,
                 Map.of(),
+                null,
                 null);
     }
 

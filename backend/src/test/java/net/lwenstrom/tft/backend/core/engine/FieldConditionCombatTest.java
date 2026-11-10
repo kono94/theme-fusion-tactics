@@ -358,7 +358,8 @@ class FieldConditionCombatTest {
                 empty.maxInterest(),
                 empty.rerollCost(),
                 Map.of("p1", RAIN.toView(null)),
-                SUN.toView(8000L));
+                SUN.toView(8000L),
+                empty.roundTimeSettings());
         var json = mapper.writeValueAsString(withWeather);
 
         assertTrue(

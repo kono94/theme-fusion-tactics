@@ -53,7 +53,8 @@ Players need a current desktop browser and a connection to the game server.
 
 Open your server's game URL, choose a player name, and create a room.
 Invite friends with the room's invite link or room code. The host can choose One Piece,
-Pokémon: Kanto, or Pokémon: Johto & Hoenn, select a Match Rule, and start; empty seats fill with bots.
+Pokémon: Kanto, or Pokémon: Johto & Hoenn, select a Match Rule, set the round time, and start; empty seats
+fill with bots.
 
 For a solo match, start a room on your own and face seven bots. Planning waits until you're
 ready. Enable **3D** in Settings for the arena view, and browse completed solo games in

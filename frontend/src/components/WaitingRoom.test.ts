@@ -61,6 +61,7 @@ function gameState(gameMode: GameState['gameMode'] = 'pokemon'): GameState {
         rerollCost: 2,
         fieldConditions: {},
         fieldForecast: null,
+        roundTimeSettings: { planningSeconds: 15, combatSeconds: 32 },
     }
 }
 
@@ -149,6 +150,53 @@ describe('WaitingRoom mode selection', () => {
         expect(writeText).toHaveBeenCalledWith(expect.stringMatching(/#\/join\/mode-room$/))
         expect(wrapper.get('.invite-btn').text()).toBe('Copied!')
         wrapper.unmount()
+    })
+})
+
+describe('WaitingRoom round time', () => {
+    const mountRoom = (currentPlayerId: string) =>
+        mount(WaitingRoom, {
+            props: {
+                gameState: gameState(),
+                currentPlayerId,
+                availableModes: ['onepiece', 'pokemon'],
+                defaultMode: 'onepiece',
+            },
+        })
+
+    const slider = (wrapper: ReturnType<typeof mountRoom>, key: string) =>
+        wrapper.get(`[data-time="${key}"] .time-slider`)
+
+    it('shows the room values and emits both when the host releases a slider', async () => {
+        const wrapper = mountRoom('player-1')
+
+        expect(wrapper.get('[data-time="planningSeconds"] .time-value').text()).toBe('15s')
+        expect(wrapper.get('[data-time="combatSeconds"] .time-value').text()).toBe('32s')
+
+        const planning = slider(wrapper, 'planningSeconds')
+        ;(planning.element as HTMLInputElement).value = '25'
+        await planning.trigger('input')
+        expect(wrapper.get('[data-time="planningSeconds"] .time-value').text()).toBe('25s')
+        expect(wrapper.emitted('round-time-change')).toBeUndefined()
+
+        await planning.trigger('change')
+        expect(wrapper.emitted('round-time-change')).toEqual([[{ planningSeconds: 25, combatSeconds: 32 }]])
+    })
+
+    it('is read-only for other players and follows the host choice', async () => {
+        const wrapper = mountRoom('guest-player')
+        const combat = slider(wrapper, 'combatSeconds')
+
+        expect(combat.attributes('disabled')).toBeDefined()
+        await combat.trigger('input')
+        await combat.trigger('change')
+        expect(wrapper.emitted('round-time-change')).toBeUndefined()
+
+        await wrapper.setProps({
+            gameState: { ...gameState(), roundTimeSettings: { planningSeconds: 40, combatSeconds: 20 } },
+        })
+        expect(wrapper.get('[data-time="planningSeconds"] .time-value').text()).toBe('40s')
+        expect(wrapper.get('[data-time="combatSeconds"] .time-value').text()).toBe('20s')
     })
 })
 

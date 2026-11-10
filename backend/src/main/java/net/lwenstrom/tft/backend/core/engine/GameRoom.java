@@ -38,6 +38,7 @@ import net.lwenstrom.tft.backend.core.model.LootOrb;
 import net.lwenstrom.tft.backend.core.model.LootType;
 import net.lwenstrom.tft.backend.core.model.MatchStats.RoundOutcome;
 import net.lwenstrom.tft.backend.core.model.PlanningPauseReason;
+import net.lwenstrom.tft.backend.core.model.RoundTimeSettings;
 import net.lwenstrom.tft.backend.core.model.UnitCombatStats;
 import net.lwenstrom.tft.backend.core.observability.GameTelemetry;
 import net.lwenstrom.tft.backend.core.random.RandomProvider;
@@ -64,6 +65,7 @@ public class GameRoom {
     private int itemSlotsPerUnit = GameConstants.DEFAULT_ITEM_SLOTS;
 
     private long currentPhaseDuration;
+    private RoundTimeSettings roundTimeSettings = RoundTimeSettings.defaults();
 
     private final GameModeRegistry gameModeRegistry;
     private GameMode gameMode;
@@ -328,6 +330,19 @@ public class GameRoom {
         if (!isHost(playerId) || phase != GamePhase.LOBBY || !matchRuleManager.select(selection)) {
             return false;
         }
+        updateGameState(0);
+        return true;
+    }
+
+    public synchronized boolean setRoundTimeForHost(String playerId, RoundTimeSettings settings) {
+        if (!isHost(playerId)
+                || phase != GamePhase.LOBBY
+                || settings == null
+                || !settings.isValid()
+                || settings.equals(roundTimeSettings)) {
+            return false;
+        }
+        roundTimeSettings = settings;
         updateGameState(0);
         return true;
     }
@@ -878,7 +893,8 @@ public class GameRoom {
                 GameConstants.MAX_INTEREST,
                 matchRuleManager.rerollCost(),
                 fieldConditionViews(),
-                fieldForecastView());
+                fieldForecastView(),
+                roundTimeSettings);
     }
 
     private Map<String, UnitStats> buildStatPreviews(Player player) {
@@ -1143,12 +1159,12 @@ public class GameRoom {
 
     private long calculatePhaseDuration(GamePhase phase, int round) {
         if (phase == GamePhase.COMBAT) {
-            return GameConstants.COMBAT_PHASE_MS;
+            return roundTimeSettings.combatDurationMs();
         }
         if (phase == GamePhase.END_CELEBRATION) {
             return 6000L; // 6 seconds for celebration animation
         }
-        return GameConstants.BASE_PLANNING_DURATION_MS + (round - 1) * GameConstants.PLANNING_DURATION_INCREMENT_MS;
+        return roundTimeSettings.planningDurationMs() + (round - 1) * GameConstants.PLANNING_DURATION_INCREMENT_MS;
     }
 
     // ========== REFACTORED handleCombatEnd ==========

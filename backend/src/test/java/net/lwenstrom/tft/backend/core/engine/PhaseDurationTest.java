@@ -3,6 +3,7 @@ package net.lwenstrom.tft.backend.core.engine;
 import static net.lwenstrom.tft.backend.test.TestHelpers.createSeededRandomProvider;
 import static net.lwenstrom.tft.backend.test.TestHelpers.createTestClock;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import net.lwenstrom.tft.backend.core.DataLoader;
@@ -11,6 +12,7 @@ import net.lwenstrom.tft.backend.core.GameModeRegistry;
 import net.lwenstrom.tft.backend.core.model.AugmentDefinition;
 import net.lwenstrom.tft.backend.core.model.GameMode;
 import net.lwenstrom.tft.backend.core.model.GamePhase;
+import net.lwenstrom.tft.backend.core.model.RoundTimeSettings;
 import net.lwenstrom.tft.backend.test.TestClock;
 import net.lwenstrom.tft.backend.test.TestHelpers;
 import org.junit.jupiter.api.BeforeEach;
@@ -118,6 +120,26 @@ public class PhaseDurationTest {
         room.tick();
 
         assertEquals(32000, room.getState().totalPhaseDuration(), "Round 2 Combat should be 32s");
+    }
+
+    @Test
+    public void testHostConfiguredDurations() {
+        var hostId = room.getState().hostId();
+        assertTrue(room.setRoundTimeForHost(hostId, new RoundTimeSettings(30, 45)));
+
+        room.startMatch();
+        assertEquals(30000, room.getState().totalPhaseDuration());
+        assertEquals(30000, room.getState().timeRemainingMs());
+
+        fastForward();
+        room.tick();
+        assertEquals(GamePhase.COMBAT, room.getState().phase());
+        assertEquals(45000, room.getState().totalPhaseDuration());
+
+        fastForward();
+        room.tick();
+        assertEquals(GamePhase.PLANNING, room.getState().phase());
+        assertEquals(30250, room.getState().totalPhaseDuration());
     }
 
     @Test

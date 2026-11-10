@@ -125,6 +125,7 @@ function state(phase: GameState['phase']): GameState {
         rerollCost: 2,
         fieldConditions: {},
         fieldForecast: null,
+        roundTimeSettings: { planningSeconds: 15, combatSeconds: 32 },
     }
 }
 

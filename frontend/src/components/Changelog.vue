@@ -121,10 +121,20 @@ const version160Commits = [
         <div class="release-header">
           <p class="eyebrow">Latest</p>
           <h2>Version X.X.X</h2>
-          <p>The Evolve button is much easier to use.</p>
+          <p>Hosts can set the pace of a match, and the Evolve button is much easier to use.</p>
         </div>
         <div class="release-grid">
           <div class="release-features">
+            <div class="feature-note">
+              <h3>Adjustable Round Time</h3>
+              <p>
+                The host can now set the pace in the lobby with two sliders in the new Round Time
+                panel. Planning time can be 5 to 60 seconds (15 by default) and still grows slightly
+                each round. The combat limit can be 15 to 60 seconds (32 by default); fights that are
+                still running at the limit end as a timeout. Other players see the chosen values, and
+                they are locked once the match starts.
+              </p>
+            </div>
             <div class="feature-note">
               <h3>Easier Evolve Button</h3>
               <p>

@@ -15,6 +15,7 @@ import net.lwenstrom.tft.backend.core.model.ActionType;
 import net.lwenstrom.tft.backend.core.model.GameAction;
 import net.lwenstrom.tft.backend.core.model.GameMode;
 import net.lwenstrom.tft.backend.core.model.GamePhase;
+import net.lwenstrom.tft.backend.core.model.RoundTimeSettings;
 import net.lwenstrom.tft.backend.test.TestHelpers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -263,6 +264,20 @@ class GameControllerSessionGuardTest {
                 room.getId(), new GameController.ModeChangeRequest("Host", GameMode.POKEMON), "guest-session");
 
         assertEquals(GameMode.ONEPIECE, room.getState().gameMode());
+    }
+
+    @Test
+    void changeRoundTime_OnlyAcceptsCompleteRequestsFromTheHostSession() {
+        var room = createRoomWithHost();
+        controller.joinRoom(new GameController.RoomRequest(room.getId(), "Guest"), "guest-session");
+        var defaults = room.getState().roundTimeSettings();
+
+        controller.changeRoundTime(room.getId(), new GameController.RoundTimeChangeRequest(20, 40), "guest-session");
+        controller.changeRoundTime(room.getId(), new GameController.RoundTimeChangeRequest(20, null), "host-session");
+        assertEquals(defaults, room.getState().roundTimeSettings());
+
+        controller.changeRoundTime(room.getId(), new GameController.RoundTimeChangeRequest(20, 40), "host-session");
+        assertEquals(new RoundTimeSettings(20, 40), room.getState().roundTimeSettings());
     }
 
     @Test

@@ -231,6 +231,7 @@ trait.
 | `/app/room/{id}/add-bot` | none | Session-bound host adds one lobby bot |
 | `/app/room/{id}/mode` | `ModeChangeRequest` | Session-bound host changes lobby mode |
 | `/app/room/{id}/match-rule` | `MatchRuleChangeRequest` | Session-bound host selects `RANDOM`, `NONE`, or a rule id in the lobby |
+| `/app/room/{id}/round-time` | `RoundTimeChangeRequest` (`planningSeconds`, `combatSeconds`) | Session-bound host sets the planning time (5-60s) and combat limit (15-60s) in the lobby |
 | `/app/room/{id}/action` | `GameAction` | Applies one validated session-bound command |
 | `/app/telemetry/action-ack` | `ClientActionAcknowledgementTelemetry` | Records a bounded browser-observed action-acknowledgement round trip for the bound session |
 
@@ -297,8 +298,12 @@ roomId, hostId, phase, round, timeRemainingMs, totalPhaseDuration,
 players, matchups, recentEvents, damageLog, gameMode,
 planningTimerPaused, planningReadyPlayerId, planningPauseReason, itemSlotsPerUnit,
 matchRuleSelection, activeMatchRule, baseIncome, maxInterest, rerollCost,
-fieldConditions, fieldForecast
+fieldConditions, fieldForecast, roundTimeSettings
 ```
+
+`roundTimeSettings` (`planningSeconds, combatSeconds`) is the host's lobby choice and defaults to 15 / 32. Planning lasts
+`planningSeconds` plus 0.25s per completed round; combat is cut off after `combatSeconds`. The setting survives a mode
+change and is locked once the match starts.
 
 `matchRuleSelection` is the lobby choice (`RANDOM`, `NONE`, or a rule id); `activeMatchRule` (`id, name, description, icon`)
 is null until a match starts with a rule. `baseIncome` and `maxInterest` let clients preview round income without hardcoding

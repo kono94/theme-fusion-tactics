@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, onUnmounted, ref, watch } from 'vue'
-import type { ActiveMatchRule, GameMode, GameState, PlayerState } from '../types'
+import type { ActiveMatchRule, GameMode, GameState, PlayerState, RoundTimeSettings } from '../types'
 import { allGameModes, getGameModeMetadata, sortGameModes } from '../data/gameModeMetadata'
+import { normalizeRoundTime, ROUND_TIME_LIMITS } from '../data/roundTime'
 import { buildInviteUrl } from '../utils/roomInvite'
 
 const props = defineProps<{
@@ -13,7 +14,7 @@ const props = defineProps<{
   matchRules?: ActiveMatchRule[]
 }>()
 
-const emit = defineEmits(['start', 'leave', 'mode-change', 'rule-change'])
+const emit = defineEmits(['start', 'leave', 'mode-change', 'rule-change', 'round-time-change'])
 
 const isHost = computed(() => {
     return props.currentPlayerId === props.gameState.hostId
@@ -106,6 +107,40 @@ const selectedRuleOption = computed(
 function selectRule(value: string) {
     if (!isHost.value || value === selectedRule.value) return
     emit('rule-change', value)
+}
+
+const roundTime = ref<RoundTimeSettings>(normalizeRoundTime(props.gameState?.roundTimeSettings))
+
+watch(
+    () => props.gameState?.roundTimeSettings,
+    (settings) => {
+        const next = normalizeRoundTime(settings)
+        if (
+            next.planningSeconds !== roundTime.value.planningSeconds ||
+            next.combatSeconds !== roundTime.value.combatSeconds
+        ) {
+            roundTime.value = next
+        }
+    },
+    { deep: true }
+)
+
+const roundTimeRows: { key: keyof RoundTimeSettings; label: string; hint: string }[] = [
+    { key: 'planningSeconds', label: 'Planning', hint: 'Time to shop and position. Later rounds get slightly longer.' },
+    { key: 'combatSeconds', label: 'Combat limit', hint: 'Fights still running at this point end as a timeout.' },
+]
+
+function previewRoundTime(key: keyof RoundTimeSettings, event: Event) {
+    if (!isHost.value) return
+    roundTime.value = normalizeRoundTime({
+        ...roundTime.value,
+        [key]: Number((event.target as HTMLInputElement).value),
+    })
+}
+
+function commitRoundTime() {
+    if (!isHost.value) return
+    emit('round-time-change', { ...roundTime.value })
 }
 
 function selectMode(mode: GameMode) {
@@ -222,6 +257,40 @@ function selectMode(mode: GameMode) {
         <p class="rule-description" data-testid="rule-description">
             <strong>{{ selectedRuleOption.name }}:</strong> {{ selectedRuleOption.description }}
         </p>
+    </div>
+
+    <div class="mode-panel time-panel">
+        <div class="mode-heading">
+            <div>
+                <div class="mode-label">Round time</div>
+                <h3>Set the pace</h3>
+                <p>How long each round lasts for the whole room.</p>
+            </div>
+            <div class="mode-status" :class="{ locked: !isHost }">
+                <span class="status-dot" aria-hidden="true"></span>
+                {{ isHost ? 'Host selection' : 'Host controlled' }}
+            </div>
+        </div>
+        <div class="time-rows">
+            <label v-for="row in roundTimeRows" :key="row.key" class="time-row" :data-time="row.key">
+                <span class="time-name">{{ row.label }}</span>
+                <input
+                    type="range"
+                    class="time-slider"
+                    step="1"
+                    :min="ROUND_TIME_LIMITS[row.key].min"
+                    :max="ROUND_TIME_LIMITS[row.key].max"
+                    :value="roundTime[row.key]"
+                    :disabled="!isHost"
+                    :aria-label="`${row.label} time in seconds`"
+                    :aria-valuetext="`${roundTime[row.key]} seconds`"
+                    @input="previewRoundTime(row.key, $event)"
+                    @change="commitRoundTime"
+                />
+                <output class="time-value">{{ roundTime[row.key] }}s</output>
+                <span class="time-hint">{{ row.hint }}</span>
+            </label>
+        </div>
     </div>
 
     <div class="actions">
@@ -540,6 +609,68 @@ function selectMode(mode: GameMode) {
     color: var(--room-muted);
     font-size: 0.82em;
     line-height: 1.4;
+}
+
+.time-rows {
+    display: grid;
+    gap: 14px;
+}
+
+.time-row {
+    display: grid;
+    grid-template-columns: 110px minmax(0, 1fr) 48px;
+    align-items: center;
+    column-gap: 14px;
+    row-gap: 4px;
+    text-align: left;
+}
+
+.time-name {
+    color: var(--room-fg);
+    font-size: 0.9em;
+    font-weight: 800;
+}
+
+.time-slider {
+    width: 100%;
+    height: 22px;
+    margin: 0;
+    accent-color: var(--room-accent, #f59e0b);
+    cursor: pointer;
+}
+
+.time-slider:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.time-value {
+    color: var(--room-fg);
+    font-size: 0.95em;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+}
+
+.time-hint {
+    grid-column: 2 / -1;
+    color: var(--room-muted);
+    font-size: 0.74em;
+    line-height: 1.3;
+}
+
+@media (max-width: 520px) {
+    .time-row {
+        grid-template-columns: minmax(0, 1fr) 48px;
+    }
+
+    .time-name {
+        grid-column: 1 / -1;
+    }
+
+    .time-hint {
+        grid-column: 1 / -1;
+    }
 }
 
 .rule-description strong {

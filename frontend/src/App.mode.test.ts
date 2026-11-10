@@ -72,6 +72,7 @@ function roomState(gameMode: GameState['gameMode']): GameState {
         rerollCost: 2,
         fieldConditions: {},
         fieldForecast: null,
+        roundTimeSettings: { planningSeconds: 15, combatSeconds: 32 },
     }
 }
 
