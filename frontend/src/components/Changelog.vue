@@ -120,7 +120,7 @@ const version160Commits = [
       <section class="release-section">
         <div class="release-header">
           <p class="eyebrow">Latest</p>
-          <h2>Version X.X.X</h2>
+          <h2>Version 3.2.0</h2>
           <p>Hosts can set the pace of a match, and the Evolve button is much easier to use.</p>
         </div>
         <div class="release-grid">
