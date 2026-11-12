@@ -883,13 +883,14 @@ public class Player {
                 .filter(unit -> wildcardIds.contains(unit.getDefinitionId()))
                 .toList();
         for (var unit : wildcardUnits) {
-            var baseTraits = definitionFor(unit)
-                    .formAt(unit.getStarLevel(), unit.getBranchId())
-                    .traits();
+            var def = definitionFor(unit);
+            var baseTraits = def.formAt(unit.getStarLevel(), unit.getBranchId()).traits();
             var traits = unit.getTraits();
             traits.clear();
             traits.addAll(baseTraits);
-            dominantBoardTrait(unit.getLineId(), baseTraits, wildcardIds).ifPresent(traits::add);
+            if (def.hasWildcardTraitAt(unit.getStarLevel())) {
+                dominantBoardTrait(unit.getLineId(), baseTraits, wildcardIds).ifPresent(traits::add);
+            }
         }
     }
 

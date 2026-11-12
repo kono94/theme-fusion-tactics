@@ -143,6 +143,17 @@ class TraitCatalogServiceTest {
         });
     }
 
+    @Test
+    void gen23VariantGroupWithATraitChoiceIsOnlyListedUnderItsBaseTrait() {
+        var unownTraits = service.getTraits(GameMode.POKEMON_GEN23).stream()
+                .filter(entry ->
+                        entry.units().stream().anyMatch(unit -> unit.lineId().equals("unown")))
+                .map(TraitCatalogEntry::id)
+                .toList();
+
+        assertEquals(List.of("psychic"), unownTraits);
+    }
+
     private static List<String> definitionIds(List<TraitRosterUnit> units) {
         return units.stream().map(TraitRosterUnit::definitionId).toList();
     }

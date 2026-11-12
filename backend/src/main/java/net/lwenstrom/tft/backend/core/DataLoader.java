@@ -18,6 +18,7 @@ import net.lwenstrom.tft.backend.core.combat.ElementalAffinityLoader;
 import net.lwenstrom.tft.backend.core.engine.MatchRuleManager;
 import net.lwenstrom.tft.backend.core.engine.TraitManager;
 import net.lwenstrom.tft.backend.core.engine.UnitDefinition;
+import net.lwenstrom.tft.backend.core.engine.UnitFormDefinition;
 import net.lwenstrom.tft.backend.core.engine.UnitVariantDefinition;
 import net.lwenstrom.tft.backend.core.model.AbilityDefinition;
 import net.lwenstrom.tft.backend.core.model.AugmentDefinition;
@@ -66,6 +67,7 @@ public class DataLoader {
             List<ItemDefinition> items) {}
 
     private static final String VARIANTS_FIELD = "variants";
+    private static final String TRAIT_CHOICE_STAR_FIELD = "traitChoiceStar";
     private static final String COMMON_MATCH_RULES_PATH = "/data/match_rules_common.json";
 
     private final Map<GameMode, ModeData> modeDataCache = new ConcurrentHashMap<>();
@@ -87,8 +89,10 @@ public class DataLoader {
 
     private ModeData loadModeData(GameMode mode) {
         var provider = gameModeRegistry.getProvider(mode);
-        var units = loadUnits(provider.getUnitsPath());
         var traits = loadTraits(provider.getTraitsPath());
+        var units = loadUnits(
+                provider.getUnitsPath(),
+                traits.stream().map(TraitDefinition::name).toList());
         var augments = loadAugments(provider.getAugmentsPath());
         var items = loadItems(provider.getItemsPath());
         if (units.isEmpty() || traits.isEmpty() || augments.isEmpty() || items.isEmpty()) {
@@ -226,12 +230,12 @@ public class DataLoader {
         }
     }
 
-    private Map<String, UnitDefinition> loadUnits(String path) {
+    private Map<String, UnitDefinition> loadUnits(String path, List<String> traitNames) {
         try (var inputStream = getClass().getResourceAsStream(path)) {
             if (inputStream == null) {
                 throw new IllegalStateException("Could not find units at " + path);
             }
-            var units = parseUnits(jsonMapper, jsonMapper.readTree(inputStream));
+            var units = parseUnits(jsonMapper, jsonMapper.readTree(inputStream), traitNames);
             units.forEach(DataLoader::validateUnitForms);
             var registry = new HashMap<String, UnitDefinition>();
             units.forEach(unit -> registry.put(unit.id(), unit));
@@ -243,6 +247,10 @@ public class DataLoader {
     }
 
     public static List<UnitDefinition> parseUnits(JsonMapper jsonMapper, JsonNode root) {
+        return parseUnits(jsonMapper, root, List.of());
+    }
+
+    public static List<UnitDefinition> parseUnits(JsonMapper jsonMapper, JsonNode root, List<String> traitNames) {
         var units = new ArrayList<UnitDefinition>();
         for (var entry : root) {
             if (!entry.has(VARIANTS_FIELD)) {
@@ -251,10 +259,12 @@ public class DataLoader {
             }
             var templateNode = (ObjectNode) entry.deepCopy();
             var variantsNode = templateNode.remove(VARIANTS_FIELD);
+            var traitChoiceNode = templateNode.remove(TRAIT_CHOICE_STAR_FIELD);
             var template = jsonMapper.treeToValue(templateNode, UnitDefinition.class);
             List<UnitVariantDefinition> variants =
                     jsonMapper.convertValue(variantsNode, new TypeReference<List<UnitVariantDefinition>>() {});
-            units.addAll(expandVariants(template, variants));
+            var traitChoiceStar = traitChoiceNode == null || traitChoiceNode.isNull() ? null : traitChoiceNode.asInt();
+            units.addAll(expandVariants(template, variants, traitChoiceStar, traitNames));
         }
         var ids = new HashSet<String>();
         for (var unit : units) {
@@ -266,11 +276,22 @@ public class DataLoader {
     }
 
     public static List<UnitDefinition> expandVariants(UnitDefinition template, List<UnitVariantDefinition> variants) {
+        return expandVariants(template, variants, null, List.of());
+    }
+
+    public static List<UnitDefinition> expandVariants(
+            UnitDefinition template,
+            List<UnitVariantDefinition> variants,
+            Integer traitChoiceStar,
+            List<String> traitNames) {
         if (variants == null || variants.isEmpty()) {
             throw invalidVariants(template, "variants must not be empty");
         }
         if (!template.forms().isEmpty()) {
             throw invalidVariants(template, "a variant template cannot also declare forms");
+        }
+        if (traitChoiceStar != null && traitChoiceStar < 2) {
+            throw invalidVariants(template, "traitChoiceStar must be at least 2");
         }
         return variants.stream()
                 .map(variant -> {
@@ -283,13 +304,47 @@ public class DataLoader {
                     if (variant.resolvedShopWeight() <= 0) {
                         throw invalidVariants(template, "variant " + variant.id() + " needs a positive shopWeight");
                     }
+                    var forms = traitChoiceStar == null || variant.resolvedWildcardTrait()
+                            ? List.<UnitFormDefinition>of()
+                            : traitChoiceForms(variant, traitChoiceStar, traitNames);
                     return template.asVariant(
                             variant.id(),
                             variant.name(),
                             variant.traits(),
                             variant.ability() != null ? variant.ability() : template.ability(),
                             variant.resolvedShopWeight(),
-                            variant.resolvedWildcardTrait());
+                            variant.resolvedWildcardTrait(),
+                            variant.wildcardTraitStar(),
+                            forms);
+                })
+                .toList();
+    }
+
+    // A trait choice is modelled as one branch per trait the variant lacks, so it reuses the evolution-choice flow
+    // while the unit keeps its own definition id, name, stats and ability.
+    private static List<UnitFormDefinition> traitChoiceForms(
+            UnitVariantDefinition variant, int starLevel, List<String> traitNames) {
+        var ownTraits =
+                variant.traits().stream().map(TraitManager::normalizeTraitId).collect(Collectors.toSet());
+        return traitNames.stream()
+                .filter(trait -> !ownTraits.contains(TraitManager.normalizeTraitId(trait)))
+                .map(trait -> {
+                    var traits = new ArrayList<>(variant.traits());
+                    traits.add(trait);
+                    return new UnitFormDefinition(
+                            starLevel,
+                            variant.id(),
+                            variant.name(),
+                            null,
+                            List.copyOf(traits),
+                            null,
+                            null,
+                            TraitManager.normalizeTraitId(trait),
+                            null,
+                            null,
+                            null,
+                            null,
+                            null);
                 })
                 .toList();
     }

@@ -52,6 +52,34 @@ describe('WeatherLayer', () => {
     expect(reducedDrop).toBeLessThan(fullDrop)
   })
 
+  it('lays a low-opacity colour wash over the board that fades in and is removed with the weather', () => {
+    const scene = new THREE.Scene()
+    const layer = new WeatherLayer(scene, false)
+    layer.set('sun')
+    const wash = layer.wash!
+    expect(scene.children).toContain(wash)
+    expect(wash.material.blending).toBe(THREE.NormalBlending)
+    expect(wash.material.depthWrite).toBe(false)
+    expect(wash.material.opacity).toBe(0)
+
+    layer.update(0)
+    layer.update(50)
+    const early = wash.material.opacity
+    expect(early).toBeGreaterThan(0)
+    for (let now = 100; now <= 2000; now += 50) layer.update(now)
+    expect(wash.material.opacity).toBeGreaterThan(early)
+    expect(wash.material.opacity).toBeLessThanOrEqual(0.25)
+
+    const dispose = vi.spyOn(wash.material, 'dispose')
+    layer.set('rain')
+    expect(dispose).toHaveBeenCalled()
+    expect(scene.children).not.toContain(wash)
+    expect(layer.wash).not.toBe(wash)
+    layer.set(null)
+    expect(layer.wash).toBeNull()
+    expect(scene.children).toHaveLength(0)
+  })
+
   it('ignores unknown or cleared conditions', () => {
     const scene = new THREE.Scene()
     const layer = new WeatherLayer(scene, false)

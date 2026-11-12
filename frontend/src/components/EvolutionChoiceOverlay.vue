@@ -1,15 +1,18 @@
 <script setup lang="ts">
-import { nextTick, onMounted, onUnmounted, ref } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
 import type { EvolutionOption, GameMode, UnitRole } from '../types'
 import { getUnitIconPath } from '../utils/iconUtils'
 import { traitTagStyle } from '../utils/traitTagStyle'
-import { laterFormsLabel } from '../utils/evolution'
+import { laterFormsLabel, traitChoices } from '../utils/evolution'
 
-defineProps<{
+const props = defineProps<{
   unitName: string
   choices: EvolutionOption[]
   gameMode: GameMode | string
 }>()
+
+const typeChoices = computed(() => traitChoices(props.choices))
+const sharedChoice = computed(() => (typeChoices.value ? (props.choices[0] ?? null) : null))
 
 const emit = defineEmits<{
   select: [branchId: string]
@@ -55,14 +58,46 @@ onUnmounted(() => {
       aria-labelledby="evolution-title"
     >
       <div class="evolution-heading">
-        <span class="evolution-label">Evolution</span>
-        <h2 id="evolution-title">Choose how {{ unitName }} evolves</h2>
+        <span class="evolution-label">{{ typeChoices ? 'Second type' : 'Evolution' }}</span>
+        <h2 id="evolution-title">
+          {{ typeChoices ? `Choose a second type for ${unitName}` : `Choose how ${unitName} evolves` }}
+        </h2>
         <button type="button" class="close-button" aria-label="Close evolution choice" @click="emit('close')">
           ✕
         </button>
       </div>
 
-      <div ref="gridRef" class="evolution-grid">
+      <div v-if="typeChoices && sharedChoice" class="type-choice" data-test="type-choice">
+        <div class="type-summary">
+          <img
+            :src="getUnitIconPath(sharedChoice.definitionId, gameMode)"
+            :alt="sharedChoice.name"
+            draggable="false"
+          />
+          <span v-if="sharedChoice.abilityName" class="ability">
+            <span class="ability-name">{{ sharedChoice.abilityName }}</span>
+            <span class="ability-description" v-html="sharedChoice.abilityDescription"></span>
+          </span>
+          <span class="type-note">The type you pick is permanent and stays when this unit reaches 3 stars.</span>
+        </div>
+        <div ref="gridRef" class="type-grid">
+          <button
+            v-for="choice in typeChoices"
+            :key="choice.branchId"
+            class="type-button"
+            :class="{ selected: selectedId === choice.branchId }"
+            type="button"
+            :style="traitTagStyle(choice.trait)"
+            :disabled="selectedId !== null"
+            :aria-label="`Add the ${choice.trait} type`"
+            @click="selectBranch(choice.branchId)"
+          >
+            {{ choice.trait }}
+          </button>
+        </div>
+      </div>
+
+      <div v-else ref="gridRef" class="evolution-grid">
         <button
           v-for="choice in choices"
           :key="choice.branchId"
@@ -296,6 +331,66 @@ h2 {
   color: #94a3b8;
 }
 
+.type-choice {
+  width: min(640px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.type-summary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.type-summary img {
+  width: 84px;
+  height: 84px;
+  object-fit: contain;
+}
+
+.type-note {
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.type-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.type-button {
+  padding: 10px 6px;
+  border: 2px solid;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.type-button:hover,
+.type-button:focus-visible {
+  transform: translateY(-2px);
+  outline: 2px solid #f8fafc;
+  outline-offset: 1px;
+}
+
+.type-button:disabled {
+  cursor: default;
+}
+
+.type-button:disabled:not(.selected) {
+  opacity: 0.45;
+}
+
 .later-forms {
   color: #94a3b8;
   font-size: 11px;
@@ -321,6 +416,10 @@ h2 {
 
   .evolution-grid {
     grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  }
+
+  .type-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 </style>

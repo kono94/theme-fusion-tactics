@@ -1,8 +1,10 @@
 import * as THREE from 'three'
 import type { FieldConditionVisual } from '../../utils/fieldConditions'
+import { ARENA_COLUMNS, ARENA_ROWS } from '../types'
 
 // Persistent weather particles for the 3D arena. The layer lives outside the effect budget, owns its geometry and
 // materials, and only uses normal (non-additive) blending at low opacity so it never brightens the scene.
+// A flat colour wash over the board tiles makes the weather readable on the ground on every arena.
 
 interface WeatherProfile {
   count: number
@@ -14,6 +16,7 @@ interface WeatherProfile {
   maxY: number
   velocity: readonly [number, number, number]
   streak: number
+  wash: string
 }
 
 const PROFILES: Record<FieldConditionVisual, WeatherProfile> = {
@@ -27,6 +30,7 @@ const PROFILES: Record<FieldConditionVisual, WeatherProfile> = {
     maxY: 5.5,
     velocity: [-0.5, -8.5, 0],
     streak: 0.28,
+    wash: '#2f6fb5',
   },
   sun: {
     count: 90,
@@ -38,6 +42,7 @@ const PROFILES: Record<FieldConditionVisual, WeatherProfile> = {
     maxY: 3.2,
     velocity: [0.12, 0.3, 0.05],
     streak: 0,
+    wash: '#e89a2c',
   },
   sand: {
     count: 360,
@@ -49,6 +54,7 @@ const PROFILES: Record<FieldConditionVisual, WeatherProfile> = {
     maxY: 1.8,
     velocity: [3, -0.15, 0.35],
     streak: 0,
+    wash: '#b98a45',
   },
   hail: {
     count: 200,
@@ -60,6 +66,7 @@ const PROFILES: Record<FieldConditionVisual, WeatherProfile> = {
     maxY: 5,
     velocity: [-0.3, -5.5, 0],
     streak: 0,
+    wash: '#bfe0f5',
   },
 }
 
@@ -67,10 +74,14 @@ const HALF_WIDTH = 5.6
 const HALF_DEPTH = 3.6
 const REDUCED_SPEED = 0.35
 const MAX_STEP_SECONDS = 0.1
+const WASH_OPACITY = 0.24
+const WASH_FADE_SECONDS = 0.6
+const WASH_HEIGHT = 0.07
 
 export class WeatherLayer {
   private current: FieldConditionVisual | null = null
   private object: THREE.Points | THREE.LineSegments | null = null
+  private washMesh: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial> | null = null
   private heads = new Float32Array(0)
   private speeds = new Float32Array(0)
   private profile: WeatherProfile | null = null
@@ -92,6 +103,10 @@ export class WeatherLayer {
 
   get root(): THREE.Object3D | null {
     return this.object
+  }
+
+  get wash(): THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial> | null {
+    return this.washMesh
   }
 
   set(kind: FieldConditionVisual | null): void {
@@ -139,6 +154,21 @@ export class WeatherLayer {
     this.object.renderOrder = 5
     this.writeVertices()
     this.scene.add(this.object)
+
+    this.washMesh = new THREE.Mesh(
+      new THREE.PlaneGeometry(ARENA_COLUMNS, ARENA_ROWS),
+      new THREE.MeshBasicMaterial({
+        color: profile.wash,
+        transparent: true,
+        opacity: 0,
+        depthWrite: false,
+      }),
+    )
+    this.washMesh.name = `weather-wash-${kind}`
+    this.washMesh.rotation.x = -Math.PI / 2
+    this.washMesh.position.y = WASH_HEIGHT
+    this.washMesh.renderOrder = 4
+    this.scene.add(this.washMesh)
   }
 
   update(now: number): void {
@@ -149,6 +179,11 @@ export class WeatherLayer {
     }
     const elapsed = this.lastUpdate === null ? 0 : (now - this.lastUpdate) / 1000
     this.lastUpdate = now
+    if (this.washMesh) {
+      const fade = (Math.min(Math.max(elapsed, 0), MAX_STEP_SECONDS) / WASH_FADE_SECONDS) * WASH_OPACITY
+      const material = this.washMesh.material
+      material.opacity = this.reducedMotion ? WASH_OPACITY : Math.min(WASH_OPACITY, material.opacity + fade)
+    }
     const step =
       Math.min(Math.max(elapsed, 0), MAX_STEP_SECONDS) * (this.reducedMotion ? REDUCED_SPEED : 1)
     if (step === 0) return
@@ -206,7 +241,13 @@ export class WeatherLayer {
       this.object.geometry.dispose()
       ;(this.object.material as THREE.Material).dispose()
     }
+    if (this.washMesh) {
+      this.scene.remove(this.washMesh)
+      this.washMesh.geometry.dispose()
+      this.washMesh.material.dispose()
+    }
     this.object = null
+    this.washMesh = null
     this.profile = null
     this.heads = new Float32Array(0)
     this.speeds = new Float32Array(0)

@@ -192,20 +192,24 @@ Shop `UnitDefinition`s read `forms` (and `startCondition`) from JSON but never s
 where any branch carries it.
 
 Variant groups: a unit JSON entry may declare `variants` (`id, name, traits, ability`, optional `shopWeight` default 1,
-optional `wildcardTrait`). `DataLoader.parseUnits` expands the template into one `UnitDefinition` per variant that
+optional `wildcardTrait` with `wildcardTraitStar` default 1). `DataLoader.parseUnits` expands the template into one `UnitDefinition` per variant that
 shares the template's line, cost, and stats and carries `variantGroup` (= the template line); the template itself is not
-registered. Variants cannot also declare `forms`; ids must be unique, weights positive, and variant traits go through
+registered. Variant templates cannot hand-write `forms`; ids must be unique, weights positive, and variant traits go through
 the normal trait validation. `variantGroup` (and `wildcardTrait` when true) serialize on shop definitions; `shopWeight`
 does not. Shop and loot rolls collapse each group to one pool entry (`VariantGroups.collapse`), so the group has the odds
 of one unit of its cost, then `Player.resolveVariant` returns the player's locked variant or a weighted random one.
 The first acquisition (buy or unit orb) locks the group to that variant in `Player.lockedVariants` and rewrites other
 shop slots of the group; buying a stale slot substitutes the locked variant. The lock is released when no unit of the
 line remains on bench, board, or in pending upgrades, and cleared on mode reset. Upgrades and evolutions resolve the
-survivor's own definition (`Player.definitionFor`), so merged variants keep their identity. A `wildcardTrait` unit gains
-a second trait copying the trait carried by the most distinct other lines on the owner's board (its own base traits and
+survivor's own definition (`Player.definitionFor`), so merged variants keep their identity. A template may set
+`traitChoiceStar` (at least 2): every non-wildcard variant then gets one generated branch form per mode trait it lacks
+(`branchId` = normalized trait id, same definition id and name, base traits plus that trait). The unit is therefore
+pending at that star and uses the normal `evolutionOptions` / `CHOOSE_EVOLUTION` / auto-pick / branch-inheritance flow to
+add a permanent extra trait; the mode's traits are loaded before units to generate these. From `wildcardTraitStar` on, a
+`wildcardTrait` unit gains a second trait copying the trait carried by the most distinct other lines on the owner's board (its own base traits and
 line excluded, ties in the mode's trait order); `Player.refreshWildcardTraits` recomputes it for state snapshots,
-stat previews, and before combat trait application. Trait rosters list one entry per line, so a group appears once per
-trait.
+stat previews, and before combat trait application. Trait rosters list one entry per line and read only a variant's
+base form, so a group appears once under its own traits and never under chosen or copied ones.
 
 ## 7. Transport and identity
 

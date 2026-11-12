@@ -9,7 +9,8 @@ public record UnitVariantDefinition(
         List<String> traits,
         AbilityDefinition ability,
         Integer shopWeight,
-        Boolean wildcardTrait) {
+        Boolean wildcardTrait,
+        Integer wildcardTraitStar) {
 
     public int resolvedShopWeight() {
         return shopWeight == null ? 1 : shopWeight;

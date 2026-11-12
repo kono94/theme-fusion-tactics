@@ -40,7 +40,9 @@ public record UnitDefinition(
 
         @JsonIgnore Integer shopWeight,
 
-        @JsonInclude(JsonInclude.Include.NON_NULL) Boolean wildcardTrait) {
+        @JsonInclude(JsonInclude.Include.NON_NULL) Boolean wildcardTrait,
+
+        @JsonIgnore Integer wildcardTraitStar) {
 
     public UnitDefinition(
             String id,
@@ -78,7 +80,8 @@ public record UnitDefinition(
                 startCondition,
                 null,
                 1,
-                false);
+                false,
+                1);
     }
 
     public UnitDefinition(
@@ -159,6 +162,7 @@ public record UnitDefinition(
         }
         shopWeight = shopWeight == null || shopWeight < 1 ? 1 : shopWeight;
         wildcardTrait = Boolean.TRUE.equals(wildcardTrait) ? Boolean.TRUE : null;
+        wildcardTraitStar = wildcardTraitStar == null || wildcardTraitStar < 1 ? 1 : wildcardTraitStar;
     }
 
     public String lineId() {
@@ -169,13 +173,19 @@ public record UnitDefinition(
         return Boolean.TRUE.equals(wildcardTrait);
     }
 
+    public boolean hasWildcardTraitAt(int starLevel) {
+        return hasWildcardTrait() && starLevel >= wildcardTraitStar;
+    }
+
     public UnitDefinition asVariant(
             String variantId,
             String variantName,
             List<String> variantTraits,
             AbilityDefinition variantAbility,
             int variantShopWeight,
-            boolean variantWildcardTrait) {
+            boolean variantWildcardTrait,
+            Integer variantWildcardTraitStar,
+            List<UnitFormDefinition> variantForms) {
         return new UnitDefinition(
                 variantId,
                 variantName,
@@ -191,11 +201,12 @@ public record UnitDefinition(
                 List.copyOf(variantTraits),
                 variantAbility,
                 lineId(),
-                forms,
+                variantForms,
                 startCondition,
                 lineId(),
                 variantShopWeight,
-                variantWildcardTrait);
+                variantWildcardTrait,
+                variantWildcardTraitStar);
     }
 
     public List<UnitFormDefinition> forms() {

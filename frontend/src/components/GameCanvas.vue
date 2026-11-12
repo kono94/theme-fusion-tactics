@@ -17,7 +17,7 @@ import type { CombatViewSetting } from '../utils/clientSettings'
 import { pickArenaId, readArenaOverride } from '../utils/arenaSelection'
 import { getGameModeMetadata, isGameMode } from '../data/gameModeMetadata'
 import { canChooseEvolution, type EvolutionChoiceContext } from '../utils/evolution'
-import { fieldDamageLabel, isFieldEvent, viewedFieldConditionId } from '../utils/fieldConditions'
+import { boardWeather, fieldDamageLabel, isFieldEvent, viewedFieldConditionId } from '../utils/fieldConditions'
 
 // Three.js is only downloaded by players who enable the 3D battle view.
 const CombatView3d = defineAsyncComponent(() => import('../combat3d/CombatView3d.vue'))
@@ -71,6 +71,7 @@ function reportInvalidCoordinate(unit: GameUnit, phase: BoardProjectionPhase) {
 
 const currentViewedPlayerId = computed(() => props.viewedPlayerId || props.actingPlayerId)
 const fieldConditionId = computed(() => viewedFieldConditionId(props.state, currentViewedPlayerId.value))
+const weather = computed(() => boardWeather(props.state, currentViewedPlayerId.value))
 const isHomeView = computed(() => !!props.actingPlayerId && currentViewedPlayerId.value === props.actingPlayerId)
 const evolutionContext = computed((): EvolutionChoiceContext => ({
     phase: props.state?.phase,
@@ -1003,7 +1004,10 @@ const onOrbClick = (orbId: string) => {
 
 <template>
   <div class="main-canvas-container" ref="containerRef">
-    <div class="board-container" :style="{ 
+    <div class="board-container"
+        :class="weather ? ['has-weather', `weather-${weather.visual}`, { 'weather-forecast': weather.forecast }] : null"
+        :data-weather="weather?.visual"
+        :style="{ 
         width: (GRID_COLS * CELL_SIZE + (GRID_GUTTER * 2)) + 'px', 
         height: (GRID_ROWS * CELL_SIZE + (GRID_GUTTER * 2)) + 'px'
     }">
@@ -1248,6 +1252,45 @@ const onOrbClick = (orbId: string) => {
         inset 0 0 40px rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(4px);
     overflow: visible; /* CRITICAL: Allow names/tooltips outside grid */
+    transition: background-color 0.6s ease, border-color 0.6s ease, box-shadow 0.6s ease;
+}
+
+/* Weather recolours the board surface itself; the forecast is the same look at lower strength. */
+.board-container.weather-rain {
+    --weather-surface: 30 64 110;
+    --weather-edge: 96 165 250;
+}
+
+.board-container.weather-sun {
+    --weather-surface: 120 72 20;
+    --weather-edge: 251 191 36;
+}
+
+.board-container.weather-sand {
+    --weather-surface: 110 86 48;
+    --weather-edge: 214 170 104;
+}
+
+.board-container.weather-hail {
+    --weather-surface: 70 100 125;
+    --weather-edge: 186 230 253;
+}
+
+.board-container.has-weather {
+    background-color: rgb(var(--weather-surface) / 55%);
+    border-color: rgb(var(--weather-edge) / 70%);
+    box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.6),
+        inset 0 0 40px rgb(var(--weather-edge) / 14%);
+}
+
+.board-container.has-weather.weather-forecast {
+    background-color: rgb(var(--weather-surface) / 28%);
+    border-color: rgb(var(--weather-edge) / 45%);
+    border-style: dashed;
+    box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.6),
+        inset 0 0 40px rgb(var(--weather-edge) / 6%);
 }
 
 .combat-3d-layer {

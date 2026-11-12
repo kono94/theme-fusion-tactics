@@ -120,6 +120,41 @@ const version160Commits = [
       <section class="release-section">
         <div class="release-header">
           <p class="eyebrow">Latest</p>
+          <h2>Version X.X.X</h2>
+          <p>Unown now picks its second type as it grows, and weather changes the look of the board.</p>
+        </div>
+        <div class="release-grid">
+          <div class="release-features">
+            <div class="feature-note">
+              <h3>Unown Picks Its Type</h3>
+              <p>
+                Every Unown is now pure Psychic at 1 star, whatever its letter. When a letter Unown
+                (A to Z) reaches 2 stars it shows the Evolve button: press it to add any other type
+                as its second type. The choice is permanent and stays at 3 stars. If you have not
+                chosen when a fight starts, the best fit for your board is picked for you.
+              </p>
+              <p>
+                Unown ? and Unown ! are special: from 2 stars they both copy the type shared by the
+                most different Pokemon on your board, and switch along as your team changes. The
+                letter still decides what Hidden Power does, and your first Unown still locks its
+                letter.
+              </p>
+            </div>
+            <div class="feature-note">
+              <h3>Weather You Can See</h3>
+              <p>
+                The board now takes on the colour of the weather during a fight: deep blue in rain,
+                warm amber in harsh sunlight, ochre in a sandstorm and icy blue in hail, in both the
+                classic and the 3D battle view. With the Weather Front rule, the planning board
+                already shows a fainter version of the coming weather with a dashed border.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="release-section">
+        <div class="release-header">
+          <p class="eyebrow">Previous</p>
           <h2>Version 3.2.0</h2>
           <p>Hosts can set the pace of a match, and the Evolve button is much easier to use.</p>
         </div>

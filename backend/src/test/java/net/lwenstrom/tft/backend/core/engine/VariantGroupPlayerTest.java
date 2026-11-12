@@ -139,15 +139,90 @@ class VariantGroupPlayerTest {
         assertEquals(2, merged.getStarLevel());
         assertEquals("unown_k", merged.getDefinitionId());
         assertEquals("Unown K", merged.getName());
-        assertEquals(List.of("Psychic", "Fighting"), List.copyOf(merged.getTraits()));
+        assertEquals(List.of("Psychic"), List.copyOf(merged.getTraits()));
         assertEquals("unown_k", player.getLockedVariants().get(GROUP));
+    }
+
+    @Test
+    void twoStarLetterChoosesAnySecondTypeAndKeepsItsLetter() {
+        var player = gen23Player();
+        player.setShop(new ArrayList<>(Arrays.asList(def("unown_k"), def("unown_k"), def("unown_k"), null, null)));
+        player.buyUnit(0);
+        assertFalse(owned(player).findFirst().orElseThrow().isEvolutionPending());
+        player.buyUnit(1);
+        player.buyUnit(2);
+
+        var merged = owned(player).findFirst().orElseThrow();
+        assertTrue(merged.isEvolutionPending());
+        assertEquals(16, merged.getEvolutionOptions().size());
+        assertTrue(merged.getEvolutionOptions().stream()
+                .allMatch(option -> option.definitionId().equals("unown_k")
+                        && option.traits().size() == 2
+                        && option.traits().getFirst().equals("Psychic")));
+        assertFalse(player.chooseEvolution(merged.getId(), "psychic"));
+
+        assertTrue(player.chooseEvolution(merged.getId(), "fire"));
+
+        var chosen = owned(player).findFirst().orElseThrow();
+        assertFalse(chosen.isEvolutionPending());
+        assertEquals("unown_k", chosen.getDefinitionId());
+        assertEquals("Unown K", chosen.getName());
+        assertEquals(2, chosen.getStarLevel());
+        assertEquals(List.of("Psychic", "Fire"), List.copyOf(chosen.getTraits()));
+        assertFalse(player.chooseEvolution(chosen.getId(), "water"));
+    }
+
+    @Test
+    void chosenTypeCarriesOverToThreeStars() {
+        var player = gen23Player();
+        player.setLevel(9);
+        player.addUnitToBoard(def("unown_k"), 0, 0, 2, "fire");
+        player.setShop(new ArrayList<>(Arrays.asList(def("unown_k"), def("unown_k"), def("unown_k"), null, null)));
+
+        player.buyUnit(0);
+        player.buyUnit(1);
+        player.buyUnit(2);
+
+        var units = owned(player).toList();
+        assertEquals(1, units.size());
+        assertEquals(3, units.getFirst().getStarLevel());
+        assertEquals(List.of("Psychic", "Fire"), List.copyOf(units.getFirst().getTraits()));
+    }
+
+    @Test
+    void wildcardStaysPureBelowItsStarLevel() {
+        var player = gen23Player();
+        player.setLevel(9);
+        player.addUnitToBoard(def("unown_question"), 0, 0);
+        player.addUnitToBoard(def("unown_exclamation"), 1, 0);
+        player.addUnitToBoard(def("torchic"), 2, 0);
+
+        player.refreshWildcardTraits();
+
+        player.getBoardUnits().stream()
+                .filter(unit -> GROUP.equals(unit.getLineId()))
+                .forEach(unit -> assertEquals(List.of("Psychic"), List.copyOf(unit.getTraits())));
+    }
+
+    @Test
+    void exclamationCopiesTheDominantTypeFromTwoStars() {
+        var player = gen23Player();
+        player.setLevel(9);
+        player.addUnitToBoard(def("unown_exclamation"), 0, 0, 2);
+        player.addUnitToBoard(def("torchic"), 1, 0);
+
+        player.refreshWildcardTraits();
+
+        assertEquals(
+                List.of("Psychic", "Fire"),
+                List.copyOf(player.getBoardUnits().getFirst().getTraits()));
     }
 
     @Test
     void wildcardCopiesTheTypeWithTheMostDistinctLines() {
         var player = gen23Player();
         player.setLevel(9);
-        player.addUnitToBoard(def("unown_question"), 0, 0);
+        player.addUnitToBoard(def("unown_question"), 0, 0, 2);
         var wildcard = player.getBoardUnits().getFirst();
 
         player.refreshWildcardTraits();
@@ -178,7 +253,7 @@ class VariantGroupPlayerTest {
     void wildcardTraitIsAppliedBeforeCombatTraits() {
         var player = gen23Player();
         player.setLevel(9);
-        player.addUnitToBoard(def("unown_question"), 0, 0);
+        player.addUnitToBoard(def("unown_question"), 0, 0, 2);
         player.addUnitToBoard(def("chikorita"), 1, 0);
         var wildcard = player.getBoardUnits().getFirst();
 

@@ -31,6 +31,34 @@ const sevenChoices = ['vaporeon', 'jolteon', 'flareon', 'espeon', 'umbreon', 'le
 )
 
 describe('EvolutionChoiceOverlay', () => {
+  it('offers a compact type grid when the options only add a second type', async () => {
+    const typed = (trait: string): EvolutionOption => ({
+      ...option(trait.toLowerCase(), 'Unown K'),
+      definitionId: 'unown_k',
+      traits: ['Psychic', trait],
+    })
+    const wrapper = mount(EvolutionChoiceOverlay, {
+      props: {
+        unitName: 'Unown K',
+        choices: [typed('Fire'), typed('Water'), typed('Grass')],
+        gameMode: 'pokemongen23',
+      },
+    })
+
+    expect(wrapper.text()).toContain('Choose a second type for Unown K')
+    expect(wrapper.findAll('.evolution-card')).toHaveLength(0)
+    const buttons = wrapper.findAll('.type-button')
+    expect(buttons.map((button) => button.text())).toEqual(['Fire', 'Water', 'Grass'])
+    expect(buttons[1]!.attributes('aria-label')).toBe('Add the Water type')
+    expect(wrapper.get('.type-summary img').attributes('src')).toBe(
+      '/assets/units/pokemongen23/unown_k.png',
+    )
+
+    await buttons[1]!.trigger('click')
+
+    expect(wrapper.emitted('select')).toEqual([['water']])
+  })
+
   it('renders one accessible card per option with portrait, stats, ability and later forms', () => {
     const wrapper = mount(EvolutionChoiceOverlay, {
       props: {

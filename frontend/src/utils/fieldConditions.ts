@@ -38,6 +38,21 @@ export function fieldConditionChip(
   return null
 }
 
+export interface BoardWeather {
+  visual: FieldConditionVisual
+  forecast: boolean
+}
+
+// The board surface takes on the active weather in combat and a fainter forecast look in planning.
+export function boardWeather(
+  state: Pick<GameState, 'phase' | 'fieldConditions' | 'fieldForecast'> | null | undefined,
+  viewedPlayerId: string | null | undefined,
+): BoardWeather | null {
+  const chip = fieldConditionChip(state, viewedPlayerId)
+  const visual = fieldConditionVisual(chip?.condition.id)
+  return chip && visual ? { visual, forecast: chip.forecast } : null
+}
+
 export function viewedFieldConditionId(
   state: Pick<GameState, 'phase' | 'fieldConditions'> | null | undefined,
   viewedPlayerId: string | null | undefined,

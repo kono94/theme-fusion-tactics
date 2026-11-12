@@ -260,6 +260,10 @@ describe('GameCanvas field conditions', () => {
             global: { stubs: { CombatEffectsCanvas: true } },
         })
         expect(wrapper.get('[data-testid="field-condition-overlay"]').classes()).toContain('field-rain')
+        expect(wrapper.get('.board-container').classes()).toEqual(
+            expect.arrayContaining(['has-weather', 'weather-rain']),
+        )
+        expect(wrapper.get('.board-container').classes()).not.toContain('weather-forecast')
 
         await wrapper.setProps({
             state: {
@@ -274,6 +278,26 @@ describe('GameCanvas field conditions', () => {
         expect(wrapper.findAll('.floating-text.field-damage').map((label) => label.text())).toEqual(['-30'])
         expect(wrapper.findComponent({ name: 'CombatEffectsCanvas' }).props('events')).toEqual([])
         expect(wrapper.find('.unit.attacking-lunge').exists()).toBe(false)
+        wrapper.unmount()
+    })
+
+    it('tints the planning board with the forecast and leaves it plain without weather', async () => {
+        const wrapper = mount(GameCanvas, {
+            props: {
+                state: { ...state('PLANNING'), fieldForecast: { ...rain, id: 'sandstorm' } },
+                actingPlayerId: 'me',
+                viewedPlayerId: 'me',
+            },
+            global: { stubs: { CombatEffectsCanvas: true } },
+        })
+        expect(wrapper.get('.board-container').classes()).toEqual(
+            expect.arrayContaining(['has-weather', 'weather-sand', 'weather-forecast']),
+        )
+        expect(wrapper.find('[data-testid="field-condition-overlay"]').exists()).toBe(false)
+
+        await wrapper.setProps({ state: state('PLANNING') })
+
+        expect(wrapper.get('.board-container').classes()).not.toContain('has-weather')
         wrapper.unmount()
     })
 

@@ -6,6 +6,7 @@ import {
   evolutionHint,
   isEvolutionPending,
   laterFormsLabel,
+  traitChoices,
 } from './evolution'
 
 function option(branchId: string, name: string, laterForms: string[] = []): EvolutionOption {
@@ -38,6 +39,26 @@ const pending = {
 const planning = { phase: 'PLANNING' as const, actingPlayerId: 'me', readOnly: false }
 
 describe('evolution helpers', () => {
+  it('recognises a second-type choice when every option keeps the unit and adds one trait', () => {
+    const typed = (trait: string): EvolutionOption => ({
+      ...option(trait.toLowerCase(), 'Unown K'),
+      definitionId: 'unown_k',
+      traits: ['Psychic', trait],
+    })
+    const options = [typed('Fire'), typed('Water')]
+
+    expect(traitChoices(options)).toEqual([
+      { branchId: 'fire', trait: 'Fire' },
+      { branchId: 'water', trait: 'Water' },
+    ])
+    expect(evolutionHint({ ownerId: 'me', evolutionOptions: options })).toBe(
+      'Press Evolve to choose a second type',
+    )
+    expect(traitChoices(pending.evolutionOptions)).toBeNull()
+    expect(traitChoices([typed('Fire')])).toBeNull()
+    expect(traitChoices(null)).toBeNull()
+  })
+
   it('treats only units with options as pending', () => {
     expect(isEvolutionPending(pending)).toBe(true)
     expect(isEvolutionPending({ ownerId: 'me', evolutionOptions: null })).toBe(false)

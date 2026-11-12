@@ -28,8 +28,29 @@ export function canChooseEvolution(
   )
 }
 
+export interface TraitChoice {
+  branchId: string
+  trait: string
+}
+
+// A trait choice keeps the unit itself: every option shares one definition and differs by one trait.
+export function traitChoices(options: EvolutionOption[] | null | undefined): TraitChoice[] | null {
+  if (!options || options.length < 2) return null
+  const first = options[0]!
+  if (options.some((option) => option.definitionId !== first.definitionId)) return null
+  const shared = first.traits.filter((trait) => options.every((option) => option.traits.includes(trait)))
+  const choices: TraitChoice[] = []
+  for (const option of options) {
+    const added = option.traits.filter((trait) => !shared.includes(trait))
+    if (added.length !== 1) return null
+    choices.push({ branchId: option.branchId, trait: added[0]! })
+  }
+  return choices
+}
+
 export function evolutionHint(unit: EvolvableUnit | null | undefined): string | null {
   if (!isEvolutionPending(unit)) return null
+  if (traitChoices(unit!.evolutionOptions)) return 'Press Evolve to choose a second type'
   return `Choose an evolution: ${unit!.evolutionOptions!.map((option) => option.name).join(', ')}`
 }
 

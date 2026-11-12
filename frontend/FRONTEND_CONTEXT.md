@@ -231,7 +231,8 @@ bonus metadata for analytics; owned copies in snapshots include their display da
 Shop definitions of a variant group (Gen 2/3 Unown letters) carry `variantGroup` (the shared template line) and,
 only when true, `wildcardTrait`. The backend owns the lock; `utils/variantGroups.ts` derives the shop card's
 Random/Locked badge purely from whether the player owns a unit whose `lineId` equals the group. A wildcard unit's copied
-type arrives in its live `traits`, so trait counts and tooltips read unit traits, never definition traits.
+type and a letter's chosen second type arrive in the unit's live `traits`, so trait counts and tooltips read unit traits,
+never definition traits.
 
 Units carry optional `branchId` and `evolutionOptions`; the backend omits them while unset.
 `evolutionOptions` is present only for a pending unit that still needs a branch choice; each `EvolutionOption` holds the
@@ -265,7 +266,9 @@ pending board units when combat starts.
 - Shows the shared `EvolveBadge` on the local player's pending bench units (board badges come from `GameCanvas`'s
   `evolve` emit) only during planning and never while spectating or eliminated. The badge opens `EvolutionChoiceOverlay`, whose
   `select` emit becomes a `CHOOSE_EVOLUTION` action. Visibility and action shape live in `utils/evolution.ts`;
-  `UnitTooltip` shows a "Choose an evolution" hint for pending units.
+  `UnitTooltip` shows a "Choose an evolution" hint for pending units. When every option keeps the same `definitionId`
+  and only adds one trait (`traitChoices`, used by Unown letters at 2 stars), the overlay renders a compact grid of type
+  buttons instead of evolution cards and the hint asks for a second type.
 - Resolves hovered units from the latest snapshot. Planning board tooltips use backend projected item/trait/augment
   stats, bench tooltips use item-only stats, and combat tooltips show live stats.
 - Shows the active Match Rule beside the room code in a compact top bar, followed by `game/FieldConditionChip.vue`:
@@ -296,6 +299,9 @@ the safety boundary.
 - During classic combat, mounts `game/FieldConditionOverlay.vue` over the board for the viewed pairing's condition:
   CSS-only, low-opacity particles (rain streaks, warm motes, drifting sand, hail) with a static faint tint and no motion
   under `prefers-reduced-motion`. It never changes lighting or uses glow.
+- Tints the board surface with the weather: `boardWeather` (`utils/fieldConditions.ts`) yields the viewed pairing's
+  condition in combat or the forecast in planning, and `.board-container` gets `has-weather weather-{rain|sun|sand|hail}`
+  (plus `weather-forecast`, a fainter dashed variant) to recolour its background and border with a CSS transition.
 - When the effective combat view is `3d` and the phase is `COMBAT`, mounts the lazy `combat3d/CombatView3d.vue` over
   the board (passing `fieldConditionId`) and skips `CombatEffectsCanvas` and the 2D weather overlay. It emits `combat-view-fallback` when WebGL is missing or the context is lost.
 
@@ -369,7 +375,9 @@ after a `combat-view-fallback`. Planning always stays on the 2D board.
 - `choreography/weather.ts` is the persistent weather particle layer (`WeatherLayer`), owned by `battleScene.ts` outside
   the effect budget. `CombatView3d` forwards `fieldConditionId` to `BattleScene.setFieldCondition`, which swaps one
   `Points` (or rain `LineSegments`) object with its own geometry and normal-blended, low-opacity material; reduced motion
-  uses fewer, slower particles. No lighting, tone mapping or post-processing changes.
+  uses fewer, slower particles. The layer also owns a flat, normal-blended colour wash plane over the 9x6 tiles that
+  fades in with the weather, so the ground reads as wet, sunlit, sandy or icy on every arena. No lighting, tone mapping
+  or post-processing changes.
 - `choreography/registry.ts` resolves ultimates and auto-attacks signature-first: `definitionId:Ability Name` (for
   Pokemon forms that change moves by star level), then `definitionId`. Signatures live in per-roster sets under
   `choreography/ultimates/` and `choreography/attacks/` (aggregated by each folder's `index.ts`). Reusable effects

@@ -42,6 +42,10 @@ public class TraitCatalogService {
     }
 
     private Optional<TraitRosterUnit> getRosterUnit(String traitId, UnitDefinition unit) {
+        // Branches of a variant-group unit are player-chosen extra traits, not roster members of those traits.
+        if (unit.variantGroup() != null) {
+            return rosterUnitWithTrait(traitId, unit, unit.formAt(1, null));
+        }
         for (var starLevel = 1; starLevel <= MAX_STAR_LEVEL; starLevel++) {
             for (var branchId : unit.variantsAt(starLevel)) {
                 var rosterUnit = rosterUnitWithTrait(traitId, unit, unit.formAt(starLevel, branchId));

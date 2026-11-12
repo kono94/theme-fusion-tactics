@@ -120,6 +120,32 @@ class DataLoaderVariantTest {
     }
 
     @Test
+    void traitChoiceStarOffersEveryMissingTraitToNonWildcardVariants() throws Exception {
+        var units = DataLoader.parseUnits(JSON_MAPPER, JSON_MAPPER.readTree("""
+                [{"id": "glyph", "name": "Glyph", "cost": 1, "role": "SUPPORT",
+                  "maxHealth": [1, 2, 3], "maxMana": [1, 1, 1], "attackDamage": [1, 2, 3],
+                  "abilityPower": [0, 0, 0], "defense": [1, 1, 1], "attackSpeed": [1, 1, 1],
+                  "range": [1, 1, 1], "traits": ["Water"], "traitChoiceStar": 2,
+                  "variants": [
+                    {"id": "glyph_a", "name": "Glyph A", "traits": ["Water"]},
+                    {"id": "glyph_b", "name": "Glyph B", "traits": ["Water"], "wildcardTrait": true,
+                     "wildcardTraitStar": 2}
+                  ]}]
+                """), List.of("Water", "Fire", "Grass"));
+
+        var letter = units.get(0);
+        assertFalse(letter.isPending(1, null));
+        assertTrue(letter.isPending(2, null));
+        assertEquals(List.of("fire", "grass"), letter.branchIdsAt(2));
+        assertEquals(List.of("Water", "Grass"), letter.formAt(3, "grass").traits());
+        assertEquals("glyph_a", letter.formAt(2, "grass").definitionId());
+        DataLoader.validateUnitForms(letter);
+        assertTrue(units.get(1).forms().isEmpty());
+        assertFalse(units.get(1).hasWildcardTraitAt(1));
+        assertTrue(units.get(1).hasWildcardTraitAt(2));
+    }
+
+    @Test
     void gen23RegistersTwentyEightLetterVariantsButNotTheirTemplate() {
         var dataLoader = new DataLoader(new GameModeRegistry(TestHelpers.allModeProviders()), JSON_MAPPER);
 
@@ -128,15 +154,21 @@ class DataLoaderVariantTest {
         assertEquals(28, variants.size());
         assertNull(dataLoader.getUnitDefinition(GameMode.POKEMON_GEN23, "unown"));
         assertTrue(variants.stream().allMatch(variant -> variant.lineId().equals("unown") && variant.cost() == 2));
-        assertEquals(
-                List.of("Psychic", "Ground"),
-                dataLoader.getUnitDefinition(GameMode.POKEMON_GEN23, "unown_q").traits());
-        assertEquals(
-                List.of("Psychic", "Dark"),
-                dataLoader.getUnitDefinition(GameMode.POKEMON_GEN23, "unown_u").traits());
+        assertTrue(variants.stream().allMatch(variant -> variant.traits().equals(List.of("Psychic"))));
+        var letter = dataLoader.getUnitDefinition(GameMode.POKEMON_GEN23, "unown_q");
+        assertEquals(2, letter.branchPoint());
+        assertEquals(16, letter.branchIdsAt(2).size());
+        assertFalse(letter.offersBranch("psychic"));
+        assertEquals(List.of("Psychic", "Dark"), letter.formAt(2, "dark").traits());
+        assertEquals("unown_q", letter.formAt(3, "dark").definitionId());
         var question = dataLoader.getUnitDefinition(GameMode.POKEMON_GEN23, "unown_question");
         var exclamation = dataLoader.getUnitDefinition(GameMode.POKEMON_GEN23, "unown_exclamation");
         assertTrue(question.hasWildcardTrait());
+        assertTrue(exclamation.hasWildcardTrait());
+        assertFalse(question.hasWildcardTraitAt(1));
+        assertTrue(question.hasWildcardTraitAt(2));
+        assertEquals(-1, question.branchPoint());
+        assertEquals(-1, exclamation.branchPoint());
         assertEquals(List.of("Psychic"), question.traits());
         assertEquals(List.of("Psychic"), exclamation.traits());
         assertEquals(AbilityPattern.LINE, exclamation.ability().pattern());

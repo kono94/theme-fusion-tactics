@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { CombatEvent, FieldConditionView } from '../types'
 import {
+  boardWeather,
   fieldConditionChip,
   fieldConditionVisual,
   fieldDamageLabel,
@@ -40,6 +41,25 @@ describe('fieldConditions', () => {
     ).toEqual({ condition: rain, forecast: true })
     expect(
       fieldConditionChip({ phase: 'LOBBY', fieldConditions: {}, fieldForecast: rain }, 'me'),
+    ).toBeNull()
+  })
+
+  it('gives the board the active weather in combat and the forecast in planning', () => {
+    const sandstorm = { ...rain, id: 'sandstorm' }
+    expect(
+      boardWeather({ phase: 'COMBAT', fieldConditions: { me: sandstorm }, fieldForecast: null }, 'me'),
+    ).toEqual({ visual: 'sand', forecast: false })
+    expect(
+      boardWeather({ phase: 'PLANNING', fieldConditions: {}, fieldForecast: rain }, 'me'),
+    ).toEqual({ visual: 'rain', forecast: true })
+    expect(
+      boardWeather({ phase: 'PLANNING', fieldConditions: { me: rain }, fieldForecast: null }, 'me'),
+    ).toBeNull()
+    expect(
+      boardWeather(
+        { phase: 'COMBAT', fieldConditions: { me: { ...rain, id: 'clear' } }, fieldForecast: null },
+        'me',
+      ),
     ).toBeNull()
   })
 
