@@ -120,7 +120,7 @@ const version160Commits = [
       <section class="release-section">
         <div class="release-header">
           <p class="eyebrow">Latest</p>
-          <h2>Version X.X.X</h2>
+          <h2>Version 3.3.1</h2>
           <p>A maintenance update that keeps the game client and servers on current, patched software.</p>
         </div>
         <div class="release-grid">
