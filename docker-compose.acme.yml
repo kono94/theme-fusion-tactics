@@ -4,7 +4,7 @@
 
 services:
   nginx:
-    image: nginx:alpine@sha256:df221db836e1754089190208cee7eeda94f233197056426eda74a43ab1abeac2
+    image: nginx:alpine@sha256:fed7e14be83cbd2661a75cdc5b872d936cf155d46c327084d30b8df19ae88d72
     container_name: tft-nginx-acme
     ports:
       - "80:80"
@@ -13,7 +13,7 @@ services:
       - ./deployment/certbot/www:/var/www/certbot
 
   certbot:
-    image: certbot/certbot@sha256:f70ad0adbb7e117f0fe42a63c553f28ea451edabc0148757b6efcd9735acaa20
+    image: certbot/certbot@sha256:c5698da859429ccee0fcc299a8000368198222d1f9e789ab6e388b491e8ce06d
     container_name: tft-certbot
     volumes:
       - ./deployment/certbot/conf:/etc/letsencrypt

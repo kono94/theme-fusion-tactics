@@ -520,52 +520,50 @@ public class GameRoom {
             return false;
         }
 
-        var accepted =
-                switch (action.type()) {
-                    case BUY -> {
-                        if (action.shopIndex() == null) yield false;
-                        player.buyUnit(action.shopIndex());
-                        yield true;
-                    }
-                    case REROLL -> {
-                        player.refreshShop();
-                        yield true;
-                    }
-                    case EXP -> player.buyXp();
-                    case MOVE -> {
-                        if (action.unitId() == null || action.targetX() == null || action.targetY() == null)
-                            yield false;
-                        if (action.targetX() < 0
-                                || action.targetX() >= GameConstants.GRID_COLS
-                                || action.targetY() < -1
-                                || action.targetY() >= GameConstants.PLAYER_ROWS) {
-                            yield false;
-                        }
-                        player.moveUnit(action.unitId(), action.targetX(), action.targetY());
-                        yield true;
-                    }
-                    case SELL -> {
-                        if (action.unitId() == null) yield false;
-                        player.sellUnit(action.unitId(), phase == GamePhase.PLANNING);
-                        yield true;
-                    }
-                    case LOCK -> {
-                        player.setShopLocked(!player.isShopLocked());
-                        yield true;
-                    }
-                    case COLLECT_ORB -> {
-                        if (action.orbId() == null) yield false;
-                        player.collectOrb(action.orbId());
-                        yield true;
-                    }
-                    case MOVE_ITEM -> player.moveItem(action.itemInstanceId(), action.targetUnitId());
-                    case CHOOSE_EVOLUTION ->
-                        phase == GamePhase.PLANNING
-                                && action.unitId() != null
-                                && action.branchId() != null
-                                && player.chooseEvolution(action.unitId(), action.branchId());
-                    case READY_FOR_COMBAT, SELECT_AUGMENT -> false;
-                };
+        var accepted = switch (action.type()) {
+            case BUY -> {
+                if (action.shopIndex() == null) yield false;
+                player.buyUnit(action.shopIndex());
+                yield true;
+            }
+            case REROLL -> {
+                player.refreshShop();
+                yield true;
+            }
+            case EXP -> player.buyXp();
+            case MOVE -> {
+                if (action.unitId() == null || action.targetX() == null || action.targetY() == null) yield false;
+                if (action.targetX() < 0
+                        || action.targetX() >= GameConstants.GRID_COLS
+                        || action.targetY() < -1
+                        || action.targetY() >= GameConstants.PLAYER_ROWS) {
+                    yield false;
+                }
+                player.moveUnit(action.unitId(), action.targetX(), action.targetY());
+                yield true;
+            }
+            case SELL -> {
+                if (action.unitId() == null) yield false;
+                player.sellUnit(action.unitId(), phase == GamePhase.PLANNING);
+                yield true;
+            }
+            case LOCK -> {
+                player.setShopLocked(!player.isShopLocked());
+                yield true;
+            }
+            case COLLECT_ORB -> {
+                if (action.orbId() == null) yield false;
+                player.collectOrb(action.orbId());
+                yield true;
+            }
+            case MOVE_ITEM -> player.moveItem(action.itemInstanceId(), action.targetUnitId());
+            case CHOOSE_EVOLUTION ->
+                phase == GamePhase.PLANNING
+                        && action.unitId() != null
+                        && action.branchId() != null
+                        && player.chooseEvolution(action.unitId(), action.branchId());
+            case READY_FOR_COMBAT, SELECT_AUGMENT -> false;
+        };
 
         if (accepted) {
             updateGameState(phaseEndTime - clock.currentTimeMillis());

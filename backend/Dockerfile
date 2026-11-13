@@ -1,11 +1,11 @@
-FROM maven:3.9-eclipse-temurin-25-alpine@sha256:781f1da87cd3d142e66e47cc149c4582a652fb7f574648206d1e956170c0dc90 AS build
+FROM maven:3.10-eclipse-temurin-25-alpine@sha256:908342738213796918a85cffc2065924ba82e4a9ab87d2756073e01da6b05d78 AS build
 WORKDIR /app
 COPY pom.xml .
 RUN mvn dependency:go-offline
 COPY src ./src
 RUN mvn clean package -DskipTests
 
-FROM eclipse-temurin:25-jdk-alpine@sha256:3fd2d245c4e0eba615fe366a71b8bd25f5db7104f53e4026b24bf508b880bd2a
+FROM eclipse-temurin:25-jdk-alpine@sha256:c7c3d0bdf7f2bbc5a05a6712ed334d198360105634ea9adf76fca94f381b1e3f
 VOLUME /tmp
 WORKDIR /app
 RUN mkdir -p /app/data

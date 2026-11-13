@@ -435,12 +435,11 @@ public class Player {
     public int calculateSellValue(GameUnit unit) {
         var cost = unit.getCost();
         var starLevel = unit.getStarLevel();
-        var copyCount =
-                switch (starLevel) {
-                    case 1 -> 1;
-                    case 2 -> GameConstants.COPIES_TO_UPGRADE_TO_TWO_STAR;
-                    default -> GameConstants.THREE_STAR_SELL_COPY_COUNT;
-                };
+        var copyCount = switch (starLevel) {
+            case 1 -> 1;
+            case 2 -> GameConstants.COPIES_TO_UPGRADE_TO_TWO_STAR;
+            default -> GameConstants.THREE_STAR_SELL_COPY_COUNT;
+        };
         return cost * copyCount;
     }
 

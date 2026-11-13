@@ -18,26 +18,26 @@
     },
     "dependencies": {
         "@stomp/stompjs": "^7.3.0",
-        "three": "^0.186.1",
+        "three": "^0.187.0",
         "vue": "^3.5.40"
     },
     "devDependencies": {
-        "@types/three": "0.186.0",
-        "@vitejs/plugin-vue": "6.0.9",
-        "@vitest/coverage-v8": "5.0.1",
+        "@types/three": "0.187.0",
+        "@vitejs/plugin-vue": "6.0.10",
+        "@vitest/coverage-v8": "5.1.0",
         "@vue/eslint-config-prettier": "10.2.0",
         "@vue/eslint-config-typescript": "14.9.0",
         "@vue/test-utils": "2.5.1",
-        "eslint": "10.11.0",
-        "eslint-plugin-vue": "10.11.1",
+        "eslint": "10.14.0",
+        "eslint-plugin-vue": "10.12.1",
         "jiti": "2.7.0",
-        "jsdom": "30.1.1",
+        "jsdom": "31.0.1",
         "typescript": "6.0.3",
-        "vite": "8.3.0",
-        "vitest": "5.0.1",
-        "vue-tsc": "3.3.11"
+        "vite": "8.3.7",
+        "vitest": "5.1.0",
+        "vue-tsc": "3.3.14"
     },
     "overrides": {
-        "glob": "13.0.6"
+        "glob": "14.0.6"
     }
 }

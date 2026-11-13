@@ -808,11 +808,10 @@ public class CombatSystem {
         if (ability == null) {
             return false;
         }
-        var targetsEnemy =
-                switch (ability.type()) {
-                    case DAMAGE, STUN, DEBUFF_DEF -> true;
-                    default -> false;
-                };
+        var targetsEnemy = switch (ability.type()) {
+            case DAMAGE, STUN, DEBUFF_DEF -> true;
+            default -> false;
+        };
         if (!targetsEnemy) {
             return false;
         }

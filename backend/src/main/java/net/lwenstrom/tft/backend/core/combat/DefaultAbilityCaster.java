@@ -53,11 +53,10 @@ public class DefaultAbilityCaster implements AbilityCaster {
         if (ability == null) {
             return false;
         }
-        var targets =
-                switch (ability.type()) {
-                    case DAMAGE, STUN, DEBUFF_DEF -> resolveEnemyTargets(source, allUnits, targetSelector, ability);
-                    default -> List.<GameUnit>of(source);
-                };
+        var targets = switch (ability.type()) {
+            case DAMAGE, STUN, DEBUFF_DEF -> resolveEnemyTargets(source, allUnits, targetSelector, ability);
+            default -> List.<GameUnit>of(source);
+        };
         if (targets.isEmpty()) {
             return false;
         }

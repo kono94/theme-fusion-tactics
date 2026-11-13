@@ -6,7 +6,7 @@
 
 services:
   observability-init:
-    image: nginx:alpine@sha256:df221db836e1754089190208cee7eeda94f233197056426eda74a43ab1abeac2
+    image: nginx:alpine@sha256:fed7e14be83cbd2661a75cdc5b872d936cf155d46c327084d30b8df19ae88d72
     container_name: tft-observability-init
     command:
       - sh
@@ -22,7 +22,7 @@ services:
       - /var/lib/tft/analytics:/analytics
 
   otel-javaagent:
-    image: otel/autoinstrumentation-java:2.31.1@sha256:342ad4c72909bb92b7cd6fa09d5fdd50f41879b5657329e729baeacb46d9a02e
+    image: otel/autoinstrumentation-java:2.33.1@sha256:383a36e8d63a96435a04f2a32f0bf065f211f9ef0c6e75e9e895f0f7d272659a
     container_name: tft-otel-javaagent
     command: ["cp", "/javaagent.jar", "/otel/opentelemetry-javaagent.jar"]
     volumes:
@@ -82,7 +82,7 @@ services:
     restart: unless-stopped
 
   mimir:
-    image: grafana/mimir:3.2.1@sha256:92838f113ba54230014e79bc812e57ca90bb9ebc06e665f59e4f700098c2dd04
+    image: grafana/mimir:3.2.5@sha256:245ce851e2f5d27db6bd37720d9ab12bcb017f4b4e20340d9b58266435dbe4b6
     container_name: tft-mimir
     mem_limit: 1g
     environment:
@@ -98,7 +98,7 @@ services:
     restart: unless-stopped
 
   loki:
-    image: grafana/loki:3.7.8@sha256:1107dd5274e0ada47e42472b7a7e71f3b2a2fe878878108f3e2f9e51528f0193
+    image: grafana/loki:3.7.10@sha256:b43c257ccfc925d4a50b8717cac61a3b51df8c48d01847936057e5c4075a24a7
     container_name: tft-loki
     mem_limit: 512m
     environment:
@@ -115,7 +115,7 @@ services:
     restart: unless-stopped
 
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.161.0@sha256:fd328de2552466ad78385e1b1289c3f2402b1c45f265b252aab1955b42845ac1
+    image: otel/opentelemetry-collector-contrib:0.165.0@sha256:e40d61f10c9a617cca1ffd1be4d7e2b3a4b0f0001798ff07e58cabe82e618cea
     container_name: tft-otel-collector
     mem_limit: 384m
     command: ["--config=/etc/otelcol-contrib/config.yaml"]
@@ -143,7 +143,7 @@ services:
     restart: unless-stopped
 
   grafana:
-    image: grafana/grafana:13.2.2@sha256:ac461fb352abc50da10a51c7d02462e9c05488f11f53f14b3ad79a8145f638a0
+    image: grafana/grafana:13.3.1@sha256:0615ec4fbd4072004b7d86b46ded63013a74b7d6eb1119273dd89e8fa25c13cf
     container_name: tft-grafana
     mem_limit: 1g
     environment:
@@ -181,7 +181,7 @@ services:
 
   # Development nginx (HTTP only) - default when no profile specified
   nginx:
-    image: nginx:alpine@sha256:df221db836e1754089190208cee7eeda94f233197056426eda74a43ab1abeac2
+    image: nginx:alpine@sha256:fed7e14be83cbd2661a75cdc5b872d936cf155d46c327084d30b8df19ae88d72
     container_name: tft-nginx
     mem_limit: 64m
     ports:
@@ -198,7 +198,7 @@ services:
 
   # Production nginx (HTTPS)
   nginx-prod:
-    image: nginx:alpine@sha256:df221db836e1754089190208cee7eeda94f233197056426eda74a43ab1abeac2
+    image: nginx:alpine@sha256:fed7e14be83cbd2661a75cdc5b872d936cf155d46c327084d30b8df19ae88d72
     container_name: tft-nginx
     mem_limit: 64m
     labels:
@@ -220,7 +220,7 @@ services:
 
   # Production nginx behind an external HTTPS reverse proxy (plain HTTP, no published ports)
   nginx-proxied:
-    image: nginx:alpine@sha256:df221db836e1754089190208cee7eeda94f233197056426eda74a43ab1abeac2
+    image: nginx:alpine@sha256:fed7e14be83cbd2661a75cdc5b872d936cf155d46c327084d30b8df19ae88d72
     container_name: tft-nginx
     mem_limit: 64m
     labels:
@@ -240,7 +240,7 @@ services:
 
   # Certificate renewal (production only)
   certbot:
-    image: certbot/certbot@sha256:f70ad0adbb7e117f0fe42a63c553f28ea451edabc0148757b6efcd9735acaa20
+    image: certbot/certbot@sha256:c5698da859429ccee0fcc299a8000368198222d1f9e789ab6e388b491e8ce06d
     container_name: tft-certbot
     mem_limit: 128m
     volumes:

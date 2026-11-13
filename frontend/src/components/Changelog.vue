@@ -120,6 +120,27 @@ const version160Commits = [
       <section class="release-section">
         <div class="release-header">
           <p class="eyebrow">Latest</p>
+          <h2>Version X.X.X</h2>
+          <p>A maintenance update that keeps the game client and servers on current, patched software.</p>
+        </div>
+        <div class="release-grid">
+          <div class="release-features">
+            <div class="feature-note">
+              <h3>Security and Stability Refresh</h3>
+              <p>
+                The game client, the game server and the hosting setup now run on the latest patched
+                versions of their software, including the 3D renderer, the web framework and the
+                Java and Node runtimes. The servers also drop the eMudhra root certificates that
+                were distrusted after the October certificate authority compromise. Matches play
+                exactly as before.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="release-section">
+        <div class="release-header">
+          <p class="eyebrow">Previous</p>
           <h2>Version 3.3.0</h2>
           <p>Unown now picks its second type as it grows, and weather changes the look of the board.</p>
         </div>
